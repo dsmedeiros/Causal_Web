@@ -1,1189 +1,692 @@
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
-[GUI] A2 ticks: 50
-[GUI] C ticks: 16
-[GUI] A1 ticks: 50
+== Tick 0 ==
+[A1] Emitted tick at 0 | Phase: 0.00
+[A2] Emitted tick at 0 | Phase: 0.00
+[C] Emitted tick at 0 | Phase: 0.00
+== Tick 1 ==
+[A1] Emitted tick at 1 | Phase: 6.28
+[A2] Emitted tick at 1 | Phase: 7.54
+[C] Emitted tick at 1 | Phase: 6.28
+== Tick 2 ==
+[A1] Emitted tick at 2 | Phase: 12.57
+[A2] Emitted tick at 2 | Phase: 15.08
+[C] Emitted tick at 2 | Phase: 12.57
+== Tick 3 ==
+[A1] Emitted tick at 3 | Phase: 18.85
+[A2] Emitted tick at 3 | Phase: 22.62
+[C] Emitted tick at 3 | Phase: 18.85
+== Tick 4 ==
+[A1] Emitted tick at 4 | Phase: 25.13
+[A2] Emitted tick at 4 | Phase: 30.16
+[C] Emitted tick at 4 | Phase: 25.13
+== Tick 5 ==
+[A1] Emitted tick at 5 | Phase: 31.42
+[A2] Emitted tick at 5 | Phase: 37.70
+[C] Emitted tick at 5 | Phase: 31.42
+[C] Received tick at 5 with phase 0.00
+[C] Received tick at 5 with phase 0.00
+[C] Tick at 5 | Phase: 0.00
+== Tick 6 ==
+[A1] Emitted tick at 6 | Phase: 37.70
+[A2] Emitted tick at 6 | Phase: 45.24
+[C] Emitted tick at 6 | Phase: 37.70
+[C] Received tick at 6 with phase 6.28
+[C] Received tick at 6 with phase 7.54
+[C] Tick at 6 | Phase: 6.91
+== Tick 7 ==
+[A1] Emitted tick at 7 | Phase: 43.98
+[A2] Emitted tick at 7 | Phase: 52.78
+[C] Emitted tick at 7 | Phase: 43.98
+[C] Received tick at 7 with phase 12.57
+[C] Received tick at 7 with phase 15.08
+[C] Tick at 7 | Phase: 13.82
+== Tick 8 ==
+[A1] Emitted tick at 8 | Phase: 50.27
+[A2] Emitted tick at 8 | Phase: 60.32
+[C] Emitted tick at 8 | Phase: 50.27
+[C] Received tick at 8 with phase 18.85
+[C] Received tick at 8 with phase 22.62
+[C] Tick at 8 | Phase: 20.73
+== Tick 9 ==
+[A1] Emitted tick at 9 | Phase: 56.55
+[A2] Emitted tick at 9 | Phase: 67.86
+[C] Emitted tick at 9 | Phase: 56.55
+[C] Received tick at 9 with phase 25.13
+[C] Received tick at 9 with phase 30.16
+[C] Tick at 9 | Phase: 27.65
+== Tick 10 ==
+[A1] Emitted tick at 10 | Phase: 62.83
+[A2] Emitted tick at 10 | Phase: 75.40
+[C] Emitted tick at 10 | Phase: 62.83
+[C] Received tick at 10 with phase 31.42
+[C] Received tick at 10 with phase 37.70
+[C] Tick at 10 | Phase: 34.56
+== Tick 11 ==
+[A1] Emitted tick at 11 | Phase: 69.12
+[A2] Emitted tick at 11 | Phase: 82.94
+[C] Emitted tick at 11 | Phase: 69.12
+[C] Received tick at 11 with phase 37.70
+[C] Received tick at 11 with phase 45.24
+[C] Tick at 11 | Phase: 41.47
+== Tick 12 ==
+[A1] Emitted tick at 12 | Phase: 75.40
+[A2] Emitted tick at 12 | Phase: 90.48
+[C] Emitted tick at 12 | Phase: 75.40
+[C] Received tick at 12 with phase 43.98
+[C] Received tick at 12 with phase 52.78
+[C] Tick at 12 | Phase: 48.38
+== Tick 13 ==
+[A1] Emitted tick at 13 | Phase: 81.68
+[A2] Emitted tick at 13 | Phase: 98.02
+[C] Emitted tick at 13 | Phase: 81.68
+[C] Received tick at 13 with phase 50.27
+[C] Received tick at 13 with phase 60.32
+[C] Tick at 13 | Phase: 55.29
+== Tick 14 ==
+[A1] Emitted tick at 14 | Phase: 87.96
+[A2] Emitted tick at 14 | Phase: 105.56
+[C] Emitted tick at 14 | Phase: 87.96
+[C] Received tick at 14 with phase 56.55
+[C] Received tick at 14 with phase 67.86
+[C] Tick at 14 | Phase: 62.20
+== Tick 15 ==
+[A1] Emitted tick at 15 | Phase: 94.25
+[A2] Emitted tick at 15 | Phase: 113.10
+[C] Emitted tick at 15 | Phase: 94.25
+[C] Received tick at 15 with phase 62.83
+[C] Received tick at 15 with phase 75.40
+[C] Tick at 15 | Phase: 69.12
+== Tick 16 ==
+[A1] Emitted tick at 16 | Phase: 100.53
+[A2] Emitted tick at 16 | Phase: 120.64
+[C] Emitted tick at 16 | Phase: 100.53
+[C] Received tick at 16 with phase 69.12
+[C] Received tick at 16 with phase 82.94
+[C] Tick at 16 | Phase: 76.03
+== Tick 17 ==
+[A1] Emitted tick at 17 | Phase: 106.81
+[A2] Emitted tick at 17 | Phase: 128.18
+[C] Emitted tick at 17 | Phase: 106.81
+[C] Received tick at 17 with phase 75.40
+[C] Received tick at 17 with phase 90.48
+[C] Tick at 17 | Phase: 82.94
+== Tick 18 ==
+[A1] Emitted tick at 18 | Phase: 113.10
+[A2] Emitted tick at 18 | Phase: 135.72
+[C] Emitted tick at 18 | Phase: 113.10
+[C] Received tick at 18 with phase 81.68
+[C] Received tick at 18 with phase 98.02
+[C] Tick at 18 | Phase: 89.85
+== Tick 19 ==
+[A1] Emitted tick at 19 | Phase: 119.38
+[A2] Emitted tick at 19 | Phase: 143.26
+[C] Emitted tick at 19 | Phase: 119.38
+[C] Received tick at 19 with phase 87.96
+[C] Received tick at 19 with phase 105.56
+[C] Tick at 19 | Phase: 96.76
+== Tick 20 ==
+[A1] Emitted tick at 20 | Phase: 125.66
+[A2] Emitted tick at 20 | Phase: 150.80
+[C] Emitted tick at 20 | Phase: 125.66
+[C] Received tick at 20 with phase 94.25
+[C] Received tick at 20 with phase 113.10
+[C] Tick at 20 | Phase: 103.67
+== Tick 21 ==
+[A1] Emitted tick at 21 | Phase: 131.95
+[A2] Emitted tick at 21 | Phase: 158.34
+[C] Emitted tick at 21 | Phase: 131.95
+[C] Received tick at 21 with phase 100.53
+[C] Received tick at 21 with phase 120.64
+[C] Tick at 21 | Phase: 110.58
+== Tick 22 ==
+[A1] Emitted tick at 22 | Phase: 138.23
+[A2] Emitted tick at 22 | Phase: 165.88
+[C] Emitted tick at 22 | Phase: 138.23
+[C] Received tick at 22 with phase 106.81
+[C] Received tick at 22 with phase 128.18
+[C] Tick at 22 | Phase: 117.50
+== Tick 23 ==
+[A1] Emitted tick at 23 | Phase: 144.51
+[A2] Emitted tick at 23 | Phase: 173.42
+[C] Emitted tick at 23 | Phase: 144.51
+[C] Received tick at 23 with phase 113.10
+[C] Received tick at 23 with phase 135.72
+[C] Tick at 23 | Phase: 124.41
+== Tick 24 ==
+[A1] Emitted tick at 24 | Phase: 150.80
+[A2] Emitted tick at 24 | Phase: 180.96
+[C] Emitted tick at 24 | Phase: 150.80
+[C] Received tick at 24 with phase 119.38
+[C] Received tick at 24 with phase 143.26
+[C] Tick at 24 | Phase: 131.32
+== Tick 25 ==
+[A1] Emitted tick at 25 | Phase: 157.08
+[A2] Emitted tick at 25 | Phase: 188.50
+[C] Emitted tick at 25 | Phase: 157.08
+[C] Received tick at 25 with phase 125.66
+[C] Received tick at 25 with phase 150.80
+[C] Tick at 25 | Phase: 138.23
+== Tick 26 ==
+[A1] Emitted tick at 26 | Phase: 163.36
+[A2] Emitted tick at 26 | Phase: 196.04
+[C] Emitted tick at 26 | Phase: 163.36
+[C] Received tick at 26 with phase 131.95
+[C] Received tick at 26 with phase 158.34
+[C] Tick at 26 | Phase: 145.14
+== Tick 27 ==
+[A1] Emitted tick at 27 | Phase: 169.65
+[A2] Emitted tick at 27 | Phase: 203.58
+[C] Emitted tick at 27 | Phase: 169.65
+[C] Received tick at 27 with phase 138.23
+[C] Received tick at 27 with phase 165.88
+[C] Tick at 27 | Phase: 152.05
+== Tick 28 ==
+[A1] Emitted tick at 28 | Phase: 175.93
+[A2] Emitted tick at 28 | Phase: 211.12
+[C] Emitted tick at 28 | Phase: 175.93
+[C] Received tick at 28 with phase 144.51
+[C] Received tick at 28 with phase 173.42
+[C] Tick at 28 | Phase: 158.96
+== Tick 29 ==
+[A1] Emitted tick at 29 | Phase: 182.21
+[A2] Emitted tick at 29 | Phase: 218.65
+[C] Emitted tick at 29 | Phase: 182.21
+[C] Received tick at 29 with phase 150.80
+[C] Received tick at 29 with phase 180.96
+[C] Tick at 29 | Phase: 165.88
+== Tick 30 ==
+[A1] Emitted tick at 30 | Phase: 188.50
+[A2] Emitted tick at 30 | Phase: 226.19
+[C] Emitted tick at 30 | Phase: 188.50
+[C] Received tick at 30 with phase 157.08
+[C] Received tick at 30 with phase 188.50
+[C] Tick at 30 | Phase: 172.79
+== Tick 31 ==
+[A1] Emitted tick at 31 | Phase: 194.78
+[A2] Emitted tick at 31 | Phase: 233.73
+[C] Emitted tick at 31 | Phase: 194.78
+[C] Received tick at 31 with phase 163.36
+[C] Received tick at 31 with phase 196.04
+[C] Tick at 31 | Phase: 179.70
+== Tick 32 ==
+[A1] Emitted tick at 32 | Phase: 201.06
+[A2] Emitted tick at 32 | Phase: 241.27
+[C] Emitted tick at 32 | Phase: 201.06
+[C] Received tick at 32 with phase 169.65
+[C] Received tick at 32 with phase 203.58
+[C] Tick at 32 | Phase: 186.61
+== Tick 33 ==
+[A1] Emitted tick at 33 | Phase: 207.35
+[A2] Emitted tick at 33 | Phase: 248.81
+[C] Emitted tick at 33 | Phase: 207.35
+[C] Received tick at 33 with phase 175.93
+[C] Received tick at 33 with phase 211.12
+[C] Tick at 33 | Phase: 193.52
+== Tick 34 ==
+[A1] Emitted tick at 34 | Phase: 213.63
+[A2] Emitted tick at 34 | Phase: 256.35
+[C] Emitted tick at 34 | Phase: 213.63
+[C] Received tick at 34 with phase 182.21
+[C] Received tick at 34 with phase 218.65
+[C] Tick at 34 | Phase: 200.43
+== Tick 35 ==
+[A1] Emitted tick at 35 | Phase: 219.91
+[A2] Emitted tick at 35 | Phase: 263.89
+[C] Emitted tick at 35 | Phase: 219.91
+[C] Received tick at 35 with phase 188.50
+[C] Received tick at 35 with phase 226.19
+[C] Tick at 35 | Phase: 207.35
+== Tick 36 ==
+[A1] Emitted tick at 36 | Phase: 226.19
+[A2] Emitted tick at 36 | Phase: 271.43
+[C] Emitted tick at 36 | Phase: 226.19
+[C] Received tick at 36 with phase 194.78
+[C] Received tick at 36 with phase 233.73
+[C] Tick at 36 | Phase: 214.26
+== Tick 37 ==
+[A1] Emitted tick at 37 | Phase: 232.48
+[A2] Emitted tick at 37 | Phase: 278.97
+[C] Emitted tick at 37 | Phase: 232.48
+[C] Received tick at 37 with phase 201.06
+[C] Received tick at 37 with phase 241.27
+[C] Tick at 37 | Phase: 221.17
+== Tick 38 ==
+[A1] Emitted tick at 38 | Phase: 238.76
+[A2] Emitted tick at 38 | Phase: 286.51
+[C] Emitted tick at 38 | Phase: 238.76
+[C] Received tick at 38 with phase 207.35
+[C] Received tick at 38 with phase 248.81
+[C] Tick at 38 | Phase: 228.08
+== Tick 39 ==
+[A1] Emitted tick at 39 | Phase: 245.04
+[A2] Emitted tick at 39 | Phase: 294.05
+[C] Emitted tick at 39 | Phase: 245.04
+[C] Received tick at 39 with phase 213.63
+[C] Received tick at 39 with phase 256.35
+[C] Tick at 39 | Phase: 234.99
+== Tick 40 ==
+[A1] Emitted tick at 40 | Phase: 251.33
+[A2] Emitted tick at 40 | Phase: 301.59
+[C] Emitted tick at 40 | Phase: 251.33
+[C] Received tick at 40 with phase 219.91
+[C] Received tick at 40 with phase 263.89
+[C] Tick at 40 | Phase: 241.90
+== Tick 41 ==
+[A1] Emitted tick at 41 | Phase: 257.61
+[A2] Emitted tick at 41 | Phase: 309.13
+[C] Emitted tick at 41 | Phase: 257.61
+[C] Received tick at 41 with phase 226.19
+[C] Received tick at 41 with phase 271.43
+[C] Tick at 41 | Phase: 248.81
+== Tick 42 ==
+[A1] Emitted tick at 42 | Phase: 263.89
+[A2] Emitted tick at 42 | Phase: 316.67
+[C] Emitted tick at 42 | Phase: 263.89
+[C] Received tick at 42 with phase 232.48
+[C] Received tick at 42 with phase 278.97
+[C] Tick at 42 | Phase: 255.73
+== Tick 43 ==
+[A1] Emitted tick at 43 | Phase: 270.18
+[A2] Emitted tick at 43 | Phase: 324.21
+[C] Emitted tick at 43 | Phase: 270.18
+[C] Received tick at 43 with phase 238.76
+[C] Received tick at 43 with phase 286.51
+[C] Tick at 43 | Phase: 262.64
+== Tick 44 ==
+[A1] Emitted tick at 44 | Phase: 276.46
+[A2] Emitted tick at 44 | Phase: 331.75
+[C] Emitted tick at 44 | Phase: 276.46
+[C] Received tick at 44 with phase 245.04
+[C] Received tick at 44 with phase 294.05
+[C] Tick at 44 | Phase: 269.55
+== Tick 45 ==
+[A1] Emitted tick at 45 | Phase: 282.74
+[A2] Emitted tick at 45 | Phase: 339.29
+[C] Emitted tick at 45 | Phase: 282.74
+[C] Received tick at 45 with phase 251.33
+[C] Received tick at 45 with phase 301.59
+[C] Tick at 45 | Phase: 276.46
+== Tick 46 ==
+[A1] Emitted tick at 46 | Phase: 289.03
+[A2] Emitted tick at 46 | Phase: 346.83
+[C] Emitted tick at 46 | Phase: 289.03
+[C] Received tick at 46 with phase 257.61
+[C] Received tick at 46 with phase 309.13
+[C] Tick at 46 | Phase: 283.37
+== Tick 47 ==
+[A1] Emitted tick at 47 | Phase: 295.31
+[A2] Emitted tick at 47 | Phase: 354.37
+[C] Emitted tick at 47 | Phase: 295.31
+[C] Received tick at 47 with phase 263.89
+[C] Received tick at 47 with phase 316.67
+[C] Tick at 47 | Phase: 290.28
+== Tick 48 ==
+[A1] Emitted tick at 48 | Phase: 301.59
+[A2] Emitted tick at 48 | Phase: 361.91
+[C] Emitted tick at 48 | Phase: 301.59
+[C] Received tick at 48 with phase 270.18
+[C] Received tick at 48 with phase 324.21
+[C] Tick at 48 | Phase: 297.19
+== Tick 49 ==
+[A1] Emitted tick at 49 | Phase: 307.88
+[A2] Emitted tick at 49 | Phase: 369.45
+[C] Emitted tick at 49 | Phase: 307.88
+[C] Received tick at 49 with phase 276.46
+[C] Received tick at 49 with phase 331.75
+[C] Tick at 49 | Phase: 304.11
+== Tick 50 ==
+[A1] Emitted tick at 50 | Phase: 314.16
+[A2] Emitted tick at 50 | Phase: 376.99
+[C] Emitted tick at 50 | Phase: 314.16
+[C] Received tick at 50 with phase 282.74
+[C] Received tick at 50 with phase 339.29
+[C] Tick at 50 | Phase: 311.02
+== Tick 51 ==
+[A1] Emitted tick at 51 | Phase: 320.44
+[A2] Emitted tick at 51 | Phase: 384.53
+[C] Emitted tick at 51 | Phase: 320.44
+[C] Received tick at 51 with phase 289.03
+[C] Received tick at 51 with phase 346.83
+[C] Tick at 51 | Phase: 317.93
+== Tick 52 ==
+[A1] Emitted tick at 52 | Phase: 326.73
+[A2] Emitted tick at 52 | Phase: 392.07
+[C] Emitted tick at 52 | Phase: 326.73
+[C] Received tick at 52 with phase 295.31
+[C] Received tick at 52 with phase 354.37
+[C] Tick at 52 | Phase: 324.84
+== Tick 53 ==
+[A1] Emitted tick at 53 | Phase: 333.01
+[A2] Emitted tick at 53 | Phase: 399.61
+[C] Emitted tick at 53 | Phase: 333.01
+[C] Received tick at 53 with phase 301.59
+[C] Received tick at 53 with phase 361.91
+[C] Tick at 53 | Phase: 331.75
+== Tick 54 ==
+[A1] Emitted tick at 54 | Phase: 339.29
+[A2] Emitted tick at 54 | Phase: 407.15
+[C] Emitted tick at 54 | Phase: 339.29
+[C] Received tick at 54 with phase 307.88
+[C] Received tick at 54 with phase 369.45
+[C] Tick at 54 | Phase: 338.66
+== Tick 55 ==
+[A1] Emitted tick at 55 | Phase: 345.58
+[A2] Emitted tick at 55 | Phase: 414.69
+[C] Emitted tick at 55 | Phase: 345.58
+[C] Received tick at 55 with phase 314.16
+[C] Received tick at 55 with phase 376.99
+[C] Tick at 55 | Phase: 345.58
+== Tick 56 ==
+[A1] Emitted tick at 56 | Phase: 351.86
+[A2] Emitted tick at 56 | Phase: 422.23
+[C] Emitted tick at 56 | Phase: 351.86
+[C] Received tick at 56 with phase 320.44
+[C] Received tick at 56 with phase 384.53
+[C] Tick at 56 | Phase: 352.49
+== Tick 57 ==
+[A1] Emitted tick at 57 | Phase: 358.14
+[A2] Emitted tick at 57 | Phase: 429.77
+[C] Emitted tick at 57 | Phase: 358.14
+[C] Received tick at 57 with phase 326.73
+[C] Received tick at 57 with phase 392.07
+[C] Tick at 57 | Phase: 359.40
+== Tick 58 ==
+[A1] Emitted tick at 58 | Phase: 364.42
+[A2] Emitted tick at 58 | Phase: 437.31
+[C] Emitted tick at 58 | Phase: 364.42
+[C] Received tick at 58 with phase 333.01
+[C] Received tick at 58 with phase 399.61
+[C] Tick at 58 | Phase: 366.31
+== Tick 59 ==
+[A1] Emitted tick at 59 | Phase: 370.71
+[A2] Emitted tick at 59 | Phase: 444.85
+[C] Emitted tick at 59 | Phase: 370.71
+[C] Received tick at 59 with phase 339.29
+[C] Received tick at 59 with phase 407.15
+[C] Tick at 59 | Phase: 373.22
+== Tick 60 ==
+[A1] Emitted tick at 60 | Phase: 376.99
+[A2] Emitted tick at 60 | Phase: 452.39
+[C] Emitted tick at 60 | Phase: 376.99
+[C] Received tick at 60 with phase 345.58
+[C] Received tick at 60 with phase 414.69
+[C] Tick at 60 | Phase: 380.13
+== Tick 61 ==
+[A1] Emitted tick at 61 | Phase: 383.27
+[A2] Emitted tick at 61 | Phase: 459.93
+[C] Emitted tick at 61 | Phase: 383.27
+[C] Received tick at 61 with phase 351.86
+[C] Received tick at 61 with phase 422.23
+[C] Tick at 61 | Phase: 387.04
+== Tick 62 ==
+[A1] Emitted tick at 62 | Phase: 389.56
+[A2] Emitted tick at 62 | Phase: 467.47
+[C] Emitted tick at 62 | Phase: 389.56
+[C] Received tick at 62 with phase 358.14
+[C] Received tick at 62 with phase 429.77
+[C] Tick at 62 | Phase: 393.96
+== Tick 63 ==
+[A1] Emitted tick at 63 | Phase: 395.84
+[A2] Emitted tick at 63 | Phase: 475.01
+[C] Emitted tick at 63 | Phase: 395.84
+[C] Received tick at 63 with phase 364.42
+[C] Received tick at 63 with phase 437.31
+[C] Tick at 63 | Phase: 400.87
+== Tick 64 ==
+[A1] Emitted tick at 64 | Phase: 402.12
+[A2] Emitted tick at 64 | Phase: 482.55
+[C] Emitted tick at 64 | Phase: 402.12
+[C] Received tick at 64 with phase 370.71
+[C] Received tick at 64 with phase 444.85
+[C] Tick at 64 | Phase: 407.78
+== Tick 65 ==
+[A1] Emitted tick at 65 | Phase: 408.41
+[A2] Emitted tick at 65 | Phase: 490.09
+[C] Emitted tick at 65 | Phase: 408.41
+[C] Received tick at 65 with phase 376.99
+[C] Received tick at 65 with phase 452.39
+[C] Tick at 65 | Phase: 414.69
+== Tick 66 ==
+[A1] Emitted tick at 66 | Phase: 414.69
+[A2] Emitted tick at 66 | Phase: 497.63
+[C] Emitted tick at 66 | Phase: 414.69
+[C] Received tick at 66 with phase 383.27
+[C] Received tick at 66 with phase 459.93
+[C] Tick at 66 | Phase: 421.60
+== Tick 67 ==
+[A1] Emitted tick at 67 | Phase: 420.97
+[A2] Emitted tick at 67 | Phase: 505.17
+[C] Emitted tick at 67 | Phase: 420.97
+[C] Received tick at 67 with phase 389.56
+[C] Received tick at 67 with phase 467.47
+[C] Tick at 67 | Phase: 428.51
+== Tick 68 ==
+[A1] Emitted tick at 68 | Phase: 427.26
+[A2] Emitted tick at 68 | Phase: 512.71
+[C] Emitted tick at 68 | Phase: 427.26
+[C] Received tick at 68 with phase 395.84
+[C] Received tick at 68 with phase 475.01
+[C] Tick at 68 | Phase: 435.42
+== Tick 69 ==
+[A1] Emitted tick at 69 | Phase: 433.54
+[A2] Emitted tick at 69 | Phase: 520.25
+[C] Emitted tick at 69 | Phase: 433.54
+[C] Received tick at 69 with phase 402.12
+[C] Received tick at 69 with phase 482.55
+[C] Tick at 69 | Phase: 442.34
+== Tick 70 ==
+[A1] Emitted tick at 70 | Phase: 439.82
+[A2] Emitted tick at 70 | Phase: 527.79
+[C] Emitted tick at 70 | Phase: 439.82
+[C] Received tick at 70 with phase 408.41
+[C] Received tick at 70 with phase 490.09
+[C] Tick at 70 | Phase: 449.25
+== Tick 71 ==
+[A1] Emitted tick at 71 | Phase: 446.11
+[A2] Emitted tick at 71 | Phase: 535.33
+[C] Emitted tick at 71 | Phase: 446.11
+[C] Received tick at 71 with phase 414.69
+[C] Received tick at 71 with phase 497.63
+[C] Tick at 71 | Phase: 456.16
+== Tick 72 ==
+[A1] Emitted tick at 72 | Phase: 452.39
+[A2] Emitted tick at 72 | Phase: 542.87
+[C] Emitted tick at 72 | Phase: 452.39
+[C] Received tick at 72 with phase 420.97
+[C] Received tick at 72 with phase 505.17
+[C] Tick at 72 | Phase: 463.07
+== Tick 73 ==
+[A1] Emitted tick at 73 | Phase: 458.67
+[A2] Emitted tick at 73 | Phase: 550.41
+[C] Emitted tick at 73 | Phase: 458.67
+[C] Received tick at 73 with phase 427.26
+[C] Received tick at 73 with phase 512.71
+[C] Tick at 73 | Phase: 469.98
+== Tick 74 ==
+[A1] Emitted tick at 74 | Phase: 464.96
+[A2] Emitted tick at 74 | Phase: 557.95
+[C] Emitted tick at 74 | Phase: 464.96
+[C] Received tick at 74 with phase 433.54
+[C] Received tick at 74 with phase 520.25
+[C] Tick at 74 | Phase: 476.89
+== Tick 75 ==
+[A1] Emitted tick at 75 | Phase: 471.24
+[A2] Emitted tick at 75 | Phase: 565.49
+[C] Emitted tick at 75 | Phase: 471.24
+[C] Received tick at 75 with phase 439.82
+[C] Received tick at 75 with phase 527.79
+[C] Tick at 75 | Phase: 483.81
+== Tick 76 ==
+[A1] Emitted tick at 76 | Phase: 477.52
+[A2] Emitted tick at 76 | Phase: 573.03
+[C] Emitted tick at 76 | Phase: 477.52
+[C] Received tick at 76 with phase 446.11
+[C] Received tick at 76 with phase 535.33
+[C] Tick at 76 | Phase: 490.72
+== Tick 77 ==
+[A1] Emitted tick at 77 | Phase: 483.81
+[A2] Emitted tick at 77 | Phase: 580.57
+[C] Emitted tick at 77 | Phase: 483.81
+[C] Received tick at 77 with phase 452.39
+[C] Received tick at 77 with phase 542.87
+[C] Tick at 77 | Phase: 497.63
+== Tick 78 ==
+[A1] Emitted tick at 78 | Phase: 490.09
+[A2] Emitted tick at 78 | Phase: 588.11
+[C] Emitted tick at 78 | Phase: 490.09
+[C] Received tick at 78 with phase 458.67
+[C] Received tick at 78 with phase 550.41
+[C] Tick at 78 | Phase: 504.54
+== Tick 79 ==
+[A1] Emitted tick at 79 | Phase: 496.37
+[A2] Emitted tick at 79 | Phase: 595.65
+[C] Emitted tick at 79 | Phase: 496.37
+[C] Received tick at 79 with phase 464.96
+[C] Received tick at 79 with phase 557.95
+[C] Tick at 79 | Phase: 511.45
+== Tick 80 ==
+[A1] Emitted tick at 80 | Phase: 502.65
+[A2] Emitted tick at 80 | Phase: 603.19
+[C] Emitted tick at 80 | Phase: 502.65
+[C] Received tick at 80 with phase 471.24
+[C] Received tick at 80 with phase 565.49
+[C] Tick at 80 | Phase: 518.36
+== Tick 81 ==
+[A1] Emitted tick at 81 | Phase: 508.94
+[A2] Emitted tick at 81 | Phase: 610.73
+[C] Emitted tick at 81 | Phase: 508.94
+[C] Received tick at 81 with phase 477.52
+[C] Received tick at 81 with phase 573.03
+[C] Tick at 81 | Phase: 525.27
+== Tick 82 ==
+[A1] Emitted tick at 82 | Phase: 515.22
+[A2] Emitted tick at 82 | Phase: 618.27
+[C] Emitted tick at 82 | Phase: 515.22
+[C] Received tick at 82 with phase 483.81
+[C] Received tick at 82 with phase 580.57
+[C] Tick at 82 | Phase: 532.19
+== Tick 83 ==
+[A1] Emitted tick at 83 | Phase: 521.50
+[A2] Emitted tick at 83 | Phase: 625.81
+[C] Emitted tick at 83 | Phase: 521.50
+[C] Received tick at 83 with phase 490.09
+[C] Received tick at 83 with phase 588.11
+[C] Tick at 83 | Phase: 539.10
+== Tick 84 ==
+[A1] Emitted tick at 84 | Phase: 527.79
+[A2] Emitted tick at 84 | Phase: 633.35
+[C] Emitted tick at 84 | Phase: 527.79
+[C] Received tick at 84 with phase 496.37
+[C] Received tick at 84 with phase 595.65
+[C] Tick at 84 | Phase: 546.01
+== Tick 85 ==
+[A1] Emitted tick at 85 | Phase: 534.07
+[A2] Emitted tick at 85 | Phase: 640.88
+[C] Emitted tick at 85 | Phase: 534.07
+[C] Received tick at 85 with phase 502.65
+[C] Received tick at 85 with phase 603.19
+[C] Tick at 85 | Phase: 552.92
+== Tick 86 ==
+[A1] Emitted tick at 86 | Phase: 540.35
+[A2] Emitted tick at 86 | Phase: 648.42
+[C] Emitted tick at 86 | Phase: 540.35
+[C] Received tick at 86 with phase 508.94
+[C] Received tick at 86 with phase 610.73
+[C] Tick at 86 | Phase: 559.83
+== Tick 87 ==
+[A1] Emitted tick at 87 | Phase: 546.64
+[A2] Emitted tick at 87 | Phase: 655.96
+[C] Emitted tick at 87 | Phase: 546.64
+[C] Received tick at 87 with phase 515.22
+[C] Received tick at 87 with phase 618.27
+[C] Tick at 87 | Phase: 566.74
+== Tick 88 ==
+[A1] Emitted tick at 88 | Phase: 552.92
+[A2] Emitted tick at 88 | Phase: 663.50
+[C] Emitted tick at 88 | Phase: 552.92
+[C] Received tick at 88 with phase 521.50
+[C] Received tick at 88 with phase 625.81
+[C] Tick at 88 | Phase: 573.65
+== Tick 89 ==
+[A1] Emitted tick at 89 | Phase: 559.20
+[A2] Emitted tick at 89 | Phase: 671.04
+[C] Emitted tick at 89 | Phase: 559.20
+[C] Received tick at 89 with phase 527.79
+[C] Received tick at 89 with phase 633.35
+[C] Tick at 89 | Phase: 580.57
+== Tick 90 ==
+[A1] Emitted tick at 90 | Phase: 565.49
+[A2] Emitted tick at 90 | Phase: 678.58
+[C] Emitted tick at 90 | Phase: 565.49
+[C] Received tick at 90 with phase 534.07
+[C] Received tick at 90 with phase 640.88
+[C] Tick at 90 | Phase: 587.48
+== Tick 91 ==
+[A1] Emitted tick at 91 | Phase: 571.77
+[A2] Emitted tick at 91 | Phase: 686.12
+[C] Emitted tick at 91 | Phase: 571.77
+[C] Received tick at 91 with phase 540.35
+[C] Received tick at 91 with phase 648.42
+[C] Tick at 91 | Phase: 594.39
+== Tick 92 ==
+[A1] Emitted tick at 92 | Phase: 578.05
+[A2] Emitted tick at 92 | Phase: 693.66
+[C] Emitted tick at 92 | Phase: 578.05
+[C] Received tick at 92 with phase 546.64
+[C] Received tick at 92 with phase 655.96
+[C] Tick at 92 | Phase: 601.30
+== Tick 93 ==
+[A1] Emitted tick at 93 | Phase: 584.34
+[A2] Emitted tick at 93 | Phase: 701.20
+[C] Emitted tick at 93 | Phase: 584.34
+[C] Received tick at 93 with phase 552.92
+[C] Received tick at 93 with phase 663.50
+[C] Tick at 93 | Phase: 608.21
+== Tick 94 ==
+[A1] Emitted tick at 94 | Phase: 590.62
+[A2] Emitted tick at 94 | Phase: 708.74
+[C] Emitted tick at 94 | Phase: 590.62
+[C] Received tick at 94 with phase 559.20
+[C] Received tick at 94 with phase 671.04
+[C] Tick at 94 | Phase: 615.12
+== Tick 95 ==
+[A1] Emitted tick at 95 | Phase: 596.90
+[A2] Emitted tick at 95 | Phase: 716.28
+[C] Emitted tick at 95 | Phase: 596.90
+[C] Received tick at 95 with phase 565.49
+[C] Received tick at 95 with phase 678.58
+[C] Tick at 95 | Phase: 622.04
+== Tick 96 ==
+[A1] Emitted tick at 96 | Phase: 603.19
+[A2] Emitted tick at 96 | Phase: 723.82
+[C] Emitted tick at 96 | Phase: 603.19
+[C] Received tick at 96 with phase 571.77
+[C] Received tick at 96 with phase 686.12
+[C] Tick at 96 | Phase: 628.95
+== Tick 97 ==
+[A1] Emitted tick at 97 | Phase: 609.47
+[A2] Emitted tick at 97 | Phase: 731.36
+[C] Emitted tick at 97 | Phase: 609.47
+[C] Received tick at 97 with phase 578.05
+[C] Received tick at 97 with phase 693.66
+[C] Tick at 97 | Phase: 635.86
+== Tick 98 ==
+[A1] Emitted tick at 98 | Phase: 615.75
+[A2] Emitted tick at 98 | Phase: 738.90
+[C] Emitted tick at 98 | Phase: 615.75
+[C] Received tick at 98 with phase 584.34
+[C] Received tick at 98 with phase 701.20
+[C] Tick at 98 | Phase: 642.77
+== Tick 99 ==
+[A1] Emitted tick at 99 | Phase: 622.04
+[A2] Emitted tick at 99 | Phase: 746.44
+[C] Emitted tick at 99 | Phase: 622.04
+[C] Received tick at 99 with phase 590.62
+[C] Received tick at 99 with phase 708.74
+[C] Tick at 99 | Phase: 649.68
+== Tick 100 ==
+[A1] Emitted tick at 100 | Phase: 628.32
+[A2] Emitted tick at 100 | Phase: 753.98
+[C] Emitted tick at 100 | Phase: 628.32
+[C] Received tick at 100 with phase 596.90
+[C] Received tick at 100 with phase 716.28
+[C] Tick at 100 | Phase: 656.59

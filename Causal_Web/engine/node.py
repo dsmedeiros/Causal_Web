@@ -1,4 +1,4 @@
-﻿﻿import math
+﻿import math
 import cmath
 from collections import defaultdict
 
@@ -63,7 +63,19 @@ class Node:
 
 
 class Edge:
-    def __init__(self, source, target, delay=1):
+    def __init__(self, source, target, attenuation, density, delay=1):
         self.source = source
         self.target = target
+        self.attenuation = attenuation  # Multiplier for phase amplitude
+        self.density = density          # Can affect delay dynamically
         self.delay = delay
+
+        def adjusted_delay(self):
+            # Optionally adjust delay based on density (example logic)
+            return self.delay + int(self.density)
+
+        def propagate_phase(self, phase, global_tick, graph):
+            target_node = graph.get_node(self.target)
+            attenuated_phase = phase * self.attenuation
+            scheduled_tick = global_tick
+            target_node.schedule_tick(scheduled_tick, attenuated_phase)

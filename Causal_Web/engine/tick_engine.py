@@ -8,12 +8,6 @@ import json
 graph = CausalGraph()
 
 def build_graph():
-    # graph.add_node("A1", x=100, y=100, frequency=1.0)
-    # graph.add_node("A2", x=100, y=200, frequency=1.2)
-    # graph.add_node("C", x=300, y=150, frequency=1.0)
-
-    # graph.add_edge("A1", "C", delay=5)
-    # graph.add_edge("A2", "C", delay=5)
     graph.load_from_file("input/graph.json")
 
 def emit_ticks(global_tick):
@@ -24,7 +18,7 @@ def propagate_phases(global_tick):
     for edge in graph.edges:
         source_node = graph.get_node(edge.source)
         for tick_time, phase in source_node.tick_history:
-            if tick_time + edge.delay == global_tick:
+            if tick_time + edge.adjusted_delay() == global_tick:
                 edge.propagate_phase(phase, global_tick, graph)
 
 def evaluate_nodes(global_tick):
@@ -56,12 +50,3 @@ def write_output():
     with open("output/tick_trace.json", "w") as f:
         json.dump(graph.to_dict(), f, indent=2)
     print("✅ Tick trace saved to output/tick_trace.json")
-
-# Extension to Edge
-from .node import Edge
-
-def propagate_phase(self, phase, global_tick, graph):
-    target_node = graph.get_node(self.target)
-    target_node.schedule_tick(global_tick, phase)
-
-Edge.propagate_phase = propagate_phase
