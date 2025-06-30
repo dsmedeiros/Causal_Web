@@ -23,7 +23,7 @@ class Node:
 
     def should_tick(self, tick_time):
         phases = self.incoming_phase_queue[tick_time]
-        vector_sum = sum(cmath.rect(1, p) for p in phases)  # unit magnitude
+        vector_sum = sum(cmath.rect(abs(p), cmath.phase(p)) for p in phases)
         magnitude = abs(vector_sum)
         threshold = 0.5
         if magnitude >= threshold:
@@ -70,12 +70,12 @@ class Edge:
         self.density = density          # Can affect delay dynamically
         self.delay = delay
 
-        def adjusted_delay(self):
-            # Optionally adjust delay based on density (example logic)
-            return self.delay + int(self.density)
+    def adjusted_delay(self):
+        # Optionally adjust delay based on density (example logic)
+        return self.delay + int(self.density)
 
-        def propagate_phase(self, phase, global_tick, graph):
-            target_node = graph.get_node(self.target)
-            attenuated_phase = phase * self.attenuation
-            scheduled_tick = global_tick
-            target_node.schedule_tick(scheduled_tick, attenuated_phase)
+    def propagate_phase(self, phase, global_tick, graph):
+        target_node = graph.get_node(self.target)
+        attenuated_phase = phase * self.attenuation
+        scheduled_tick = global_tick
+        target_node.schedule_tick(scheduled_tick, attenuated_phase)
