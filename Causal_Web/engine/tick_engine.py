@@ -4,20 +4,33 @@ from config import Config
 from .graph import CausalGraph
 import json
 
+# Global graph instance
 graph = CausalGraph()
 
 def build_graph():
-    graph.add_node("A1", x=100, y=100, frequency=1.0)
-    graph.add_node("A2", x=100, y=200, frequency=1.2)
-    graph.add_node("C", x=300, y=150, frequency=1.0)
+    # graph.add_node("A1", x=100, y=100, frequency=1.0)
+    # graph.add_node("A2", x=100, y=200, frequency=1.2)
+    # graph.add_node("C", x=300, y=150, frequency=1.0)
 
-    graph.add_edge("A1", "C", delay=5)
-    graph.add_edge("A2", "C", delay=5)
+    # graph.add_edge("A1", "C", delay=5)
+    # graph.add_edge("A2", "C", delay=5)
+    graph.load_from_file("input/graph.json")
 
-    # Both upstream nodes tick deterministically
-    # for t in range(0, 50):
-    #     graph.get_node("A1").tick_history.append((t, graph.get_node("A1").compute_phase(t)))
-    #     graph.get_node("A2").tick_history.append((t, graph.get_node("A2").compute_phase(t)))
+def emit_ticks(global_tick):
+    for node in graph.nodes.values():
+        # Optional: allow some nodes to emit new ticks based on their own oscillation
+        pass  # Placeholder for future tick emit logic
+
+def propagate_phases(global_tick):
+    for edge in graph.edges:
+        source_node = graph.get_node(edge.source)
+        for tick_time, phase in source_node.tick_history:
+            if tick_time + edge.delay == global_tick:
+                edge.propagate_phase(phase, global_tick, graph)
+
+def evaluate_nodes(global_tick):
+    for node in graph.nodes.values():
+        node.maybe_tick(global_tick)
 
 def simulation_loop():
     def run():
@@ -25,18 +38,9 @@ def simulation_loop():
         while Config.is_running:
             print(f"== Tick {global_tick} ==")
 
-            # Propagate all past ticks forward
-            for edge in graph.edges:
-                source_node = graph.get_node(edge.source)
-                target_node = graph.get_node(edge.target)
-
-                for (tick_time, phase) in source_node.tick_history:
-                    if tick_time + edge.delay == global_tick:
-                        target_node.schedule_tick(global_tick, phase)
-
-            # Try to tick target nodes
-            for node_id, node in graph.nodes.items():
-                node.maybe_tick(global_tick)
+            emit_ticks(global_tick)
+            propagate_phases(global_tick)
+            evaluate_nodes(global_tick)
 
             Config.current_tick = global_tick
 
@@ -53,3 +57,12 @@ def write_output():
     with open("output/tick_trace.json", "w") as f:
         json.dump(graph.to_dict(), f, indent=2)
     print("✅ Tick trace saved to output/tick_trace.json")
+
+# Extension to Edge
+from .node import Edge
+
+def propagate_phase(self, phase, global_tick, graph):
+    target_node = graph.get_node(self.target)
+    target_node.schedule_tick(global_tick, phase)
+
+Edge.propagate_phase = propagate_phase

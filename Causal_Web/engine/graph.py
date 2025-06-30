@@ -1,4 +1,5 @@
 from .node import Node, Edge
+import json
 
 class CausalGraph:
     def __init__(self):
@@ -14,6 +15,18 @@ class CausalGraph:
     def get_node(self, node_id):
         return self.nodes.get(node_id)
 
+    def get_edges_from(self, node_id):
+        return [e for e in self.edges if e.source == node_id]
+
+    def get_edges_to(self, node_id):
+        return [e for e in self.edges if e.target == node_id]
+
+    def get_upstream_nodes(self, node_id):
+        return [e.source for e in self.get_edges_to(node_id)]
+
+    def get_downstream_nodes(self, node_id):
+        return [e.target for e in self.get_edges_from(node_id)]
+
     def to_dict(self):
         return {
             "nodes": {
@@ -28,3 +41,21 @@ class CausalGraph:
                 for e in self.edges
             ]
         }
+
+    def load_from_file(self, path):
+        with open(path, 'r') as f:
+            data = json.load(f)
+
+        self.nodes.clear()
+        self.edges.clear()
+
+        for node_id, node_data in data.get("nodes", {}).items():
+            self.add_node(
+                node_id,
+                x=node_data.get("x", 0.0),
+                y=node_data.get("y", 0.0),
+                frequency=node_data.get("frequency", 1.0)
+            )
+
+        for edge in data.get("edges", []):
+            self.add_edge(edge["from"], edge["to"], delay=edge.get("delay", 1))
