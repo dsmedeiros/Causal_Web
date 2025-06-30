@@ -9,8 +9,8 @@ class CausalGraph:
     def add_node(self, node_id, x=0.0, y=0.0, frequency=1.0):
         self.nodes[node_id] = Node(node_id, x, y, frequency)
 
-    def add_edge(self, source_id, target_id, delay=1):
-        self.edges.append(Edge(source_id, target_id, delay))
+    def add_edge(self, source_id, target_id, attenuation=1.0, density=0.0, delay=1):
+        self.edges.append(Edge(source_id, target_id, attenuation, density, delay))
 
     def get_node(self, node_id):
         return self.nodes.get(node_id)
@@ -71,4 +71,9 @@ class CausalGraph:
             )
 
         for edge in data.get("edges", []):
-            self.add_edge(edge["from"], edge["to"], delay=edge.get("delay", 1))
+            self.add_edge(
+                edge["from"], 
+                edge["to"],
+                attenuation=edge.get("attenuation", 1.0),
+                density=edge.get("density", 0.0),
+                delay=edge.get("delay", 1))
