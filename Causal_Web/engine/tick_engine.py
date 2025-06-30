@@ -23,7 +23,7 @@ def propagate_phases(global_tick):
 
 def evaluate_nodes(global_tick):
     for node in graph.nodes.values():
-        node.maybe_tick(global_tick)
+        node.maybe_tick(global_tick, graph)
 
 def simulation_loop():
     def run():
