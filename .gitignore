@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /Causal_Web/input/graph.json
 /Causal_Web/output/cwt_console_output.txt
+/Causal_Web/output/tick_trace.json
