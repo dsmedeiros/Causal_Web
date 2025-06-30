@@ -1,4 +1,5 @@
-﻿import math
+﻿﻿import math
+import cmath
 from collections import defaultdict
 
 class Node:
@@ -11,6 +12,7 @@ class Node:
         self.incoming_phase_queue = defaultdict(list)  # tick_time -> [phase_i]
         self.current_tick = 0
         self.subjective_ticks = 0  # For relativistic tracking
+        self.last_emission_tick = None
 
     def compute_phase(self, tick_time):
         return 2 * math.pi * self.frequency * tick_time
@@ -21,9 +23,10 @@ class Node:
 
     def should_tick(self, tick_time):
         phases = self.incoming_phase_queue[tick_time]
-        interference = sum(math.sin(p) for p in phases)
-        threshold = 0.3
-        if abs(interference) >= threshold:
+        vector_sum = sum(cmath.rect(1, p) for p in phases)  # unit magnitude
+        magnitude = abs(vector_sum)
+        threshold = 0.5
+        if magnitude >= threshold:
             avg_phase = sum(phases) / len(phases)
             return True, avg_phase
         return False, None
@@ -45,12 +48,18 @@ class Node:
             return should_fire
         return False
 
+    def emit_tick_if_ready(self, global_tick):
+        if self.last_emission_tick is None:
+            self.last_emission_tick = global_tick
+            self._emit(global_tick)
+        elif (global_tick - self.last_emission_tick) >= (1.0 / self.frequency):
+            self.last_emission_tick = global_tick
+            self._emit(global_tick)
 
-class Edge:
-    def __init__(self, source, target, delay=1):
-        self.source = source
-        self.target = target
-        self.delay = delay
+    def _emit(self, tick_time):
+        phase = self.compute_phase(tick_time)
+        self.tick_history.append((tick_time, phase))
+        print(f"[{self.id}] Emitted tick at {tick_time} | Phase: {phase:.2f}")
 
 
 class Edge:

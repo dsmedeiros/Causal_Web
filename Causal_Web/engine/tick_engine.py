@@ -18,8 +18,7 @@ def build_graph():
 
 def emit_ticks(global_tick):
     for node in graph.nodes.values():
-        # Optional: allow some nodes to emit new ticks based on their own oscillation
-        pass  # Placeholder for future tick emit logic
+        node.emit_tick_if_ready(global_tick)
 
 def propagate_phases(global_tick):
     for edge in graph.edges:

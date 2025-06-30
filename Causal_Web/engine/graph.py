@@ -27,6 +27,14 @@ class CausalGraph:
     def get_downstream_nodes(self, node_id):
         return [e.target for e in self.get_edges_from(node_id)]
 
+    def reset_ticks(self):
+        for node in self.nodes.values():
+            node.tick_history.clear()
+            node.incoming_phase_queue.clear()
+            node.current_tick = 0
+            node.subjective_ticks = 0
+            node.last_emission_tick = None
+
     def to_dict(self):
         return {
             "nodes": {
@@ -41,6 +49,11 @@ class CausalGraph:
                 for e in self.edges
             ]
         }
+
+    def save_to_file(self, path):
+        with open(path, 'w') as f:
+            json.dump(self.to_dict(), f, indent=2)
+
 
     def load_from_file(self, path):
         with open(path, 'r') as f:
