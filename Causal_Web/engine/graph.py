@@ -1,3 +1,4 @@
+from turtle import delay
 from .node import Node, Edge
 import json
 
@@ -9,8 +10,8 @@ class CausalGraph:
     def add_node(self, node_id, x=0.0, y=0.0, frequency=1.0, refractory_period=2, base_threshold=0.5):
         self.nodes[node_id] = Node(node_id, x, y, frequency, refractory_period, base_threshold)
 
-    def add_edge(self, source_id, target_id, attenuation=1.0, density=0.0, delay=1):
-        self.edges.append(Edge(source_id, target_id, attenuation, density, delay))
+    def add_edge(self, source_id, target_id, attenuation=1.0, density=0.0, delay=1, phase_shift=0.0):
+        self.edges.append(Edge(source_id, target_id, attenuation, density, delay, phase_shift))
 
     def get_node(self, node_id):
         return self.nodes.get(node_id)
@@ -41,11 +42,29 @@ class CausalGraph:
                 nid: {
                     "x": n.x,
                     "y": n.y,
-                    "ticks": [{"time": t, "phase": p} for t, p in n.tick_history]
+                    "ticks": [{"time": t, "phase": p} for t, p in n.tick_history],
+                    "frequency": n.frequency,
+                    "refractory_period": n.refractory_period,
+                    "base_threshold": n.base_threshold
                 } for nid, n in self.nodes.items()
             },
+            "superpositions": {
+                nid: {
+                    str(t): [round(float(p), 4) for p in node.pending_superpositions[t]]
+                    for t in node.pending_superpositions
+                }
+                for nid, node in self.nodes.items() if node.pending_superpositions
+            },
             "edges": [
-                {"from": e.source, "to": e.target, "delay": e.delay}
+                {
+                    "from": e.source, 
+                    "to": e.target, 
+                    "delay": e.delay,
+                    "attenuation": e.attenuation,
+                    "density": e.density,
+                    "delay": e.delay,
+                    "phase_shift": e.phase_shift
+                }
                 for e in self.edges
             ]
         }
@@ -78,4 +97,5 @@ class CausalGraph:
                 edge["to"],
                 attenuation=edge.get("attenuation", 1.0),
                 density=edge.get("density", 0.0),
-                delay=edge.get("delay", 1))
+                delay=edge.get("delay", 1),
+                phase_shift=edge.get("phase_shift", 0.0))

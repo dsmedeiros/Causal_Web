@@ -10,12 +10,13 @@ class Node:
         self.frequency = frequency
         self.tick_history = []  # [(tick_time, phase)]
         self.incoming_phase_queue = defaultdict(list)  # tick_time -> [phase_i]
+        self.pending_superpositions = defaultdict(list) # for logging and anaysis
         self.current_tick = 0
         self.subjective_ticks = 0  # For relativistic tracking
         self.last_emission_tick = None
-        self.refractory_period = 2
+        self.refractory_period = refractory_period
         self.last_tick_time = -math.inf
-        self.base_threshold = 0.5
+        self.base_threshold = base_threshold
         self.current_threshold = self.base_threshold
 
     def compute_phase(self, tick_time):
@@ -23,6 +24,7 @@ class Node:
 
     def schedule_tick(self, tick_time, incoming_phase):
         self.incoming_phase_queue[tick_time].append(incoming_phase)
+        self.pending_superpositions[tick_time].append(incoming_phase) # track unresolved states
         print(f"[{self.id}] Received tick at {tick_time} with phase {incoming_phase:.2f}")
 
     def should_tick(self, tick_time):
@@ -52,8 +54,9 @@ class Node:
         for edge in graph.get_edges_from(self.id):
             delay = edge.adjusted_delay()
             attenuated = phase * edge.attenuation
+            shifted = attenuated + edge.phase_shift
             target = graph.get_node(edge.target)
-            target.schedule_tick(tick_time + delay, attenuated)
+            target.schedule_tick(tick_time + delay, shifted)
 
     def maybe_tick(self, global_tick, graph):
         if global_tick in self.incoming_phase_queue:
@@ -63,6 +66,7 @@ class Node:
             else:
                 print(f"[{self.id}] Interference at {global_tick} cancelled tick")
             del self.incoming_phase_queue[global_tick]
+            # del self.pending_superpositions[global_tick]  # Clear resolved state
         else:
             self.current_threshold = max(self.base_threshold, self.current_threshold - 0.01)
 
@@ -81,12 +85,13 @@ class Node:
 
 
 class Edge:
-    def __init__(self, source, target, attenuation, density, delay=1):
+    def __init__(self, source, target, attenuation, density, delay=1, phase_shift=0.0):
         self.source = source
         self.target = target
         self.attenuation = attenuation  # Multiplier for phase amplitude
         self.density = density          # Can affect delay dynamically
         self.delay = delay
+        self.phase_shift = phase_shift
 
     def adjusted_delay(self):
         # Optionally adjust delay based on density (example logic)
@@ -94,6 +99,7 @@ class Edge:
 
     def propagate_phase(self, phase, global_tick, graph):
         target_node = graph.get_node(self.target)
-        attenuated_phase = phase * self.attenuation
+        shifted_phase = phase + self.phase_shift
+        attenuated_phase = shifted_phase * self.attenuation
         scheduled_tick = global_tick
         target_node.schedule_tick(scheduled_tick, attenuated_phase)
