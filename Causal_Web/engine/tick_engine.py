@@ -19,11 +19,15 @@ def emit_ticks(global_tick):
             node.apply_tick(global_tick, phase, graph, origin="source")
 
 def propagate_phases(global_tick):
-    for edge in graph.edges:
-        source_node = graph.get_node(edge.source)
-        for tick in source_node.tick_history:
-            if tick.time + edge.adjusted_delay() == global_tick:
-                edge.propagate_phase(tick.phase, global_tick, graph)
+    """Propagate phases scheduled during node ticks.
+
+    Previous versions walked through each node's ``tick_history`` and
+    rescheduled downstream ticks on every global step. This caused phases to
+    arrive after twice the intended edge delay. Node.apply_tick now schedules
+    outgoing phases directly, so this function no longer performs any work but
+    is kept for API compatibility.
+    """
+    pass
 
 def evaluate_nodes(global_tick):
     for node in graph.nodes.values():
@@ -113,4 +117,4 @@ def write_output():
     inspection = graph.inspect_superpositions()
     with open("output/inspection_log.json", "w") as f:
         json.dump(inspection, f, indent=2)
-    print("✅ Superposition inspection saved to output/superposition_inspection.json")
+    print("✅ Superposition inspection saved to output/inspection_log.json")
