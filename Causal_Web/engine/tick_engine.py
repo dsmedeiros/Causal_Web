@@ -4,10 +4,13 @@ from config import Config
 from .graph import CausalGraph
 from .observer import Observer
 import json
+import numpy as np
 
 # Global graph instance
 graph = CausalGraph()
 observers = []
+kappa = 0.5  # curvature strength for refraction fields
+_law_wave_stability = {}
 
 def build_graph():
     graph.load_from_file("input/graph.json")
@@ -37,6 +40,19 @@ def propagate_phases(global_tick):
 def evaluate_nodes(global_tick):
     for node in graph.nodes.values():
         node.maybe_tick(global_tick, graph)
+
+def log_curvature_per_tick(global_tick):
+    log = {}
+    for edge in graph.edges:
+        src = graph.get_node(edge.source)
+        tgt = graph.get_node(edge.target)
+        if not src or not tgt:
+            continue
+        df = abs(src.law_wave_frequency - tgt.law_wave_frequency)
+        curved = edge.adjusted_delay(src.law_wave_frequency, tgt.law_wave_frequency, kappa)
+        log[f"{edge.source}->{edge.target}"] = {"delta_f": round(df,4), "curved_delay": round(curved,4)}
+    with open("output/curvature_log.json", "a") as f:
+        f.write(json.dumps({str(global_tick): log}) + "\n")
 
 def log_bridge_states(global_tick):
     snapshot = {
@@ -72,7 +88,23 @@ def log_metrics_per_tick(global_tick):
         log_metrics_per_tick._last_coherence[node_id] = coherence
         node.coherence_velocity = delta
 
-        node.update_classical_state(decoherence)
+        node.update_classical_state(decoherence, tick_time=global_tick)
+
+        # track law-wave stability
+        record = _law_wave_stability.setdefault(node_id, {"freqs": [], "stable": 0})
+        record["freqs"].append(node.law_wave_frequency)
+        if len(record["freqs"]) > 5:
+            record["freqs"].pop(0)
+        if len(record["freqs"]) == 5:
+            if np.std(record["freqs"]) < 0.01:
+                record["stable"] += 1
+            else:
+                record["stable"] = 0
+        if record["stable"] >= 10:
+            node.refractory_period = max(1.0, node.refractory_period - 0.1)
+            with open("output/law_drift_log.json", "a") as f:
+                f.write(json.dumps({"tick": global_tick, "node": node_id, "new_refractory_period": node.refractory_period}) + "\n")
+            record["stable"] = 0
 
         decoherence_log[node_id] = round(decoherence, 4)
         coherence_log[node_id] = round(coherence, 4)
@@ -81,6 +113,7 @@ def log_metrics_per_tick(global_tick):
         law_wave_log[node_id] = round(node.law_wave_frequency, 4)
 
     clusters = graph.detect_clusters()
+    graph.create_meta_nodes(clusters)
 
     with open("output/cluster_log.json", "a") as f:
         f.write(json.dumps({str(global_tick): clusters}) + "\n")
@@ -115,9 +148,13 @@ def simulation_loop():
 
             log_metrics_per_tick(global_tick)
             log_bridge_states(global_tick)
+            log_curvature_per_tick(global_tick)
 
             for obs in observers:
                 obs.observe(graph, global_tick)
+                inferred = obs.infer_field_state()
+                with open("output/observer_perceived_field.json", "a") as f:
+                    f.write(json.dumps({"tick": global_tick, "observer": obs.id, "state": inferred}) + "\n")
 
             for bridge in graph.bridges:
                 bridge.apply(global_tick, graph)

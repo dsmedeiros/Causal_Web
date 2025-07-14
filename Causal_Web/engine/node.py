@@ -82,14 +82,18 @@ class Node:
                 idx = int(np.argmax(np.abs(spectrum[1:])) + 1)
                 self.law_wave_frequency = idx / window
 
-    def update_classical_state(self, decoherence_strength, threshold=0.4, streak_required=2):
+    def update_classical_state(self, decoherence_strength, tick_time=None, threshold=0.4, streak_required=2):
         if decoherence_strength > threshold:
             self._decoherence_streak += 1
         else:
             self._decoherence_streak = 0
 
-        if self._decoherence_streak >= streak_required:
+        if self._decoherence_streak >= streak_required and not self.is_classical:
             self.is_classical = True
+            if tick_time is not None:
+                record = {"tick": tick_time, "node": self.id, "event": "collapse_start"}
+                with open("output/collapse_front_log.json", "a") as f:
+                    f.write(json.dumps(record) + "\n")
 
     def schedule_tick(self, tick_time, incoming_phase):
         self.incoming_phase_queue[tick_time].append(incoming_phase)
@@ -138,7 +142,7 @@ class Node:
         # Recursive phase propagation with refraction
         for edge in graph.get_edges_from(self.id):
             target = graph.get_node(edge.target)
-            delay = edge.adjusted_delay(target.law_wave_frequency)
+            delay = edge.adjusted_delay(self.law_wave_frequency, target.law_wave_frequency)
             attenuated = phase * edge.attenuation
             shifted = attenuated + edge.phase_shift
             target.schedule_tick(tick_time + delay, shifted)
@@ -163,6 +167,10 @@ class Node:
             if deco > threshold:
                 other.apply_tick(tick_time, self.phase, graph, origin="entanglement")
                 collapsed.append(nid)
+        if collapsed:
+            record = {"tick": tick_time, "source": self.id, "front": collapsed}
+            with open("output/collapse_front_log.json", "a") as f:
+                f.write(json.dumps(record) + "\n")
         return collapsed
 
     def _log_collapse_chain(self, tick_time, collapsed):
@@ -217,12 +225,12 @@ class Edge:
         self.delay = delay
         self.phase_shift = phase_shift
 
-    def adjusted_delay(self, law_wave_freq: float = None):
+    def adjusted_delay(self, source_freq: float = 0.0, target_freq: float = 0.0, kappa: float = 1.0):
+        """Delay adjusted by local law-wave gradient."""
         base = self.delay + int(self.density)
-        if law_wave_freq is not None:
-            modifier = math.sin(2 * math.pi * law_wave_freq) * self.density
-            return base + modifier
-        return base
+        delta_f = abs(source_freq - target_freq)
+        modifier = kappa * math.sin(2 * math.pi * delta_f) * self.density
+        return base + modifier
 
     def propagate_phase(self, phase, global_tick, graph):
         target_node = graph.get_node(self.target)
@@ -244,5 +252,6 @@ class Edge:
 
         shifted_phase = phase + drift_phase
         attenuated_phase = shifted_phase * self.attenuation
-        scheduled_tick = global_tick + self.adjusted_delay(target_node.law_wave_frequency)
+        scheduled_tick = global_tick + self.adjusted_delay(graph.get_node(self.source).law_wave_frequency if hasattr(self, 'source') else 0.0,
+                                                           target_node.law_wave_frequency)
         target_node.schedule_tick(scheduled_tick, attenuated_phase)

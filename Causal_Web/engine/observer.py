@@ -17,3 +17,12 @@ class Observer:
         self.memory.append({'tick': tick_time, 'events': events})
         if len(self.memory) > self.window:
             self.memory.pop(0)
+
+    def infer_field_state(self):
+        """Simple inference based on memory of recent events."""
+        state = {}
+        for entry in self.memory:
+            for ev in entry['events']:
+                state.setdefault(ev['node'], 0)
+                state[ev['node']] += 1
+        return state
