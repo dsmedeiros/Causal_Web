@@ -2,6 +2,8 @@ import json
 import os
 from typing import Dict, List
 
+from .causal_analyst import CausalAnalyst
+
 
 def _load_json_lines(path: str) -> Dict[str, Dict]:
     data = {}
@@ -309,6 +311,13 @@ class CWTLogInterpreter:
             f.write(text_summary)
         print(f"✅ Interpretation saved to {out_path}")
         print(f"✅ Narrative saved to {text_path}")
+
+        # Run causal analyst layer to produce explanations
+        try:
+            analyst = CausalAnalyst(output_dir=self.output_dir)
+            analyst.run()
+        except Exception as e:
+            print(f"⚠️ Causal analyst failed: {e}")
 
 
 def run_interpreter() -> None:
