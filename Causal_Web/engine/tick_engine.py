@@ -113,4 +113,4 @@ def write_output():
     inspection = graph.inspect_superpositions()
     with open("output/inspection_log.json", "w") as f:
         json.dump(inspection, f, indent=2)
-    print("✅ Superposition inspection saved to output/superposition_inspection.json")
+    print("✅ Superposition inspection saved to output/inspection_log.json")
