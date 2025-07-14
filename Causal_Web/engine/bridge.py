@@ -81,6 +81,7 @@ class Bridge:
                 drift = abs((phase_a - phase_b + math.pi) % (2 * math.pi) - math.pi)
                 if drift > self.drift_tolerance:
                     print(f"[BRIDGE] Drift too high at tick {tick_time}: {drift:.2f} > {self.drift_tolerance}")
+                    self._log_event(tick_time, "bridge_drift", drift)
                     return
 
         decoherence_a = node_a.compute_decoherence_field(tick_time)
