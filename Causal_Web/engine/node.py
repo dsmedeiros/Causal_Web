@@ -142,7 +142,13 @@ class Node:
         # Recursive phase propagation with refraction
         for edge in graph.get_edges_from(self.id):
             target = graph.get_node(edge.target)
-            delay = edge.adjusted_delay(self.law_wave_frequency, target.law_wave_frequency)
+            # Import here to avoid circular dependency during module load
+            from .tick_engine import kappa
+            delay = edge.adjusted_delay(
+                self.law_wave_frequency,
+                target.law_wave_frequency,
+                kappa,
+            )
             attenuated = phase * edge.attenuation
             shifted = attenuated + edge.phase_shift
             target.schedule_tick(tick_time + delay, shifted)
