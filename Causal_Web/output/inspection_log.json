@@ -1,0 +1,3538 @@
+[
+  {
+    "tick": 1,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 2,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 4,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 5,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 7,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 8,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 10,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 11,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 13,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 14,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 16,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 17,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 19,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 20,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 22,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 23,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 25,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 26,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 28,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 29,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 31,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 32,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 34,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 35,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 37,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 38,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 40,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 41,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 43,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 44,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 46,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 47,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 49,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 50,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 52,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 53,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 55,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 56,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 58,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 59,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 61,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 62,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 64,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 65,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 67,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 68,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 70,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 71,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 73,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 74,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 76,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 77,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 79,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 80,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 82,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 83,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 85,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 86,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 88,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 89,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 91,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 92,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 94,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 95,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 97,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 98,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 100,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  },
+  {
+    "tick": 101,
+    "node": "B",
+    "contributors": [
+      {
+        "phase": 0.0,
+        "magnitude": 1.0
+      },
+      {
+        "phase": 3.14,
+        "magnitude": 1.0
+      }
+    ],
+    "interference_result": {
+      "resultant_phase": 1.57,
+      "amplitude": 0.0016,
+      "type": "destructive"
+    },
+    "collapsed": false,
+    "bridge_status": [
+      {
+        "between": [
+          "A1",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      },
+      {
+        "between": [
+          "A2",
+          "B"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.5,
+        "decoherence_limit": 5
+      },
+      {
+        "between": [
+          "B",
+          "C"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 1.0,
+        "decoherence_limit": 10
+      }
+    ]
+  }
+]
