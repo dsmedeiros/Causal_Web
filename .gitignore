@@ -362,3 +362,8 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /Causal_Web/input/graph.json
+/Causal_Web/diagrams/lccm_layers.txt
+/Causal_Web/diagrams/roadmap.txt
+/Causal_Web/input/destructive_interference_test.json
+/Causal_Web/input/dilation_baseline_test_case.json
+/Causal_Web/input/partial_interference_test.json
