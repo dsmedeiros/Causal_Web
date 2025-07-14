@@ -7,6 +7,7 @@ from .log_interpreter import run_interpreter
 import json
 import numpy as np
 import os
+from concurrent.futures import ThreadPoolExecutor
 
 # Global graph instance
 graph = CausalGraph()
@@ -95,6 +96,12 @@ def log_meta_node_ticks(global_tick):
             f.write(json.dumps({str(global_tick): events}) + "\n")
 
 
+def _compute_metrics(node, tick_time):
+    decoherence = node.compute_decoherence_field(tick_time)
+    coherence = node.compute_coherence_level(tick_time)
+    return node.id, decoherence, coherence
+
+
 def log_metrics_per_tick(global_tick):
     decoherence_log = {}
     coherence_log = {}
@@ -106,9 +113,11 @@ def log_metrics_per_tick(global_tick):
     if not hasattr(log_metrics_per_tick, "_last_coherence"):
         log_metrics_per_tick._last_coherence = {}
 
-    for node_id, node in graph.nodes.items():
-        decoherence = node.compute_decoherence_field(global_tick)
-        coherence = node.compute_coherence_level(global_tick)
+    with ThreadPoolExecutor() as ex:
+        results = list(ex.map(lambda n: _compute_metrics(n, global_tick), graph.nodes.values()))
+
+    for node_id, decoherence, coherence in results:
+        node = graph.get_node(node_id)
         prev = log_metrics_per_tick._last_coherence.get(node_id, coherence)
         delta = coherence - prev
         log_metrics_per_tick._last_coherence[node_id] = coherence

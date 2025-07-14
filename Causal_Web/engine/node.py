@@ -239,7 +239,7 @@ class Edge:
         base = self.delay + int(self.density)
         delta_f = abs(source_freq - target_freq)
         modifier = kappa * math.sin(2 * math.pi * delta_f) * self.density
-        return base + modifier
+        return int(round(base + modifier))
 
     def propagate_phase(self, phase, global_tick, graph):
         target_node = graph.get_node(self.target)
