@@ -1,10 +1,11 @@
 import math
 import cmath
-from collections import defaultdict
+from collections import defaultdict, deque
 from dataclasses import dataclass
-from typing import Set, List
+from typing import Set, List, Dict, Optional
 import numpy as np
 import json
+from config import Config
 
 
 
@@ -43,9 +44,25 @@ class Node:
         self.entangled_with: Set[str] = set()
         self.coherence_velocity: float = 0.0
 
+        # ---- Phase 4 additions ----
+        self.memory_window = 20
+        self.memory: Dict[str, deque] = {
+            "origins": deque(maxlen=self.memory_window),
+            "coherence": deque(maxlen=self.memory_window),
+            "decoherence": deque(maxlen=self.memory_window),
+        }
+        self.trust_profile: Dict[str, float] = {}
+        self.phase_confidence_index: float = 1.0
+        self.goals: Dict[str, float] = {}
+        self.goal_error: Dict[str, float] = {}
+
 
     def compute_phase(self, tick_time):
-        return 2 * math.pi * self.frequency * tick_time
+        base = 2 * math.pi * self.frequency * tick_time
+        jitter = Config.phase_jitter
+        if jitter["amplitude"]:
+            base += jitter["amplitude"] * math.sin(2 * math.pi * tick_time / jitter["period"])
+        return base
 
     def compute_coherence_level(self, tick_time):
         phases = self.pending_superpositions.get(tick_time, [])
@@ -69,6 +86,45 @@ class Node:
         variance = sum((p - mean_phase) ** 2 for p in normalized) / len(normalized)
         self.decoherence = variance
         return self.decoherence
+
+    # ------------------------------------------------------------------
+    def _update_memory(self, tick_time: int, origin: Optional[str] = None) -> None:
+        coherence = self.compute_coherence_level(tick_time)
+        decoherence = self.compute_decoherence_field(tick_time)
+        self.memory["coherence"].append(coherence)
+        self.memory["decoherence"].append(decoherence)
+        if origin is not None:
+            self.memory["origins"].append(origin)
+            score = self.trust_profile.get(origin, 0.5)
+            if coherence > 0.8:
+                score = min(1.0, score + 0.05)
+            else:
+                score = max(0.0, score - 0.05)
+            self.trust_profile[origin] = score
+        if len(self.memory["coherence"]) > 1:
+            self.phase_confidence_index = 1.0 - float(np.var(self.memory["coherence"]))
+        else:
+            self.phase_confidence_index = 1.0
+
+    def _adapt_behavior(self) -> None:
+        if self.memory["coherence"]:
+            avg_coh = sum(self.memory["coherence"]) / len(self.memory["coherence"])
+        else:
+            avg_coh = 1.0
+
+        # adjust thresholds based on recent stability
+        if avg_coh > 0.9:
+            self.current_threshold = max(self.base_threshold * 0.8, self.current_threshold - 0.01)
+            self.refractory_period = max(1.0, self.refractory_period - 0.05)
+        elif avg_coh < 0.5:
+            self.current_threshold = min(1.0, self.current_threshold + 0.02)
+            self.refractory_period += 0.05
+
+        goal = self.goals.get("coherence")
+        if goal is not None:
+            error = goal - avg_coh
+            self.goal_error["coherence"] = error
+            self.current_threshold -= error * 0.05
 
     def _update_law_wave(self, window: int = 20):
         """Compute dominant coherence frequency over a sliding window."""
@@ -138,6 +194,10 @@ class Node:
         self.tick_history.append(Tick(origin=origin, time=tick_time, amplitude=1.0, phase=phase))
         self.collapse_origin[tick_time] = origin
         print(f"[{self.id}] Tick at {tick_time} via {origin.upper()} | Phase: {phase:.2f}")
+
+        # Update memory and adapt behaviour
+        self._update_memory(tick_time, origin)
+        self._adapt_behavior()
         
         # Recursive phase propagation with refraction
         for edge in graph.get_edges_from(self.id):
@@ -199,6 +259,8 @@ class Node:
             del self.incoming_phase_queue[global_tick]
             if global_tick in self.pending_superpositions:
                 del self.pending_superpositions[global_tick]
+            self._update_memory(global_tick)
+            self._adapt_behavior()
         else:
             self.current_threshold = max(self.base_threshold, self.current_threshold - 0.01)
 

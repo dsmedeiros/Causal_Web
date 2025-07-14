@@ -11,6 +11,12 @@ phase value that propagates through the graph. Edges attenuate and delay phases 
 they arrive at downstream nodes. Nodes decide whether to fire based on the combined
 incoming phases and their current threshold.
 
+Phase 4 introduces memory, intention and rhythmic forcing. Nodes now keep sliding
+histories of recent coherence and learn trust scores for their neighbours. Bridges
+track ruptures and reinforcement streaks while observers attempt to infer unseen
+events. Optional global modulation fields can jitter phases or thresholds for all
+nodes.
+
 The main components are:
 
 - **`engine/graph.py`** – Defines `CausalGraph` which stores nodes and edges. Graphs can be

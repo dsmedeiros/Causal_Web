@@ -34,6 +34,12 @@ class Bridge:
         self.coherence_at_reform = None
         self.bridge_id = f"{self.node_a_id}->{self.node_b_id}"
 
+        # ---- Phase 4 additions ----
+        self.rupture_history = []  # list of (tick, decoherence)
+        self.reinforcement_streak = 0
+        self.decoherence_exposure = []  # recent avg decoherence values
+        self.trust_score = 0.5
+
     def _log_event(self, tick, event_type, value):
         event = BridgeEvent(
             tick=tick,
@@ -82,15 +88,23 @@ class Bridge:
                 if drift > self.drift_tolerance:
                     print(f"[BRIDGE] Drift too high at tick {tick_time}: {drift:.2f} > {self.drift_tolerance}")
                     self._log_event(tick_time, "bridge_drift", drift)
+                    self.trust_score = max(0.0, self.trust_score - 0.05)
+                    self.reinforcement_streak = 0
                     return
 
         decoherence_a = node_a.compute_decoherence_field(tick_time)
         decoherence_b = node_b.compute_decoherence_field(tick_time)
         avg_decoherence = (decoherence_a + decoherence_b) / 2
+        self.decoherence_exposure.append(avg_decoherence)
+        if len(self.decoherence_exposure) > 20:
+            self.decoherence_exposure.pop(0)
 
         if self.probabilistic_bridge_failure(avg_decoherence):
             self.last_rupture_tick = tick_time
             self._log_event(tick_time, "bridge_ruptured", avg_decoherence)
+            self.rupture_history.append((tick_time, avg_decoherence))
+            self.trust_score = max(0.0, self.trust_score - 0.1)
+            self.reinforcement_streak = 0
             return
 
         if self.decoherence_limit and self.last_activation is not None:
@@ -99,6 +113,9 @@ class Bridge:
                 self.active = False
                 self.last_rupture_tick = tick_time
                 self._log_event(tick_time, "bridge_ruptured", avg_decoherence)
+                self.rupture_history.append((tick_time, avg_decoherence))
+                self.trust_score = max(0.0, self.trust_score - 0.1)
+                self.reinforcement_streak = 0
                 return
 
         if not self.active:
@@ -121,8 +138,9 @@ class Bridge:
                 node_b.apply_tick(tick_time, phase + self.phase_offset, graph, origin="bridge")
                 node_a.entangled_with.add(node_b.id)
                 node_b.entangled_with.add(node_a.id)
-
         self.last_activation = tick_time
+        self.reinforcement_streak += 1
+        self.trust_score = min(1.0, self.trust_score + 0.01)
 
     def to_dict(self):
         return {
@@ -137,4 +155,7 @@ class Bridge:
             "last_rupture_tick": self.last_rupture_tick,
             "last_reform_tick": self.last_reform_tick,
             "coherence_at_reform": self.coherence_at_reform,
+            "trust_score": self.trust_score,
+            "reinforcement_streak": self.reinforcement_streak,
+            "avg_decoherence": sum(self.decoherence_exposure)/len(self.decoherence_exposure) if self.decoherence_exposure else 0.0,
         }
