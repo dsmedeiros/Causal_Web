@@ -1,4 +1,4 @@
-﻿import time
+import time
 import threading
 from config import Config
 from .graph import CausalGraph

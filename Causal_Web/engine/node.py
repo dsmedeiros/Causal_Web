@@ -1,4 +1,4 @@
-﻿import math
+import math
 import cmath
 from collections import defaultdict
 
