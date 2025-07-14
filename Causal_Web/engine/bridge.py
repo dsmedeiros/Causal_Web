@@ -108,13 +108,19 @@ class Bridge:
             if a_collapsed:
                 phase = node_a.get_phase_at(tick_time)
                 node_b.apply_tick(tick_time, phase + self.phase_offset, graph, origin="bridge")
+                node_a.entangled_with.add(node_b.id)
+                node_b.entangled_with.add(node_a.id)
             elif b_collapsed:
                 phase = node_b.get_phase_at(tick_time)
                 node_a.apply_tick(tick_time, phase + self.phase_offset, graph, origin="bridge")
+                node_a.entangled_with.add(node_b.id)
+                node_b.entangled_with.add(node_a.id)
         elif self.bridge_type in {"unidirectional", "mirror"}:
             if a_collapsed:
                 phase = node_a.get_phase_at(tick_time)
                 node_b.apply_tick(tick_time, phase + self.phase_offset, graph, origin="bridge")
+                node_a.entangled_with.add(node_b.id)
+                node_b.entangled_with.add(node_a.id)
 
         self.last_activation = tick_time
 

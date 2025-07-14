@@ -2,13 +2,18 @@ import time
 import threading
 from config import Config
 from .graph import CausalGraph
+from .observer import Observer
 import json
 
 # Global graph instance
 graph = CausalGraph()
+observers = []
 
 def build_graph():
     graph.load_from_file("input/graph.json")
+
+def add_observer(observer: Observer):
+    observers.append(observer)
 
 def emit_ticks(global_tick):
     for source in getattr(graph, "tick_sources", []):
@@ -72,6 +77,11 @@ def log_metrics_per_tick(global_tick):
         classical_state[node_id] = getattr(node, "is_classical", False)
         coherence_velocity[node_id] = round(delta, 5)
 
+    clusters = graph.detect_clusters()
+
+    with open("output/cluster_log.json", "a") as f:
+        f.write(json.dumps({str(global_tick): clusters}) + "\n")
+
     with open("output/decoherence_log.json", "a") as f:
         f.write(json.dumps({str(global_tick): decoherence_log}) + "\n")
     with open("output/coherence_log.json", "a") as f:
@@ -94,6 +104,9 @@ def simulation_loop():
 
             log_metrics_per_tick(global_tick)
             log_bridge_states(global_tick)
+
+            for obs in observers:
+                obs.observe(graph, global_tick)
 
             for bridge in graph.bridges:
                 bridge.apply(global_tick, graph)
