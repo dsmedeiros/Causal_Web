@@ -3,6 +3,7 @@ import math
 
 from engine.bridge import Bridge
 from .node import Node, Edge
+from .meta_node import MetaNode
 import json
 
 class CausalGraph:
@@ -11,6 +12,7 @@ class CausalGraph:
         self.edges = []
         self.bridges = []
         self.tick_sources = []
+        self.meta_nodes = {}
 
     def add_node(self, node_id, x=0.0, y=0.0, frequency=1.0, refractory_period=2, base_threshold=0.5, phase=0.0):
         self.nodes[node_id] = Node(node_id, x, y, frequency, refractory_period, base_threshold, phase)
@@ -129,6 +131,12 @@ class CausalGraph:
             if len(cluster) > 1:
                 clusters.append(cluster)
         return clusters
+
+    def create_meta_nodes(self, clusters):
+        """Instantiate MetaNode objects for given clusters."""
+        for cluster in clusters:
+            meta = MetaNode(cluster, self)
+            self.meta_nodes[meta.id] = meta
 
     def to_dict(self):
         return {
