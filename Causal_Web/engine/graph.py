@@ -108,6 +108,28 @@ class CausalGraph:
         else:
             return "partial"
 
+    def detect_clusters(self, coherence_threshold: float = 0.8, freq_tolerance: float = 0.1):
+        """Detect sets of phase-aligned nodes."""
+        clusters = []
+        visited = set()
+        node_list = list(self.nodes.values())
+        for node in node_list:
+            if node.id in visited or node.law_wave_frequency == 0.0:
+                continue
+            cluster = [node.id]
+            visited.add(node.id)
+            for other in node_list:
+                if other.id in visited or other.law_wave_frequency == 0.0:
+                    continue
+                if (abs(node.law_wave_frequency - other.law_wave_frequency) <= freq_tolerance and
+                        node.coherence > coherence_threshold and
+                        other.coherence > coherence_threshold):
+                    cluster.append(other.id)
+                    visited.add(other.id)
+            if len(cluster) > 1:
+                clusters.append(cluster)
+        return clusters
+
     def to_dict(self):
         return {
             "nodes": {
@@ -125,7 +147,8 @@ class CausalGraph:
                     "is_classical": getattr(n, "is_classical", False),
                     "decoherence_streak": getattr(n, "_decoherence_streak", 0),
                     "last_tick_time": n.last_tick_time,
-                    "subjective_ticks": n.subjective_ticks
+                    "subjective_ticks": n.subjective_ticks,
+                    "law_wave_frequency": n.law_wave_frequency
                 } for nid, n in self.nodes.items()
             },
             "superpositions": {

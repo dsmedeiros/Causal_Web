@@ -2,6 +2,8 @@ import math
 import cmath
 from collections import defaultdict
 from dataclasses import dataclass
+from typing import Set, List
+import numpy as np
 
 
 @dataclass
@@ -34,6 +36,9 @@ class Node:
         self.collapse_origin = {} # tick_time -> "self" or "bridge"
         self._decoherence_streak = 0
         self.is_classical = False
+        self.coherence_series: List[float] = []
+        self.law_wave_frequency: float = 0.0
+        self.entangled_with: Set[str] = set()
 
     def compute_phase(self, tick_time):
         return 2 * math.pi * self.frequency * tick_time
@@ -42,10 +47,12 @@ class Node:
         phases = self.pending_superpositions.get(tick_time, [])
         if len(phases) < 2:
             self.coherence = 1.0
+            self._update_law_wave()
             return self.coherence
         complex_vecs = [cmath.rect(1.0, p % (2 * math.pi)) for p in phases]
         vector_sum = sum(complex_vecs)
         self.coherence = abs(vector_sum) / len(phases)
+        self._update_law_wave()
         return self.coherence
 
     def compute_decoherence_field(self, tick_time):
@@ -58,6 +65,18 @@ class Node:
         variance = sum((p - mean_phase) ** 2 for p in normalized) / len(normalized)
         self.decoherence = variance
         return self.decoherence
+
+    def _update_law_wave(self, window: int = 20):
+        """Compute dominant coherence frequency over a sliding window."""
+        self.coherence_series.append(self.coherence)
+        if len(self.coherence_series) > window:
+            self.coherence_series.pop(0)
+        if len(self.coherence_series) > 1:
+            arr = np.array(self.coherence_series[-window:])
+            spectrum = np.fft.rfft(arr)
+            if spectrum.size > 1:
+                idx = int(np.argmax(np.abs(spectrum[1:])) + 1)
+                self.law_wave_frequency = idx / window
 
     def update_classical_state(self, decoherence_strength, threshold=0.4, streak_required=2):
         if decoherence_strength > threshold:
@@ -112,13 +131,26 @@ class Node:
         self.collapse_origin[tick_time] = origin
         print(f"[{self.id}] Tick at {tick_time} via {origin.upper()} | Phase: {phase:.2f}")
         
-        # Recursive phase propagation
+        # Recursive phase propagation with refraction
         for edge in graph.get_edges_from(self.id):
-            delay = edge.adjusted_delay()
+            target = graph.get_node(edge.target)
+            delay = edge.adjusted_delay(target.law_wave_frequency)
             attenuated = phase * edge.attenuation
             shifted = attenuated + edge.phase_shift
-            target = graph.get_node(edge.target)
             target.schedule_tick(tick_time + delay, shifted)
+
+        if origin == "self":
+            self.propagate_collapse(tick_time, graph)
+
+    def propagate_collapse(self, tick_time, graph, threshold: float = 0.5):
+        """Propagate collapse to entangled nodes if their decoherence is high."""
+        for nid in self.entangled_with:
+            other = graph.get_node(nid)
+            if not other or other.collapse_origin.get(tick_time):
+                continue
+            deco = other.compute_decoherence_field(tick_time)
+            if deco > threshold:
+                other.apply_tick(tick_time, self.phase, graph, origin="entanglement")
 
     def maybe_tick(self, global_tick, graph):
         if global_tick in self.incoming_phase_queue:
@@ -165,9 +197,12 @@ class Edge:
         self.delay = delay
         self.phase_shift = phase_shift
 
-    def adjusted_delay(self):
-        # Optionally adjust delay based on density (example logic)
-        return self.delay + int(self.density)
+    def adjusted_delay(self, law_wave_freq: float = None):
+        base = self.delay + int(self.density)
+        if law_wave_freq is not None:
+            modifier = math.sin(2 * math.pi * law_wave_freq) * self.density
+            return base + modifier
+        return base
 
     def propagate_phase(self, phase, global_tick, graph):
         target_node = graph.get_node(self.target)
@@ -189,5 +224,5 @@ class Edge:
 
         shifted_phase = phase + drift_phase
         attenuated_phase = shifted_phase * self.attenuation
-        scheduled_tick = global_tick + self.adjusted_delay()
+        scheduled_tick = global_tick + self.adjusted_delay(target_node.law_wave_frequency)
         target_node.schedule_tick(scheduled_tick, attenuated_phase)
