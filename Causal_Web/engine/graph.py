@@ -1,4 +1,3 @@
-from turtle import delay
 from .node import Node, Edge
 import json
 
