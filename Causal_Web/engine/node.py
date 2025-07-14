@@ -10,7 +10,7 @@ class Node:
         self.frequency = frequency
         self.tick_history = []  # [(tick_time, phase)]
         self.incoming_phase_queue = defaultdict(list)  # tick_time -> [phase_i]
-        self.pending_superpositions = defaultdict(list) # for logging and anaysis
+        self.pending_superpositions = defaultdict(list) # for logging and analysis
         self.current_tick = 0
         self.subjective_ticks = 0  # For relativistic tracking
         self.last_emission_tick = None
