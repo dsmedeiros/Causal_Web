@@ -10,9 +10,20 @@ from typing import Dict, List, Tuple, Optional
 # Helper to load newline-delimited JSON where each line maps a tick to values
 
 def _load_json_lines(path: str) -> Dict[int, Dict]:
+    """Load newline-delimited JSON where each line may take multiple forms.
+
+    Supported line formats::
+
+        {"12": {...}}                     # mapping of tick -> values
+        {"tick": 12, "foo": "bar"}        # tick field plus other keys
+
+    Returns a mapping from tick (int) to the associated value dict.
+    """
+
     records: Dict[int, Dict] = {}
     if not os.path.exists(path):
         return records
+
     with open(path) as f:
         for line in f:
             line = line.strip()
@@ -22,8 +33,24 @@ def _load_json_lines(path: str) -> Dict[int, Dict]:
                 obj = json.loads(line)
             except json.JSONDecodeError:
                 continue
+
+            # Case 1: single key that is a tick string
+            if len(obj) == 1 and next(iter(obj)).isdigit():
+                k = next(iter(obj))
+                records[int(k)] = obj[k]
+                continue
+
+            # Case 2: object contains explicit 'tick' field
+            if "tick" in obj:
+                tick = int(obj.pop("tick"))
+                records[tick] = obj
+                continue
+
+            # Fallback: attempt to coerce any digit-like keys
             for k, v in obj.items():
-                records[int(k)] = v
+                if isinstance(k, str) and k.isdigit():
+                    records[int(k)] = v
+
     return records
 
 
