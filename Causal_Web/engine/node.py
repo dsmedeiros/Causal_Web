@@ -7,6 +7,7 @@ import numpy as np
 import json
 
 
+
 @dataclass
 class Tick:
     """Discrete causal pulse."""
@@ -41,6 +42,7 @@ class Node:
         self.law_wave_frequency: float = 0.0
         self.entangled_with: Set[str] = set()
         self.coherence_velocity: float = 0.0
+
 
     def compute_phase(self, tick_time):
         return 2 * math.pi * self.frequency * tick_time
@@ -152,6 +154,7 @@ class Node:
         Returns a list of node IDs that collapsed due to this propagation.
         """
         collapsed = []
+
         for nid in self.entangled_with:
             other = graph.get_node(nid)
             if not other or other.collapse_origin.get(tick_time):
@@ -167,6 +170,7 @@ class Node:
         record = {"tick": tick_time, "source": self.id, "collapsed": collapsed}
         with open("output/collapse_chain_log.json", "a") as f:
             f.write(json.dumps(record) + "\n")
+
 
     def maybe_tick(self, global_tick, graph):
         if global_tick in self.incoming_phase_queue:
