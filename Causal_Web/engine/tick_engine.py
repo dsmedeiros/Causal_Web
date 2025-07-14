@@ -6,6 +6,7 @@ from .observer import Observer
 from .log_interpreter import run_interpreter
 import json
 import numpy as np
+import os
 
 # Global graph instance
 graph = CausalGraph()
@@ -13,7 +14,19 @@ observers = []
 kappa = 0.5  # curvature strength for refraction fields
 _law_wave_stability = {}
 
+
+def clear_output_directory():
+    """Remove or truncate JSON output files from previous runs."""
+    out_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "output"))
+    if not os.path.isdir(out_dir):
+        return
+    for name in os.listdir(out_dir):
+        if name == "__init__.py":
+            continue
+        open(os.path.join(out_dir, name), "w").close()
+
 def build_graph():
+    clear_output_directory()
     graph.load_from_file("input/graph.json")
 
 def add_observer(observer: Observer):
