@@ -3,6 +3,7 @@ import threading
 from config import Config
 from .graph import CausalGraph
 from .observer import Observer
+from .log_interpreter import run_interpreter
 import json
 import numpy as np
 
@@ -204,6 +205,7 @@ def write_output():
     print("✅ Superposition inspection saved to output/inspection_log.json")
 
     export_curvature_map()
+    run_interpreter()
 
 def export_curvature_map():
     """Aggregate curvature logs into a D3-friendly dataset."""
