@@ -1,6 +1,5 @@
 import cmath
 import math
-from turtle import delay
 
 from engine.bridge import Bridge
 from .node import Node, Edge
@@ -132,12 +131,11 @@ class CausalGraph:
             },
             "edges": [
                 {
-                    "from": e.source, 
-                    "to": e.target, 
+                    "from": e.source,
+                    "to": e.target,
                     "delay": e.delay,
                     "attenuation": e.attenuation,
                     "density": e.density,
-                    "delay": e.delay,
                     "phase_shift": e.phase_shift
                 }
                 for e in self.edges

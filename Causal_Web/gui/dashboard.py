@@ -125,4 +125,3 @@ def dashboard():
     dpg.start_dearpygui()
     dpg.destroy_context()
 
-    
