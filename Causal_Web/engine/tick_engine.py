@@ -58,6 +58,7 @@ def log_metrics_per_tick(global_tick):
     coherence_log = {}
     classical_state = {}
     coherence_velocity = {}
+    law_wave_log = {}
 
     # Store last coherence to compute delta
     if not hasattr(log_metrics_per_tick, "_last_coherence"):
@@ -69,6 +70,7 @@ def log_metrics_per_tick(global_tick):
         prev = log_metrics_per_tick._last_coherence.get(node_id, coherence)
         delta = coherence - prev
         log_metrics_per_tick._last_coherence[node_id] = coherence
+        node.coherence_velocity = delta
 
         node.update_classical_state(decoherence)
 
@@ -76,6 +78,15 @@ def log_metrics_per_tick(global_tick):
         coherence_log[node_id] = round(coherence, 4)
         classical_state[node_id] = getattr(node, "is_classical", False)
         coherence_velocity[node_id] = round(delta, 5)
+        law_wave_log[node_id] = round(node.law_wave_frequency, 4)
+
+    clusters = graph.detect_clusters()
+
+    with open("output/cluster_log.json", "a") as f:
+        f.write(json.dumps({str(global_tick): clusters}) + "\n")
+
+    with open("output/law_wave_log.json", "a") as f:
+        f.write(json.dumps({str(global_tick): law_wave_log}) + "\n")
 
     clusters = graph.detect_clusters()
 
