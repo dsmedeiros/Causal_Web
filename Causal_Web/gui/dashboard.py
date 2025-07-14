@@ -71,11 +71,21 @@ def update_graph_visuals():
             label += f"\nC{cluster_map[node_id]}"
         dpg.draw_text(pos=(x - 30, y - 15), text=label, size=15, color=(255, 255, 255), parent="graph_drawlist")
 
-    # Draw edges
+    # Draw edges with curvature overlays
     for edge in graph.edges:
         from_node = graph.nodes[edge.source]
         to_node = graph.nodes[edge.target]
-        dpg.draw_arrow(p1=(from_node.x, from_node.y), p2=(to_node.x, to_node.y), color=(200, 200, 200), thickness=2, parent="graph_drawlist")
+
+        delay = edge.adjusted_delay(from_node.law_wave_frequency, to_node.law_wave_frequency)
+        thickness = 2 + delay * 0.2
+        intensity = min(255, int(50 + delay * 20))
+        color = (200, 200 - intensity if 200 - intensity > 0 else 0, 200)
+
+        dpg.draw_arrow(p1=(from_node.x, from_node.y),
+                       p2=(to_node.x, to_node.y),
+                       color=color,
+                       thickness=thickness,
+                       parent="graph_drawlist")
 
 
 def refresh():

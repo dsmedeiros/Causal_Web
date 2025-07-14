@@ -152,29 +152,32 @@ class Node:
             if collapsed:
                 self._log_collapse_chain(tick_time, collapsed)
 
-    def propagate_collapse(self, tick_time, graph, threshold: float = 0.5):
-        """Propagate collapse to entangled nodes if their decoherence is high.
+    def propagate_collapse(self, tick_time, graph, threshold: float = 0.5, depth: int = 1, visited=None):
+        """Recursively propagate collapse and track chain depth."""
+        if visited is None:
+            visited = set()
+        visited.add(self.id)
 
-        Returns a list of node IDs that collapsed due to this propagation.
-        """
-        collapsed = []
-
+        chain = []
         for nid in self.entangled_with:
+            if nid in visited:
+                continue
             other = graph.get_node(nid)
             if not other or other.collapse_origin.get(tick_time):
                 continue
             deco = other.compute_decoherence_field(tick_time)
             if deco > threshold:
                 other.apply_tick(tick_time, self.phase, graph, origin="entanglement")
-                collapsed.append(nid)
-        if collapsed:
-            record = {"tick": tick_time, "source": self.id, "front": collapsed}
+                chain.append({"node": nid, "depth": depth})
+                chain.extend(other.propagate_collapse(tick_time, graph, threshold, depth + 1, visited))
+        if chain:
+            record = {"tick": tick_time, "source": self.id, "chain": chain}
             with open("output/collapse_front_log.json", "a") as f:
                 f.write(json.dumps(record) + "\n")
-        return collapsed
+        return chain
 
     def _log_collapse_chain(self, tick_time, collapsed):
-        """Log collapse propagation events to file."""
+        """Log collapse propagation events to file with depth info."""
         record = {"tick": tick_time, "source": self.id, "collapsed": collapsed}
         with open("output/collapse_chain_log.json", "a") as f:
             f.write(json.dumps(record) + "\n")

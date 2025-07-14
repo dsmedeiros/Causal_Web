@@ -69,6 +69,18 @@ def log_bridge_states(global_tick):
         f.write(json.dumps({str(global_tick): snapshot}) + "\n")
 
 
+def log_meta_node_ticks(global_tick):
+    events = {}
+    for meta_id, meta in graph.meta_nodes.items():
+        member_ticks = [nid for nid in meta.member_ids
+                        if any(t.time == global_tick for t in graph.get_node(nid).tick_history)]
+        if member_ticks:
+            events[meta_id] = member_ticks
+    if events:
+        with open("output/meta_node_tick_log.json", "a") as f:
+            f.write(json.dumps({str(global_tick): events}) + "\n")
+
+
 def log_metrics_per_tick(global_tick):
     decoherence_log = {}
     coherence_log = {}
@@ -148,6 +160,7 @@ def simulation_loop():
 
             log_metrics_per_tick(global_tick)
             log_bridge_states(global_tick)
+            log_meta_node_ticks(global_tick)
             log_curvature_per_tick(global_tick)
 
             for obs in observers:
@@ -155,6 +168,16 @@ def simulation_loop():
                 inferred = obs.infer_field_state()
                 with open("output/observer_perceived_field.json", "a") as f:
                     f.write(json.dumps({"tick": global_tick, "observer": obs.id, "state": inferred}) + "\n")
+
+                actual = {n.id: len(n.tick_history) for n in graph.nodes.values()}
+                diff = {
+                    nid: {"actual": actual.get(nid, 0), "inferred": inferred.get(nid, 0)}
+                    for nid in set(actual) | set(inferred)
+                    if actual.get(nid, 0) != inferred.get(nid, 0)
+                }
+                if diff:
+                    with open("output/observer_disagreement_log.json", "a") as f:
+                        f.write(json.dumps({"tick": global_tick, "observer": obs.id, "diff": diff}) + "\n")
 
             for bridge in graph.bridges:
                 bridge.apply(global_tick, graph)
@@ -179,3 +202,29 @@ def write_output():
     with open("output/inspection_log.json", "w") as f:
         json.dump(inspection, f, indent=2)
     print("✅ Superposition inspection saved to output/inspection_log.json")
+
+    export_curvature_map()
+
+def export_curvature_map():
+    """Aggregate curvature logs into a D3-friendly dataset."""
+    grid = []
+    try:
+        with open("output/curvature_log.json") as f:
+            for line in f:
+                data = json.loads(line.strip())
+                tick, edges = next(iter(data.items()))
+                records = [
+                    {
+                        "source": k.split("->")[0],
+                        "target": k.split("->")[1],
+                        "delay": v["curved_delay"],
+                    }
+                    for k, v in edges.items()
+                ]
+                grid.append({"tick": int(tick), "edges": records})
+    except FileNotFoundError:
+        return
+
+    with open("output/curvature_map.json", "w") as f:
+        json.dump(grid, f, indent=2)
+    print("✅ Curvature map exported to output/curvature_map.json")
