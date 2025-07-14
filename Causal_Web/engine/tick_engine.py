@@ -8,12 +8,25 @@ import json
 import numpy as np
 import os
 from concurrent.futures import ThreadPoolExecutor
+import math
 
 # Global graph instance
 graph = CausalGraph()
 observers = []
 kappa = 0.5  # curvature strength for refraction fields
 _law_wave_stability = {}
+
+
+def apply_global_forcing(tick: int) -> None:
+    """Apply rhythmic modulation to all nodes."""
+    jitter = Config.phase_jitter
+    wave = Config.coherence_wave
+    for node in graph.nodes.values():
+        if jitter["amplitude"]:
+            node.phase += jitter["amplitude"] * math.sin(2 * math.pi * tick / jitter["period"])
+        if wave["amplitude"]:
+            mod = wave["amplitude"] * math.sin(2 * math.pi * tick / wave["period"])
+            node.current_threshold = max(0.1, node.current_threshold - mod)
 
 
 def clear_output_directory():
@@ -76,7 +89,9 @@ def log_bridge_states(global_tick):
             "last_activation": b.last_activation,
             "last_rupture_tick": b.last_rupture_tick,
             "last_reform_tick": b.last_reform_tick,
-            "coherence_at_reform": b.coherence_at_reform
+            "coherence_at_reform": b.coherence_at_reform,
+            "trust_score": b.trust_score,
+            "reinforcement": b.reinforcement_streak
         }
         for b in graph.bridges
     }
@@ -171,6 +186,8 @@ def simulation_loop():
         global_tick = 0
         while Config.is_running:
             print(f"== Tick {global_tick} ==")
+
+            apply_global_forcing(global_tick)
 
             emit_ticks(global_tick)
             propagate_phases(global_tick)

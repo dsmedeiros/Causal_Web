@@ -157,6 +157,9 @@ class CausalGraph:
                     "last_tick_time": n.last_tick_time,
                     "subjective_ticks": n.subjective_ticks,
                     "law_wave_frequency": n.law_wave_frequency
+                    ,"trust_profile": n.trust_profile
+                    ,"phase_confidence": n.phase_confidence_index
+                    ,"goals": n.goals
                 } for nid, n in self.nodes.items()
             },
             "superpositions": {
@@ -203,7 +206,8 @@ class CausalGraph:
                 base_threshold=node_data.get("base_threshold", 0.5),
                 phase=node_data.get("phase", 0.0)
             )
-
+            if "goals" in node_data:
+                self.nodes[node_data["id"].__str__()].goals = node_data["goals"]
         for edge in data.get("edges", []):
             self.add_edge(
                 edge["from"], 
