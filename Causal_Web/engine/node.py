@@ -1,14 +1,27 @@
 import math
 import cmath
 from collections import defaultdict
+from dataclasses import dataclass
+
+
+@dataclass
+class Tick:
+    """Discrete causal pulse."""
+    origin: str
+    time: float
+    amplitude: float
+    phase: float
 
 class Node:
-    def __init__(self, node_id, x=0.0, y=0.0, frequency=1.0, refractory_period=2, base_threshold=0.5):
+    def __init__(self, node_id, x=0.0, y=0.0, frequency=1.0, refractory_period=2, base_threshold=0.5, phase=0.0):
         self.id = node_id
         self.x = x
         self.y = y
         self.frequency = frequency
-        self.tick_history = []  # [(tick_time, phase)]
+        self.phase = phase
+        self.coherence = 1.0
+        self.decoherence = 0.0
+        self.tick_history = []  # List[Tick]
         self.incoming_phase_queue = defaultdict(list)  # tick_time -> [phase_i]
         self.pending_superpositions = defaultdict(list) # for logging and analysis
         self.current_tick = 0
@@ -28,19 +41,23 @@ class Node:
     def compute_coherence_level(self, tick_time):
         phases = self.pending_superpositions.get(tick_time, [])
         if len(phases) < 2:
-            return 1.0  # fully coherent by default
+            self.coherence = 1.0
+            return self.coherence
         complex_vecs = [cmath.rect(1.0, p % (2 * math.pi)) for p in phases]
         vector_sum = sum(complex_vecs)
-        return abs(vector_sum) / len(phases)
+        self.coherence = abs(vector_sum) / len(phases)
+        return self.coherence
 
     def compute_decoherence_field(self, tick_time):
         phases = self.pending_superpositions.get(tick_time, [])
         if len(phases) < 2:
-            return 0.0
+            self.decoherence = 0.0
+            return self.decoherence
         normalized = [(p % (2 * math.pi)) for p in phases]
         mean_phase = sum(normalized) / len(normalized)
         variance = sum((p - mean_phase) ** 2 for p in normalized) / len(normalized)
-        return variance
+        self.decoherence = variance
+        return self.decoherence
 
     def update_classical_state(self, decoherence_strength, threshold=0.4, streak_required=2):
         if decoherence_strength > threshold:
@@ -73,20 +90,25 @@ class Node:
         return False, None
 
     def get_phase_at(self, tick_time):
-        for t, p in self.tick_history:
-            if t == tick_time:
-                return p
+        for tick in self.tick_history:
+            if tick.time == tick_time:
+                return tick.phase
         return None
 
     def apply_tick(self, tick_time, phase, graph, origin="self"):
-        if any(t == tick_time for t, _ in self.tick_history):
+        if self.is_classical:
+            print(f"[{self.id}] Classical node cannot emit ticks")
+            return
+
+        if any(tick.time == tick_time for tick in self.tick_history):
             return
 
         self.current_tick += 1
         self.subjective_ticks += 1
         self.last_tick_time = tick_time
         self.current_threshold = min(self.current_threshold + 0.05, 1.0) # Slight adaptation
-        self.tick_history.append((tick_time, phase))
+        self.phase = phase
+        self.tick_history.append(Tick(origin=origin, time=tick_time, amplitude=1.0, phase=phase))
         self.collapse_origin[tick_time] = origin
         print(f"[{self.id}] Tick at {tick_time} via {origin.upper()} | Phase: {phase:.2f}")
         
@@ -101,7 +123,7 @@ class Node:
     def maybe_tick(self, global_tick, graph):
         if global_tick in self.incoming_phase_queue:
             should_fire, phase = self.should_tick(global_tick)
-            if should_fire:
+            if should_fire and not self.is_classical:
                 self.apply_tick(global_tick, phase, graph)
             else:
                 print(f"[{self.id}] Interference at {global_tick} cancelled tick")
@@ -115,6 +137,8 @@ class Node:
         Emits a self-tick only if the node is self-connected and not suppressed.
         Triggers real collapse via apply_tick().
         """
+        if self.is_classical:
+            return
         if self.id not in graph.get_upstream_nodes(self.id):
             return
 
@@ -127,7 +151,7 @@ class Node:
 
     def _emit(self, tick_time):
         phase = self.compute_phase(tick_time)
-        self.tick_history.append((tick_time, phase))
+        self.tick_history.append(Tick(origin="self", time=tick_time, amplitude=1.0, phase=phase))
         print(f"[{self.id}] Emitted tick at {tick_time} | Phase: {phase:.2f}")
 
 
