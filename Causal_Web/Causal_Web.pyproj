@@ -22,6 +22,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="config.py" />
+    <Compile Include="engine\bridge.py" />
     <Compile Include="engine\graph.py" />
     <Compile Include="engine\node.py" />
     <Compile Include="engine\simulation.py" />
@@ -43,8 +44,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="assets\fonts\consola.ttf" />
+    <Content Include="input\destructive_interference_test.json" />
     <Content Include="input\dilation_baseline_test_case.json" />
     <Content Include="input\graph.json" />
+    <Content Include="input\partial_interference_test.json" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
