@@ -40,9 +40,15 @@ def gui_loop():
                 node_tags[node_id] = node_tag
                 tick_counters[node_id] = label_tag
 
-            # Draw directed edges
-            dpg.draw_arrow(p1=node_positions["A1"], p2=node_positions["C"], color=(150, 150, 150), thickness=2)
-            dpg.draw_arrow(p1=node_positions["A2"], p2=node_positions["C"], color=(150, 150, 150), thickness=2)
+            # Draw directed edges with curvature overlays
+            for edge in graph.edges:
+                from_node = graph.nodes[edge.source]
+                to_node = graph.nodes[edge.target]
+                delay = edge.adjusted_delay(from_node.law_wave_frequency, to_node.law_wave_frequency)
+                thickness = 2 + delay * 0.2
+                intensity = min(255, int(50 + delay * 20))
+                color = (150, 150 - intensity if 150 - intensity > 0 else 0, 150)
+                dpg.draw_arrow(p1=(from_node.x, from_node.y), p2=(to_node.x, to_node.y), color=color, thickness=thickness)
 
         dpg.add_button(label="Start Simulation", callback=start_sim)
         dpg.add_text("Tick: 0", tag="tick_counter")
