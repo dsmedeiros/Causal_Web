@@ -128,7 +128,8 @@ class Node:
             else:
                 print(f"[{self.id}] Interference at {global_tick} cancelled tick")
             del self.incoming_phase_queue[global_tick]
-            # del self.pending_superpositions[global_tick]  # Clear resolved state
+            if global_tick in self.pending_superpositions:
+                del self.pending_superpositions[global_tick]
         else:
             self.current_threshold = max(self.base_threshold, self.current_threshold - 0.01)
 
