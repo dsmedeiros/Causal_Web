@@ -24,7 +24,9 @@
     <Compile Include="config.py" />
     <Compile Include="engine\bridge.py" />
     <Compile Include="engine\graph.py" />
+    <Compile Include="engine\meta_node.py" />
     <Compile Include="engine\node.py" />
+    <Compile Include="engine\observer.py" />
     <Compile Include="engine\simulation.py" />
     <Compile Include="engine\tick_engine.py" />
     <Compile Include="engine\__init__.py" />
@@ -50,11 +52,13 @@
     <Content Include="input\partial_interference_test.json" />
     <Content Include="output\bridge_state_log.json" />
     <Content Include="output\classicalization_map.json" />
+    <Content Include="output\cluster_log.json" />
     <Content Include="output\coherence_log.json" />
     <Content Include="output\coherence_velocity_log.json" />
     <Content Include="output\cwt_console_output.txt" />
     <Content Include="output\decoherence_log.json" />
     <Content Include="output\inspection_log.json" />
+    <Content Include="output\law_wave_log.json" />
     <Content Include="output\tick_trace.json" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />

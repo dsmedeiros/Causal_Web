@@ -1,455 +1,764 @@
 == Tick 0 ==
 [A1] Tick at 0 via SOURCE | Phase: 0.00
-[B] Received tick at 1 with phase 0.00
-[A2] Tick at 0 via SOURCE | Phase: 0.00
-[B] Received tick at 1 with phase 3.14
+[B1] Received tick at 1.0 with phase 0.00
+[A2] Tick at 0 via SOURCE | Phase: 0.50
+[B2] Received tick at 1.0 with phase 0.50
 == Tick 1 ==
-[B] Received tick at 2 with phase 0.00
-[B] Received tick at 2 with phase 3.14
-[B] Interference at 1 cancelled tick
+[B1] Tick at 1 via SELF | Phase: 0.00
+[C] Received tick at 4.0 with phase 0.00
+[B2] Tick at 1 via SELF | Phase: 0.50
+[C] Received tick at 4.0 with phase 0.45
+[A1] Tick at 1 via BRIDGE | Phase: 0.00
+[B1] Received tick at 2.0 with phase 0.00
+[A2] Tick at 1 via BRIDGE | Phase: 0.50
+[B2] Received tick at 2.0 with phase 0.50
 == Tick 2 ==
-[A1] Tick at 2 via SOURCE | Phase: 0.00
-[B] Received tick at 3 with phase 0.00
-[B] Interference at 2 cancelled tick
+[B1] Suppressed by refractory period at 2
+[B1] Interference at 2 cancelled tick
+[B2] Suppressed by refractory period at 2
+[B2] Interference at 2 cancelled tick
 == Tick 3 ==
-[A2] Tick at 3 via SOURCE | Phase: 0.00
-[B] Received tick at 4 with phase 3.14
-[B] Received tick at 4 with phase 0.00
-[B] Interference at 3 cancelled tick
+[A1] Tick at 3 via SOURCE | Phase: 0.00
+[B1] Received tick at 4.0 with phase 0.00
+[A2] Tick at 3 via SOURCE | Phase: 0.50
+[B2] Received tick at 4.0 with phase 0.50
 == Tick 4 ==
-[A1] Tick at 4 via SOURCE | Phase: 0.00
-[B] Received tick at 5 with phase 0.00
-[B] Received tick at 5 with phase 3.14
-[B] Interference at 4 cancelled tick
+[B1] Tick at 4 via SELF | Phase: 0.00
+[C] Received tick at 7.0 with phase 0.00
+[B2] Tick at 4 via SELF | Phase: 0.50
+[C] Received tick at 7.0 with phase 0.45
+[C] Tick at 4 via SELF | Phase: 0.23
+[D] Received tick at 8.0 with phase 0.23
+[A1] Tick at 4 via BRIDGE | Phase: 0.00
+[B1] Received tick at 5.0 with phase 0.00
+[A2] Tick at 4 via BRIDGE | Phase: 0.50
+[B2] Received tick at 5.0 with phase 0.50
+[D] Tick at 4 via BRIDGE | Phase: 0.23
 == Tick 5 ==
-[B] Received tick at 6 with phase 0.00
-[B] Interference at 5 cancelled tick
+[B1] Suppressed by refractory period at 5
+[B1] Interference at 5 cancelled tick
+[B2] Suppressed by refractory period at 5
+[B2] Interference at 5 cancelled tick
 == Tick 6 ==
 [A1] Tick at 6 via SOURCE | Phase: 0.00
-[B] Received tick at 7 with phase 0.00
-[A2] Tick at 6 via SOURCE | Phase: 0.00
-[B] Received tick at 7 with phase 3.14
-[B] Interference at 6 cancelled tick
+[B1] Received tick at 7.0 with phase 0.00
+[A2] Tick at 6 via SOURCE | Phase: 0.50
+[B2] Received tick at 7.0 with phase 0.50
 == Tick 7 ==
-[B] Received tick at 8 with phase 0.00
-[B] Received tick at 8 with phase 3.14
-[B] Interference at 7 cancelled tick
+[B1] Tick at 7 via SELF | Phase: 0.00
+[C] Received tick at 10.0 with phase 0.00
+[B2] Tick at 7 via SELF | Phase: 0.50
+[C] Received tick at 10.0 with phase 0.45
+[C] Suppressed by refractory period at 7
+[C] Interference at 7 cancelled tick
+[A1] Tick at 7 via BRIDGE | Phase: 0.00
+[B1] Received tick at 8.0 with phase 0.00
+[A2] Tick at 7 via BRIDGE | Phase: 0.50
+[B2] Received tick at 8.0 with phase 0.50
 == Tick 8 ==
-[A1] Tick at 8 via SOURCE | Phase: 0.00
-[B] Received tick at 9 with phase 0.00
-[B] Interference at 8 cancelled tick
+[B1] Suppressed by refractory period at 8
+[B1] Interference at 8 cancelled tick
+[B2] Suppressed by refractory period at 8
+[B2] Interference at 8 cancelled tick
+[D] Tick at 8 via SELF | Phase: 0.23
+[C] Tick at 8 via BRIDGE | Phase: 0.23
+[D] Received tick at 12.0 with phase 0.23
 == Tick 9 ==
-[A2] Tick at 9 via SOURCE | Phase: 0.00
-[B] Received tick at 10 with phase 3.14
-[B] Received tick at 10 with phase 0.00
-[B] Interference at 9 cancelled tick
+[A1] Tick at 9 via SOURCE | Phase: 0.00
+[B1] Received tick at 10.0 with phase 0.00
+[A2] Tick at 9 via SOURCE | Phase: 0.50
+[B2] Received tick at 10.0 with phase 0.50
 == Tick 10 ==
-[A1] Tick at 10 via SOURCE | Phase: 0.00
-[B] Received tick at 11 with phase 0.00
-[B] Received tick at 11 with phase 3.14
-[B] Interference at 10 cancelled tick
+[B1] Tick at 10 via SELF | Phase: 0.00
+[C] Received tick at 13.0 with phase 0.00
+[B2] Tick at 10 via SELF | Phase: 0.50
+[C] Received tick at 13.0 with phase 0.45
+[C] Suppressed by refractory period at 10
+[C] Interference at 10 cancelled tick
+[A1] Tick at 10 via BRIDGE | Phase: 0.00
+[B1] Received tick at 11.0 with phase 0.00
+[A2] Tick at 10 via BRIDGE | Phase: 0.50
+[B2] Received tick at 11.0 with phase 0.50
 == Tick 11 ==
-[B] Received tick at 12 with phase 0.00
-[B] Interference at 11 cancelled tick
+[B1] Suppressed by refractory period at 11
+[B1] Interference at 11 cancelled tick
+[B2] Suppressed by refractory period at 11
+[B2] Interference at 11 cancelled tick
 == Tick 12 ==
 [A1] Tick at 12 via SOURCE | Phase: 0.00
-[B] Received tick at 13 with phase 0.00
-[A2] Tick at 12 via SOURCE | Phase: 0.00
-[B] Received tick at 13 with phase 3.14
-[B] Interference at 12 cancelled tick
+[B1] Received tick at 13.0 with phase 0.00
+[A2] Tick at 12 via SOURCE | Phase: 0.50
+[B2] Received tick at 13.0 with phase 0.50
+[D] Tick at 12 via SELF | Phase: 0.23
+[C] Tick at 12 via BRIDGE | Phase: 0.23
+[D] Received tick at 16.0 with phase 0.23
 == Tick 13 ==
-[B] Received tick at 14 with phase 0.00
-[B] Received tick at 14 with phase 3.14
-[B] Interference at 13 cancelled tick
+[B1] Tick at 13 via SELF | Phase: 0.00
+[C] Received tick at 16.0 with phase 0.00
+[B2] Tick at 13 via SELF | Phase: 0.50
+[C] Received tick at 16.0 with phase 0.45
+[C] Suppressed by refractory period at 13
+[C] Interference at 13 cancelled tick
+[A1] Tick at 13 via BRIDGE | Phase: 0.00
+[B1] Received tick at 14.0 with phase 0.00
+[A2] Tick at 13 via BRIDGE | Phase: 0.50
+[B2] Received tick at 14.0 with phase 0.50
 == Tick 14 ==
-[A1] Tick at 14 via SOURCE | Phase: 0.00
-[B] Received tick at 15 with phase 0.00
-[B] Interference at 14 cancelled tick
+[B1] Suppressed by refractory period at 14
+[B1] Interference at 14 cancelled tick
+[B2] Suppressed by refractory period at 14
+[B2] Interference at 14 cancelled tick
 == Tick 15 ==
-[A2] Tick at 15 via SOURCE | Phase: 0.00
-[B] Received tick at 16 with phase 3.14
-[B] Received tick at 16 with phase 0.00
-[B] Interference at 15 cancelled tick
+[A1] Tick at 15 via SOURCE | Phase: 0.00
+[B1] Received tick at 16.0 with phase 0.00
+[A2] Tick at 15 via SOURCE | Phase: 0.50
+[B2] Received tick at 16.0 with phase 0.50
 == Tick 16 ==
-[A1] Tick at 16 via SOURCE | Phase: 0.00
-[B] Received tick at 17 with phase 0.00
-[B] Received tick at 17 with phase 3.14
-[B] Interference at 16 cancelled tick
+[B1] Tick at 16 via SELF | Phase: 0.00
+[C] Received tick at 19.0 with phase 0.00
+[B2] Tick at 16 via SELF | Phase: 0.50
+[C] Received tick at 19.0 with phase 0.45
+[C] Tick at 16 via SELF | Phase: 0.23
+[D] Received tick at 20.0 with phase 0.23
+[D] Tick at 16 via SELF | Phase: 0.23
+[A1] Tick at 16 via BRIDGE | Phase: 0.00
+[B1] Received tick at 17.0 with phase 0.00
+[A2] Tick at 16 via BRIDGE | Phase: 0.50
+[B2] Received tick at 17.0 with phase 0.50
 == Tick 17 ==
-[B] Received tick at 18 with phase 0.00
-[B] Interference at 17 cancelled tick
+[B1] Suppressed by refractory period at 17
+[B1] Interference at 17 cancelled tick
+[B2] Suppressed by refractory period at 17
+[B2] Interference at 17 cancelled tick
 == Tick 18 ==
 [A1] Tick at 18 via SOURCE | Phase: 0.00
-[B] Received tick at 19 with phase 0.00
-[A2] Tick at 18 via SOURCE | Phase: 0.00
-[B] Received tick at 19 with phase 3.14
-[B] Interference at 18 cancelled tick
+[B1] Received tick at 19.0 with phase 0.00
+[A2] Tick at 18 via SOURCE | Phase: 0.50
+[B2] Received tick at 19.0 with phase 0.50
 == Tick 19 ==
-[B] Received tick at 20 with phase 0.00
-[B] Received tick at 20 with phase 3.14
-[B] Interference at 19 cancelled tick
+[B1] Tick at 19 via SELF | Phase: 0.00
+[C] Received tick at 22.0 with phase 0.00
+[B2] Tick at 19 via SELF | Phase: 0.50
+[C] Received tick at 22.0 with phase 0.45
+[C] Suppressed by refractory period at 19
+[C] Interference at 19 cancelled tick
+[A1] Tick at 19 via BRIDGE | Phase: 0.00
+[B1] Received tick at 20.0 with phase 0.00
+[A2] Tick at 19 via BRIDGE | Phase: 0.50
+[B2] Received tick at 20.0 with phase 0.50
 == Tick 20 ==
-[A1] Tick at 20 via SOURCE | Phase: 0.00
-[B] Received tick at 21 with phase 0.00
-[B] Interference at 20 cancelled tick
+[B1] Suppressed by refractory period at 20
+[B1] Interference at 20 cancelled tick
+[B2] Suppressed by refractory period at 20
+[B2] Interference at 20 cancelled tick
+[D] Tick at 20 via SELF | Phase: 0.23
+[C] Tick at 20 via BRIDGE | Phase: 0.23
+[D] Received tick at 24.0 with phase 0.23
 == Tick 21 ==
-[A2] Tick at 21 via SOURCE | Phase: 0.00
-[B] Received tick at 22 with phase 3.14
-[B] Received tick at 22 with phase 0.00
-[B] Interference at 21 cancelled tick
+[A1] Tick at 21 via SOURCE | Phase: 0.00
+[B1] Received tick at 22.0 with phase 0.00
+[A2] Tick at 21 via SOURCE | Phase: 0.50
+[B2] Received tick at 22.0 with phase 0.50
 == Tick 22 ==
-[A1] Tick at 22 via SOURCE | Phase: 0.00
-[B] Received tick at 23 with phase 0.00
-[B] Received tick at 23 with phase 3.14
-[B] Interference at 22 cancelled tick
+[B1] Tick at 22 via SELF | Phase: 0.00
+[C] Received tick at 25.0 with phase 0.00
+[B2] Tick at 22 via SELF | Phase: 0.50
+[C] Received tick at 25.0 with phase 0.45
+[C] Suppressed by refractory period at 22
+[C] Interference at 22 cancelled tick
+[A1] Tick at 22 via BRIDGE | Phase: 0.00
+[B1] Received tick at 23.0 with phase 0.00
+[A2] Tick at 22 via BRIDGE | Phase: 0.50
+[B2] Received tick at 23.0 with phase 0.50
 == Tick 23 ==
-[B] Received tick at 24 with phase 0.00
-[B] Interference at 23 cancelled tick
+[B1] Suppressed by refractory period at 23
+[B1] Interference at 23 cancelled tick
+[B2] Suppressed by refractory period at 23
+[B2] Interference at 23 cancelled tick
 == Tick 24 ==
 [A1] Tick at 24 via SOURCE | Phase: 0.00
-[B] Received tick at 25 with phase 0.00
-[A2] Tick at 24 via SOURCE | Phase: 0.00
-[B] Received tick at 25 with phase 3.14
-[B] Interference at 24 cancelled tick
+[B1] Received tick at 25.0 with phase 0.00
+[A2] Tick at 24 via SOURCE | Phase: 0.50
+[B2] Received tick at 25.0 with phase 0.50
+[D] Tick at 24 via SELF | Phase: 0.23
+[C] Tick at 24 via BRIDGE | Phase: 0.23
+[D] Received tick at 28.0 with phase 0.23
 == Tick 25 ==
-[B] Received tick at 26 with phase 0.00
-[B] Received tick at 26 with phase 3.14
-[B] Interference at 25 cancelled tick
+[B1] Tick at 25 via SELF | Phase: 0.00
+[C] Received tick at 28.0 with phase 0.00
+[B2] Tick at 25 via SELF | Phase: 0.50
+[C] Received tick at 28.0 with phase 0.45
+[C] Suppressed by refractory period at 25
+[C] Interference at 25 cancelled tick
+[A1] Tick at 25 via BRIDGE | Phase: 0.00
+[B1] Received tick at 26.0 with phase 0.00
+[A2] Tick at 25 via BRIDGE | Phase: 0.50
+[B2] Received tick at 26.0 with phase 0.50
 == Tick 26 ==
-[A1] Tick at 26 via SOURCE | Phase: 0.00
-[B] Received tick at 27 with phase 0.00
-[B] Interference at 26 cancelled tick
+[B1] Suppressed by refractory period at 26
+[B1] Interference at 26 cancelled tick
+[B2] Suppressed by refractory period at 26
+[B2] Interference at 26 cancelled tick
 == Tick 27 ==
-[A2] Tick at 27 via SOURCE | Phase: 0.00
-[B] Received tick at 28 with phase 3.14
-[B] Received tick at 28 with phase 0.00
-[B] Interference at 27 cancelled tick
+[A1] Tick at 27 via SOURCE | Phase: 0.00
+[B1] Received tick at 28.0 with phase 0.00
+[A2] Tick at 27 via SOURCE | Phase: 0.50
+[B2] Received tick at 28.0 with phase 0.50
 == Tick 28 ==
-[A1] Tick at 28 via SOURCE | Phase: 0.00
-[B] Received tick at 29 with phase 0.00
-[B] Received tick at 29 with phase 3.14
-[B] Interference at 28 cancelled tick
+[B1] Tick at 28 via SELF | Phase: 0.00
+[C] Received tick at 31.0 with phase 0.00
+[B2] Tick at 28 via SELF | Phase: 0.50
+[C] Received tick at 31.0 with phase 0.45
+[C] Tick at 28 via SELF | Phase: 0.23
+[D] Received tick at 32.0 with phase 0.23
+[D] Tick at 28 via SELF | Phase: 0.23
+[A1] Tick at 28 via BRIDGE | Phase: 0.00
+[B1] Received tick at 29.0 with phase 0.00
+[A2] Tick at 28 via BRIDGE | Phase: 0.50
+[B2] Received tick at 29.0 with phase 0.50
 == Tick 29 ==
-[B] Received tick at 30 with phase 0.00
-[B] Interference at 29 cancelled tick
+[B1] Suppressed by refractory period at 29
+[B1] Interference at 29 cancelled tick
+[B2] Suppressed by refractory period at 29
+[B2] Interference at 29 cancelled tick
 == Tick 30 ==
 [A1] Tick at 30 via SOURCE | Phase: 0.00
-[B] Received tick at 31 with phase 0.00
-[A2] Tick at 30 via SOURCE | Phase: 0.00
-[B] Received tick at 31 with phase 3.14
-[B] Interference at 30 cancelled tick
+[B1] Received tick at 31.0 with phase 0.00
+[A2] Tick at 30 via SOURCE | Phase: 0.50
+[B2] Received tick at 31.0 with phase 0.50
 == Tick 31 ==
-[B] Received tick at 32 with phase 0.00
-[B] Received tick at 32 with phase 3.14
-[B] Interference at 31 cancelled tick
+[B1] Tick at 31 via SELF | Phase: 0.00
+[C] Received tick at 34.0 with phase 0.00
+[B2] Tick at 31 via SELF | Phase: 0.50
+[C] Received tick at 34.0 with phase 0.45
+[C] Suppressed by refractory period at 31
+[C] Interference at 31 cancelled tick
+[A1] Tick at 31 via BRIDGE | Phase: 0.00
+[B1] Received tick at 32.0 with phase 0.00
+[A2] Tick at 31 via BRIDGE | Phase: 0.50
+[B2] Received tick at 32.0 with phase 0.50
 == Tick 32 ==
-[A1] Tick at 32 via SOURCE | Phase: 0.00
-[B] Received tick at 33 with phase 0.00
-[B] Interference at 32 cancelled tick
+[B1] Suppressed by refractory period at 32
+[B1] Interference at 32 cancelled tick
+[B2] Suppressed by refractory period at 32
+[B2] Interference at 32 cancelled tick
+[D] Tick at 32 via SELF | Phase: 0.23
+[C] Tick at 32 via BRIDGE | Phase: 0.23
+[D] Received tick at 36.0 with phase 0.23
 == Tick 33 ==
-[A2] Tick at 33 via SOURCE | Phase: 0.00
-[B] Received tick at 34 with phase 3.14
-[B] Received tick at 34 with phase 0.00
-[B] Interference at 33 cancelled tick
+[A1] Tick at 33 via SOURCE | Phase: 0.00
+[B1] Received tick at 34.0 with phase 0.00
+[A2] Tick at 33 via SOURCE | Phase: 0.50
+[B2] Received tick at 34.0 with phase 0.50
 == Tick 34 ==
-[A1] Tick at 34 via SOURCE | Phase: 0.00
-[B] Received tick at 35 with phase 0.00
-[B] Received tick at 35 with phase 3.14
-[B] Interference at 34 cancelled tick
+[B1] Tick at 34 via SELF | Phase: 0.00
+[C] Received tick at 37.0 with phase 0.00
+[B2] Tick at 34 via SELF | Phase: 0.50
+[C] Received tick at 37.0 with phase 0.45
+[C] Suppressed by refractory period at 34
+[C] Interference at 34 cancelled tick
+[A1] Tick at 34 via BRIDGE | Phase: 0.00
+[B1] Received tick at 35.0 with phase 0.00
+[A2] Tick at 34 via BRIDGE | Phase: 0.50
+[B2] Received tick at 35.0 with phase 0.50
 == Tick 35 ==
-[B] Received tick at 36 with phase 0.00
-[B] Interference at 35 cancelled tick
+[B1] Suppressed by refractory period at 35
+[B1] Interference at 35 cancelled tick
+[B2] Suppressed by refractory period at 35
+[B2] Interference at 35 cancelled tick
 == Tick 36 ==
 [A1] Tick at 36 via SOURCE | Phase: 0.00
-[B] Received tick at 37 with phase 0.00
-[A2] Tick at 36 via SOURCE | Phase: 0.00
-[B] Received tick at 37 with phase 3.14
-[B] Interference at 36 cancelled tick
+[B1] Received tick at 37.0 with phase 0.00
+[A2] Tick at 36 via SOURCE | Phase: 0.50
+[B2] Received tick at 37.0 with phase 0.50
+[D] Tick at 36 via SELF | Phase: 0.23
+[C] Tick at 36 via BRIDGE | Phase: 0.23
+[D] Received tick at 40.0 with phase 0.23
 == Tick 37 ==
-[B] Received tick at 38 with phase 0.00
-[B] Received tick at 38 with phase 3.14
-[B] Interference at 37 cancelled tick
+[B1] Tick at 37 via SELF | Phase: 0.00
+[C] Received tick at 40.0 with phase 0.00
+[B2] Tick at 37 via SELF | Phase: 0.50
+[C] Received tick at 40.0 with phase 0.45
+[C] Suppressed by refractory period at 37
+[C] Interference at 37 cancelled tick
+[A1] Tick at 37 via BRIDGE | Phase: 0.00
+[B1] Received tick at 38.0 with phase 0.00
+[A2] Tick at 37 via BRIDGE | Phase: 0.50
+[B2] Received tick at 38.0 with phase 0.50
 == Tick 38 ==
-[A1] Tick at 38 via SOURCE | Phase: 0.00
-[B] Received tick at 39 with phase 0.00
-[B] Interference at 38 cancelled tick
+[B1] Suppressed by refractory period at 38
+[B1] Interference at 38 cancelled tick
+[B2] Suppressed by refractory period at 38
+[B2] Interference at 38 cancelled tick
 == Tick 39 ==
-[A2] Tick at 39 via SOURCE | Phase: 0.00
-[B] Received tick at 40 with phase 3.14
-[B] Received tick at 40 with phase 0.00
-[B] Interference at 39 cancelled tick
+[A1] Tick at 39 via SOURCE | Phase: 0.00
+[B1] Received tick at 40.0 with phase 0.00
+[A2] Tick at 39 via SOURCE | Phase: 0.50
+[B2] Received tick at 40.0 with phase 0.50
 == Tick 40 ==
-[A1] Tick at 40 via SOURCE | Phase: 0.00
-[B] Received tick at 41 with phase 0.00
-[B] Received tick at 41 with phase 3.14
-[B] Interference at 40 cancelled tick
+[B1] Tick at 40 via SELF | Phase: 0.00
+[C] Received tick at 43.0 with phase 0.00
+[B2] Tick at 40 via SELF | Phase: 0.50
+[C] Received tick at 43.0 with phase 0.45
+[C] Tick at 40 via SELF | Phase: 0.23
+[D] Received tick at 44.0 with phase 0.23
+[D] Tick at 40 via SELF | Phase: 0.23
+[A1] Tick at 40 via BRIDGE | Phase: 0.00
+[B1] Received tick at 41.0 with phase 0.00
+[A2] Tick at 40 via BRIDGE | Phase: 0.50
+[B2] Received tick at 41.0 with phase 0.50
 == Tick 41 ==
-[B] Received tick at 42 with phase 0.00
-[B] Interference at 41 cancelled tick
+[B1] Suppressed by refractory period at 41
+[B1] Interference at 41 cancelled tick
+[B2] Suppressed by refractory period at 41
+[B2] Interference at 41 cancelled tick
 == Tick 42 ==
 [A1] Tick at 42 via SOURCE | Phase: 0.00
-[B] Received tick at 43 with phase 0.00
-[A2] Tick at 42 via SOURCE | Phase: 0.00
-[B] Received tick at 43 with phase 3.14
-[B] Interference at 42 cancelled tick
+[B1] Received tick at 43.0 with phase 0.00
+[A2] Tick at 42 via SOURCE | Phase: 0.50
+[B2] Received tick at 43.0 with phase 0.50
 == Tick 43 ==
-[B] Received tick at 44 with phase 0.00
-[B] Received tick at 44 with phase 3.14
-[B] Interference at 43 cancelled tick
+[B1] Tick at 43 via SELF | Phase: 0.00
+[C] Received tick at 46.0 with phase 0.00
+[B2] Tick at 43 via SELF | Phase: 0.50
+[C] Received tick at 46.0 with phase 0.45
+[C] Suppressed by refractory period at 43
+[C] Interference at 43 cancelled tick
+[A1] Tick at 43 via BRIDGE | Phase: 0.00
+[B1] Received tick at 44.0 with phase 0.00
+[A2] Tick at 43 via BRIDGE | Phase: 0.50
+[B2] Received tick at 44.0 with phase 0.50
 == Tick 44 ==
-[A1] Tick at 44 via SOURCE | Phase: 0.00
-[B] Received tick at 45 with phase 0.00
-[B] Interference at 44 cancelled tick
+[B1] Suppressed by refractory period at 44
+[B1] Interference at 44 cancelled tick
+[B2] Suppressed by refractory period at 44
+[B2] Interference at 44 cancelled tick
+[D] Tick at 44 via SELF | Phase: 0.23
+[C] Tick at 44 via BRIDGE | Phase: 0.23
+[D] Received tick at 48.0 with phase 0.23
 == Tick 45 ==
-[A2] Tick at 45 via SOURCE | Phase: 0.00
-[B] Received tick at 46 with phase 3.14
-[B] Received tick at 46 with phase 0.00
-[B] Interference at 45 cancelled tick
+[A1] Tick at 45 via SOURCE | Phase: 0.00
+[B1] Received tick at 46.0 with phase 0.00
+[A2] Tick at 45 via SOURCE | Phase: 0.50
+[B2] Received tick at 46.0 with phase 0.50
 == Tick 46 ==
-[A1] Tick at 46 via SOURCE | Phase: 0.00
-[B] Received tick at 47 with phase 0.00
-[B] Received tick at 47 with phase 3.14
-[B] Interference at 46 cancelled tick
+[B1] Tick at 46 via SELF | Phase: 0.00
+[C] Received tick at 49.0 with phase 0.00
+[B2] Tick at 46 via SELF | Phase: 0.50
+[C] Received tick at 49.0 with phase 0.45
+[C] Suppressed by refractory period at 46
+[C] Interference at 46 cancelled tick
+[A1] Tick at 46 via BRIDGE | Phase: 0.00
+[B1] Received tick at 47.0 with phase 0.00
+[A2] Tick at 46 via BRIDGE | Phase: 0.50
+[B2] Received tick at 47.0 with phase 0.50
 == Tick 47 ==
-[B] Received tick at 48 with phase 0.00
-[B] Interference at 47 cancelled tick
+[B1] Suppressed by refractory period at 47
+[B1] Interference at 47 cancelled tick
+[B2] Suppressed by refractory period at 47
+[B2] Interference at 47 cancelled tick
 == Tick 48 ==
 [A1] Tick at 48 via SOURCE | Phase: 0.00
-[B] Received tick at 49 with phase 0.00
-[A2] Tick at 48 via SOURCE | Phase: 0.00
-[B] Received tick at 49 with phase 3.14
-[B] Interference at 48 cancelled tick
+[B1] Received tick at 49.0 with phase 0.00
+[A2] Tick at 48 via SOURCE | Phase: 0.50
+[B2] Received tick at 49.0 with phase 0.50
+[D] Tick at 48 via SELF | Phase: 0.23
+[C] Tick at 48 via BRIDGE | Phase: 0.23
+[D] Received tick at 52.0 with phase 0.23
 == Tick 49 ==
-[B] Received tick at 50 with phase 0.00
-[B] Received tick at 50 with phase 3.14
-[B] Interference at 49 cancelled tick
+[B1] Tick at 49 via SELF | Phase: 0.00
+[C] Received tick at 52.0 with phase 0.00
+[B2] Tick at 49 via SELF | Phase: 0.50
+[C] Received tick at 52.0 with phase 0.45
+[C] Suppressed by refractory period at 49
+[C] Interference at 49 cancelled tick
+[A1] Tick at 49 via BRIDGE | Phase: 0.00
+[B1] Received tick at 50.0 with phase 0.00
+[A2] Tick at 49 via BRIDGE | Phase: 0.50
+[B2] Received tick at 50.0 with phase 0.50
 == Tick 50 ==
-[A1] Tick at 50 via SOURCE | Phase: 0.00
-[B] Received tick at 51 with phase 0.00
-[B] Interference at 50 cancelled tick
+[B1] Suppressed by refractory period at 50
+[B1] Interference at 50 cancelled tick
+[B2] Suppressed by refractory period at 50
+[B2] Interference at 50 cancelled tick
 == Tick 51 ==
-[A2] Tick at 51 via SOURCE | Phase: 0.00
-[B] Received tick at 52 with phase 3.14
-[B] Received tick at 52 with phase 0.00
-[B] Interference at 51 cancelled tick
+[A1] Tick at 51 via SOURCE | Phase: 0.00
+[B1] Received tick at 52.0 with phase 0.00
+[A2] Tick at 51 via SOURCE | Phase: 0.50
+[B2] Received tick at 52.0 with phase 0.50
 == Tick 52 ==
-[A1] Tick at 52 via SOURCE | Phase: 0.00
-[B] Received tick at 53 with phase 0.00
-[B] Received tick at 53 with phase 3.14
-[B] Interference at 52 cancelled tick
+[B1] Tick at 52 via SELF | Phase: 0.00
+[C] Received tick at 55.0 with phase 0.00
+[B2] Tick at 52 via SELF | Phase: 0.50
+[C] Received tick at 55.0 with phase 0.45
+[C] Tick at 52 via SELF | Phase: 0.23
+[D] Received tick at 56.0 with phase 0.23
+[D] Tick at 52 via SELF | Phase: 0.23
+[A1] Tick at 52 via BRIDGE | Phase: 0.00
+[B1] Received tick at 53.0 with phase 0.00
+[A2] Tick at 52 via BRIDGE | Phase: 0.50
+[B2] Received tick at 53.0 with phase 0.50
 == Tick 53 ==
-[B] Received tick at 54 with phase 0.00
-[B] Interference at 53 cancelled tick
+[B1] Suppressed by refractory period at 53
+[B1] Interference at 53 cancelled tick
+[B2] Suppressed by refractory period at 53
+[B2] Interference at 53 cancelled tick
 == Tick 54 ==
 [A1] Tick at 54 via SOURCE | Phase: 0.00
-[B] Received tick at 55 with phase 0.00
-[A2] Tick at 54 via SOURCE | Phase: 0.00
-[B] Received tick at 55 with phase 3.14
-[B] Interference at 54 cancelled tick
+[B1] Received tick at 55.0 with phase 0.00
+[A2] Tick at 54 via SOURCE | Phase: 0.50
+[B2] Received tick at 55.0 with phase 0.50
 == Tick 55 ==
-[B] Received tick at 56 with phase 0.00
-[B] Received tick at 56 with phase 3.14
-[B] Interference at 55 cancelled tick
+[B1] Tick at 55 via SELF | Phase: 0.00
+[C] Received tick at 58.0 with phase 0.00
+[B2] Tick at 55 via SELF | Phase: 0.50
+[C] Received tick at 58.0 with phase 0.45
+[C] Suppressed by refractory period at 55
+[C] Interference at 55 cancelled tick
+[A1] Tick at 55 via BRIDGE | Phase: 0.00
+[B1] Received tick at 56.0 with phase 0.00
+[A2] Tick at 55 via BRIDGE | Phase: 0.50
+[B2] Received tick at 56.0 with phase 0.50
 == Tick 56 ==
-[A1] Tick at 56 via SOURCE | Phase: 0.00
-[B] Received tick at 57 with phase 0.00
-[B] Interference at 56 cancelled tick
+[B1] Suppressed by refractory period at 56
+[B1] Interference at 56 cancelled tick
+[B2] Suppressed by refractory period at 56
+[B2] Interference at 56 cancelled tick
+[D] Tick at 56 via SELF | Phase: 0.23
+[C] Tick at 56 via BRIDGE | Phase: 0.23
+[D] Received tick at 60.0 with phase 0.23
 == Tick 57 ==
-[A2] Tick at 57 via SOURCE | Phase: 0.00
-[B] Received tick at 58 with phase 3.14
-[B] Received tick at 58 with phase 0.00
-[B] Interference at 57 cancelled tick
+[A1] Tick at 57 via SOURCE | Phase: 0.00
+[B1] Received tick at 58.0 with phase 0.00
+[A2] Tick at 57 via SOURCE | Phase: 0.50
+[B2] Received tick at 58.0 with phase 0.50
 == Tick 58 ==
-[A1] Tick at 58 via SOURCE | Phase: 0.00
-[B] Received tick at 59 with phase 0.00
-[B] Received tick at 59 with phase 3.14
-[B] Interference at 58 cancelled tick
+[B1] Tick at 58 via SELF | Phase: 0.00
+[C] Received tick at 61.0 with phase 0.00
+[B2] Tick at 58 via SELF | Phase: 0.50
+[C] Received tick at 61.0 with phase 0.45
+[C] Suppressed by refractory period at 58
+[C] Interference at 58 cancelled tick
+[A1] Tick at 58 via BRIDGE | Phase: 0.00
+[B1] Received tick at 59.0 with phase 0.00
+[A2] Tick at 58 via BRIDGE | Phase: 0.50
+[B2] Received tick at 59.0 with phase 0.50
 == Tick 59 ==
-[B] Received tick at 60 with phase 0.00
-[B] Interference at 59 cancelled tick
+[B1] Suppressed by refractory period at 59
+[B1] Interference at 59 cancelled tick
+[B2] Suppressed by refractory period at 59
+[B2] Interference at 59 cancelled tick
 == Tick 60 ==
 [A1] Tick at 60 via SOURCE | Phase: 0.00
-[B] Received tick at 61 with phase 0.00
-[A2] Tick at 60 via SOURCE | Phase: 0.00
-[B] Received tick at 61 with phase 3.14
-[B] Interference at 60 cancelled tick
+[B1] Received tick at 61.0 with phase 0.00
+[A2] Tick at 60 via SOURCE | Phase: 0.50
+[B2] Received tick at 61.0 with phase 0.50
+[D] Tick at 60 via SELF | Phase: 0.23
+[C] Tick at 60 via BRIDGE | Phase: 0.23
+[D] Received tick at 64.0 with phase 0.23
 == Tick 61 ==
-[B] Received tick at 62 with phase 0.00
-[B] Received tick at 62 with phase 3.14
-[B] Interference at 61 cancelled tick
+[B1] Tick at 61 via SELF | Phase: 0.00
+[C] Received tick at 64.0 with phase 0.00
+[B2] Tick at 61 via SELF | Phase: 0.50
+[C] Received tick at 64.0 with phase 0.45
+[C] Suppressed by refractory period at 61
+[C] Interference at 61 cancelled tick
+[A1] Tick at 61 via BRIDGE | Phase: 0.00
+[B1] Received tick at 62.0 with phase 0.00
+[A2] Tick at 61 via BRIDGE | Phase: 0.50
+[B2] Received tick at 62.0 with phase 0.50
 == Tick 62 ==
-[A1] Tick at 62 via SOURCE | Phase: 0.00
-[B] Received tick at 63 with phase 0.00
-[B] Interference at 62 cancelled tick
+[B1] Suppressed by refractory period at 62
+[B1] Interference at 62 cancelled tick
+[B2] Suppressed by refractory period at 62
+[B2] Interference at 62 cancelled tick
 == Tick 63 ==
-[A2] Tick at 63 via SOURCE | Phase: 0.00
-[B] Received tick at 64 with phase 3.14
-[B] Received tick at 64 with phase 0.00
-[B] Interference at 63 cancelled tick
+[A1] Tick at 63 via SOURCE | Phase: 0.00
+[B1] Received tick at 64.0 with phase 0.00
+[A2] Tick at 63 via SOURCE | Phase: 0.50
+[B2] Received tick at 64.0 with phase 0.50
 == Tick 64 ==
-[A1] Tick at 64 via SOURCE | Phase: 0.00
-[B] Received tick at 65 with phase 0.00
-[B] Received tick at 65 with phase 3.14
-[B] Interference at 64 cancelled tick
+[B1] Tick at 64 via SELF | Phase: 0.00
+[C] Received tick at 67.0 with phase 0.00
+[B2] Tick at 64 via SELF | Phase: 0.50
+[C] Received tick at 67.0 with phase 0.45
+[C] Tick at 64 via SELF | Phase: 0.23
+[D] Received tick at 68.0 with phase 0.23
+[D] Tick at 64 via SELF | Phase: 0.23
+[A1] Tick at 64 via BRIDGE | Phase: 0.00
+[B1] Received tick at 65.0 with phase 0.00
+[A2] Tick at 64 via BRIDGE | Phase: 0.50
+[B2] Received tick at 65.0 with phase 0.50
 == Tick 65 ==
-[B] Received tick at 66 with phase 0.00
-[B] Interference at 65 cancelled tick
+[B1] Suppressed by refractory period at 65
+[B1] Interference at 65 cancelled tick
+[B2] Suppressed by refractory period at 65
+[B2] Interference at 65 cancelled tick
 == Tick 66 ==
 [A1] Tick at 66 via SOURCE | Phase: 0.00
-[B] Received tick at 67 with phase 0.00
-[A2] Tick at 66 via SOURCE | Phase: 0.00
-[B] Received tick at 67 with phase 3.14
-[B] Interference at 66 cancelled tick
+[B1] Received tick at 67.0 with phase 0.00
+[A2] Tick at 66 via SOURCE | Phase: 0.50
+[B2] Received tick at 67.0 with phase 0.50
 == Tick 67 ==
-[B] Received tick at 68 with phase 0.00
-[B] Received tick at 68 with phase 3.14
-[B] Interference at 67 cancelled tick
+[B1] Tick at 67 via SELF | Phase: 0.00
+[C] Received tick at 70.0 with phase 0.00
+[B2] Tick at 67 via SELF | Phase: 0.50
+[C] Received tick at 70.0 with phase 0.45
+[C] Suppressed by refractory period at 67
+[C] Interference at 67 cancelled tick
+[A1] Tick at 67 via BRIDGE | Phase: 0.00
+[B1] Received tick at 68.0 with phase 0.00
+[A2] Tick at 67 via BRIDGE | Phase: 0.50
+[B2] Received tick at 68.0 with phase 0.50
 == Tick 68 ==
-[A1] Tick at 68 via SOURCE | Phase: 0.00
-[B] Received tick at 69 with phase 0.00
-[B] Interference at 68 cancelled tick
+[B1] Suppressed by refractory period at 68
+[B1] Interference at 68 cancelled tick
+[B2] Suppressed by refractory period at 68
+[B2] Interference at 68 cancelled tick
+[D] Tick at 68 via SELF | Phase: 0.23
+[C] Tick at 68 via BRIDGE | Phase: 0.23
+[D] Received tick at 72.0 with phase 0.23
 == Tick 69 ==
-[A2] Tick at 69 via SOURCE | Phase: 0.00
-[B] Received tick at 70 with phase 3.14
-[B] Received tick at 70 with phase 0.00
-[B] Interference at 69 cancelled tick
+[A1] Tick at 69 via SOURCE | Phase: 0.00
+[B1] Received tick at 70.0 with phase 0.00
+[A2] Tick at 69 via SOURCE | Phase: 0.50
+[B2] Received tick at 70.0 with phase 0.50
 == Tick 70 ==
-[A1] Tick at 70 via SOURCE | Phase: 0.00
-[B] Received tick at 71 with phase 0.00
-[B] Received tick at 71 with phase 3.14
-[B] Interference at 70 cancelled tick
+[B1] Tick at 70 via SELF | Phase: 0.00
+[C] Received tick at 73.0 with phase 0.00
+[B2] Tick at 70 via SELF | Phase: 0.50
+[C] Received tick at 73.0 with phase 0.45
+[C] Suppressed by refractory period at 70
+[C] Interference at 70 cancelled tick
+[A1] Tick at 70 via BRIDGE | Phase: 0.00
+[B1] Received tick at 71.0 with phase 0.00
+[A2] Tick at 70 via BRIDGE | Phase: 0.50
+[B2] Received tick at 71.0 with phase 0.50
 == Tick 71 ==
-[B] Received tick at 72 with phase 0.00
-[B] Interference at 71 cancelled tick
+[B1] Suppressed by refractory period at 71
+[B1] Interference at 71 cancelled tick
+[B2] Suppressed by refractory period at 71
+[B2] Interference at 71 cancelled tick
 == Tick 72 ==
 [A1] Tick at 72 via SOURCE | Phase: 0.00
-[B] Received tick at 73 with phase 0.00
-[A2] Tick at 72 via SOURCE | Phase: 0.00
-[B] Received tick at 73 with phase 3.14
-[B] Interference at 72 cancelled tick
+[B1] Received tick at 73.0 with phase 0.00
+[A2] Tick at 72 via SOURCE | Phase: 0.50
+[B2] Received tick at 73.0 with phase 0.50
+[D] Tick at 72 via SELF | Phase: 0.23
+[C] Tick at 72 via BRIDGE | Phase: 0.23
+[D] Received tick at 76.0 with phase 0.23
 == Tick 73 ==
-[B] Received tick at 74 with phase 0.00
-[B] Received tick at 74 with phase 3.14
-[B] Interference at 73 cancelled tick
+[B1] Tick at 73 via SELF | Phase: 0.00
+[C] Received tick at 76.0 with phase 0.00
+[B2] Tick at 73 via SELF | Phase: 0.50
+[C] Received tick at 76.0 with phase 0.45
+[C] Suppressed by refractory period at 73
+[C] Interference at 73 cancelled tick
+[A1] Tick at 73 via BRIDGE | Phase: 0.00
+[B1] Received tick at 74.0 with phase 0.00
+[A2] Tick at 73 via BRIDGE | Phase: 0.50
+[B2] Received tick at 74.0 with phase 0.50
 == Tick 74 ==
-[A1] Tick at 74 via SOURCE | Phase: 0.00
-[B] Received tick at 75 with phase 0.00
-[B] Interference at 74 cancelled tick
+[B1] Suppressed by refractory period at 74
+[B1] Interference at 74 cancelled tick
+[B2] Suppressed by refractory period at 74
+[B2] Interference at 74 cancelled tick
 == Tick 75 ==
-[A2] Tick at 75 via SOURCE | Phase: 0.00
-[B] Received tick at 76 with phase 3.14
-[B] Received tick at 76 with phase 0.00
-[B] Interference at 75 cancelled tick
+[A1] Tick at 75 via SOURCE | Phase: 0.00
+[B1] Received tick at 76.0 with phase 0.00
+[A2] Tick at 75 via SOURCE | Phase: 0.50
+[B2] Received tick at 76.0 with phase 0.50
 == Tick 76 ==
-[A1] Tick at 76 via SOURCE | Phase: 0.00
-[B] Received tick at 77 with phase 0.00
-[B] Received tick at 77 with phase 3.14
-[B] Interference at 76 cancelled tick
+[B1] Tick at 76 via SELF | Phase: 0.00
+[C] Received tick at 79.0 with phase 0.00
+[B2] Tick at 76 via SELF | Phase: 0.50
+[C] Received tick at 79.0 with phase 0.45
+[C] Tick at 76 via SELF | Phase: 0.23
+[D] Received tick at 80.0 with phase 0.23
+[D] Tick at 76 via SELF | Phase: 0.23
+[A1] Tick at 76 via BRIDGE | Phase: 0.00
+[B1] Received tick at 77.0 with phase 0.00
+[A2] Tick at 76 via BRIDGE | Phase: 0.50
+[B2] Received tick at 77.0 with phase 0.50
 == Tick 77 ==
-[B] Received tick at 78 with phase 0.00
-[B] Interference at 77 cancelled tick
+[B1] Suppressed by refractory period at 77
+[B1] Interference at 77 cancelled tick
+[B2] Suppressed by refractory period at 77
+[B2] Interference at 77 cancelled tick
 == Tick 78 ==
 [A1] Tick at 78 via SOURCE | Phase: 0.00
-[B] Received tick at 79 with phase 0.00
-[A2] Tick at 78 via SOURCE | Phase: 0.00
-[B] Received tick at 79 with phase 3.14
-[B] Interference at 78 cancelled tick
+[B1] Received tick at 79.0 with phase 0.00
+[A2] Tick at 78 via SOURCE | Phase: 0.50
+[B2] Received tick at 79.0 with phase 0.50
 == Tick 79 ==
-[B] Received tick at 80 with phase 0.00
-[B] Received tick at 80 with phase 3.14
-[B] Interference at 79 cancelled tick
+[B1] Tick at 79 via SELF | Phase: 0.00
+[C] Received tick at 82.0 with phase 0.00
+[B2] Tick at 79 via SELF | Phase: 0.50
+[C] Received tick at 82.0 with phase 0.45
+[C] Suppressed by refractory period at 79
+[C] Interference at 79 cancelled tick
+[A1] Tick at 79 via BRIDGE | Phase: 0.00
+[B1] Received tick at 80.0 with phase 0.00
+[A2] Tick at 79 via BRIDGE | Phase: 0.50
+[B2] Received tick at 80.0 with phase 0.50
 == Tick 80 ==
-[A1] Tick at 80 via SOURCE | Phase: 0.00
-[B] Received tick at 81 with phase 0.00
-[B] Interference at 80 cancelled tick
+[B1] Suppressed by refractory period at 80
+[B1] Interference at 80 cancelled tick
+[B2] Suppressed by refractory period at 80
+[B2] Interference at 80 cancelled tick
+[D] Tick at 80 via SELF | Phase: 0.23
+[C] Tick at 80 via BRIDGE | Phase: 0.23
+[D] Received tick at 84.0 with phase 0.23
 == Tick 81 ==
-[A2] Tick at 81 via SOURCE | Phase: 0.00
-[B] Received tick at 82 with phase 3.14
-[B] Received tick at 82 with phase 0.00
-[B] Interference at 81 cancelled tick
+[A1] Tick at 81 via SOURCE | Phase: 0.00
+[B1] Received tick at 82.0 with phase 0.00
+[A2] Tick at 81 via SOURCE | Phase: 0.50
+[B2] Received tick at 82.0 with phase 0.50
 == Tick 82 ==
-[A1] Tick at 82 via SOURCE | Phase: 0.00
-[B] Received tick at 83 with phase 0.00
-[B] Received tick at 83 with phase 3.14
-[B] Interference at 82 cancelled tick
+[B1] Tick at 82 via SELF | Phase: 0.00
+[C] Received tick at 85.0 with phase 0.00
+[B2] Tick at 82 via SELF | Phase: 0.50
+[C] Received tick at 85.0 with phase 0.45
+[C] Suppressed by refractory period at 82
+[C] Interference at 82 cancelled tick
+[A1] Tick at 82 via BRIDGE | Phase: 0.00
+[B1] Received tick at 83.0 with phase 0.00
+[A2] Tick at 82 via BRIDGE | Phase: 0.50
+[B2] Received tick at 83.0 with phase 0.50
 == Tick 83 ==
-[B] Received tick at 84 with phase 0.00
-[B] Interference at 83 cancelled tick
+[B1] Suppressed by refractory period at 83
+[B1] Interference at 83 cancelled tick
+[B2] Suppressed by refractory period at 83
+[B2] Interference at 83 cancelled tick
 == Tick 84 ==
 [A1] Tick at 84 via SOURCE | Phase: 0.00
-[B] Received tick at 85 with phase 0.00
-[A2] Tick at 84 via SOURCE | Phase: 0.00
-[B] Received tick at 85 with phase 3.14
-[B] Interference at 84 cancelled tick
+[B1] Received tick at 85.0 with phase 0.00
+[A2] Tick at 84 via SOURCE | Phase: 0.50
+[B2] Received tick at 85.0 with phase 0.50
+[D] Tick at 84 via SELF | Phase: 0.23
+[C] Tick at 84 via BRIDGE | Phase: 0.23
+[D] Received tick at 88.0 with phase 0.23
 == Tick 85 ==
-[B] Received tick at 86 with phase 0.00
-[B] Received tick at 86 with phase 3.14
-[B] Interference at 85 cancelled tick
+[B1] Tick at 85 via SELF | Phase: 0.00
+[C] Received tick at 88.0 with phase 0.00
+[B2] Tick at 85 via SELF | Phase: 0.50
+[C] Received tick at 88.0 with phase 0.45
+[C] Suppressed by refractory period at 85
+[C] Interference at 85 cancelled tick
+[A1] Tick at 85 via BRIDGE | Phase: 0.00
+[B1] Received tick at 86.0 with phase 0.00
+[A2] Tick at 85 via BRIDGE | Phase: 0.50
+[B2] Received tick at 86.0 with phase 0.50
 == Tick 86 ==
-[A1] Tick at 86 via SOURCE | Phase: 0.00
-[B] Received tick at 87 with phase 0.00
-[B] Interference at 86 cancelled tick
+[B1] Suppressed by refractory period at 86
+[B1] Interference at 86 cancelled tick
+[B2] Suppressed by refractory period at 86
+[B2] Interference at 86 cancelled tick
 == Tick 87 ==
-[A2] Tick at 87 via SOURCE | Phase: 0.00
-[B] Received tick at 88 with phase 3.14
-[B] Received tick at 88 with phase 0.00
-[B] Interference at 87 cancelled tick
+[A1] Tick at 87 via SOURCE | Phase: 0.00
+[B1] Received tick at 88.0 with phase 0.00
+[A2] Tick at 87 via SOURCE | Phase: 0.50
+[B2] Received tick at 88.0 with phase 0.50
 == Tick 88 ==
-[A1] Tick at 88 via SOURCE | Phase: 0.00
-[B] Received tick at 89 with phase 0.00
-[B] Received tick at 89 with phase 3.14
-[B] Interference at 88 cancelled tick
+[B1] Tick at 88 via SELF | Phase: 0.00
+[C] Received tick at 91.0 with phase 0.00
+[B2] Tick at 88 via SELF | Phase: 0.50
+[C] Received tick at 91.0 with phase 0.45
+[C] Tick at 88 via SELF | Phase: 0.23
+[D] Received tick at 92.0 with phase 0.23
+[D] Tick at 88 via SELF | Phase: 0.23
+[A1] Tick at 88 via BRIDGE | Phase: 0.00
+[B1] Received tick at 89.0 with phase 0.00
+[A2] Tick at 88 via BRIDGE | Phase: 0.50
+[B2] Received tick at 89.0 with phase 0.50
 == Tick 89 ==
-[B] Received tick at 90 with phase 0.00
-[B] Interference at 89 cancelled tick
+[B1] Suppressed by refractory period at 89
+[B1] Interference at 89 cancelled tick
+[B2] Suppressed by refractory period at 89
+[B2] Interference at 89 cancelled tick
 == Tick 90 ==
 [A1] Tick at 90 via SOURCE | Phase: 0.00
-[B] Received tick at 91 with phase 0.00
-[A2] Tick at 90 via SOURCE | Phase: 0.00
-[B] Received tick at 91 with phase 3.14
-[B] Interference at 90 cancelled tick
+[B1] Received tick at 91.0 with phase 0.00
+[A2] Tick at 90 via SOURCE | Phase: 0.50
+[B2] Received tick at 91.0 with phase 0.50
 == Tick 91 ==
-[B] Received tick at 92 with phase 0.00
-[B] Received tick at 92 with phase 3.14
-[B] Interference at 91 cancelled tick
+[B1] Tick at 91 via SELF | Phase: 0.00
+[C] Received tick at 94.0 with phase 0.00
+[B2] Tick at 91 via SELF | Phase: 0.50
+[C] Received tick at 94.0 with phase 0.45
+[C] Suppressed by refractory period at 91
+[C] Interference at 91 cancelled tick
+[A1] Tick at 91 via BRIDGE | Phase: 0.00
+[B1] Received tick at 92.0 with phase 0.00
+[A2] Tick at 91 via BRIDGE | Phase: 0.50
+[B2] Received tick at 92.0 with phase 0.50
 == Tick 92 ==
-[A1] Tick at 92 via SOURCE | Phase: 0.00
-[B] Received tick at 93 with phase 0.00
-[B] Interference at 92 cancelled tick
+[B1] Suppressed by refractory period at 92
+[B1] Interference at 92 cancelled tick
+[B2] Suppressed by refractory period at 92
+[B2] Interference at 92 cancelled tick
+[D] Tick at 92 via SELF | Phase: 0.23
+[C] Tick at 92 via BRIDGE | Phase: 0.23
+[D] Received tick at 96.0 with phase 0.23
 == Tick 93 ==
-[A2] Tick at 93 via SOURCE | Phase: 0.00
-[B] Received tick at 94 with phase 3.14
-[B] Received tick at 94 with phase 0.00
-[B] Interference at 93 cancelled tick
+[A1] Tick at 93 via SOURCE | Phase: 0.00
+[B1] Received tick at 94.0 with phase 0.00
+[A2] Tick at 93 via SOURCE | Phase: 0.50
+[B2] Received tick at 94.0 with phase 0.50
 == Tick 94 ==
-[A1] Tick at 94 via SOURCE | Phase: 0.00
-[B] Received tick at 95 with phase 0.00
-[B] Received tick at 95 with phase 3.14
-[B] Interference at 94 cancelled tick
+[B1] Tick at 94 via SELF | Phase: 0.00
+[C] Received tick at 97.0 with phase 0.00
+[B2] Tick at 94 via SELF | Phase: 0.50
+[C] Received tick at 97.0 with phase 0.45
+[C] Suppressed by refractory period at 94
+[C] Interference at 94 cancelled tick
+[A1] Tick at 94 via BRIDGE | Phase: 0.00
+[B1] Received tick at 95.0 with phase 0.00
+[A2] Tick at 94 via BRIDGE | Phase: 0.50
+[B2] Received tick at 95.0 with phase 0.50
 == Tick 95 ==
-[B] Received tick at 96 with phase 0.00
-[B] Interference at 95 cancelled tick
+[B1] Suppressed by refractory period at 95
+[B1] Interference at 95 cancelled tick
+[B2] Suppressed by refractory period at 95
+[B2] Interference at 95 cancelled tick
 == Tick 96 ==
 [A1] Tick at 96 via SOURCE | Phase: 0.00
-[B] Received tick at 97 with phase 0.00
-[A2] Tick at 96 via SOURCE | Phase: 0.00
-[B] Received tick at 97 with phase 3.14
-[B] Interference at 96 cancelled tick
+[B1] Received tick at 97.0 with phase 0.00
+[A2] Tick at 96 via SOURCE | Phase: 0.50
+[B2] Received tick at 97.0 with phase 0.50
+[D] Tick at 96 via SELF | Phase: 0.23
+[C] Tick at 96 via BRIDGE | Phase: 0.23
+[D] Received tick at 100.0 with phase 0.23
 == Tick 97 ==
-[B] Received tick at 98 with phase 0.00
-[B] Received tick at 98 with phase 3.14
-[B] Interference at 97 cancelled tick
+[B1] Tick at 97 via SELF | Phase: 0.00
+[C] Received tick at 100.0 with phase 0.00
+[B2] Tick at 97 via SELF | Phase: 0.50
+[C] Received tick at 100.0 with phase 0.45
+[C] Suppressed by refractory period at 97
+[C] Interference at 97 cancelled tick
+[A1] Tick at 97 via BRIDGE | Phase: 0.00
+[B1] Received tick at 98.0 with phase 0.00
+[A2] Tick at 97 via BRIDGE | Phase: 0.50
+[B2] Received tick at 98.0 with phase 0.50
 == Tick 98 ==
-[A1] Tick at 98 via SOURCE | Phase: 0.00
-[B] Received tick at 99 with phase 0.00
-[B] Interference at 98 cancelled tick
+[B1] Suppressed by refractory period at 98
+[B1] Interference at 98 cancelled tick
+[B2] Suppressed by refractory period at 98
+[B2] Interference at 98 cancelled tick
 == Tick 99 ==
-[A2] Tick at 99 via SOURCE | Phase: 0.00
-[B] Received tick at 100 with phase 3.14
-[B] Received tick at 100 with phase 0.00
-[B] Interference at 99 cancelled tick
+[A1] Tick at 99 via SOURCE | Phase: 0.00
+[B1] Received tick at 100.0 with phase 0.00
+[A2] Tick at 99 via SOURCE | Phase: 0.50
+[B2] Received tick at 100.0 with phase 0.50
 == Tick 100 ==
-[A1] Tick at 100 via SOURCE | Phase: 0.00
-[B] Received tick at 101 with phase 0.00
-[B] Received tick at 101 with phase 3.14
-[B] Interference at 100 cancelled tick
+[B1] Tick at 100 via SELF | Phase: 0.00
+[C] Received tick at 103.0 with phase 0.00
+[B2] Tick at 100 via SELF | Phase: 0.50
+[C] Received tick at 103.0 with phase 0.45
+[C] Tick at 100 via SELF | Phase: 0.23
+[D] Received tick at 104.0 with phase 0.23
+[D] Tick at 100 via SELF | Phase: 0.23
+[A1] Tick at 100 via BRIDGE | Phase: 0.00
+[B1] Received tick at 101.0 with phase 0.00
+[A2] Tick at 100 via BRIDGE | Phase: 0.50
+[B2] Received tick at 101.0 with phase 0.50

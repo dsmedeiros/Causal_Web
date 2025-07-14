@@ -10,328 +10,9 @@
           "origin": "source"
         },
         {
-          "time": 2,
+          "time": 1,
           "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 4,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 6,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 8,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 10,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 12,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 14,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 16,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 18,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 20,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 22,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 24,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 26,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 28,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 30,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 32,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 34,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 36,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 38,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 40,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 42,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 44,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 46,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 48,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 50,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 52,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 54,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 56,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 58,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 60,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 62,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 64,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 66,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 68,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 70,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 72,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 74,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 76,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 78,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 80,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 82,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 84,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 86,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 88,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 90,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 92,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 94,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 96,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 98,
-          "phase": 0.0,
-          "origin": "source"
-        },
-        {
-          "time": 100,
-          "phase": 0.0,
-          "origin": "source"
-        }
-      ],
-      "phase": 0.0,
-      "coherence": 1.0,
-      "decoherence": 0.0,
-      "frequency": 0.3,
-      "refractory_period": 2,
-      "base_threshold": 0.4,
-      "collapse_origin": {
-        "0": "source",
-        "2": "source",
-        "4": "source",
-        "6": "source",
-        "8": "source",
-        "10": "source",
-        "12": "source",
-        "14": "source",
-        "16": "source",
-        "18": "source",
-        "20": "source",
-        "22": "source",
-        "24": "source",
-        "26": "source",
-        "28": "source",
-        "30": "source",
-        "32": "source",
-        "34": "source",
-        "36": "source",
-        "38": "source",
-        "40": "source",
-        "42": "source",
-        "44": "source",
-        "46": "source",
-        "48": "source",
-        "50": "source",
-        "52": "source",
-        "54": "source",
-        "56": "source",
-        "58": "source",
-        "60": "source",
-        "62": "source",
-        "64": "source",
-        "66": "source",
-        "68": "source",
-        "70": "source",
-        "72": "source",
-        "74": "source",
-        "76": "source",
-        "78": "source",
-        "80": "source",
-        "82": "source",
-        "84": "source",
-        "86": "source",
-        "88": "source",
-        "90": "source",
-        "92": "source",
-        "94": "source",
-        "96": "source",
-        "98": "source",
-        "100": "source"
-      },
-      "is_classical": false,
-      "decoherence_streak": 0,
-      "last_tick_time": 100,
-      "subjective_ticks": 51
-    },
-    "A2": {
-      "x": 100,
-      "y": 300,
-      "ticks": [
-        {
-          "time": 0,
-          "phase": 0.0,
-          "origin": "source"
+          "origin": "bridge"
         },
         {
           "time": 3,
@@ -339,9 +20,19 @@
           "origin": "source"
         },
         {
+          "time": 4,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
           "time": 6,
           "phase": 0.0,
           "origin": "source"
+        },
+        {
+          "time": 7,
+          "phase": 0.0,
+          "origin": "bridge"
         },
         {
           "time": 9,
@@ -349,9 +40,19 @@
           "origin": "source"
         },
         {
+          "time": 10,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
           "time": 12,
           "phase": 0.0,
           "origin": "source"
+        },
+        {
+          "time": 13,
+          "phase": 0.0,
+          "origin": "bridge"
         },
         {
           "time": 15,
@@ -359,9 +60,19 @@
           "origin": "source"
         },
         {
+          "time": 16,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
           "time": 18,
           "phase": 0.0,
           "origin": "source"
+        },
+        {
+          "time": 19,
+          "phase": 0.0,
+          "origin": "bridge"
         },
         {
           "time": 21,
@@ -369,9 +80,19 @@
           "origin": "source"
         },
         {
+          "time": 22,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
           "time": 24,
           "phase": 0.0,
           "origin": "source"
+        },
+        {
+          "time": 25,
+          "phase": 0.0,
+          "origin": "bridge"
         },
         {
           "time": 27,
@@ -379,9 +100,19 @@
           "origin": "source"
         },
         {
+          "time": 28,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
           "time": 30,
           "phase": 0.0,
           "origin": "source"
+        },
+        {
+          "time": 31,
+          "phase": 0.0,
+          "origin": "bridge"
         },
         {
           "time": 33,
@@ -389,9 +120,19 @@
           "origin": "source"
         },
         {
+          "time": 34,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
           "time": 36,
           "phase": 0.0,
           "origin": "source"
+        },
+        {
+          "time": 37,
+          "phase": 0.0,
+          "origin": "bridge"
         },
         {
           "time": 39,
@@ -399,9 +140,19 @@
           "origin": "source"
         },
         {
+          "time": 40,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
           "time": 42,
           "phase": 0.0,
           "origin": "source"
+        },
+        {
+          "time": 43,
+          "phase": 0.0,
+          "origin": "bridge"
         },
         {
           "time": 45,
@@ -409,9 +160,19 @@
           "origin": "source"
         },
         {
+          "time": 46,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
           "time": 48,
           "phase": 0.0,
           "origin": "source"
+        },
+        {
+          "time": 49,
+          "phase": 0.0,
+          "origin": "bridge"
         },
         {
           "time": 51,
@@ -419,9 +180,19 @@
           "origin": "source"
         },
         {
+          "time": 52,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
           "time": 54,
           "phase": 0.0,
           "origin": "source"
+        },
+        {
+          "time": 55,
+          "phase": 0.0,
+          "origin": "bridge"
         },
         {
           "time": 57,
@@ -429,9 +200,19 @@
           "origin": "source"
         },
         {
+          "time": 58,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
           "time": 60,
           "phase": 0.0,
           "origin": "source"
+        },
+        {
+          "time": 61,
+          "phase": 0.0,
+          "origin": "bridge"
         },
         {
           "time": 63,
@@ -439,9 +220,19 @@
           "origin": "source"
         },
         {
+          "time": 64,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
           "time": 66,
           "phase": 0.0,
           "origin": "source"
+        },
+        {
+          "time": 67,
+          "phase": 0.0,
+          "origin": "bridge"
         },
         {
           "time": 69,
@@ -449,9 +240,19 @@
           "origin": "source"
         },
         {
+          "time": 70,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
           "time": 72,
           "phase": 0.0,
           "origin": "source"
+        },
+        {
+          "time": 73,
+          "phase": 0.0,
+          "origin": "bridge"
         },
         {
           "time": 75,
@@ -459,9 +260,19 @@
           "origin": "source"
         },
         {
+          "time": 76,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
           "time": 78,
           "phase": 0.0,
           "origin": "source"
+        },
+        {
+          "time": 79,
+          "phase": 0.0,
+          "origin": "bridge"
         },
         {
           "time": 81,
@@ -469,9 +280,19 @@
           "origin": "source"
         },
         {
+          "time": 82,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
           "time": 84,
           "phase": 0.0,
           "origin": "source"
+        },
+        {
+          "time": 85,
+          "phase": 0.0,
+          "origin": "bridge"
         },
         {
           "time": 87,
@@ -479,9 +300,19 @@
           "origin": "source"
         },
         {
+          "time": 88,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
           "time": 90,
           "phase": 0.0,
           "origin": "source"
+        },
+        {
+          "time": 91,
+          "phase": 0.0,
+          "origin": "bridge"
         },
         {
           "time": 93,
@@ -489,507 +320,1400 @@
           "origin": "source"
         },
         {
+          "time": 94,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
           "time": 96,
           "phase": 0.0,
           "origin": "source"
         },
         {
+          "time": 97,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
           "time": 99,
           "phase": 0.0,
           "origin": "source"
+        },
+        {
+          "time": 100,
+          "phase": 0.0,
+          "origin": "bridge"
         }
       ],
       "phase": 0.0,
       "coherence": 1.0,
       "decoherence": 0.0,
-      "frequency": 0.32,
-      "refractory_period": 2,
-      "base_threshold": 0.4,
+      "frequency": 0.25,
+      "refractory_period": 2.099999999999999,
+      "base_threshold": 0.45,
       "collapse_origin": {
         "0": "source",
+        "1": "bridge",
         "3": "source",
+        "4": "bridge",
         "6": "source",
+        "7": "bridge",
         "9": "source",
+        "10": "bridge",
         "12": "source",
+        "13": "bridge",
         "15": "source",
+        "16": "bridge",
         "18": "source",
+        "19": "bridge",
         "21": "source",
+        "22": "bridge",
         "24": "source",
+        "25": "bridge",
         "27": "source",
+        "28": "bridge",
         "30": "source",
+        "31": "bridge",
         "33": "source",
+        "34": "bridge",
         "36": "source",
+        "37": "bridge",
         "39": "source",
+        "40": "bridge",
         "42": "source",
+        "43": "bridge",
         "45": "source",
+        "46": "bridge",
         "48": "source",
+        "49": "bridge",
         "51": "source",
+        "52": "bridge",
         "54": "source",
+        "55": "bridge",
         "57": "source",
+        "58": "bridge",
         "60": "source",
+        "61": "bridge",
         "63": "source",
+        "64": "bridge",
         "66": "source",
+        "67": "bridge",
         "69": "source",
+        "70": "bridge",
         "72": "source",
+        "73": "bridge",
         "75": "source",
+        "76": "bridge",
         "78": "source",
+        "79": "bridge",
         "81": "source",
+        "82": "bridge",
         "84": "source",
+        "85": "bridge",
         "87": "source",
+        "88": "bridge",
         "90": "source",
+        "91": "bridge",
         "93": "source",
+        "94": "bridge",
         "96": "source",
-        "99": "source"
+        "97": "bridge",
+        "99": "source",
+        "100": "bridge"
       },
       "is_classical": false,
       "decoherence_streak": 0,
-      "last_tick_time": 99,
-      "subjective_ticks": 34
+      "last_tick_time": 100,
+      "subjective_ticks": 68,
+      "law_wave_frequency": 0.05
     },
-    "B": {
+    "A2": {
+      "x": 100,
+      "y": 300,
+      "ticks": [
+        {
+          "time": 0,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 1,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 3,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 4,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 6,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 7,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 9,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 10,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 12,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 13,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 15,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 16,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 18,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 19,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 21,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 22,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 24,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 25,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 27,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 28,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 30,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 31,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 33,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 34,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 36,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 37,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 39,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 40,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 42,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 43,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 45,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 46,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 48,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 49,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 51,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 52,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 54,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 55,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 57,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 58,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 60,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 61,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 63,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 64,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 66,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 67,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 69,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 70,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 72,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 73,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 75,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 76,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 78,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 79,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 81,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 82,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 84,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 85,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 87,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 88,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 90,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 91,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 93,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 94,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 96,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 97,
+          "phase": 0.5,
+          "origin": "bridge"
+        },
+        {
+          "time": 99,
+          "phase": 0.5,
+          "origin": "source"
+        },
+        {
+          "time": 100,
+          "phase": 0.5,
+          "origin": "bridge"
+        }
+      ],
+      "phase": 0.5,
+      "coherence": 1.0,
+      "decoherence": 0.0,
+      "frequency": 0.25,
+      "refractory_period": 2.099999999999999,
+      "base_threshold": 0.45,
+      "collapse_origin": {
+        "0": "source",
+        "1": "bridge",
+        "3": "source",
+        "4": "bridge",
+        "6": "source",
+        "7": "bridge",
+        "9": "source",
+        "10": "bridge",
+        "12": "source",
+        "13": "bridge",
+        "15": "source",
+        "16": "bridge",
+        "18": "source",
+        "19": "bridge",
+        "21": "source",
+        "22": "bridge",
+        "24": "source",
+        "25": "bridge",
+        "27": "source",
+        "28": "bridge",
+        "30": "source",
+        "31": "bridge",
+        "33": "source",
+        "34": "bridge",
+        "36": "source",
+        "37": "bridge",
+        "39": "source",
+        "40": "bridge",
+        "42": "source",
+        "43": "bridge",
+        "45": "source",
+        "46": "bridge",
+        "48": "source",
+        "49": "bridge",
+        "51": "source",
+        "52": "bridge",
+        "54": "source",
+        "55": "bridge",
+        "57": "source",
+        "58": "bridge",
+        "60": "source",
+        "61": "bridge",
+        "63": "source",
+        "64": "bridge",
+        "66": "source",
+        "67": "bridge",
+        "69": "source",
+        "70": "bridge",
+        "72": "source",
+        "73": "bridge",
+        "75": "source",
+        "76": "bridge",
+        "78": "source",
+        "79": "bridge",
+        "81": "source",
+        "82": "bridge",
+        "84": "source",
+        "85": "bridge",
+        "87": "source",
+        "88": "bridge",
+        "90": "source",
+        "91": "bridge",
+        "93": "source",
+        "94": "bridge",
+        "96": "source",
+        "97": "bridge",
+        "99": "source",
+        "100": "bridge"
+      },
+      "is_classical": false,
+      "decoherence_streak": 0,
+      "last_tick_time": 100,
+      "subjective_ticks": 68,
+      "law_wave_frequency": 0.05
+    },
+    "B1": {
       "x": 250,
-      "y": 250,
-      "ticks": [],
+      "y": 200,
+      "ticks": [
+        {
+          "time": 1,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 4,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 7,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 10,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 13,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 16,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 19,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 22,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 25,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 28,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 31,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 34,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 37,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 40,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 43,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 46,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 49,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 52,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 55,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 58,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 61,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 64,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 67,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 70,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 73,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 76,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 79,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 82,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 85,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 88,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 91,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 94,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 97,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 100,
+          "phase": 0.0,
+          "origin": "self"
+        }
+      ],
       "phase": 0.0,
-      "coherence": 0.0007963267107332633,
-      "decoherence": 2.4649,
-      "frequency": 0.2,
-      "refractory_period": 2,
+      "coherence": 1.0,
+      "decoherence": 0.0,
+      "frequency": 0.15,
+      "refractory_period": 2.099999999999999,
       "base_threshold": 0.5,
-      "collapse_origin": {},
-      "is_classical": true,
-      "decoherence_streak": 1,
-      "last_tick_time": -Infinity,
-      "subjective_ticks": 0
+      "collapse_origin": {
+        "1": "self",
+        "4": "self",
+        "7": "self",
+        "10": "self",
+        "13": "self",
+        "16": "self",
+        "19": "self",
+        "22": "self",
+        "25": "self",
+        "28": "self",
+        "31": "self",
+        "34": "self",
+        "37": "self",
+        "40": "self",
+        "43": "self",
+        "46": "self",
+        "49": "self",
+        "52": "self",
+        "55": "self",
+        "58": "self",
+        "61": "self",
+        "64": "self",
+        "67": "self",
+        "70": "self",
+        "73": "self",
+        "76": "self",
+        "79": "self",
+        "82": "self",
+        "85": "self",
+        "88": "self",
+        "91": "self",
+        "94": "self",
+        "97": "self",
+        "100": "self"
+      },
+      "is_classical": false,
+      "decoherence_streak": 0,
+      "last_tick_time": 100,
+      "subjective_ticks": 34,
+      "law_wave_frequency": 0.05
+    },
+    "B2": {
+      "x": 250,
+      "y": 300,
+      "ticks": [
+        {
+          "time": 1,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 4,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 7,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 10,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 13,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 16,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 19,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 22,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 25,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 28,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 31,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 34,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 37,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 40,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 43,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 46,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 49,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 52,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 55,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 58,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 61,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 64,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 67,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 70,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 73,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 76,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 79,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 82,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 85,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 88,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 91,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 94,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 97,
+          "phase": 0.5,
+          "origin": "self"
+        },
+        {
+          "time": 100,
+          "phase": 0.5,
+          "origin": "self"
+        }
+      ],
+      "phase": 0.5,
+      "coherence": 1.0,
+      "decoherence": 0.0,
+      "frequency": 0.15,
+      "refractory_period": 2.099999999999999,
+      "base_threshold": 0.5,
+      "collapse_origin": {
+        "1": "self",
+        "4": "self",
+        "7": "self",
+        "10": "self",
+        "13": "self",
+        "16": "self",
+        "19": "self",
+        "22": "self",
+        "25": "self",
+        "28": "self",
+        "31": "self",
+        "34": "self",
+        "37": "self",
+        "40": "self",
+        "43": "self",
+        "46": "self",
+        "49": "self",
+        "52": "self",
+        "55": "self",
+        "58": "self",
+        "61": "self",
+        "64": "self",
+        "67": "self",
+        "70": "self",
+        "73": "self",
+        "76": "self",
+        "79": "self",
+        "82": "self",
+        "85": "self",
+        "88": "self",
+        "91": "self",
+        "94": "self",
+        "97": "self",
+        "100": "self"
+      },
+      "is_classical": false,
+      "decoherence_streak": 0,
+      "last_tick_time": 100,
+      "subjective_ticks": 34,
+      "law_wave_frequency": 0.05
     },
     "C": {
       "x": 400,
       "y": 250,
-      "ticks": [],
-      "phase": 0.0,
+      "ticks": [
+        {
+          "time": 4,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 8,
+          "phase": 0.22500000000000003,
+          "origin": "bridge"
+        },
+        {
+          "time": 12,
+          "phase": 0.22500000000000003,
+          "origin": "bridge"
+        },
+        {
+          "time": 16,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 20,
+          "phase": 0.22500000000000003,
+          "origin": "bridge"
+        },
+        {
+          "time": 24,
+          "phase": 0.22500000000000003,
+          "origin": "bridge"
+        },
+        {
+          "time": 28,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 32,
+          "phase": 0.22500000000000003,
+          "origin": "bridge"
+        },
+        {
+          "time": 36,
+          "phase": 0.22500000000000003,
+          "origin": "bridge"
+        },
+        {
+          "time": 40,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 44,
+          "phase": 0.22500000000000003,
+          "origin": "bridge"
+        },
+        {
+          "time": 48,
+          "phase": 0.22500000000000003,
+          "origin": "bridge"
+        },
+        {
+          "time": 52,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 56,
+          "phase": 0.22500000000000003,
+          "origin": "bridge"
+        },
+        {
+          "time": 60,
+          "phase": 0.22500000000000003,
+          "origin": "bridge"
+        },
+        {
+          "time": 64,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 68,
+          "phase": 0.22500000000000003,
+          "origin": "bridge"
+        },
+        {
+          "time": 72,
+          "phase": 0.22500000000000003,
+          "origin": "bridge"
+        },
+        {
+          "time": 76,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 80,
+          "phase": 0.22500000000000003,
+          "origin": "bridge"
+        },
+        {
+          "time": 84,
+          "phase": 0.22500000000000003,
+          "origin": "bridge"
+        },
+        {
+          "time": 88,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 92,
+          "phase": 0.22500000000000003,
+          "origin": "bridge"
+        },
+        {
+          "time": 96,
+          "phase": 0.22500000000000003,
+          "origin": "bridge"
+        },
+        {
+          "time": 100,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        }
+      ],
+      "phase": 0.22500000000000003,
+      "coherence": 1.0,
+      "decoherence": 0.0,
+      "frequency": 0.05,
+      "refractory_period": 3.099999999999999,
+      "base_threshold": 0.55,
+      "collapse_origin": {
+        "4": "self",
+        "8": "bridge",
+        "12": "bridge",
+        "16": "self",
+        "20": "bridge",
+        "24": "bridge",
+        "28": "self",
+        "32": "bridge",
+        "36": "bridge",
+        "40": "self",
+        "44": "bridge",
+        "48": "bridge",
+        "52": "self",
+        "56": "bridge",
+        "60": "bridge",
+        "64": "self",
+        "68": "bridge",
+        "72": "bridge",
+        "76": "self",
+        "80": "bridge",
+        "84": "bridge",
+        "88": "self",
+        "92": "bridge",
+        "96": "bridge",
+        "100": "self"
+      },
+      "is_classical": false,
+      "decoherence_streak": 0,
+      "last_tick_time": 100,
+      "subjective_ticks": 25,
+      "law_wave_frequency": 0.05
+    },
+    "D": {
+      "x": 550,
+      "y": 250,
+      "ticks": [
+        {
+          "time": 4,
+          "phase": 0.22500000000000003,
+          "origin": "bridge"
+        },
+        {
+          "time": 8,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 12,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 16,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 20,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 24,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 28,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 32,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 36,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 40,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 44,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 48,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 52,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 56,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 60,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 64,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 68,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 72,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 76,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 80,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 84,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 88,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 92,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 96,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        },
+        {
+          "time": 100,
+          "phase": 0.22500000000000003,
+          "origin": "self"
+        }
+      ],
+      "phase": 0.22500000000000003,
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 0.1,
-      "refractory_period": 3,
-      "base_threshold": 0.5,
-      "collapse_origin": {},
+      "refractory_period": 3.099999999999999,
+      "base_threshold": 0.55,
+      "collapse_origin": {
+        "4": "bridge",
+        "8": "self",
+        "12": "self",
+        "16": "self",
+        "20": "self",
+        "24": "self",
+        "28": "self",
+        "32": "self",
+        "36": "self",
+        "40": "self",
+        "44": "self",
+        "48": "self",
+        "52": "self",
+        "56": "self",
+        "60": "self",
+        "64": "self",
+        "68": "self",
+        "72": "self",
+        "76": "self",
+        "80": "self",
+        "84": "self",
+        "88": "self",
+        "92": "self",
+        "96": "self",
+        "100": "self"
+      },
       "is_classical": false,
       "decoherence_streak": 0,
-      "last_tick_time": -Infinity,
-      "subjective_ticks": 0
+      "last_tick_time": 100,
+      "subjective_ticks": 25,
+      "law_wave_frequency": 0.05
     }
   },
   "superpositions": {
-    "B": {
-      "1": [
-        0.0,
-        3.14
-      ],
-      "2": [
-        0.0,
-        3.14
-      ],
-      "3": [
+    "B1": {
+      "101.0": [
         0.0
-      ],
-      "4": [
-        3.14,
-        0.0
-      ],
-      "5": [
+      ]
+    },
+    "B2": {
+      "101.0": [
+        0.5
+      ]
+    },
+    "C": {
+      "103.0": [
         0.0,
-        3.14
-      ],
-      "6": [
-        0.0
-      ],
-      "7": [
-        0.0,
-        3.14
-      ],
-      "8": [
-        0.0,
-        3.14
-      ],
-      "9": [
-        0.0
-      ],
-      "10": [
-        3.14,
-        0.0
-      ],
-      "11": [
-        0.0,
-        3.14
-      ],
-      "12": [
-        0.0
-      ],
-      "13": [
-        0.0,
-        3.14
-      ],
-      "14": [
-        0.0,
-        3.14
-      ],
-      "15": [
-        0.0
-      ],
-      "16": [
-        3.14,
-        0.0
-      ],
-      "17": [
-        0.0,
-        3.14
-      ],
-      "18": [
-        0.0
-      ],
-      "19": [
-        0.0,
-        3.14
-      ],
-      "20": [
-        0.0,
-        3.14
-      ],
-      "21": [
-        0.0
-      ],
-      "22": [
-        3.14,
-        0.0
-      ],
-      "23": [
-        0.0,
-        3.14
-      ],
-      "24": [
-        0.0
-      ],
-      "25": [
-        0.0,
-        3.14
-      ],
-      "26": [
-        0.0,
-        3.14
-      ],
-      "27": [
-        0.0
-      ],
-      "28": [
-        3.14,
-        0.0
-      ],
-      "29": [
-        0.0,
-        3.14
-      ],
-      "30": [
-        0.0
-      ],
-      "31": [
-        0.0,
-        3.14
-      ],
-      "32": [
-        0.0,
-        3.14
-      ],
-      "33": [
-        0.0
-      ],
-      "34": [
-        3.14,
-        0.0
-      ],
-      "35": [
-        0.0,
-        3.14
-      ],
-      "36": [
-        0.0
-      ],
-      "37": [
-        0.0,
-        3.14
-      ],
-      "38": [
-        0.0,
-        3.14
-      ],
-      "39": [
-        0.0
-      ],
-      "40": [
-        3.14,
-        0.0
-      ],
-      "41": [
-        0.0,
-        3.14
-      ],
-      "42": [
-        0.0
-      ],
-      "43": [
-        0.0,
-        3.14
-      ],
-      "44": [
-        0.0,
-        3.14
-      ],
-      "45": [
-        0.0
-      ],
-      "46": [
-        3.14,
-        0.0
-      ],
-      "47": [
-        0.0,
-        3.14
-      ],
-      "48": [
-        0.0
-      ],
-      "49": [
-        0.0,
-        3.14
-      ],
-      "50": [
-        0.0,
-        3.14
-      ],
-      "51": [
-        0.0
-      ],
-      "52": [
-        3.14,
-        0.0
-      ],
-      "53": [
-        0.0,
-        3.14
-      ],
-      "54": [
-        0.0
-      ],
-      "55": [
-        0.0,
-        3.14
-      ],
-      "56": [
-        0.0,
-        3.14
-      ],
-      "57": [
-        0.0
-      ],
-      "58": [
-        3.14,
-        0.0
-      ],
-      "59": [
-        0.0,
-        3.14
-      ],
-      "60": [
-        0.0
-      ],
-      "61": [
-        0.0,
-        3.14
-      ],
-      "62": [
-        0.0,
-        3.14
-      ],
-      "63": [
-        0.0
-      ],
-      "64": [
-        3.14,
-        0.0
-      ],
-      "65": [
-        0.0,
-        3.14
-      ],
-      "66": [
-        0.0
-      ],
-      "67": [
-        0.0,
-        3.14
-      ],
-      "68": [
-        0.0,
-        3.14
-      ],
-      "69": [
-        0.0
-      ],
-      "70": [
-        3.14,
-        0.0
-      ],
-      "71": [
-        0.0,
-        3.14
-      ],
-      "72": [
-        0.0
-      ],
-      "73": [
-        0.0,
-        3.14
-      ],
-      "74": [
-        0.0,
-        3.14
-      ],
-      "75": [
-        0.0
-      ],
-      "76": [
-        3.14,
-        0.0
-      ],
-      "77": [
-        0.0,
-        3.14
-      ],
-      "78": [
-        0.0
-      ],
-      "79": [
-        0.0,
-        3.14
-      ],
-      "80": [
-        0.0,
-        3.14
-      ],
-      "81": [
-        0.0
-      ],
-      "82": [
-        3.14,
-        0.0
-      ],
-      "83": [
-        0.0,
-        3.14
-      ],
-      "84": [
-        0.0
-      ],
-      "85": [
-        0.0,
-        3.14
-      ],
-      "86": [
-        0.0,
-        3.14
-      ],
-      "87": [
-        0.0
-      ],
-      "88": [
-        3.14,
-        0.0
-      ],
-      "89": [
-        0.0,
-        3.14
-      ],
-      "90": [
-        0.0
-      ],
-      "91": [
-        0.0,
-        3.14
-      ],
-      "92": [
-        0.0,
-        3.14
-      ],
-      "93": [
-        0.0
-      ],
-      "94": [
-        3.14,
-        0.0
-      ],
-      "95": [
-        0.0,
-        3.14
-      ],
-      "96": [
-        0.0
-      ],
-      "97": [
-        0.0,
-        3.14
-      ],
-      "98": [
-        0.0,
-        3.14
-      ],
-      "99": [
-        0.0
-      ],
-      "100": [
-        3.14,
-        0.0
-      ],
-      "101": [
-        0.0,
-        3.14
+        0.45
+      ]
+    },
+    "D": {
+      "104.0": [
+        0.225
       ]
     }
   },
   "edges": [
     {
       "from": "A1",
-      "to": "B",
+      "to": "B1",
       "delay": 1,
       "attenuation": 1.0,
-      "density": 0.0,
+      "density": 0.8,
       "phase_shift": 0.0
     },
     {
       "from": "A2",
-      "to": "B",
+      "to": "B2",
       "delay": 1,
       "attenuation": 1.0,
-      "density": 0.0,
-      "phase_shift": 3.14
+      "density": 0.8,
+      "phase_shift": 0.0
     },
     {
-      "from": "B",
+      "from": "B1",
       "to": "C",
       "delay": 2,
       "attenuation": 0.9,
-      "density": 0.0,
+      "density": 1.2,
+      "phase_shift": 0.0
+    },
+    {
+      "from": "B2",
+      "to": "C",
+      "delay": 2,
+      "attenuation": 0.9,
+      "density": 1.2,
+      "phase_shift": 0.0
+    },
+    {
+      "from": "C",
+      "to": "D",
+      "delay": 3,
+      "attenuation": 1.0,
+      "density": 1.0,
       "phase_shift": 0.0
     }
   ],
   "tick_sources": [
     {
       "node_id": "A1",
-      "tick_interval": 2,
+      "tick_interval": 3,
       "phase": 0.0
     },
     {
       "node_id": "A2",
       "tick_interval": 3,
-      "phase": 0.0
+      "phase": 0.5
     }
   ]
 }
