@@ -133,11 +133,6 @@ def log_metrics_per_tick(global_tick):
     with open("output/law_wave_log.json", "a") as f:
         f.write(json.dumps({str(global_tick): law_wave_log}) + "\n")
 
-    clusters = graph.detect_clusters()
-
-    with open("output/cluster_log.json", "a") as f:
-        f.write(json.dumps({str(global_tick): clusters}) + "\n")
-
     with open("output/decoherence_log.json", "a") as f:
         f.write(json.dumps({str(global_tick): decoherence_log}) + "\n")
     with open("output/coherence_log.json", "a") as f:
