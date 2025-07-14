@@ -1,0 +1,326 @@
+{
+  "curvature": {
+    "A1->B1": {
+      "delay_range": [
+        1,
+        1
+      ]
+    },
+    "A2->B2": {
+      "delay_range": [
+        2,
+        2
+      ]
+    },
+    "A3->B3": {
+      "delay_range": [
+        2,
+        2
+      ]
+    },
+    "B1->C": {
+      "delay_range": [
+        3,
+        4
+      ]
+    },
+    "B2->C": {
+      "delay_range": [
+        3,
+        4
+      ]
+    },
+    "B3->C": {
+      "delay_range": [
+        3,
+        4
+      ]
+    },
+    "C->D": {
+      "delay_range": [
+        4,
+        4
+      ]
+    },
+    "C->E": {
+      "delay_range": [
+        4,
+        4
+      ]
+    },
+    "B2->D": {
+      "delay_range": [
+        5,
+        6
+      ]
+    },
+    "B3->E": {
+      "delay_range": [
+        5,
+        6
+      ]
+    },
+    "D->E": {
+      "delay_range": [
+        2,
+        2
+      ]
+    },
+    "E->D": {
+      "delay_range": [
+        2,
+        2
+      ]
+    }
+  },
+  "coherence": {
+    "A1": {
+      "max": 1.0,
+      "min": 1.0
+    },
+    "A2": {
+      "max": 1.0,
+      "min": 1.0
+    },
+    "A3": {
+      "max": 1.0,
+      "min": 1.0
+    },
+    "B1": {
+      "max": 1.0,
+      "min": 1.0
+    },
+    "B2": {
+      "max": 1.0,
+      "min": 1.0
+    },
+    "B3": {
+      "max": 1.0,
+      "min": 1.0
+    },
+    "C": {
+      "max": 1.0,
+      "min": 1.0
+    },
+    "D": {
+      "max": 1.0,
+      "min": 1.0
+    },
+    "E": {
+      "max": 1.0,
+      "min": 1.0
+    }
+  },
+  "law_wave": {
+    "A1": {
+      "mean": 0.05,
+      "variance": 0.0
+    },
+    "A2": {
+      "mean": 0.05,
+      "variance": 0.0
+    },
+    "A3": {
+      "mean": 0.05,
+      "variance": 0.0
+    },
+    "B1": {
+      "mean": 0.0495,
+      "variance": 2.5e-05
+    },
+    "B2": {
+      "mean": 0.0495,
+      "variance": 2.5e-05
+    },
+    "B3": {
+      "mean": 0.0495,
+      "variance": 2.5e-05
+    },
+    "C": {
+      "mean": 0.0901,
+      "variance": 0.00906
+    },
+    "D": {
+      "mean": 0.1827,
+      "variance": 0.025022
+    },
+    "E": {
+      "mean": 0.1569,
+      "variance": 0.021388
+    }
+  },
+  "decoherence": {
+    "A1": {
+      "max": 0.0,
+      "min": 0.0
+    },
+    "A2": {
+      "max": 0.0,
+      "min": 0.0
+    },
+    "A3": {
+      "max": 0.0,
+      "min": 0.0
+    },
+    "B1": {
+      "max": 0.0,
+      "min": 0.0
+    },
+    "B2": {
+      "max": 0.0,
+      "min": 0.0
+    },
+    "B3": {
+      "max": 0.0,
+      "min": 0.0
+    },
+    "C": {
+      "max": 0.0,
+      "min": 0.0
+    },
+    "D": {
+      "max": 0.0,
+      "min": 0.0
+    },
+    "E": {
+      "max": 0.0,
+      "min": 0.0
+    }
+  },
+  "clusters": {
+    "first_detected": 0,
+    "max_clusters": 2
+  },
+  "bridges": {
+    "A1->A2": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "A2->A3": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "B1->B2": {
+      "active": true,
+      "last_activation": 30,
+      "last_rupture_tick": 98,
+      "last_reform_tick": 99,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.0,
+      "reinforcement": 0
+    },
+    "B2->B3": {
+      "active": true,
+      "last_activation": 37,
+      "last_rupture_tick": 98,
+      "last_reform_tick": 99,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.0,
+      "reinforcement": 0
+    },
+    "B2->C": {
+      "active": true,
+      "last_activation": 4,
+      "last_rupture_tick": 98,
+      "last_reform_tick": 99,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.0,
+      "reinforcement": 0
+    },
+    "C->D": {
+      "active": false,
+      "last_activation": 8,
+      "last_rupture_tick": 99,
+      "last_reform_tick": 99,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.0,
+      "reinforcement": 0
+    },
+    "C->E": {
+      "active": true,
+      "last_activation": 8,
+      "last_rupture_tick": 98,
+      "last_reform_tick": 99,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.0,
+      "reinforcement": 0
+    },
+    "D->E": {
+      "active": false,
+      "last_activation": 62,
+      "last_rupture_tick": 99,
+      "last_reform_tick": 98,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.0,
+      "reinforcement": 0
+    },
+    "A1->B3": {
+      "active": true,
+      "last_activation": 2,
+      "last_rupture_tick": 97,
+      "last_reform_tick": 98,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.0,
+      "reinforcement": 0
+    },
+    "A3->B1": {
+      "active": true,
+      "last_activation": 28,
+      "last_rupture_tick": 97,
+      "last_reform_tick": 98,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.0,
+      "reinforcement": 0
+    }
+  },
+  "law_drift": {
+    "A1": 9,
+    "A2": 9,
+    "A3": 9,
+    "B1": 9,
+    "B2": 9,
+    "B3": 9,
+    "E": 1,
+    "D": 1,
+    "C": 2
+  },
+  "meta_nodes": {
+    "meta_A1_A2_A3": 61,
+    "meta_A1_A2_A3_B1_B2_B3_C_D_E": 89,
+    "meta_A1_A2_A3_B1_B2_B3_C_E": 79,
+    "meta_A1_A2_A3_B1_B2_B3_C_D": 73,
+    "meta_A1_A2_A3_B1_B2_B3_D_E": 65,
+    "meta_A1_A2_A3_B1_B2_B3_C": 60,
+    "meta_A1_A2_A3_B1_B2_B3_D": 56,
+    "meta_C_E": 48,
+    "meta_A1_A2_A3_B1_B2_B3_E": 51,
+    "meta_D_E": 32,
+    "meta_A1_A2_A3_B1_B2_B3": 26
+  },
+  "tick_counts": {
+    "A1": 35,
+    "A2": 26,
+    "A3": 29,
+    "B1": 34,
+    "B2": 38,
+    "B3": 25,
+    "C": 37,
+    "D": 55,
+    "E": 53
+  },
+  "inspection_events": 1,
+  "console": {
+    "lines": 0,
+    "ticks_logged": 0
+  }
+}

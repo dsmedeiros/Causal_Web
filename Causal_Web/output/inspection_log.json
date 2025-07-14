@@ -1,20 +1,20 @@
 [
   {
-    "tick": 103,
-    "node": "C",
+    "tick": 104,
+    "node": "D",
     "contributors": [
       {
-        "phase": 0.0,
+        "phase": 1.706,
         "magnitude": 1.0
       },
       {
-        "phase": 0.45,
+        "phase": 5.492,
         "magnitude": 1.0
       }
     ],
     "interference_result": {
-      "resultant_phase": 0.225,
-      "amplitude": 1.9496,
+      "resultant_phase": 0.4574,
+      "amplitude": 0.6334,
       "type": "partial"
     },
     "collapsed": false,
@@ -23,6 +23,16 @@
         "between": [
           "C",
           "D"
+        ],
+        "active": true,
+        "type": "braided",
+        "drift_tolerance": 0.9,
+        "decoherence_limit": 6
+      },
+      {
+        "between": [
+          "D",
+          "E"
         ],
         "active": true,
         "type": "braided",

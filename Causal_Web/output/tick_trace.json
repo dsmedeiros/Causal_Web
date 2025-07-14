@@ -2,7 +2,7 @@
   "nodes": {
     "A1": {
       "x": 100,
-      "y": 200,
+      "y": 100,
       "ticks": [
         {
           "time": 0,
@@ -10,8 +10,8 @@
           "origin": "source"
         },
         {
-          "time": 1,
-          "phase": 0.0,
+          "time": 2,
+          "phase": -2.4681853071795867,
           "origin": "bridge"
         },
         {
@@ -20,19 +20,9 @@
           "origin": "source"
         },
         {
-          "time": 4,
-          "phase": 0.0,
-          "origin": "bridge"
-        },
-        {
           "time": 6,
           "phase": 0.0,
           "origin": "source"
-        },
-        {
-          "time": 7,
-          "phase": 0.0,
-          "origin": "bridge"
         },
         {
           "time": 9,
@@ -40,19 +30,9 @@
           "origin": "source"
         },
         {
-          "time": 10,
-          "phase": 0.0,
-          "origin": "bridge"
-        },
-        {
           "time": 12,
           "phase": 0.0,
           "origin": "source"
-        },
-        {
-          "time": 13,
-          "phase": 0.0,
-          "origin": "bridge"
         },
         {
           "time": 15,
@@ -60,19 +40,9 @@
           "origin": "source"
         },
         {
-          "time": 16,
-          "phase": 0.0,
-          "origin": "bridge"
-        },
-        {
           "time": 18,
           "phase": 0.0,
           "origin": "source"
-        },
-        {
-          "time": 19,
-          "phase": 0.0,
-          "origin": "bridge"
         },
         {
           "time": 21,
@@ -80,19 +50,9 @@
           "origin": "source"
         },
         {
-          "time": 22,
-          "phase": 0.0,
-          "origin": "bridge"
-        },
-        {
           "time": 24,
           "phase": 0.0,
           "origin": "source"
-        },
-        {
-          "time": 25,
-          "phase": 0.0,
-          "origin": "bridge"
         },
         {
           "time": 27,
@@ -100,19 +60,9 @@
           "origin": "source"
         },
         {
-          "time": 28,
-          "phase": 0.0,
-          "origin": "bridge"
-        },
-        {
           "time": 30,
           "phase": 0.0,
           "origin": "source"
-        },
-        {
-          "time": 31,
-          "phase": 0.0,
-          "origin": "bridge"
         },
         {
           "time": 33,
@@ -120,19 +70,9 @@
           "origin": "source"
         },
         {
-          "time": 34,
-          "phase": 0.0,
-          "origin": "bridge"
-        },
-        {
           "time": 36,
           "phase": 0.0,
           "origin": "source"
-        },
-        {
-          "time": 37,
-          "phase": 0.0,
-          "origin": "bridge"
         },
         {
           "time": 39,
@@ -140,19 +80,9 @@
           "origin": "source"
         },
         {
-          "time": 40,
-          "phase": 0.0,
-          "origin": "bridge"
-        },
-        {
           "time": 42,
           "phase": 0.0,
           "origin": "source"
-        },
-        {
-          "time": 43,
-          "phase": 0.0,
-          "origin": "bridge"
         },
         {
           "time": 45,
@@ -160,19 +90,9 @@
           "origin": "source"
         },
         {
-          "time": 46,
-          "phase": 0.0,
-          "origin": "bridge"
-        },
-        {
           "time": 48,
           "phase": 0.0,
           "origin": "source"
-        },
-        {
-          "time": 49,
-          "phase": 0.0,
-          "origin": "bridge"
         },
         {
           "time": 51,
@@ -180,19 +100,9 @@
           "origin": "source"
         },
         {
-          "time": 52,
-          "phase": 0.0,
-          "origin": "bridge"
-        },
-        {
           "time": 54,
           "phase": 0.0,
           "origin": "source"
-        },
-        {
-          "time": 55,
-          "phase": 0.0,
-          "origin": "bridge"
         },
         {
           "time": 57,
@@ -200,19 +110,9 @@
           "origin": "source"
         },
         {
-          "time": 58,
-          "phase": 0.0,
-          "origin": "bridge"
-        },
-        {
           "time": 60,
           "phase": 0.0,
           "origin": "source"
-        },
-        {
-          "time": 61,
-          "phase": 0.0,
-          "origin": "bridge"
         },
         {
           "time": 63,
@@ -220,19 +120,9 @@
           "origin": "source"
         },
         {
-          "time": 64,
-          "phase": 0.0,
-          "origin": "bridge"
-        },
-        {
           "time": 66,
           "phase": 0.0,
           "origin": "source"
-        },
-        {
-          "time": 67,
-          "phase": 0.0,
-          "origin": "bridge"
         },
         {
           "time": 69,
@@ -240,19 +130,9 @@
           "origin": "source"
         },
         {
-          "time": 70,
-          "phase": 0.0,
-          "origin": "bridge"
-        },
-        {
           "time": 72,
           "phase": 0.0,
           "origin": "source"
-        },
-        {
-          "time": 73,
-          "phase": 0.0,
-          "origin": "bridge"
         },
         {
           "time": 75,
@@ -260,19 +140,9 @@
           "origin": "source"
         },
         {
-          "time": 76,
-          "phase": 0.0,
-          "origin": "bridge"
-        },
-        {
           "time": 78,
           "phase": 0.0,
           "origin": "source"
-        },
-        {
-          "time": 79,
-          "phase": 0.0,
-          "origin": "bridge"
         },
         {
           "time": 81,
@@ -280,19 +150,9 @@
           "origin": "source"
         },
         {
-          "time": 82,
-          "phase": 0.0,
-          "origin": "bridge"
-        },
-        {
           "time": 84,
           "phase": 0.0,
           "origin": "source"
-        },
-        {
-          "time": 85,
-          "phase": 0.0,
-          "origin": "bridge"
         },
         {
           "time": 87,
@@ -300,19 +160,9 @@
           "origin": "source"
         },
         {
-          "time": 88,
-          "phase": 0.0,
-          "origin": "bridge"
-        },
-        {
           "time": 90,
           "phase": 0.0,
           "origin": "source"
-        },
-        {
-          "time": 91,
-          "phase": 0.0,
-          "origin": "bridge"
         },
         {
           "time": 93,
@@ -320,114 +170,252 @@
           "origin": "source"
         },
         {
-          "time": 94,
-          "phase": 0.0,
-          "origin": "bridge"
-        },
-        {
           "time": 96,
           "phase": 0.0,
           "origin": "source"
         },
         {
-          "time": 97,
-          "phase": 0.0,
-          "origin": "bridge"
-        },
-        {
           "time": 99,
           "phase": 0.0,
           "origin": "source"
-        },
-        {
-          "time": 100,
-          "phase": 0.0,
-          "origin": "bridge"
         }
       ],
       "phase": 0.0,
       "coherence": 1.0,
       "decoherence": 0.0,
-      "frequency": 0.25,
-      "refractory_period": 2.099999999999999,
-      "base_threshold": 0.45,
+      "frequency": 0.18,
+      "refractory_period": 1.0,
+      "base_threshold": 0.4,
       "collapse_origin": {
         "0": "source",
-        "1": "bridge",
+        "2": "bridge",
         "3": "source",
-        "4": "bridge",
         "6": "source",
-        "7": "bridge",
         "9": "source",
-        "10": "bridge",
         "12": "source",
-        "13": "bridge",
         "15": "source",
-        "16": "bridge",
         "18": "source",
-        "19": "bridge",
         "21": "source",
-        "22": "bridge",
         "24": "source",
-        "25": "bridge",
         "27": "source",
-        "28": "bridge",
         "30": "source",
-        "31": "bridge",
         "33": "source",
-        "34": "bridge",
         "36": "source",
-        "37": "bridge",
         "39": "source",
-        "40": "bridge",
         "42": "source",
-        "43": "bridge",
         "45": "source",
-        "46": "bridge",
         "48": "source",
-        "49": "bridge",
         "51": "source",
-        "52": "bridge",
         "54": "source",
-        "55": "bridge",
         "57": "source",
-        "58": "bridge",
         "60": "source",
-        "61": "bridge",
         "63": "source",
-        "64": "bridge",
         "66": "source",
-        "67": "bridge",
         "69": "source",
-        "70": "bridge",
         "72": "source",
-        "73": "bridge",
         "75": "source",
-        "76": "bridge",
         "78": "source",
-        "79": "bridge",
         "81": "source",
-        "82": "bridge",
         "84": "source",
-        "85": "bridge",
         "87": "source",
-        "88": "bridge",
         "90": "source",
-        "91": "bridge",
         "93": "source",
-        "94": "bridge",
         "96": "source",
-        "97": "bridge",
-        "99": "source",
-        "100": "bridge"
+        "99": "source"
+      },
+      "is_classical": false,
+      "decoherence_streak": 0,
+      "last_tick_time": 99,
+      "subjective_ticks": 35,
+      "law_wave_frequency": 0.05,
+      "trust_profile": {
+        "source": 1.0,
+        "bridge": 0.55
+      },
+      "phase_confidence": 1.0,
+      "goals": {}
+    },
+    "A2": {
+      "x": 100,
+      "y": 200,
+      "ticks": [
+        {
+          "time": 0,
+          "phase": 0.25,
+          "origin": "source"
+        },
+        {
+          "time": 4,
+          "phase": 0.25,
+          "origin": "source"
+        },
+        {
+          "time": 8,
+          "phase": 0.25,
+          "origin": "source"
+        },
+        {
+          "time": 12,
+          "phase": 0.25,
+          "origin": "source"
+        },
+        {
+          "time": 16,
+          "phase": 0.25,
+          "origin": "source"
+        },
+        {
+          "time": 20,
+          "phase": 0.25,
+          "origin": "source"
+        },
+        {
+          "time": 24,
+          "phase": 0.25,
+          "origin": "source"
+        },
+        {
+          "time": 28,
+          "phase": 0.25,
+          "origin": "source"
+        },
+        {
+          "time": 32,
+          "phase": 0.25,
+          "origin": "source"
+        },
+        {
+          "time": 36,
+          "phase": 0.25,
+          "origin": "source"
+        },
+        {
+          "time": 40,
+          "phase": 0.25,
+          "origin": "source"
+        },
+        {
+          "time": 44,
+          "phase": 0.25,
+          "origin": "source"
+        },
+        {
+          "time": 48,
+          "phase": 0.25,
+          "origin": "source"
+        },
+        {
+          "time": 52,
+          "phase": 0.25,
+          "origin": "source"
+        },
+        {
+          "time": 56,
+          "phase": 0.25,
+          "origin": "source"
+        },
+        {
+          "time": 60,
+          "phase": 0.25,
+          "origin": "source"
+        },
+        {
+          "time": 64,
+          "phase": 0.25,
+          "origin": "source"
+        },
+        {
+          "time": 68,
+          "phase": 0.25,
+          "origin": "source"
+        },
+        {
+          "time": 72,
+          "phase": 0.25,
+          "origin": "source"
+        },
+        {
+          "time": 76,
+          "phase": 0.25,
+          "origin": "source"
+        },
+        {
+          "time": 80,
+          "phase": 0.25,
+          "origin": "source"
+        },
+        {
+          "time": 84,
+          "phase": 0.25,
+          "origin": "source"
+        },
+        {
+          "time": 88,
+          "phase": 0.25,
+          "origin": "source"
+        },
+        {
+          "time": 92,
+          "phase": 0.25,
+          "origin": "source"
+        },
+        {
+          "time": 96,
+          "phase": 0.25,
+          "origin": "source"
+        },
+        {
+          "time": 100,
+          "phase": 0.25,
+          "origin": "source"
+        }
+      ],
+      "phase": 0.25,
+      "coherence": 1.0,
+      "decoherence": 0.0,
+      "frequency": 0.2,
+      "refractory_period": 1.0,
+      "base_threshold": 0.4,
+      "collapse_origin": {
+        "0": "source",
+        "4": "source",
+        "8": "source",
+        "12": "source",
+        "16": "source",
+        "20": "source",
+        "24": "source",
+        "28": "source",
+        "32": "source",
+        "36": "source",
+        "40": "source",
+        "44": "source",
+        "48": "source",
+        "52": "source",
+        "56": "source",
+        "60": "source",
+        "64": "source",
+        "68": "source",
+        "72": "source",
+        "76": "source",
+        "80": "source",
+        "84": "source",
+        "88": "source",
+        "92": "source",
+        "96": "source",
+        "100": "source"
       },
       "is_classical": false,
       "decoherence_streak": 0,
       "last_tick_time": 100,
-      "subjective_ticks": 68,
-      "law_wave_frequency": 0.05
+      "subjective_ticks": 26,
+      "law_wave_frequency": 0.05,
+      "trust_profile": {
+        "source": 1.0
+      },
+      "phase_confidence": 1.0,
+      "goals": {}
     },
-    "A2": {
+    "A3": {
       "x": 100,
       "y": 300,
       "ticks": [
@@ -438,47 +426,32 @@
         },
         {
           "time": 1,
-          "phase": 0.5,
+          "phase": 0.75,
           "origin": "bridge"
-        },
-        {
-          "time": 3,
-          "phase": 0.5,
-          "origin": "source"
         },
         {
           "time": 4,
-          "phase": 0.5,
+          "phase": 0.75,
           "origin": "bridge"
         },
         {
-          "time": 6,
+          "time": 5,
           "phase": 0.5,
           "origin": "source"
         },
         {
           "time": 7,
-          "phase": 0.5,
+          "phase": 0.75,
           "origin": "bridge"
-        },
-        {
-          "time": 9,
-          "phase": 0.5,
-          "origin": "source"
         },
         {
           "time": 10,
-          "phase": 0.5,
-          "origin": "bridge"
-        },
-        {
-          "time": 12,
           "phase": 0.5,
           "origin": "source"
         },
         {
           "time": 13,
-          "phase": 0.5,
+          "phase": 0.75,
           "origin": "bridge"
         },
         {
@@ -488,47 +461,32 @@
         },
         {
           "time": 16,
-          "phase": 0.5,
+          "phase": 0.75,
           "origin": "bridge"
-        },
-        {
-          "time": 18,
-          "phase": 0.5,
-          "origin": "source"
         },
         {
           "time": 19,
-          "phase": 0.5,
+          "phase": 0.75,
           "origin": "bridge"
         },
         {
-          "time": 21,
+          "time": 20,
           "phase": 0.5,
           "origin": "source"
         },
         {
           "time": 22,
-          "phase": 0.5,
+          "phase": 0.75,
           "origin": "bridge"
-        },
-        {
-          "time": 24,
-          "phase": 0.5,
-          "origin": "source"
         },
         {
           "time": 25,
-          "phase": 0.5,
-          "origin": "bridge"
-        },
-        {
-          "time": 27,
           "phase": 0.5,
           "origin": "source"
         },
         {
           "time": 28,
-          "phase": 0.5,
+          "phase": 0.75,
           "origin": "bridge"
         },
         {
@@ -537,49 +495,14 @@
           "origin": "source"
         },
         {
-          "time": 31,
-          "phase": 0.5,
-          "origin": "bridge"
-        },
-        {
-          "time": 33,
-          "phase": 0.5,
-          "origin": "source"
-        },
-        {
-          "time": 34,
-          "phase": 0.5,
-          "origin": "bridge"
-        },
-        {
-          "time": 36,
-          "phase": 0.5,
-          "origin": "source"
-        },
-        {
-          "time": 37,
-          "phase": 0.5,
-          "origin": "bridge"
-        },
-        {
-          "time": 39,
+          "time": 35,
           "phase": 0.5,
           "origin": "source"
         },
         {
           "time": 40,
           "phase": 0.5,
-          "origin": "bridge"
-        },
-        {
-          "time": 42,
-          "phase": 0.5,
           "origin": "source"
-        },
-        {
-          "time": 43,
-          "phase": 0.5,
-          "origin": "bridge"
         },
         {
           "time": 45,
@@ -587,49 +510,14 @@
           "origin": "source"
         },
         {
-          "time": 46,
-          "phase": 0.5,
-          "origin": "bridge"
-        },
-        {
-          "time": 48,
-          "phase": 0.5,
-          "origin": "source"
-        },
-        {
-          "time": 49,
-          "phase": 0.5,
-          "origin": "bridge"
-        },
-        {
-          "time": 51,
-          "phase": 0.5,
-          "origin": "source"
-        },
-        {
-          "time": 52,
-          "phase": 0.5,
-          "origin": "bridge"
-        },
-        {
-          "time": 54,
+          "time": 50,
           "phase": 0.5,
           "origin": "source"
         },
         {
           "time": 55,
           "phase": 0.5,
-          "origin": "bridge"
-        },
-        {
-          "time": 57,
-          "phase": 0.5,
           "origin": "source"
-        },
-        {
-          "time": 58,
-          "phase": 0.5,
-          "origin": "bridge"
         },
         {
           "time": 60,
@@ -637,49 +525,14 @@
           "origin": "source"
         },
         {
-          "time": 61,
-          "phase": 0.5,
-          "origin": "bridge"
-        },
-        {
-          "time": 63,
-          "phase": 0.5,
-          "origin": "source"
-        },
-        {
-          "time": 64,
-          "phase": 0.5,
-          "origin": "bridge"
-        },
-        {
-          "time": 66,
-          "phase": 0.5,
-          "origin": "source"
-        },
-        {
-          "time": 67,
-          "phase": 0.5,
-          "origin": "bridge"
-        },
-        {
-          "time": 69,
+          "time": 65,
           "phase": 0.5,
           "origin": "source"
         },
         {
           "time": 70,
           "phase": 0.5,
-          "origin": "bridge"
-        },
-        {
-          "time": 72,
-          "phase": 0.5,
           "origin": "source"
-        },
-        {
-          "time": 73,
-          "phase": 0.5,
-          "origin": "bridge"
         },
         {
           "time": 75,
@@ -687,49 +540,14 @@
           "origin": "source"
         },
         {
-          "time": 76,
-          "phase": 0.5,
-          "origin": "bridge"
-        },
-        {
-          "time": 78,
-          "phase": 0.5,
-          "origin": "source"
-        },
-        {
-          "time": 79,
-          "phase": 0.5,
-          "origin": "bridge"
-        },
-        {
-          "time": 81,
-          "phase": 0.5,
-          "origin": "source"
-        },
-        {
-          "time": 82,
-          "phase": 0.5,
-          "origin": "bridge"
-        },
-        {
-          "time": 84,
+          "time": 80,
           "phase": 0.5,
           "origin": "source"
         },
         {
           "time": 85,
           "phase": 0.5,
-          "origin": "bridge"
-        },
-        {
-          "time": 87,
-          "phase": 0.5,
           "origin": "source"
-        },
-        {
-          "time": 88,
-          "phase": 0.5,
-          "origin": "bridge"
         },
         {
           "time": 90,
@@ -737,126 +555,68 @@
           "origin": "source"
         },
         {
-          "time": 91,
-          "phase": 0.5,
-          "origin": "bridge"
-        },
-        {
-          "time": 93,
-          "phase": 0.5,
-          "origin": "source"
-        },
-        {
-          "time": 94,
-          "phase": 0.5,
-          "origin": "bridge"
-        },
-        {
-          "time": 96,
-          "phase": 0.5,
-          "origin": "source"
-        },
-        {
-          "time": 97,
-          "phase": 0.5,
-          "origin": "bridge"
-        },
-        {
-          "time": 99,
+          "time": 95,
           "phase": 0.5,
           "origin": "source"
         },
         {
           "time": 100,
           "phase": 0.5,
-          "origin": "bridge"
+          "origin": "source"
         }
       ],
       "phase": 0.5,
       "coherence": 1.0,
       "decoherence": 0.0,
-      "frequency": 0.25,
-      "refractory_period": 2.099999999999999,
-      "base_threshold": 0.45,
+      "frequency": 0.22,
+      "refractory_period": 1.0,
+      "base_threshold": 0.4,
       "collapse_origin": {
         "0": "source",
         "1": "bridge",
-        "3": "source",
         "4": "bridge",
-        "6": "source",
+        "5": "source",
         "7": "bridge",
-        "9": "source",
-        "10": "bridge",
-        "12": "source",
+        "10": "source",
         "13": "bridge",
         "15": "source",
         "16": "bridge",
-        "18": "source",
         "19": "bridge",
-        "21": "source",
+        "20": "source",
         "22": "bridge",
-        "24": "source",
-        "25": "bridge",
-        "27": "source",
+        "25": "source",
         "28": "bridge",
         "30": "source",
-        "31": "bridge",
-        "33": "source",
-        "34": "bridge",
-        "36": "source",
-        "37": "bridge",
-        "39": "source",
-        "40": "bridge",
-        "42": "source",
-        "43": "bridge",
+        "35": "source",
+        "40": "source",
         "45": "source",
-        "46": "bridge",
-        "48": "source",
-        "49": "bridge",
-        "51": "source",
-        "52": "bridge",
-        "54": "source",
-        "55": "bridge",
-        "57": "source",
-        "58": "bridge",
+        "50": "source",
+        "55": "source",
         "60": "source",
-        "61": "bridge",
-        "63": "source",
-        "64": "bridge",
-        "66": "source",
-        "67": "bridge",
-        "69": "source",
-        "70": "bridge",
-        "72": "source",
-        "73": "bridge",
+        "65": "source",
+        "70": "source",
         "75": "source",
-        "76": "bridge",
-        "78": "source",
-        "79": "bridge",
-        "81": "source",
-        "82": "bridge",
-        "84": "source",
-        "85": "bridge",
-        "87": "source",
-        "88": "bridge",
+        "80": "source",
+        "85": "source",
         "90": "source",
-        "91": "bridge",
-        "93": "source",
-        "94": "bridge",
-        "96": "source",
-        "97": "bridge",
-        "99": "source",
-        "100": "bridge"
+        "95": "source",
+        "100": "source"
       },
       "is_classical": false,
       "decoherence_streak": 0,
       "last_tick_time": 100,
-      "subjective_ticks": 68,
-      "law_wave_frequency": 0.05
+      "subjective_ticks": 29,
+      "law_wave_frequency": 0.05,
+      "trust_profile": {
+        "source": 1.0,
+        "bridge": 0.9000000000000004
+      },
+      "phase_confidence": 1.0,
+      "goals": {}
     },
     "B1": {
-      "x": 250,
-      "y": 200,
+      "x": 300,
+      "y": 100,
       "ticks": [
         {
           "time": 1,
@@ -909,9 +669,9 @@
           "origin": "self"
         },
         {
-          "time": 31,
-          "phase": 0.0,
-          "origin": "self"
+          "time": 30,
+          "phase": 2.12,
+          "origin": "bridge"
         },
         {
           "time": 34,
@@ -1032,8 +792,8 @@
       "phase": 0.0,
       "coherence": 1.0,
       "decoherence": 0.0,
-      "frequency": 0.15,
-      "refractory_period": 2.099999999999999,
+      "frequency": 0.12,
+      "refractory_period": 1.0,
       "base_threshold": 0.5,
       "collapse_origin": {
         "1": "self",
@@ -1046,7 +806,7 @@
         "22": "self",
         "25": "self",
         "28": "self",
-        "31": "self",
+        "30": "bridge",
         "34": "self",
         "37": "self",
         "40": "self",
@@ -1075,536 +835,976 @@
       "decoherence_streak": 0,
       "last_tick_time": 100,
       "subjective_ticks": 34,
-      "law_wave_frequency": 0.05
+      "law_wave_frequency": 0.05,
+      "trust_profile": {
+        "self": 1.0,
+        "bridge": 0.55
+      },
+      "phase_confidence": 1.0,
+      "goals": {}
     },
     "B2": {
-      "x": 250,
-      "y": 300,
+      "x": 300,
+      "y": 200,
       "ticks": [
         {
           "time": 1,
-          "phase": 0.5,
-          "origin": "self"
+          "phase": 0.3,
+          "origin": "bridge"
+        },
+        {
+          "time": 2,
+          "phase": -2.418185307179587,
+          "origin": "bridge"
         },
         {
           "time": 4,
-          "phase": 0.5,
-          "origin": "self"
+          "phase": 0.3,
+          "origin": "bridge"
+        },
+        {
+          "time": 6,
+          "phase": -2.205685307179587,
+          "origin": "bridge"
         },
         {
           "time": 7,
-          "phase": 0.5,
-          "origin": "self"
+          "phase": 0.3,
+          "origin": "bridge"
+        },
+        {
+          "time": 9,
+          "phase": -2.205685307179587,
+          "origin": "bridge"
         },
         {
           "time": 10,
-          "phase": 0.5,
-          "origin": "self"
+          "phase": 0.3,
+          "origin": "bridge"
+        },
+        {
+          "time": 12,
+          "phase": -2.418185307179587,
+          "origin": "bridge"
         },
         {
           "time": 13,
-          "phase": 0.5,
-          "origin": "self"
+          "phase": 0.3,
+          "origin": "bridge"
+        },
+        {
+          "time": 15,
+          "phase": -2.205685307179587,
+          "origin": "bridge"
         },
         {
           "time": 16,
-          "phase": 0.5,
-          "origin": "self"
+          "phase": 0.3,
+          "origin": "bridge"
+        },
+        {
+          "time": 18,
+          "phase": -2.205685307179587,
+          "origin": "bridge"
         },
         {
           "time": 19,
-          "phase": 0.5,
-          "origin": "self"
+          "phase": 0.3,
+          "origin": "bridge"
+        },
+        {
+          "time": 21,
+          "phase": -2.205685307179587,
+          "origin": "bridge"
         },
         {
           "time": 22,
-          "phase": 0.5,
-          "origin": "self"
+          "phase": 0.3,
+          "origin": "bridge"
+        },
+        {
+          "time": 24,
+          "phase": -2.205685307179587,
+          "origin": "bridge"
         },
         {
           "time": 25,
-          "phase": 0.5,
-          "origin": "self"
+          "phase": 0.3,
+          "origin": "bridge"
+        },
+        {
+          "time": 27,
+          "phase": -2.418185307179587,
+          "origin": "bridge"
         },
         {
           "time": 28,
-          "phase": 0.5,
+          "phase": 0.3,
+          "origin": "bridge"
+        },
+        {
+          "time": 30,
+          "phase": 1.82,
           "origin": "self"
         },
         {
-          "time": 31,
-          "phase": 0.5,
-          "origin": "self"
+          "time": 32,
+          "phase": -2.418185307179587,
+          "origin": "bridge"
         },
         {
           "time": 34,
-          "phase": 0.5,
+          "phase": 1.82,
           "origin": "self"
         },
         {
           "time": 37,
-          "phase": 0.5,
-          "origin": "self"
+          "phase": -2.418185307179587,
+          "origin": "bridge"
         },
         {
-          "time": 40,
-          "phase": 0.5,
-          "origin": "self"
-        },
-        {
-          "time": 43,
-          "phase": 0.5,
+          "time": 42,
+          "phase": 1.82,
           "origin": "self"
         },
         {
           "time": 46,
-          "phase": 0.5,
+          "phase": 1.82,
           "origin": "self"
         },
         {
-          "time": 49,
-          "phase": 0.5,
+          "time": 50,
+          "phase": 1.82,
           "origin": "self"
         },
         {
-          "time": 52,
-          "phase": 0.5,
-          "origin": "self"
-        },
-        {
-          "time": 55,
-          "phase": 0.5,
+          "time": 54,
+          "phase": 1.82,
           "origin": "self"
         },
         {
           "time": 58,
-          "phase": 0.5,
+          "phase": 1.82,
           "origin": "self"
         },
         {
-          "time": 61,
-          "phase": 0.5,
+          "time": 62,
+          "phase": 1.82,
           "origin": "self"
         },
         {
-          "time": 64,
-          "phase": 0.5,
-          "origin": "self"
-        },
-        {
-          "time": 67,
-          "phase": 0.5,
+          "time": 66,
+          "phase": 1.82,
           "origin": "self"
         },
         {
           "time": 70,
-          "phase": 0.5,
+          "phase": 1.82,
           "origin": "self"
         },
         {
-          "time": 73,
-          "phase": 0.5,
+          "time": 74,
+          "phase": 1.82,
           "origin": "self"
         },
         {
-          "time": 76,
-          "phase": 0.5,
-          "origin": "self"
-        },
-        {
-          "time": 79,
-          "phase": 0.5,
+          "time": 78,
+          "phase": 1.82,
           "origin": "self"
         },
         {
           "time": 82,
-          "phase": 0.5,
+          "phase": 1.82,
           "origin": "self"
         },
         {
-          "time": 85,
-          "phase": 0.5,
+          "time": 86,
+          "phase": 1.82,
           "origin": "self"
         },
         {
-          "time": 88,
-          "phase": 0.5,
-          "origin": "self"
-        },
-        {
-          "time": 91,
-          "phase": 0.5,
+          "time": 90,
+          "phase": 1.82,
           "origin": "self"
         },
         {
           "time": 94,
-          "phase": 0.5,
+          "phase": 1.82,
+          "origin": "self"
+        },
+        {
+          "time": 98,
+          "phase": 1.82,
+          "origin": "self"
+        }
+      ],
+      "phase": 1.82,
+      "coherence": 1.0,
+      "decoherence": 0.0,
+      "frequency": 0.15,
+      "refractory_period": 1.0,
+      "base_threshold": 0.5,
+      "collapse_origin": {
+        "1": "bridge",
+        "2": "bridge",
+        "4": "bridge",
+        "6": "bridge",
+        "7": "bridge",
+        "9": "bridge",
+        "10": "bridge",
+        "12": "bridge",
+        "13": "bridge",
+        "15": "bridge",
+        "16": "bridge",
+        "18": "bridge",
+        "19": "bridge",
+        "21": "bridge",
+        "22": "bridge",
+        "24": "bridge",
+        "25": "bridge",
+        "27": "bridge",
+        "28": "bridge",
+        "30": "self",
+        "32": "bridge",
+        "34": "self",
+        "37": "bridge",
+        "42": "self",
+        "46": "self",
+        "50": "self",
+        "54": "self",
+        "58": "self",
+        "62": "self",
+        "66": "self",
+        "70": "self",
+        "74": "self",
+        "78": "self",
+        "82": "self",
+        "86": "self",
+        "90": "self",
+        "94": "self",
+        "98": "self"
+      },
+      "is_classical": false,
+      "decoherence_streak": 0,
+      "last_tick_time": 98,
+      "subjective_ticks": 38,
+      "law_wave_frequency": 0.05,
+      "trust_profile": {
+        "bridge": 1.0,
+        "self": 1.0
+      },
+      "phase_confidence": 1.0,
+      "goals": {}
+    },
+    "B3": {
+      "x": 300,
+      "y": 300,
+      "ticks": [
+        {
+          "time": 2,
+          "phase": -2.7181853071795867,
+          "origin": "self"
+        },
+        {
+          "time": 6,
+          "phase": -2.505685307179587,
+          "origin": "self"
+        },
+        {
+          "time": 9,
+          "phase": -2.505685307179587,
+          "origin": "self"
+        },
+        {
+          "time": 12,
+          "phase": -2.7181853071795867,
+          "origin": "self"
+        },
+        {
+          "time": 15,
+          "phase": -2.505685307179587,
+          "origin": "self"
+        },
+        {
+          "time": 18,
+          "phase": -2.505685307179587,
+          "origin": "self"
+        },
+        {
+          "time": 21,
+          "phase": -2.505685307179587,
+          "origin": "self"
+        },
+        {
+          "time": 24,
+          "phase": -2.505685307179587,
+          "origin": "self"
+        },
+        {
+          "time": 27,
+          "phase": -2.7181853071795867,
+          "origin": "self"
+        },
+        {
+          "time": 30,
+          "phase": -2.505685307179587,
+          "origin": "self"
+        },
+        {
+          "time": 32,
+          "phase": -2.7181853071795867,
+          "origin": "self"
+        },
+        {
+          "time": 34,
+          "phase": 2.12,
+          "origin": "bridge"
+        },
+        {
+          "time": 37,
+          "phase": -2.7181853071795867,
+          "origin": "self"
+        },
+        {
+          "time": 42,
+          "phase": -2.7181853071795867,
+          "origin": "self"
+        },
+        {
+          "time": 47,
+          "phase": -2.7181853071795867,
+          "origin": "self"
+        },
+        {
+          "time": 52,
+          "phase": -2.7181853071795867,
+          "origin": "self"
+        },
+        {
+          "time": 57,
+          "phase": -2.7181853071795867,
+          "origin": "self"
+        },
+        {
+          "time": 62,
+          "phase": -2.7181853071795867,
+          "origin": "self"
+        },
+        {
+          "time": 67,
+          "phase": -2.7181853071795867,
+          "origin": "self"
+        },
+        {
+          "time": 72,
+          "phase": -2.7181853071795867,
+          "origin": "self"
+        },
+        {
+          "time": 77,
+          "phase": -2.7181853071795867,
+          "origin": "self"
+        },
+        {
+          "time": 82,
+          "phase": -2.7181853071795867,
+          "origin": "self"
+        },
+        {
+          "time": 87,
+          "phase": -2.7181853071795867,
+          "origin": "self"
+        },
+        {
+          "time": 92,
+          "phase": -2.7181853071795867,
           "origin": "self"
         },
         {
           "time": 97,
-          "phase": 0.5,
-          "origin": "self"
-        },
-        {
-          "time": 100,
-          "phase": 0.5,
+          "phase": -2.7181853071795867,
           "origin": "self"
         }
       ],
-      "phase": 0.5,
+      "phase": -2.7181853071795867,
       "coherence": 1.0,
       "decoherence": 0.0,
-      "frequency": 0.15,
-      "refractory_period": 2.099999999999999,
+      "frequency": 0.14,
+      "refractory_period": 1.0,
       "base_threshold": 0.5,
       "collapse_origin": {
-        "1": "self",
-        "4": "self",
-        "7": "self",
-        "10": "self",
-        "13": "self",
-        "16": "self",
-        "19": "self",
-        "22": "self",
-        "25": "self",
-        "28": "self",
-        "31": "self",
-        "34": "self",
+        "2": "self",
+        "6": "self",
+        "9": "self",
+        "12": "self",
+        "15": "self",
+        "18": "self",
+        "21": "self",
+        "24": "self",
+        "27": "self",
+        "30": "self",
+        "32": "self",
+        "34": "bridge",
         "37": "self",
-        "40": "self",
-        "43": "self",
-        "46": "self",
-        "49": "self",
+        "42": "self",
+        "47": "self",
         "52": "self",
-        "55": "self",
-        "58": "self",
-        "61": "self",
-        "64": "self",
+        "57": "self",
+        "62": "self",
         "67": "self",
-        "70": "self",
-        "73": "self",
-        "76": "self",
-        "79": "self",
+        "72": "self",
+        "77": "self",
         "82": "self",
-        "85": "self",
-        "88": "self",
-        "91": "self",
-        "94": "self",
-        "97": "self",
-        "100": "self"
+        "87": "self",
+        "92": "self",
+        "97": "self"
       },
       "is_classical": false,
       "decoherence_streak": 0,
-      "last_tick_time": 100,
-      "subjective_ticks": 34,
-      "law_wave_frequency": 0.05
+      "last_tick_time": 97,
+      "subjective_ticks": 25,
+      "law_wave_frequency": 0.05,
+      "trust_profile": {
+        "self": 1.0,
+        "bridge": 0.55
+      },
+      "phase_confidence": 1.0,
+      "goals": {}
     },
     "C": {
-      "x": 400,
-      "y": 250,
+      "x": 500,
+      "y": 200,
       "ticks": [
         {
           "time": 4,
-          "phase": 0.22500000000000003,
+          "phase": 0.39249999999999996,
           "origin": "self"
         },
         {
           "time": 8,
-          "phase": 0.22500000000000003,
+          "phase": 0.39249999999999996,
           "origin": "bridge"
         },
         {
           "time": 12,
-          "phase": 0.22500000000000003,
-          "origin": "bridge"
+          "phase": -1.487901041820608,
+          "origin": "self"
         },
         {
           "time": 16,
-          "phase": 0.22500000000000003,
+          "phase": 0.39249999999999996,
           "origin": "self"
         },
         {
-          "time": 20,
-          "phase": 0.22500000000000003,
-          "origin": "bridge"
+          "time": 21,
+          "phase": -1.487901041820608,
+          "origin": "self"
         },
         {
-          "time": 24,
-          "phase": 0.22500000000000003,
-          "origin": "bridge"
+          "time": 25,
+          "phase": 0.39249999999999996,
+          "origin": "self"
         },
         {
           "time": 28,
-          "phase": 0.22500000000000003,
+          "phase": 0.39249999999999996,
           "origin": "self"
         },
         {
-          "time": 32,
-          "phase": 0.22500000000000003,
-          "origin": "bridge"
+          "time": 31,
+          "phase": 0.0,
+          "origin": "self"
         },
         {
-          "time": 36,
-          "phase": 0.22500000000000003,
-          "origin": "bridge"
+          "time": 35,
+          "phase": -1.6897760418206078,
+          "origin": "self"
         },
         {
           "time": 40,
-          "phase": 0.22500000000000003,
+          "phase": -1.2015995394566603,
           "origin": "self"
         },
         {
-          "time": 44,
-          "phase": 0.22500000000000003,
-          "origin": "bridge"
+          "time": 43,
+          "phase": 0.0,
+          "origin": "self"
         },
         {
-          "time": 48,
-          "phase": 0.22500000000000003,
-          "origin": "bridge"
+          "time": 46,
+          "phase": 1.82,
+          "origin": "entanglement"
+        },
+        {
+          "time": 49,
+          "phase": 1.1145,
+          "origin": "self"
         },
         {
           "time": 52,
-          "phase": 0.22500000000000003,
+          "phase": 0.0,
           "origin": "self"
         },
         {
-          "time": 56,
-          "phase": 0.22500000000000003,
-          "origin": "bridge"
+          "time": 55,
+          "phase": -0.7911380209103039,
+          "origin": "self"
+        },
+        {
+          "time": 57,
+          "phase": 2.229,
+          "origin": "self"
         },
         {
           "time": 60,
-          "phase": 0.22500000000000003,
-          "origin": "bridge"
-        },
-        {
-          "time": 64,
-          "phase": 0.22500000000000003,
+          "phase": -1.5822760418206079,
           "origin": "self"
         },
         {
-          "time": 68,
-          "phase": 0.22500000000000003,
-          "origin": "bridge"
+          "time": 64,
+          "phase": 0.0,
+          "origin": "self"
         },
         {
-          "time": 72,
-          "phase": 0.22500000000000003,
-          "origin": "bridge"
+          "time": 67,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 69,
+          "phase": 2.229,
+          "origin": "self"
+        },
+        {
+          "time": 70,
+          "phase": 1.82,
+          "origin": "entanglement"
+        },
+        {
+          "time": 73,
+          "phase": 1.1145,
+          "origin": "self"
+        },
+        {
+          "time": 75,
+          "phase": -1.5822760418206079,
+          "origin": "self"
         },
         {
           "time": 76,
-          "phase": 0.22500000000000003,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 77,
+          "phase": 2.229,
+          "origin": "self"
+        },
+        {
+          "time": 79,
+          "phase": 0.0,
           "origin": "self"
         },
         {
           "time": 80,
-          "phase": 0.22500000000000003,
-          "origin": "bridge"
+          "phase": -1.5822760418206079,
+          "origin": "self"
         },
         {
-          "time": 84,
-          "phase": 0.22500000000000003,
-          "origin": "bridge"
+          "time": 81,
+          "phase": 2.229,
+          "origin": "self"
+        },
+        {
+          "time": 82,
+          "phase": 0.0,
+          "origin": "self"
         },
         {
           "time": 88,
-          "phase": 0.22500000000000003,
+          "phase": 0.0,
           "origin": "self"
         },
         {
-          "time": 92,
-          "phase": 0.22500000000000003,
-          "origin": "bridge"
+          "time": 89,
+          "phase": 2.229,
+          "origin": "self"
         },
         {
-          "time": 96,
-          "phase": 0.22500000000000003,
-          "origin": "bridge"
+          "time": 90,
+          "phase": -1.5822760418206079,
+          "origin": "self"
+        },
+        {
+          "time": 91,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 93,
+          "phase": 2.229,
+          "origin": "self"
+        },
+        {
+          "time": 94,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 95,
+          "phase": -1.5822760418206079,
+          "origin": "self"
         },
         {
           "time": 100,
-          "phase": 0.22500000000000003,
+          "phase": -0.7911380209103039,
           "origin": "self"
         }
       ],
-      "phase": 0.22500000000000003,
+      "phase": -0.7911380209103039,
       "coherence": 1.0,
       "decoherence": 0.0,
-      "frequency": 0.05,
-      "refractory_period": 3.099999999999999,
+      "frequency": 0.08,
+      "refractory_period": 1.0,
       "base_threshold": 0.55,
       "collapse_origin": {
         "4": "self",
         "8": "bridge",
-        "12": "bridge",
+        "12": "self",
         "16": "self",
-        "20": "bridge",
-        "24": "bridge",
+        "21": "self",
+        "25": "self",
         "28": "self",
-        "32": "bridge",
-        "36": "bridge",
+        "31": "self",
+        "35": "self",
         "40": "self",
-        "44": "bridge",
-        "48": "bridge",
+        "43": "self",
+        "46": "entanglement",
+        "49": "self",
         "52": "self",
-        "56": "bridge",
-        "60": "bridge",
+        "55": "self",
+        "57": "self",
+        "60": "self",
         "64": "self",
-        "68": "bridge",
-        "72": "bridge",
+        "67": "self",
+        "69": "self",
+        "70": "entanglement",
+        "73": "self",
+        "75": "self",
         "76": "self",
-        "80": "bridge",
-        "84": "bridge",
+        "77": "self",
+        "79": "self",
+        "80": "self",
+        "81": "self",
+        "82": "self",
         "88": "self",
-        "92": "bridge",
-        "96": "bridge",
+        "89": "self",
+        "90": "self",
+        "91": "self",
+        "93": "self",
+        "94": "self",
+        "95": "self",
         "100": "self"
       },
       "is_classical": false,
       "decoherence_streak": 0,
       "last_tick_time": 100,
-      "subjective_ticks": 25,
-      "law_wave_frequency": 0.05
+      "subjective_ticks": 37,
+      "law_wave_frequency": 0.1,
+      "trust_profile": {
+        "self": 0.95,
+        "bridge": 0.55,
+        "entanglement": 0.4
+      },
+      "phase_confidence": 0.9958111012453844,
+      "goals": {}
     },
     "D": {
-      "x": 550,
-      "y": 250,
+      "x": 700,
+      "y": 150,
       "ticks": [
         {
           "time": 4,
-          "phase": 0.22500000000000003,
+          "phase": 0.39249999999999996,
           "origin": "bridge"
         },
         {
           "time": 8,
-          "phase": 0.22500000000000003,
+          "phase": 0.39249999999999996,
           "origin": "self"
         },
         {
           "time": 12,
-          "phase": 0.22500000000000003,
+          "phase": 0.44125,
           "origin": "self"
         },
         {
           "time": 16,
-          "phase": 0.22500000000000003,
+          "phase": -1.4879010418206084,
           "origin": "self"
         },
         {
           "time": 20,
-          "phase": 0.22500000000000003,
+          "phase": 0.39249999999999996,
           "origin": "self"
         },
         {
           "time": 24,
-          "phase": 0.22500000000000003,
+          "phase": 0.49,
           "origin": "self"
         },
         {
-          "time": 28,
-          "phase": 0.22500000000000003,
+          "time": 27,
+          "phase": 0.49,
           "origin": "self"
         },
         {
-          "time": 32,
-          "phase": 0.22500000000000003,
+          "time": 30,
+          "phase": 0.49,
           "origin": "self"
         },
         {
-          "time": 36,
-          "phase": 0.22500000000000003,
+          "time": 33,
+          "phase": 0.49,
           "origin": "self"
         },
         {
-          "time": 40,
-          "phase": 0.22500000000000003,
+          "time": 35,
+          "phase": -1.6897760418206078,
+          "origin": "entanglement"
+        },
+        {
+          "time": 39,
+          "phase": -2.763480674500097,
+          "origin": "bridge"
+        },
+        {
+          "time": 42,
+          "phase": -1.6845482457436696,
           "origin": "self"
         },
         {
           "time": 44,
-          "phase": 0.22500000000000003,
+          "phase": -1.3130738926001653,
+          "origin": "self"
+        },
+        {
+          "time": 46,
+          "phase": -1.3130738926001657,
           "origin": "self"
         },
         {
           "time": 48,
-          "phase": 0.22500000000000003,
+          "phase": -1.3130738926001657,
           "origin": "self"
         },
         {
           "time": 52,
-          "phase": 0.22500000000000003,
+          "phase": 1.7060000000000002,
+          "origin": "self"
+        },
+        {
+          "time": 54,
+          "phase": -1.4245482457436698,
           "origin": "self"
         },
         {
           "time": 56,
-          "phase": 0.22500000000000003,
+          "phase": 0.8530000000000002,
+          "origin": "self"
+        },
+        {
+          "time": 58,
+          "phase": 0.8530000000000002,
           "origin": "self"
         },
         {
           "time": 60,
-          "phase": 0.22500000000000003,
+          "phase": 0.8530000000000002,
+          "origin": "self"
+        },
+        {
+          "time": 61,
+          "phase": 2.229,
+          "origin": "self"
+        },
+        {
+          "time": 62,
+          "phase": 0.8530000000000002,
+          "origin": "self"
+        },
+        {
+          "time": 63,
+          "phase": 1.9675000000000002,
           "origin": "self"
         },
         {
           "time": 64,
-          "phase": 0.22500000000000003,
+          "phase": 0.0,
+          "origin": "entanglement"
+        },
+        {
+          "time": 65,
+          "phase": 2.229,
+          "origin": "self"
+        },
+        {
+          "time": 66,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 67,
+          "phase": 1.8367500000000003,
           "origin": "self"
         },
         {
           "time": 68,
-          "phase": 0.22500000000000003,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 69,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 70,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 71,
+          "phase": 0.9183750000000002,
           "origin": "self"
         },
         {
           "time": 72,
-          "phase": 0.22500000000000003,
+          "phase": 0.8530000000000002,
+          "origin": "self"
+        },
+        {
+          "time": 73,
+          "phase": 1.1145,
+          "origin": "entanglement"
+        },
+        {
+          "time": 74,
+          "phase": 0.91,
+          "origin": "self"
+        },
+        {
+          "time": 75,
+          "phase": 1.4102500000000002,
           "origin": "self"
         },
         {
           "time": 76,
-          "phase": 0.22500000000000003,
+          "phase": 1.3365,
           "origin": "self"
+        },
+        {
+          "time": 77,
+          "phase": 1.1145,
+          "origin": "self"
+        },
+        {
+          "time": 78,
+          "phase": 0.91,
+          "origin": "self"
+        },
+        {
+          "time": 79,
+          "phase": 0.0,
+          "origin": "entanglement"
         },
         {
           "time": 80,
-          "phase": 0.22500000000000003,
+          "phase": -1.5822760418206079,
+          "origin": "entanglement"
+        },
+        {
+          "time": 81,
+          "phase": 2.229,
+          "origin": "entanglement"
+        },
+        {
+          "time": 82,
+          "phase": 0.455,
           "origin": "self"
         },
         {
-          "time": 84,
-          "phase": 0.22500000000000003,
+          "time": 85,
+          "phase": 2.229,
+          "origin": "self"
+        },
+        {
+          "time": 86,
+          "phase": -0.281819010455152,
           "origin": "self"
         },
         {
           "time": 88,
-          "phase": 0.22500000000000003,
+          "phase": 0.0,
+          "origin": "entanglement"
+        },
+        {
+          "time": 90,
+          "phase": -0.8531836280994114,
+          "origin": "self"
+        },
+        {
+          "time": 91,
+          "phase": 1.7060000000000002,
           "origin": "self"
         },
         {
           "time": 92,
-          "phase": 0.22500000000000003,
+          "phase": 0.0,
           "origin": "self"
         },
         {
+          "time": 93,
+          "phase": 2.229,
+          "origin": "self"
+        },
+        {
+          "time": 94,
+          "phase": 0.0,
+          "origin": "entanglement"
+        },
+        {
+          "time": 95,
+          "phase": -1.5822760418206079,
+          "origin": "entanglement"
+        },
+        {
           "time": 96,
-          "phase": 0.22500000000000003,
+          "phase": 0.8530000000000002,
+          "origin": "self"
+        },
+        {
+          "time": 98,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 99,
+          "phase": -2.0740772403315564,
           "origin": "self"
         },
         {
           "time": 100,
-          "phase": 0.22500000000000003,
+          "phase": 0.4265000000000001,
           "origin": "self"
         }
       ],
-      "phase": 0.22500000000000003,
+      "phase": 0.4265000000000001,
       "coherence": 1.0,
       "decoherence": 0.0,
-      "frequency": 0.1,
-      "refractory_period": 3.099999999999999,
-      "base_threshold": 0.55,
+      "frequency": 0.06,
+      "refractory_period": 1.0,
+      "base_threshold": 0.6,
       "collapse_origin": {
         "4": "bridge",
         "8": "self",
@@ -1612,53 +1812,454 @@
         "16": "self",
         "20": "self",
         "24": "self",
-        "28": "self",
-        "32": "self",
-        "36": "self",
-        "40": "self",
+        "27": "self",
+        "30": "self",
+        "33": "self",
+        "35": "entanglement",
+        "39": "bridge",
+        "42": "self",
         "44": "self",
+        "46": "self",
         "48": "self",
         "52": "self",
+        "54": "self",
         "56": "self",
+        "58": "self",
         "60": "self",
-        "64": "self",
+        "61": "self",
+        "62": "self",
+        "63": "self",
+        "64": "entanglement",
+        "65": "self",
+        "66": "self",
+        "67": "self",
         "68": "self",
+        "69": "self",
+        "70": "self",
+        "71": "self",
         "72": "self",
+        "73": "entanglement",
+        "74": "self",
+        "75": "self",
         "76": "self",
-        "80": "self",
-        "84": "self",
-        "88": "self",
+        "77": "self",
+        "78": "self",
+        "79": "entanglement",
+        "80": "entanglement",
+        "81": "entanglement",
+        "82": "self",
+        "85": "self",
+        "86": "self",
+        "88": "entanglement",
+        "90": "self",
+        "91": "self",
         "92": "self",
+        "93": "self",
+        "94": "entanglement",
+        "95": "entanglement",
         "96": "self",
+        "98": "self",
+        "99": "self",
         "100": "self"
       },
       "is_classical": false,
       "decoherence_streak": 0,
       "last_tick_time": 100,
-      "subjective_ticks": 25,
-      "law_wave_frequency": 0.05
+      "subjective_ticks": 55,
+      "law_wave_frequency": 0.25,
+      "trust_profile": {
+        "bridge": 0.6000000000000001,
+        "self": 1.0,
+        "entanglement": 0.05000000000000007
+      },
+      "phase_confidence": 0.9618907476728474,
+      "goals": {}
+    },
+    "E": {
+      "x": 700,
+      "y": 250,
+      "ticks": [
+        {
+          "time": 4,
+          "phase": 0.39249999999999996,
+          "origin": "bridge"
+        },
+        {
+          "time": 8,
+          "phase": 0.39249999999999996,
+          "origin": "self"
+        },
+        {
+          "time": 12,
+          "phase": 0.39249999999999996,
+          "origin": "self"
+        },
+        {
+          "time": 16,
+          "phase": -1.4879010418206084,
+          "origin": "self"
+        },
+        {
+          "time": 20,
+          "phase": -0.4310241228718349,
+          "origin": "self"
+        },
+        {
+          "time": 24,
+          "phase": 0.49,
+          "origin": "bridge"
+        },
+        {
+          "time": 27,
+          "phase": 0.49,
+          "origin": "bridge"
+        },
+        {
+          "time": 30,
+          "phase": 0.49,
+          "origin": "bridge"
+        },
+        {
+          "time": 33,
+          "phase": 0.49,
+          "origin": "bridge"
+        },
+        {
+          "time": 35,
+          "phase": -1.6897760418206078,
+          "origin": "entanglement"
+        },
+        {
+          "time": 39,
+          "phase": -2.763480674500097,
+          "origin": "self"
+        },
+        {
+          "time": 42,
+          "phase": -1.4245482457436698,
+          "origin": "self"
+        },
+        {
+          "time": 44,
+          "phase": -1.3130738926001653,
+          "origin": "bridge"
+        },
+        {
+          "time": 46,
+          "phase": -1.3130738926001657,
+          "origin": "bridge"
+        },
+        {
+          "time": 48,
+          "phase": -1.3688110691719177,
+          "origin": "self"
+        },
+        {
+          "time": 52,
+          "phase": -1.4245482457436698,
+          "origin": "self"
+        },
+        {
+          "time": 54,
+          "phase": 1.7060000000000002,
+          "origin": "self"
+        },
+        {
+          "time": 56,
+          "phase": 0.8530000000000002,
+          "origin": "entanglement"
+        },
+        {
+          "time": 58,
+          "phase": 0.8530000000000002,
+          "origin": "self"
+        },
+        {
+          "time": 60,
+          "phase": 0.8530000000000002,
+          "origin": "self"
+        },
+        {
+          "time": 61,
+          "phase": 2.229,
+          "origin": "bridge"
+        },
+        {
+          "time": 62,
+          "phase": 0.8530000000000002,
+          "origin": "entanglement"
+        },
+        {
+          "time": 63,
+          "phase": 2.229,
+          "origin": "self"
+        },
+        {
+          "time": 64,
+          "phase": 0.0,
+          "origin": "entanglement"
+        },
+        {
+          "time": 65,
+          "phase": 1.9675000000000002,
+          "origin": "self"
+        },
+        {
+          "time": 66,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 67,
+          "phase": 0.0,
+          "origin": "entanglement"
+        },
+        {
+          "time": 68,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 69,
+          "phase": 1.8367500000000003,
+          "origin": "self"
+        },
+        {
+          "time": 70,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 71,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 72,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 73,
+          "phase": 1.1145,
+          "origin": "entanglement"
+        },
+        {
+          "time": 74,
+          "phase": 1.3365,
+          "origin": "self"
+        },
+        {
+          "time": 75,
+          "phase": 1.1145,
+          "origin": "self"
+        },
+        {
+          "time": 76,
+          "phase": 0.91,
+          "origin": "self"
+        },
+        {
+          "time": 77,
+          "phase": 2.229,
+          "origin": "entanglement"
+        },
+        {
+          "time": 78,
+          "phase": 1.3365,
+          "origin": "self"
+        },
+        {
+          "time": 79,
+          "phase": 0.0,
+          "origin": "entanglement"
+        },
+        {
+          "time": 80,
+          "phase": 0.455,
+          "origin": "self"
+        },
+        {
+          "time": 81,
+          "phase": 2.229,
+          "origin": "entanglement"
+        },
+        {
+          "time": 84,
+          "phase": -0.5636380209103039,
+          "origin": "self"
+        },
+        {
+          "time": 86,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 88,
+          "phase": -0.853183628099411,
+          "origin": "self"
+        },
+        {
+          "time": 90,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 92,
+          "phase": 0.0,
+          "origin": "entanglement"
+        },
+        {
+          "time": 93,
+          "phase": 2.229,
+          "origin": "entanglement"
+        },
+        {
+          "time": 94,
+          "phase": 0.0,
+          "origin": "entanglement"
+        },
+        {
+          "time": 95,
+          "phase": -1.5822760418206079,
+          "origin": "entanglement"
+        },
+        {
+          "time": 96,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 97,
+          "phase": -1.9499942068618812,
+          "origin": "self"
+        },
+        {
+          "time": 98,
+          "phase": 0.4265000000000001,
+          "origin": "self"
+        },
+        {
+          "time": 100,
+          "phase": 0.0,
+          "origin": "self"
+        }
+      ],
+      "phase": 0.0,
+      "coherence": 1.0,
+      "decoherence": 0.0,
+      "frequency": 0.07,
+      "refractory_period": 1.0,
+      "base_threshold": 0.6,
+      "collapse_origin": {
+        "4": "bridge",
+        "8": "self",
+        "12": "self",
+        "16": "self",
+        "20": "self",
+        "24": "bridge",
+        "27": "bridge",
+        "30": "bridge",
+        "33": "bridge",
+        "35": "entanglement",
+        "39": "self",
+        "42": "self",
+        "44": "bridge",
+        "46": "bridge",
+        "48": "self",
+        "52": "self",
+        "54": "self",
+        "56": "entanglement",
+        "58": "self",
+        "60": "self",
+        "61": "bridge",
+        "62": "entanglement",
+        "63": "self",
+        "64": "entanglement",
+        "65": "self",
+        "66": "self",
+        "67": "entanglement",
+        "68": "self",
+        "69": "self",
+        "70": "self",
+        "71": "self",
+        "72": "self",
+        "73": "entanglement",
+        "74": "self",
+        "75": "self",
+        "76": "self",
+        "77": "entanglement",
+        "78": "self",
+        "79": "entanglement",
+        "80": "self",
+        "81": "entanglement",
+        "84": "self",
+        "86": "self",
+        "88": "self",
+        "90": "self",
+        "92": "entanglement",
+        "93": "entanglement",
+        "94": "entanglement",
+        "95": "entanglement",
+        "96": "self",
+        "97": "self",
+        "98": "self",
+        "100": "self"
+      },
+      "is_classical": false,
+      "decoherence_streak": 0,
+      "last_tick_time": 100,
+      "subjective_ticks": 53,
+      "law_wave_frequency": 0.4,
+      "trust_profile": {
+        "bridge": 0.9000000000000004,
+        "self": 1.0,
+        "entanglement": 0.0
+      },
+      "phase_confidence": 0.9534797245253216,
+      "goals": {}
     }
   },
   "superpositions": {
-    "B1": {
-      "101.0": [
-        0.0
+    "B2": {
+      "102": [
+        1.82
       ]
     },
-    "B2": {
-      "101.0": [
-        0.5
+    "B3": {
+      "102": [
+        3.565
       ]
     },
     "C": {
-      "103.0": [
-        0.0,
-        0.45
+      "101": [
+        2.229
+      ],
+      "103": [
+        0.0
       ]
     },
     "D": {
-      "104.0": [
-        0.225
+      "104": [
+        1.706,
+        -0.7911
+      ],
+      "102": [
+        0.0
+      ]
+    },
+    "E": {
+      "103": [
+        -1.4245
+      ],
+      "101": [
+        -2.0741
+      ],
+      "104": [
+        -0.7911
+      ],
+      "102": [
+        0.4265
       ]
     }
   },
@@ -1667,7 +2268,7 @@
       "from": "A1",
       "to": "B1",
       "delay": 1,
-      "attenuation": 1.0,
+      "attenuation": 0.9,
       "density": 0.8,
       "phase_shift": 0.0
     },
@@ -1676,24 +2277,40 @@
       "to": "B2",
       "delay": 1,
       "attenuation": 1.0,
-      "density": 0.8,
-      "phase_shift": 0.0
+      "density": 1.0,
+      "phase_shift": 1.57
+    },
+    {
+      "from": "A3",
+      "to": "B3",
+      "delay": 1,
+      "attenuation": 0.85,
+      "density": 1.2,
+      "phase_shift": 3.14
     },
     {
       "from": "B1",
       "to": "C",
       "delay": 2,
-      "attenuation": 0.9,
-      "density": 1.2,
+      "attenuation": 0.95,
+      "density": 1.1,
       "phase_shift": 0.0
     },
     {
       "from": "B2",
       "to": "C",
       "delay": 2,
-      "attenuation": 0.9,
-      "density": 1.2,
-      "phase_shift": 0.0
+      "attenuation": 0.95,
+      "density": 1.3,
+      "phase_shift": 0.5
+    },
+    {
+      "from": "B3",
+      "to": "C",
+      "delay": 2,
+      "attenuation": 0.95,
+      "density": 1.1,
+      "phase_shift": 1.0
     },
     {
       "from": "C",
@@ -1701,6 +2318,46 @@
       "delay": 3,
       "attenuation": 1.0,
       "density": 1.0,
+      "phase_shift": 0.0
+    },
+    {
+      "from": "C",
+      "to": "E",
+      "delay": 3,
+      "attenuation": 1.0,
+      "density": 1.0,
+      "phase_shift": 0.0
+    },
+    {
+      "from": "B2",
+      "to": "D",
+      "delay": 4,
+      "attenuation": 0.8,
+      "density": 1.5,
+      "phase_shift": 0.25
+    },
+    {
+      "from": "B3",
+      "to": "E",
+      "delay": 4,
+      "attenuation": 0.8,
+      "density": 1.4,
+      "phase_shift": 0.75
+    },
+    {
+      "from": "D",
+      "to": "E",
+      "delay": 2,
+      "attenuation": 1.0,
+      "density": 0.9,
+      "phase_shift": 0.0
+    },
+    {
+      "from": "E",
+      "to": "D",
+      "delay": 2,
+      "attenuation": 1.0,
+      "density": 0.9,
       "phase_shift": 0.0
     }
   ],
@@ -1712,7 +2369,12 @@
     },
     {
       "node_id": "A2",
-      "tick_interval": 3,
+      "tick_interval": 4,
+      "phase": 0.25
+    },
+    {
+      "node_id": "A3",
+      "tick_interval": 5,
       "phase": 0.5
     }
   ]

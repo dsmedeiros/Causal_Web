@@ -3,50 +3,74 @@
     {
       "id": "A1",
       "x": 100,
-      "y": 200,
-      "frequency": 0.25,
+      "y": 100,
+      "frequency": 0.18,
       "refractory_period": 3,
-      "base_threshold": 0.45
+      "base_threshold": 0.4
     },
     {
       "id": "A2",
       "x": 100,
-      "y": 300,
-      "frequency": 0.25,
+      "y": 200,
+      "frequency": 0.20,
       "refractory_period": 3,
-      "base_threshold": 0.45
+      "base_threshold": 0.4
+    },
+    {
+      "id": "A3",
+      "x": 100,
+      "y": 300,
+      "frequency": 0.22,
+      "refractory_period": 3,
+      "base_threshold": 0.4
     },
     {
       "id": "B1",
-      "x": 250,
-      "y": 200,
-      "frequency": 0.15,
+      "x": 300,
+      "y": 100,
+      "frequency": 0.12,
       "refractory_period": 3,
       "base_threshold": 0.5
     },
     {
       "id": "B2",
-      "x": 250,
-      "y": 300,
+      "x": 300,
+      "y": 200,
       "frequency": 0.15,
       "refractory_period": 3,
       "base_threshold": 0.5
     },
     {
+      "id": "B3",
+      "x": 300,
+      "y": 300,
+      "frequency": 0.14,
+      "refractory_period": 3,
+      "base_threshold": 0.5
+    },
+    {
       "id": "C",
-      "x": 400,
-      "y": 250,
-      "frequency": 0.05,
+      "x": 500,
+      "y": 200,
+      "frequency": 0.08,
       "refractory_period": 4,
       "base_threshold": 0.55
     },
     {
       "id": "D",
-      "x": 550,
-      "y": 250,
-      "frequency": 0.10,
+      "x": 700,
+      "y": 150,
+      "frequency": 0.06,
       "refractory_period": 4,
-      "base_threshold": 0.55
+      "base_threshold": 0.6
+    },
+    {
+      "id": "E",
+      "x": 700,
+      "y": 250,
+      "frequency": 0.07,
+      "refractory_period": 4,
+      "base_threshold": 0.6
     }
   ],
   "edges": [
@@ -54,7 +78,7 @@
       "from": "A1",
       "to": "B1",
       "delay": 1,
-      "attenuation": 1.0,
+      "attenuation": 0.9,
       "density": 0.8,
       "phase_shift": 0.0
     },
@@ -63,24 +87,40 @@
       "to": "B2",
       "delay": 1,
       "attenuation": 1.0,
-      "density": 0.8,
-      "phase_shift": 0.0
+      "density": 1.0,
+      "phase_shift": 1.57
+    },
+    {
+      "from": "A3",
+      "to": "B3",
+      "delay": 1,
+      "attenuation": 0.85,
+      "density": 1.2,
+      "phase_shift": 3.14
     },
     {
       "from": "B1",
       "to": "C",
       "delay": 2,
-      "attenuation": 0.9,
-      "density": 1.2,
+      "attenuation": 0.95,
+      "density": 1.1,
       "phase_shift": 0.0
     },
     {
       "from": "B2",
       "to": "C",
       "delay": 2,
-      "attenuation": 0.9,
-      "density": 1.2,
-      "phase_shift": 0.0
+      "attenuation": 0.95,
+      "density": 1.3,
+      "phase_shift": 0.5
+    },
+    {
+      "from": "B3",
+      "to": "C",
+      "delay": 2,
+      "attenuation": 0.95,
+      "density": 1.1,
+      "phase_shift": 1.0
     },
     {
       "from": "C",
@@ -88,6 +128,46 @@
       "delay": 3,
       "attenuation": 1.0,
       "density": 1.0,
+      "phase_shift": 0.0
+    },
+    {
+      "from": "C",
+      "to": "E",
+      "delay": 3,
+      "attenuation": 1.0,
+      "density": 1.0,
+      "phase_shift": 0.0
+    },
+    {
+      "from": "B2",
+      "to": "D",
+      "delay": 4,
+      "attenuation": 0.8,
+      "density": 1.5,
+      "phase_shift": 0.25
+    },
+    {
+      "from": "B3",
+      "to": "E",
+      "delay": 4,
+      "attenuation": 0.8,
+      "density": 1.4,
+      "phase_shift": 0.75
+    },
+    {
+      "from": "D",
+      "to": "E",
+      "delay": 2,
+      "attenuation": 1.0,
+      "density": 0.9,
+      "phase_shift": 0.0
+    },
+    {
+      "from": "E",
+      "to": "D",
+      "delay": 2,
+      "attenuation": 1.0,
+      "density": 0.9,
       "phase_shift": 0.0
     }
   ],
@@ -101,36 +181,76 @@
       "decoherence_limit": 8
     },
     {
-      "from": "A1",
-      "to": "B1",
-      "bridge_type": "braided",
-      "phase_offset": 0.0,
-      "drift_tolerance": 0.5,
-      "decoherence_limit": 5
-    },
-    {
       "from": "A2",
-      "to": "B2",
+      "to": "A3",
       "bridge_type": "braided",
-      "phase_offset": 0.0,
-      "drift_tolerance": 0.5,
-      "decoherence_limit": 5
+      "phase_offset": 0.5,
+      "drift_tolerance": 0.8,
+      "decoherence_limit": 8
     },
     {
       "from": "B1",
       "to": "B2",
       "bridge_type": "braided",
-      "phase_offset": 0.0,
-      "drift_tolerance": 1.0,
-      "decoherence_limit": 10
+      "phase_offset": 0.3,
+      "drift_tolerance": 0.6,
+      "decoherence_limit": 6
+    },
+    {
+      "from": "B2",
+      "to": "B3",
+      "bridge_type": "braided",
+      "phase_offset": 0.3,
+      "drift_tolerance": 0.6,
+      "decoherence_limit": 6
+    },
+    {
+      "from": "B2",
+      "to": "C",
+      "bridge_type": "braided",
+      "phase_offset": 0.2,
+      "drift_tolerance": 0.7,
+      "decoherence_limit": 6
     },
     {
       "from": "C",
       "to": "D",
       "bridge_type": "braided",
       "phase_offset": 0.0,
+      "drift_tolerance": 0.9,
+      "decoherence_limit": 6
+    },
+    {
+      "from": "C",
+      "to": "E",
+      "bridge_type": "braided",
+      "phase_offset": 0.0,
+      "drift_tolerance": 0.9,
+      "decoherence_limit": 6
+    },
+    {
+      "from": "D",
+      "to": "E",
+      "bridge_type": "braided",
+      "phase_offset": 0.0,
       "drift_tolerance": 1.0,
       "decoherence_limit": 10
+    },
+    {
+      "from": "A1",
+      "to": "B3",
+      "bridge_type": "braided",
+      "phase_offset": 0.25,
+      "drift_tolerance": 0.6,
+      "decoherence_limit": 5
+    },
+    {
+      "from": "A3",
+      "to": "B1",
+      "bridge_type": "braided",
+      "phase_offset": 0.75,
+      "drift_tolerance": 0.6,
+      "decoherence_limit": 5
     }
   ],
   "tick_sources": [
@@ -141,7 +261,12 @@
     },
     {
       "node_id": "A2",
-      "tick_interval": 3,
+      "tick_interval": 4,
+      "phase": 0.25
+    },
+    {
+      "node_id": "A3",
+      "tick_interval": 5,
       "phase": 0.5
     }
   ],
@@ -149,14 +274,20 @@
     {
       "id": "Obs1",
       "window": 10,
-      "x": 300,
-      "y": 200
+      "x": 200,
+      "y": 150
     },
     {
       "id": "Obs2",
       "window": 10,
-      "x": 500,
+      "x": 350,
       "y": 250
+    },
+    {
+      "id": "Obs3",
+      "window": 10,
+      "x": 600,
+      "y": 200
     }
   ]
 }

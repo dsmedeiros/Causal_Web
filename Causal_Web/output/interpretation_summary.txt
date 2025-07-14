@@ -1,0 +1,42 @@
+The simulation recorded 332 ticks across 9 nodes.
+- Node A1 emitted 35 ticks.
+- Node A2 emitted 26 ticks.
+- Node A3 emitted 29 ticks.
+- Node B1 emitted 34 ticks.
+- Node B2 emitted 38 ticks.
+- Node B3 emitted 25 ticks.
+- Node C emitted 37 ticks.
+- Node D emitted 55 ticks.
+- Node E emitted 53 ticks.
+- A1 coherence ranged from 1.000 to 1.000.
+- A2 coherence ranged from 1.000 to 1.000.
+- A3 coherence ranged from 1.000 to 1.000.
+- B1 coherence ranged from 1.000 to 1.000.
+- B2 coherence ranged from 1.000 to 1.000.
+- B3 coherence ranged from 1.000 to 1.000.
+- C coherence ranged from 1.000 to 1.000.
+- D coherence ranged from 1.000 to 1.000.
+- E coherence ranged from 1.000 to 1.000.
+- A1 decoherence ranged from 0.000 to 0.000.
+- A2 decoherence ranged from 0.000 to 0.000.
+- A3 decoherence ranged from 0.000 to 0.000.
+- B1 decoherence ranged from 0.000 to 0.000.
+- B2 decoherence ranged from 0.000 to 0.000.
+- B3 decoherence ranged from 0.000 to 0.000.
+- C decoherence ranged from 0.000 to 0.000.
+- D decoherence ranged from 0.000 to 0.000.
+- E decoherence ranged from 0.000 to 0.000.
+Clusters first appeared at tick 0 with up to 2 cluster(s).
+Law drift events recorded: 58 total.
+- Bridge A1->A2 ended active; last rupture at None
+- Bridge A2->A3 ended active; last rupture at None
+- Bridge B1->B2 ended active; last rupture at 98
+- Bridge B2->B3 ended active; last rupture at 98
+- Bridge B2->C ended active; last rupture at 98
+- Bridge C->D ended inactive; last rupture at 99
+- Bridge C->E ended active; last rupture at 98
+- Bridge D->E ended inactive; last rupture at 99
+- Bridge A1->B3 ended active; last rupture at 97
+- Bridge A3->B1 ended active; last rupture at 97
+Recorded 1 superposition inspections.
+Console log contains 0 lines covering 0 ticks.

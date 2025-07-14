@@ -23,6 +23,7 @@
   <ItemGroup>
     <Compile Include="config.py" />
     <Compile Include="engine\bridge.py" />
+    <Compile Include="engine\causal_analyst.py" />
     <Compile Include="engine\graph.py" />
     <Compile Include="engine\meta_node.py" />
     <Compile Include="engine\node.py" />
@@ -56,10 +57,19 @@
     <Content Include="output\cluster_log.json" />
     <Content Include="output\coherence_log.json" />
     <Content Include="output\coherence_velocity_log.json" />
+    <Content Include="output\collapse_chain_log.json" />
+    <Content Include="output\collapse_front_log.json" />
+    <Content Include="output\curvature_log.json" />
+    <Content Include="output\curvature_map.json" />
     <Content Include="output\cwt_console_output.txt" />
     <Content Include="output\decoherence_log.json" />
+    <Content Include="output\event_log.json" />
     <Content Include="output\inspection_log.json" />
+    <Content Include="output\interpretation_log.json" />
+    <Content Include="output\interpretation_summary.txt" />
+    <Content Include="output\law_drift_log.json" />
     <Content Include="output\law_wave_log.json" />
+    <Content Include="output\meta_node_tick_log.json" />
     <Content Include="output\tick_trace.json" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
