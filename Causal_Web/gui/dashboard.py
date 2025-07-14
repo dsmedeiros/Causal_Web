@@ -51,18 +51,25 @@ def update_graph_visuals():
 
     dpg.delete_item("graph_drawlist", children_only=True)
 
+    cluster_map = {}
+    clusters = graph.detect_clusters()
+    for idx, c in enumerate(clusters, start=1):
+        for nid in c:
+            cluster_map[nid] = idx
+
     for node_id, node in graph.nodes.items():
         x, y = node.x, node.y
         tick_count = len(node.tick_history)
+        vel = getattr(node, "coherence_velocity", 0.0)
 
-        # Node color based on role
         color = (100, 149, 237) if "A1" in node_id else (60, 179, 113) if "A2" in node_id else (220, 20, 60)
 
-        # Draw node as filled circle
         dpg.draw_circle(center=(x, y), radius=30, color=color, fill=color, parent="graph_drawlist")
 
-        # Draw node ID and tick count
-        dpg.draw_text(pos=(x - 25, y - 10), text=f"{node_id}\\nTicks: {tick_count}", size=15, color=(255, 255, 255), parent="graph_drawlist")
+        label = f"{node_id}\nTicks: {tick_count}\nVel:{vel:.2f}"
+        if node_id in cluster_map:
+            label += f"\nC{cluster_map[node_id]}"
+        dpg.draw_text(pos=(x - 30, y - 15), text=label, size=15, color=(255, 255, 255), parent="graph_drawlist")
 
     # Draw edges
     for edge in graph.edges:

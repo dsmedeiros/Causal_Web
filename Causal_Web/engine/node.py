@@ -4,6 +4,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import Set, List
 import numpy as np
+import json
 
 
 @dataclass
@@ -39,6 +40,7 @@ class Node:
         self.coherence_series: List[float] = []
         self.law_wave_frequency: float = 0.0
         self.entangled_with: Set[str] = set()
+        self.coherence_velocity: float = 0.0
 
     def compute_phase(self, tick_time):
         return 2 * math.pi * self.frequency * tick_time
@@ -140,10 +142,16 @@ class Node:
             target.schedule_tick(tick_time + delay, shifted)
 
         if origin == "self":
-            self.propagate_collapse(tick_time, graph)
+            collapsed = self.propagate_collapse(tick_time, graph)
+            if collapsed:
+                self._log_collapse_chain(tick_time, collapsed)
 
     def propagate_collapse(self, tick_time, graph, threshold: float = 0.5):
-        """Propagate collapse to entangled nodes if their decoherence is high."""
+        """Propagate collapse to entangled nodes if their decoherence is high.
+
+        Returns a list of node IDs that collapsed due to this propagation.
+        """
+        collapsed = []
         for nid in self.entangled_with:
             other = graph.get_node(nid)
             if not other or other.collapse_origin.get(tick_time):
@@ -151,6 +159,14 @@ class Node:
             deco = other.compute_decoherence_field(tick_time)
             if deco > threshold:
                 other.apply_tick(tick_time, self.phase, graph, origin="entanglement")
+                collapsed.append(nid)
+        return collapsed
+
+    def _log_collapse_chain(self, tick_time, collapsed):
+        """Log collapse propagation events to file."""
+        record = {"tick": tick_time, "source": self.id, "collapsed": collapsed}
+        with open("output/collapse_chain_log.json", "a") as f:
+            f.write(json.dumps(record) + "\n")
 
     def maybe_tick(self, global_tick, graph):
         if global_tick in self.incoming_phase_queue:
