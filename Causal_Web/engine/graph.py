@@ -10,9 +10,10 @@ class CausalGraph:
         self.nodes = {}
         self.edges = []
         self.bridges = []
+        self.tick_sources = []
 
-    def add_node(self, node_id, x=0.0, y=0.0, frequency=1.0, refractory_period=2, base_threshold=0.5):
-        self.nodes[node_id] = Node(node_id, x, y, frequency, refractory_period, base_threshold)
+    def add_node(self, node_id, x=0.0, y=0.0, frequency=1.0, refractory_period=2, base_threshold=0.5, phase=0.0):
+        self.nodes[node_id] = Node(node_id, x, y, frequency, refractory_period, base_threshold, phase)
 
     def add_edge(self, source_id, target_id, attenuation=1.0, density=0.0, delay=1, phase_shift=0.0):
         self.edges.append(Edge(source_id, target_id, attenuation, density, delay, phase_shift))
@@ -44,6 +45,8 @@ class CausalGraph:
             node.current_tick = 0
             node.subjective_ticks = 0
             node.last_emission_tick = None
+            node.coherence = 1.0
+            node.decoherence = 0.0
 
     def inspect_superpositions(self):
         inspection_log = []
@@ -70,7 +73,7 @@ class CausalGraph:
                             "amplitude": round(abs(vector_sum), 4),
                             "type": self._interference_type(raw_phases)
                         },
-                        "collapsed": any(t == tick for t, _ in node.tick_history),
+                        "collapsed": any(tick_obj.time == tick for tick_obj in node.tick_history),
                         "bridge_status": [
                             {
                                 "between": [bridge.node_a_id, bridge.node_b_id],
@@ -111,7 +114,10 @@ class CausalGraph:
                 nid: {
                     "x": n.x,
                     "y": n.y,
-                    "ticks": [{"time": t, "phase": p} for t, p in n.tick_history],
+                    "ticks": [{"time": tick.time, "phase": tick.phase, "origin": tick.origin} for tick in n.tick_history],
+                    "phase": n.phase,
+                    "coherence": n.coherence,
+                    "decoherence": n.decoherence,
                     "frequency": n.frequency,
                     "refractory_period": n.refractory_period,
                     "base_threshold": n.base_threshold,
@@ -139,7 +145,8 @@ class CausalGraph:
                     "phase_shift": e.phase_shift
                 }
                 for e in self.edges
-            ]
+            ],
+            "tick_sources": self.tick_sources
         }
 
     def save_to_file(self, path):
@@ -162,7 +169,8 @@ class CausalGraph:
                 y=node_data.get("y", 0.0),
                 frequency=node_data.get("frequency", 1.0),
                 refractory_period=node_data.get("refractory_period", 2.0),
-                base_threshold=node_data.get("base_threshold", 0.5)
+                base_threshold=node_data.get("base_threshold", 0.5),
+                phase=node_data.get("phase", 0.0)
             )
 
         for edge in data.get("edges", []):
@@ -183,4 +191,6 @@ class CausalGraph:
                 drift_tolerance=bridge.get("drift_tolerance"),
                 decoherence_limit=bridge.get("decoherence_limit")
             )
+
+        self.tick_sources = data.get("tick_sources", [])
 

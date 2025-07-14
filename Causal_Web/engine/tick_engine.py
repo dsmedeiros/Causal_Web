@@ -11,15 +11,19 @@ def build_graph():
     graph.load_from_file("input/graph.json")
 
 def emit_ticks(global_tick):
-    for node in graph.nodes.values():
-        node.emit_tick_if_ready(global_tick, graph)
+    for source in getattr(graph, "tick_sources", []):
+        node = graph.get_node(source["node_id"])
+        interval = source.get("tick_interval", 1)
+        phase = source.get("phase", 0.0)
+        if node and not node.is_classical and global_tick % interval == 0:
+            node.apply_tick(global_tick, phase, graph, origin="source")
 
 def propagate_phases(global_tick):
     for edge in graph.edges:
         source_node = graph.get_node(edge.source)
-        for tick_time, phase in source_node.tick_history:
-            if tick_time + edge.adjusted_delay() == global_tick:
-                edge.propagate_phase(phase, global_tick, graph)
+        for tick in source_node.tick_history:
+            if tick.time + edge.adjusted_delay() == global_tick:
+                edge.propagate_phase(tick.phase, global_tick, graph)
 
 def evaluate_nodes(global_tick):
     for node in graph.nodes.values():
