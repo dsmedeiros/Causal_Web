@@ -1,0 +1,91 @@
+{
+  "nodes": [
+    {
+      "id": "A1",
+      "tick_interval": 2,
+      "phase": 0.0,
+      "x": 100,
+      "y": 100
+    },
+    {
+      "id": "A2",
+      "tick_interval": 2,
+      "phase": 3.14,
+      "x": 200,
+      "y": 100
+    },
+    {
+      "id": "B",
+      "x": 300,
+      "y": 300
+    },
+    {
+      "id": "C",
+      "x": 400,
+      "y": 300
+    }
+  ],
+  "edges": [
+    {
+      "from": "A1",
+      "to": "B",
+      "delay": 1
+    },
+    {
+      "from": "A2",
+      "to": "B",
+      "delay": 1
+    },
+    {
+      "from": "B",
+      "to": "C",
+      "delay": 1
+    }
+  ],
+  "bridges": [
+    {
+      "from": "A1",
+      "to": "A2",
+      "bridge_type": "braided",
+      "phase_offset": 0.0,
+      "drift_tolerance": 0.15,
+      "decoherence_limit": 5
+    },
+    {
+      "from": "A2",
+      "to": "B",
+      "bridge_type": "braided",
+      "phase_offset": 0.15,
+      "drift_tolerance": 0.4,
+      "decoherence_limit": 4
+    },
+    {
+      "from": "A2",
+      "to": "C",
+      "bridge_type": "braided",
+      "phase_offset": 0.0,
+      "drift_tolerance": 0.2,
+      "decoherence_limit": 4
+    },
+    {
+      "from": "B",
+      "to": "C",
+      "bridge_type": "unidirectional",
+      "phase_offset": 0.0,
+      "drift_tolerance": 0.3,
+      "decoherence_limit": 6
+    }
+  ],
+  "tick_sources": [
+    {
+      "node_id": "A1",
+      "tick_interval": 2,
+      "phase": 0.0
+    },
+    {
+      "node_id": "A2",
+      "tick_interval": 3,
+      "phase": 0.0
+    }
+  ]
+}
