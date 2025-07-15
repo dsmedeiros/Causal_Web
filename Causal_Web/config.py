@@ -15,4 +15,6 @@ class Config:
         "amplitude": 0.0,  # threshold modulation
         "period": 30
     }
+    # interval for saving runtime snapshots of the graph
+    snapshot_interval = 10
 

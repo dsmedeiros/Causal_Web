@@ -106,9 +106,19 @@ def log_meta_node_ticks(global_tick):
                         if any(t.time == global_tick for t in graph.get_node(nid).tick_history)]
         if member_ticks:
             events[meta_id] = member_ticks
-    if events:
-        with open("output/meta_node_tick_log.json", "a") as f:
-            f.write(json.dumps({str(global_tick): events}) + "\n")
+        if events:
+            with open("output/meta_node_tick_log.json", "a") as f:
+                f.write(json.dumps({str(global_tick): events}) + "\n")
+
+
+def snapshot_graph(global_tick):
+    interval = getattr(Config, "snapshot_interval", 0)
+    if interval and global_tick % interval == 0:
+        path_dir = os.path.join("output", "runtime_graph_snapshots")
+        os.makedirs(path_dir, exist_ok=True)
+        path = os.path.join(path_dir, f"graph_{global_tick}.json")
+        with open(path, "w") as f:
+            json.dump(graph.to_dict(), f, indent=2)
 
 
 def dynamic_bridge_management(global_tick):
@@ -123,10 +133,21 @@ def dynamic_bridge_management(global_tick):
                 continue
             drift = abs((a.phase - b.phase + math.pi) % (2 * math.pi) - math.pi)
             if drift < 0.1 and a.coherence > 0.9 and b.coherence > 0.9:
-                graph.add_bridge(a.id, b.id)
+                graph.add_bridge(
+                    a.id,
+                    b.id,
+                    formed_at_tick=global_tick,
+                    seeded=False,
+                )
                 bridge = graph.bridges[-1]
-                with open("output/bridge_dynamics_log.json", "a") as f:
-                    f.write(json.dumps({"tick": global_tick, "bridge": bridge.bridge_id, "from": None, "to": "forming"}) + "\n")
+                bridge._log_dynamics(
+                    global_tick,
+                    "formed",
+                    {
+                        "phase_delta": drift,
+                        "coherence": (a.coherence + b.coherence) / 2,
+                    },
+                )
                 bridge.update_state(global_tick)
 
 
@@ -232,6 +253,7 @@ def simulation_loop():
             log_meta_node_ticks(global_tick)
             log_curvature_per_tick(global_tick)
             dynamic_bridge_management(global_tick)
+            snapshot_graph(global_tick)
 
             for obs in observers:
                 obs.observe(graph, global_tick)

@@ -13,6 +13,7 @@ class BridgeState(Enum):
     STRAINED = "strained"
     RUPTURING = "rupturing"
     RUPTURED = "ruptured"
+    DORMANT = "dormant"
 
 @dataclass
 class BridgeEvent:
@@ -24,19 +25,33 @@ class BridgeEvent:
     coherence_at_event: Optional[float] = None
 
 class Bridge:
-    def __init__(self, 
-                 node_a_id, 
-                 node_b_id, 
-                 bridge_type="braided", 
+    def __init__(self,
+                 node_a_id,
+                 node_b_id,
+                 bridge_type="braided",
                  phase_offset=0.0,
                  drift_tolerance=None,
-                 decoherence_limit=None):
+                 decoherence_limit=None,
+                 initial_strength=1.0,
+                 medium_type="standard",
+                 mutable=True,
+                 seeded=True,
+                 formed_at_tick=0):
         self.node_a_id = node_a_id
         self.node_b_id = node_b_id
         self.bridge_type = bridge_type  # "braided", "mirror", "unidirectional", etc.
         self.phase_offset = phase_offset  # For inverted or phase-shifted mirroring
         self.drift_tolerance = drift_tolerance
         self.decoherence_limit = decoherence_limit
+        self.initial_strength = initial_strength
+        self.current_strength = initial_strength
+        self.medium_type = medium_type
+        self.mutable = mutable
+        self.seeded = seeded
+        self.formed_at_tick = formed_at_tick
+        self.tick_load = 0
+        self.phase_drift = 0.0
+        self.coherence_flux = 0.0
         self.last_activation = None
         self.active = True
         self.state = BridgeState.FORMING
@@ -52,10 +67,27 @@ class Bridge:
         self.decoherence_exposure = []  # recent avg decoherence values
         self.trust_score = 0.5
 
+    def _log_dynamics(self, tick, event, conditions=None):
+        record = {
+            "bridge_id": self.bridge_id,
+            "source": self.node_a_id,
+            "target": self.node_b_id,
+            "event": event,
+            "tick": tick,
+            "seeded": self.seeded
+        }
+        if conditions is not None:
+            record["conditions"] = conditions
+        with open("output/bridge_dynamics_log.json", "a") as f:
+            f.write(json.dumps(record) + "\n")
+
     def update_state(self, tick: int) -> None:
         old = self.state
         if not self.active:
-            self.state = BridgeState.RUPTURED
+            if self.current_strength > 0 and self.fatigue <= 3.0:
+                self.state = BridgeState.DORMANT
+            else:
+                self.state = BridgeState.RUPTURED
         else:
             avg = sum(self.decoherence_exposure[-5:]) / len(self.decoherence_exposure[-5:]) if self.decoherence_exposure else 0.0
             self.fatigue += avg
@@ -67,8 +99,7 @@ class Bridge:
             else:
                 self.state = BridgeState.STABLE
         if old != self.state:
-            with open("output/bridge_dynamics_log.json", "a") as f:
-                f.write(json.dumps({"tick": tick, "bridge": self.bridge_id, "from": old.value, "to": self.state.value}) + "\n")
+            self._log_dynamics(tick, self.state.value, {"from": old.value})
 
     def _log_event(self, tick, event_type, value):
         event = BridgeEvent(
@@ -97,6 +128,7 @@ class Bridge:
             self.coherence_at_reform = coherence
             print(f"[BRIDGE] Reactivated at tick {tick_time} with coherence={coherence:.2f}")
             self._log_event(tick_time, "bridge_reformed", coherence)
+            self._log_dynamics(tick_time, "recovered", {"coherence": coherence})
 
     def apply(self, tick_time, graph):
         node_a = graph.get_node(self.node_a_id)
@@ -134,6 +166,7 @@ class Bridge:
         if self.probabilistic_bridge_failure(rupture_chance):
             self.last_rupture_tick = tick_time
             self._log_event(tick_time, "bridge_ruptured", avg_decoherence)
+            self._log_dynamics(tick_time, "ruptured", {"decoherence": avg_decoherence})
             self.rupture_history.append((tick_time, avg_decoherence))
             self.trust_score = max(0.0, self.trust_score - 0.1)
             self.reinforcement_streak = 0
@@ -146,6 +179,7 @@ class Bridge:
                 self.active = False
                 self.last_rupture_tick = tick_time
                 self._log_event(tick_time, "bridge_ruptured", avg_decoherence)
+                self._log_dynamics(tick_time, "ruptured", {"decoherence": avg_decoherence})
                 self.rupture_history.append((tick_time, avg_decoherence))
                 self.trust_score = max(0.0, self.trust_score - 0.1)
                 self.reinforcement_streak = 0
@@ -173,6 +207,11 @@ class Bridge:
                 node_b.apply_tick(tick_time, phase + self.phase_offset, graph, origin="bridge")
                 node_a.entangled_with.add(node_b.id)
                 node_b.entangled_with.add(node_a.id)
+        if self.active:
+            self.tick_load += 1
+            if phase_a is not None and phase_b is not None:
+                self.phase_drift += abs((phase_a - phase_b + math.pi) % (2 * math.pi) - math.pi)
+            self.coherence_flux += (node_a.coherence + node_b.coherence) / 2
         self.last_activation = tick_time
         self.reinforcement_streak += 1
         self.trust_score = min(1.0, self.trust_score + 0.01)
@@ -186,6 +225,12 @@ class Bridge:
             "phase_offset": self.phase_offset,
             "drift_tolerance": self.drift_tolerance,
             "decoherence_limit": self.decoherence_limit,
+            "initial_strength": self.initial_strength,
+            "current_strength": self.current_strength,
+            "medium_type": self.medium_type,
+            "mutable": self.mutable,
+            "seeded": self.seeded,
+            "formed_at_tick": self.formed_at_tick,
             "active": self.active,
             "last_activation": self.last_activation,
             "last_rupture_tick": self.last_rupture_tick,
@@ -196,4 +241,7 @@ class Bridge:
             "avg_decoherence": sum(self.decoherence_exposure)/len(self.decoherence_exposure) if self.decoherence_exposure else 0.0,
             "state": self.state.value,
             "fatigue": round(self.fatigue, 3),
+            "tick_load": self.tick_load,
+            "phase_drift": round(self.phase_drift, 4),
+            "coherence_flux": round(self.coherence_flux, 4),
         }
