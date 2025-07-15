@@ -343,6 +343,49 @@ class CausalAnalyst:
         return text
 
     # ------------------------------------------------------------
+    def generate_explanation_graph(self) -> dict:
+        """Export causal chains as a DAG for visualization."""
+        nodes = []
+        edges = []
+        counter = 1
+        for chain in self.causal_chains:
+            steps = sorted(chain.get("chain", []), key=lambda s: s.get("tick", 0))
+            ids = []
+            step_objs = []
+            for step in steps:
+                node = {
+                    "id": f"event_{counter}",
+                    "tick": step.get("tick"),
+                    "type": step.get("event"),
+                }
+                if step.get("event") == "bridge_ruptured":
+                    node["node"] = f"{step['target'][0]}->{step['target'][1]}"
+                    node["description"] = "bridge rupture"
+                elif step.get("event") == "decoherence_spike":
+                    node["node"] = chain.get("root_event", "").split()[1]
+                    node["description"] = "decoherence spike"
+                elif step.get("event") == "node_collapsed":
+                    node["node"] = step.get("node")
+                    node["description"] = "collapse"
+                nodes.append(node)
+                ids.append(node["id"])
+                step_objs.append(step)
+                counter += 1
+            for (a, step_a), (b, step_b) in zip(zip(ids, step_objs), zip(ids[1:], step_objs[1:])):
+                label = (
+                    "triggered"
+                    if step_a.get("event") == "decoherence_spike" and step_b.get("event") == "bridge_ruptured"
+                    else "caused"
+                )
+                edges.append({"source": a, "target": b, "label": label})
+
+        graph = {"nodes": nodes, "edges": edges}
+        path = os.path.join(self.output_dir, "explanation_graph.json")
+        with open(path, "w") as f:
+            json.dump(graph, f, indent=2)
+        return graph
+
+    # ------------------------------------------------------------
     def run(self) -> None:
         self.load_logs()
         self.detect_transitions()
@@ -350,5 +393,6 @@ class CausalAnalyst:
         self.infer_causal_chains()
         self.generate_explanation_log()
         self.generate_explanation_narrative()
+        self.generate_explanation_graph()
         print("✅ Causal explanations generated")
 
