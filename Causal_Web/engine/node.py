@@ -423,7 +423,13 @@ class Node:
 
     def _log_collapse_chain(self, tick_time, collapsed):
         """Log collapse propagation events to file with depth info."""
-        record = {"tick": tick_time, "source": self.id, "collapsed": collapsed}
+        record = {
+            "tick": tick_time,
+            "source": self.id,
+            "collapsed": collapsed,
+            "collapsed_entity": self.id,
+            "children_spawned": [c.get("node") for c in collapsed],
+        }
         with open(Config.output_path("collapse_chain_log.json"), "a") as f:
             f.write(json.dumps(record) + "\n")
 

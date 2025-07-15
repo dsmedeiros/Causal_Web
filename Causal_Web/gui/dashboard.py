@@ -1,16 +1,30 @@
 import os
 import dearpygui.dearpygui as dpg
 from ..config import Config
-from ..engine.tick_engine import simulation_loop
-from ..engine.tick_engine import graph, build_graph, _update_simulation_state
+from ..engine.tick_engine import (
+    simulation_loop,
+    graph,
+    build_graph,
+    _update_simulation_state,
+    recent_csp_failures,
+)
 import threading
 
 # Tick stores for visual update
 node_colors = {
-    "A1": (100, 149, 237),  # Cornflower Blue
-    "A2": (60, 179, 113),  # Medium Sea Green
-    "C": (220, 20, 60),  # Crimson
+    "A1": (100, 149, 237),
+    "A2": (60, 179, 113),
+    "C": (220, 20, 60),
 }
+
+# Mapping of origin types to colors for dynamic nodes
+ORIGIN_COLORS = {
+    "SIP_BUD": (60, 179, 113),  # green
+    "SIP_RECOMB": (0, 255, 255),  # cyan
+    "CSP": (220, 20, 60),  # crimson
+}
+
+ripples = []  # GUI animations for failed CSP seeds
 node_positions = {"A1": (100, 200), "A2": (100, 300), "C": (400, 250)}
 node_tags = {}
 tick_counters = {}
@@ -67,11 +81,7 @@ def update_graph_visuals():
         tick_count = len(node.tick_history)
         vel = getattr(node, "coherence_velocity", 0.0)
 
-        color = (
-            (100, 149, 237)
-            if "A1" in node_id
-            else (60, 179, 113) if "A2" in node_id else (220, 20, 60)
-        )
+        color = ORIGIN_COLORS.get(getattr(node, "origin_type", ""), (100, 149, 237))
 
         dpg.draw_circle(
             center=(x, y), radius=30, color=color, fill=color, parent="graph_drawlist"
@@ -105,6 +115,23 @@ def update_graph_visuals():
             p2=(to_node.x, to_node.y),
             color=color,
             thickness=thickness,
+            parent="graph_drawlist",
+        )
+
+    # Draw ripples for recent CSP failures
+    now = Config.current_tick
+    for rip in list(recent_csp_failures):
+        age = now - rip["tick"]
+        if age > 10:
+            recent_csp_failures.remove(rip)
+            continue
+        radius = 5 + age * 5
+        alpha = max(0, 255 - age * 25)
+        dpg.draw_circle(
+            center=(rip["x"], rip["y"]),
+            radius=radius,
+            color=(255, 165, 0, alpha),
+            fill=(255, 165, 0, 50),
             parent="graph_drawlist",
         )
 
@@ -193,6 +220,15 @@ def dashboard():
                 color=(150, 150, 150),
                 thickness=2,
             )
+
+    with dpg.window(label="Legend", width=180, height=120, pos=(610, 260)):
+        dpg.add_text(
+            "\u2b1b SIP_BUD — Stable replication", color=ORIGIN_COLORS["SIP_BUD"]
+        )
+        dpg.add_text(
+            "\u2b1b SIP_RECOMB — Dual-parent recomb", color=ORIGIN_COLORS["SIP_RECOMB"]
+        )
+        dpg.add_text("\u2b1b CSP — Collapse-seeded", color=ORIGIN_COLORS["CSP"])
 
     dpg.setup_dearpygui()
     dpg.show_viewport()

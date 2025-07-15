@@ -26,8 +26,11 @@ bridges_reformed_count = 0
 _decay_durations = []
 
 # --- Propagation tracking ---
-_sip_pending = []  # list of (child_id, parents, spawn_tick)
+_sip_pending = []  # list of (child_id, parents, spawn_tick, origin_type)
 _csp_seeds = []  # list of (seed_id, parent_id, x, y, spawn_tick)
+
+# GUI hook for failed CSP seed ripples
+recent_csp_failures = []  # list of dict(x,y,tick,intensity)
 
 _sip_success_count = 0
 _sip_failure_count = 0
@@ -237,15 +240,18 @@ def _spawn_sip_child(parent, tick: int):
                     "tick": tick,
                     "parents": [parent.id],
                     "origin_type": "SIP_BUD",
-                    "coherence": parent.coherence,
+                    "generation_tick": tick,
                     "sigma_phi": parent.law_wave_frequency,
+                    "phase_confidence_index": graph.get_node(
+                        child_id
+                    ).phase_confidence_index,
                 }
             )
             + "\n"
         )
     _update_growth_log(tick)
     global _sip_pending, _sip_success_count
-    _sip_pending.append((child_id, [parent.id], tick))
+    _sip_pending.append((child_id, [parent.id], tick, "SIP_BUD"))
     _sip_success_count += 1
 
 
@@ -278,21 +284,24 @@ def _spawn_sip_recomb_child(parent_a, parent_b, tick: int):
                     "tick": tick,
                     "parents": [parent_a.id, parent_b.id],
                     "origin_type": "SIP_RECOMB",
-                    "coherence": (parent_a.coherence + parent_b.coherence) / 2,
+                    "generation_tick": tick,
                     "sigma_phi": freq,
+                    "phase_confidence_index": graph.get_node(
+                        child_id
+                    ).phase_confidence_index,
                 }
             )
             + "\n"
         )
     global _sip_pending, _sip_success_count
-    _sip_pending.append((child_id, [parent_a.id, parent_b.id], tick))
+    _sip_pending.append((child_id, [parent_a.id, parent_b.id], tick, "SIP_RECOMB"))
     _sip_success_count += 1
 
 
 def _check_sip_failures(tick: int) -> None:
     """Assess pending SIP offspring for stabilization failures."""
     global _sip_pending, _sip_failure_count
-    for child_id, parents, start in list(_sip_pending):
+    for child_id, parents, start, otype in list(_sip_pending):
         if tick - start < Config.SIP_STABILIZATION_WINDOW:
             continue
         node = graph.get_node(child_id)
@@ -316,15 +325,17 @@ def _check_sip_failures(tick: int) -> None:
                             "tick": tick,
                             "type": "SIP_FAILURE",
                             "parent": parents[0],
+                            "child": child_id,
                             "reason": "Insufficient coherence after "
                             f"{Config.SIP_STABILIZATION_WINDOW} ticks",
                             "entropy_injected": Config.SIP_FAILURE_ENTROPY_INJECTION,
+                            "origin_type": otype,
                         }
                     )
                     + "\n"
                 )
             _sip_failure_count += 1
-        _sip_pending.remove((child_id, parents, start))
+        _sip_pending.remove((child_id, parents, start, otype))
 
 
 def trigger_csp(parent_id: str, x: float, y: float, tick: int) -> None:
@@ -369,6 +380,11 @@ def _process_csp_seeds(tick: int) -> None:
                             "tick": tick,
                             "parents": [seed["parent"]],
                             "origin_type": "CSP",
+                            "generation_tick": tick,
+                            "sigma_phi": graph.get_node(node_id).law_wave_frequency,
+                            "phase_confidence_index": graph.get_node(
+                                node_id
+                            ).phase_confidence_index,
                         }
                     )
                     + "\n"
@@ -398,10 +414,20 @@ def _process_csp_seeds(tick: int) -> None:
                             "parent": seed["parent"],
                             "reason": "Seed failed to cohere",
                             "entropy_injected": Config.CSP_ENTROPY_INJECTION,
+                            "origin_type": "CSP",
+                            "location": [seed["x"], seed["y"]],
                         }
                     )
                     + "\n"
                 )
+            recent_csp_failures.append(
+                {
+                    "x": seed["x"],
+                    "y": seed["y"],
+                    "tick": tick,
+                    "intensity": Config.CSP_ENTROPY_INJECTION,
+                }
+            )
             _csp_failure_count += 1
         _csp_seeds.remove(seed)
 
