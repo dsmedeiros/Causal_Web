@@ -46,11 +46,15 @@ class CWTLogInterpreter:
 
     # ------------------------------------------------------------
     def interpret_curvature(self) -> None:
-        path = os.path.join(self.output_dir, "curvature_map.json")
-        if not os.path.exists(path):
+        """Aggregate curvature statistics from the log file."""
+        path = self._path("curvature_map.json")
+        if not os.path.exists(path) or os.path.getsize(path) == 0:
             return
-        with open(path) as f:
-            records = json.load(f)
+        try:
+            with open(path) as f:
+                records = json.load(f)
+        except json.JSONDecodeError:
+            return
         stats: Dict[str, Dict[str, float]] = {}
         for entry in records:
             for edge in entry.get("edges", []):
