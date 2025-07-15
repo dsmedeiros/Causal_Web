@@ -1,48 +1,49 @@
 # Causal Web
 
-This project contains a small simulation engine and GUI for experimenting with causal
-graphs. It is written in Python and uses [Dear PyGui](https://github.com/hoffstadt/DearPyGui)
-for the graphical interface.
+This project contains a small simulation engine and GUI for experimenting with causal graphs. It is written in Python and uses [Dear PyGui](https://github.com/hoffstadt/DearPyGui) for the graphical interface.
 
 ## Overview
 
-The code models nodes connected by directed edges. Each node can emit "ticks" with a
-phase value that propagates through the graph. Edges attenuate and delay phases before
-they arrive at downstream nodes. Nodes decide whether to fire based on the combined
-incoming phases and their current threshold.
+The engine models a directed network of nodes. Each node maintains its own oscillator phase and can emit "ticks" that travel along edges with delay and attenuation. Nodes accumulate incoming phases and fire when they pass a threshold, scheduling more ticks. Bridges create additional links whose strength can change over time. Observers watch the network and attempt to infer hidden state.
 
-Phase 4 introduces memory, intention and rhythmic forcing. Nodes now keep sliding
-histories of recent coherence and learn trust scores for their neighbours. Bridges
-track ruptures and reinforcement streaks while observers attempt to infer unseen
-events. Optional global modulation fields can jitter phases or thresholds for all
-nodes.
+Key modules include:
 
-The main components are:
+- **`engine/graph.py`** – container for nodes, edges and bridges. Graphs can be loaded from or written to JSON files.
+- **`engine/node.py`** – implementation of `Node`, `Edge` and related logic.
+- **`engine/bridge.py`** – manages dynamic bridges between nodes.
+- **`engine/tick_engine.py`** – drives the discrete simulation and records metrics under `output/`.
+- **`engine/log_interpreter.py`** – parses the generated logs and aggregates statistics.
+- **`engine/causal_analyst.py`** – infers causal chains and produces explanation files.
+- **`gui/dashboard.py`** – Dear PyGui dashboard for interactive runs.
+- **`main.py`** – simple entry point that launches the dashboard.
 
-- **`engine/graph.py`** – Defines `CausalGraph` which stores nodes and edges. Graphs can be
-  loaded from or saved to JSON files.
-- **`engine/node.py`** – Implements `Node` and `Edge` classes. Nodes keep a history of
-ticks, queue incoming phases and apply refractory periods before firing.
-- **`engine/tick_engine.py`** – Runs the discrete tick simulation. It emits ticks from
-nodes, propagates phases along edges and records the results to
-`output/tick_trace.json`.
-- **`gui/dashboard.py`** – Launches a simple dashboard built with Dear PyGui. Controls allow
-starting, pausing and adjusting the tick rate while visualising the graph in real time.
-- **`main.py`** – Entry point that simply launches the dashboard.
+Graphs are stored in `input/graph.json` inside the package. Paths are resolved relative to the package so the module can be run from any working directory. All output is written next to the code in the `output` directory.
 
-Graphs are expected to be defined in `input/graph.json` inside the package. The
-code now resolves this path relative to the package location so the module can
-be executed from any working directory. Simulation output is written to the
-`output` folder located next to the code.
+## Running the simulation
 
-## Running
-
-1. Install dependencies (e.g. `dearpygui`).
-2. Run the application:
+1. Install the dependencies (`dearpygui` is required for the GUI).
+2. Launch the dashboard:
 
 ```bash
 python -m Causal_Web.main
 ```
 
-A window will appear showing the causal graph and controls for the simulation.
+Use the on-screen controls to start or pause the simulation and adjust the tick rate. As it runs, a number of JSON log files are produced inside `Causal_Web/output`.
 
+### Analysing the output
+
+Once a simulation has finished you can interpret the logs via:
+
+```bash
+python -m Causal_Web.engine.log_interpreter
+```
+
+This command loads the logs and generates several summary files:
+
+- **`interpretation_log.json`** – aggregated metrics such as coherence ranges and collapse events.
+- **`interpretation_summary.txt`** – human readable summary of the above data.
+- **`causal_explanations.json`** and **`causal_summary.txt`** – explanation events and a narrative produced by `CausalAnalyst`.
+- **`explanation_graph.json`** – causal chains expressed as a graph for visualisation.
+- **`causal_timeline.json`** – ordered timeline of notable events.
+
+The raw logs (`tick_trace.json`, `coherence_log.json`, `event_log.json`, etc.) remain in `output/` for detailed inspection. For convenience, running `bundle_run.py` packages the important files with a manifest describing the run.
