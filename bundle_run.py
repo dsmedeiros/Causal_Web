@@ -8,6 +8,7 @@ import zipfile
 from datetime import datetime
 
 from Causal_Web.engine.log_interpreter import run_interpreter
+from Causal_Web.config import Config
 
 
 DEFAULT_KEEP_FILES = [
@@ -27,6 +28,7 @@ DEFAULT_KEEP_FILES = [
     "manifest.json",
     "interference_log.json",
     "tick_density_map.json",
+    "tick_seed_log.json",
     "refraction_log.json",
     "node_state_log.json",
     "boundary_interaction_log.json",
@@ -53,6 +55,11 @@ def _create_manifest(out_dir: str, run_id: str, timestamp: str) -> None:
 
     deco_lines = _load_lines(os.path.join(out_dir, "decoherence_log.json"))
     manifest["total_ticks"] = len(deco_lines)
+
+    seed_lines = _load_lines(os.path.join(out_dir, "tick_seed_log.json"))
+    manifest["ticks_seeded"] = len(seed_lines)
+    manifest["seeded_nodes_count"] = len({e.get("node") for e in seed_lines})
+    manifest["seeding_strategy"] = Config.seeding.get("strategy", "static")
 
     graph_path = os.path.join("Causal_Web", "input", "graph.json")
     if os.path.exists(graph_path):

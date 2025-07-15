@@ -18,3 +18,9 @@ class Config:
     # interval for saving runtime snapshots of the graph
     snapshot_interval = 10
 
+    # tick seeding configuration
+    seeding = {
+        "strategy": "static",  # static or probabilistic
+        "probability": 0.1,   # used when strategy == "probabilistic"
+    }
+

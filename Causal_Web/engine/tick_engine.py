@@ -4,6 +4,7 @@ from config import Config
 from .graph import CausalGraph
 from .observer import Observer
 from .log_interpreter import run_interpreter
+from .tick_seeder import TickSeeder
 import json
 import numpy as np
 import os
@@ -15,6 +16,7 @@ graph = CausalGraph()
 observers = []
 kappa = 0.5  # curvature strength for refraction fields
 _law_wave_stability = {}
+seeder = TickSeeder(graph)
 
 # Phase 6 metrics
 void_absorption_events = 0
@@ -48,17 +50,15 @@ def clear_output_directory():
 def build_graph():
     clear_output_directory()
     graph.load_from_file("input/graph.json")
+    global seeder
+    seeder = TickSeeder(graph)
 
 def add_observer(observer: Observer):
     observers.append(observer)
 
 def emit_ticks(global_tick):
-    for source in getattr(graph, "tick_sources", []):
-        node = graph.get_node(source["node_id"])
-        interval = source.get("tick_interval", 1)
-        phase = source.get("phase", 0.0)
-        if node and not node.is_classical and global_tick % interval == 0:
-            node.apply_tick(global_tick, phase, graph, origin="source")
+    """Seed ticks into the graph via the configured seeder."""
+    seeder.seed(global_tick)
 
 def propagate_phases(global_tick):
     """Propagate phases scheduled during node ticks.
