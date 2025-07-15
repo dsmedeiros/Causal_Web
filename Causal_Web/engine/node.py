@@ -6,6 +6,7 @@ from enum import Enum
 from typing import Set, List, Dict, Optional
 import numpy as np
 import json
+import uuid
 from ..config import Config
 
 
@@ -21,11 +22,13 @@ class NodeType(Enum):
 
 @dataclass
 class Tick:
-    """Discrete causal pulse."""
+    """Discrete causal pulse with layer metadata."""
     origin: str
     time: float
     amplitude: float
     phase: float
+    layer: str = "tick"
+    trace_id: str = ""
 
 class Node:
     def __init__(self, node_id, x=0.0, y=0.0, frequency=1.0, refractory_period=2, base_threshold=0.5, phase=0.0):
@@ -252,7 +255,11 @@ class Node:
         self.last_tick_time = tick_time
         self.current_threshold = min(self.current_threshold + 0.05, 1.0) # Slight adaptation
         self.phase = phase
-        self.tick_history.append(Tick(origin=origin, time=tick_time, amplitude=1.0, phase=phase))
+        trace_id = str(uuid.uuid4())
+        tick_obj = Tick(origin=origin, time=tick_time, amplitude=1.0, phase=phase, layer="tick", trace_id=trace_id)
+        self.tick_history.append(tick_obj)
+        from .tick_router import TickRouter
+        TickRouter.route_tick(self, tick_obj)
         self.collapse_origin[tick_time] = origin
         print(f"[{self.id}] Tick at {tick_time} via {origin.upper()} | Phase: {phase:.2f}")
 
@@ -328,6 +335,10 @@ class Node:
 
 
     def maybe_tick(self, global_tick, graph):
+        if self.tick_history:
+            from .tick_router import TickRouter
+            TickRouter.route_tick(self, self.tick_history[-1])
+
         if global_tick in self.incoming_phase_queue:
             should_fire, phase = self.should_tick(global_tick)
             if should_fire and not self.is_classical:
@@ -346,7 +357,7 @@ class Node:
 
     def _emit(self, tick_time):
         phase = self.compute_phase(tick_time)
-        self.tick_history.append(Tick(origin="self", time=tick_time, amplitude=1.0, phase=phase))
+        self.tick_history.append(Tick(origin="self", time=tick_time, amplitude=1.0, phase=phase, layer="tick", trace_id=str(uuid.uuid4())))
         print(f"[{self.id}] Emitted tick at {tick_time} | Phase: {phase:.2f}")
 
 

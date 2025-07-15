@@ -178,7 +178,7 @@ class CausalGraph:
                 nid: {
                     "x": n.x,
                     "y": n.y,
-                    "ticks": [{"time": tick.time, "phase": tick.phase, "origin": tick.origin} for tick in n.tick_history],
+                    "ticks": [{"time": tick.time, "phase": tick.phase, "origin": tick.origin, "layer": getattr(tick, "layer", "tick"), "trace_id": getattr(tick, "trace_id", "")} for tick in n.tick_history],
                     "phase": n.phase,
                     "coherence": n.coherence,
                     "decoherence": n.decoherence,
