@@ -170,6 +170,13 @@ class Bridge:
         node_a = graph.get_node(self.node_a_id)
         node_b = graph.get_node(self.node_b_id)
 
+        # Precompute phases for both nodes. These may be used for drift checks
+        # as well as later metrics collection. Initialise to ``None`` so that
+        # subsequent logic can safely reference them even when a particular
+        # phase is unavailable or drift checks are disabled.
+        phase_a = node_a.get_phase_at(tick_time)
+        phase_b = node_b.get_phase_at(tick_time)
+
         self.decay(tick_time)
         self.try_reform(tick_time, node_a, node_b)
 
@@ -179,17 +186,14 @@ class Bridge:
         if a_collapsed == b_collapsed:
             return
 
-        if self.drift_tolerance is not None:
-            phase_a = node_a.get_phase_at(tick_time)
-            phase_b = node_b.get_phase_at(tick_time)
-            if phase_a is not None and phase_b is not None:
-                drift = abs((phase_a - phase_b + math.pi) % (2 * math.pi) - math.pi)
-                if drift > self.drift_tolerance:
-                    print(f"[BRIDGE] Drift too high at tick {tick_time}: {drift:.2f} > {self.drift_tolerance}")
-                    self._log_event(tick_time, "bridge_drift", drift)
-                    self.trust_score = max(0.0, self.trust_score - 0.05)
-                    self.reinforcement_streak = 0
-                    return
+        if self.drift_tolerance is not None and phase_a is not None and phase_b is not None:
+            drift = abs((phase_a - phase_b + math.pi) % (2 * math.pi) - math.pi)
+            if drift > self.drift_tolerance:
+                print(f"[BRIDGE] Drift too high at tick {tick_time}: {drift:.2f} > {self.drift_tolerance}")
+                self._log_event(tick_time, "bridge_drift", drift)
+                self.trust_score = max(0.0, self.trust_score - 0.05)
+                self.reinforcement_streak = 0
+                return
 
         decoherence_a = node_a.compute_decoherence_field(tick_time)
         decoherence_b = node_b.compute_decoherence_field(tick_time)
