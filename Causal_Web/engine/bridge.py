@@ -4,6 +4,16 @@ from random import random
 from typing import Optional
 import json
 
+from enum import Enum
+
+
+class BridgeState(Enum):
+    FORMING = "forming"
+    STABLE = "stable"
+    STRAINED = "strained"
+    RUPTURING = "rupturing"
+    RUPTURED = "ruptured"
+
 @dataclass
 class BridgeEvent:
     tick: int
@@ -29,6 +39,8 @@ class Bridge:
         self.decoherence_limit = decoherence_limit
         self.last_activation = None
         self.active = True
+        self.state = BridgeState.FORMING
+        self.fatigue = 0.0
         self.last_rupture_tick = None
         self.last_reform_tick = None
         self.coherence_at_reform = None
@@ -39,6 +51,24 @@ class Bridge:
         self.reinforcement_streak = 0
         self.decoherence_exposure = []  # recent avg decoherence values
         self.trust_score = 0.5
+
+    def update_state(self, tick: int) -> None:
+        old = self.state
+        if not self.active:
+            self.state = BridgeState.RUPTURED
+        else:
+            avg = sum(self.decoherence_exposure[-5:]) / len(self.decoherence_exposure[-5:]) if self.decoherence_exposure else 0.0
+            self.fatigue += avg
+            if self.fatigue > 3.0:
+                self.state = BridgeState.RUPTURING
+                self.active = False
+            elif self.fatigue > 1.5:
+                self.state = BridgeState.STRAINED
+            else:
+                self.state = BridgeState.STABLE
+        if old != self.state:
+            with open("output/bridge_dynamics_log.json", "a") as f:
+                f.write(json.dumps({"tick": tick, "bridge": self.bridge_id, "from": old.value, "to": self.state.value}) + "\n")
 
     def _log_event(self, tick, event_type, value):
         event = BridgeEvent(
@@ -107,6 +137,7 @@ class Bridge:
             self.rupture_history.append((tick_time, avg_decoherence))
             self.trust_score = max(0.0, self.trust_score - 0.1)
             self.reinforcement_streak = 0
+            self.update_state(tick_time)
             return
 
         if self.decoherence_limit and self.last_activation is not None:
@@ -118,9 +149,11 @@ class Bridge:
                 self.rupture_history.append((tick_time, avg_decoherence))
                 self.trust_score = max(0.0, self.trust_score - 0.1)
                 self.reinforcement_streak = 0
+                self.update_state(tick_time)
                 return
 
         if not self.active:
+            self.update_state(tick_time)
             return
 
         if self.bridge_type == "braided":
@@ -143,6 +176,7 @@ class Bridge:
         self.last_activation = tick_time
         self.reinforcement_streak += 1
         self.trust_score = min(1.0, self.trust_score + 0.01)
+        self.update_state(tick_time)
 
     def to_dict(self):
         return {
@@ -160,4 +194,6 @@ class Bridge:
             "trust_score": self.trust_score,
             "reinforcement_streak": self.reinforcement_streak,
             "avg_decoherence": sum(self.decoherence_exposure)/len(self.decoherence_exposure) if self.decoherence_exposure else 0.0,
+            "state": self.state.value,
+            "fatigue": round(self.fatigue, 3),
         }

@@ -233,3 +233,26 @@ class CausalGraph:
 
         self.tick_sources = data.get("tick_sources", [])
 
+    # ------------------------------------------------------------
+    def emit_law_wave(self, origin_id: str, tick: int, radius: int = 2) -> None:
+        """Propagate a law wave from origin node and log affected nodes."""
+        visited = {origin_id}
+        frontier = [(origin_id, 0)]
+        affected = []
+        while frontier:
+            nid, dist = frontier.pop(0)
+            if dist > radius:
+                continue
+            node = self.get_node(nid)
+            if node:
+                node.collapse_pressure += max(0.0, 1.0 - 0.5 * dist)
+                if nid != origin_id:
+                    affected.append(nid)
+            for edge in self.get_edges_from(nid):
+                if edge.target not in visited:
+                    visited.add(edge.target)
+                    frontier.append((edge.target, dist + 1))
+        if affected:
+            with open("output/law_wave_log.json", "a") as f:
+                f.write(json.dumps({"tick": tick, "origin": origin_id, "affected": affected}) + "\n")
+

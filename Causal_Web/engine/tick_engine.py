@@ -111,6 +111,25 @@ def log_meta_node_ticks(global_tick):
             f.write(json.dumps({str(global_tick): events}) + "\n")
 
 
+def dynamic_bridge_management(global_tick):
+    ids = list(graph.nodes.keys())
+    existing = {(b.node_a_id, b.node_b_id) for b in graph.bridges}
+    existing |= {(b.node_b_id, b.node_a_id) for b in graph.bridges}
+    for i in range(len(ids)):
+        for j in range(i + 1, len(ids)):
+            a = graph.get_node(ids[i])
+            b = graph.get_node(ids[j])
+            if (a.id, b.id) in existing:
+                continue
+            drift = abs((a.phase - b.phase + math.pi) % (2 * math.pi) - math.pi)
+            if drift < 0.1 and a.coherence > 0.9 and b.coherence > 0.9:
+                graph.add_bridge(a.id, b.id)
+                bridge = graph.bridges[-1]
+                with open("output/bridge_dynamics_log.json", "a") as f:
+                    f.write(json.dumps({"tick": global_tick, "bridge": bridge.bridge_id, "from": None, "to": "forming"}) + "\n")
+                bridge.update_state(global_tick)
+
+
 def _compute_metrics(node, tick_time):
     decoherence = node.compute_decoherence_field(tick_time)
     coherence = node.compute_coherence_level(tick_time)
@@ -143,7 +162,7 @@ def log_metrics_per_tick(global_tick):
         log_metrics_per_tick._last_coherence[node_id] = coherence
         node.coherence_velocity = delta
 
-        node.update_classical_state(decoherence, tick_time=global_tick)
+        node.update_classical_state(decoherence, tick_time=global_tick, graph=graph)
 
         # track law-wave stability
         record = _law_wave_stability.setdefault(node_id, {"freqs": [], "stable": 0})
@@ -212,6 +231,7 @@ def simulation_loop():
             log_bridge_states(global_tick)
             log_meta_node_ticks(global_tick)
             log_curvature_per_tick(global_tick)
+            dynamic_bridge_management(global_tick)
 
             for obs in observers:
                 obs.observe(graph, global_tick)

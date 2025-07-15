@@ -146,6 +146,21 @@ def _create_manifest(out_dir: str, run_id: str, timestamp: str) -> None:
     # refraction events
     manifest["refraction_events_logged"] = len(_load_lines(os.path.join(out_dir, "refraction_log.json")))
 
+    # bridge dynamics
+    dynamics = _load_lines(os.path.join(out_dir, "bridge_dynamics_log.json"))
+    manifest["bridge_formations"] = sum(1 for e in dynamics if e.get("from") is None)
+    manifest["ruptures_total"] = sum(1 for e in dynamics if e.get("to") == "ruptured")
+
+    # law wave propagation
+    law_wave_events = _load_lines(os.path.join(out_dir, "law_wave_log.json"))
+    manifest["law_waves_emitted"] = sum(1 for e in law_wave_events if e.get("origin"))
+    manifest["collapse_pressure_events"] = sum(len(e.get("affected", [])) for e in law_wave_events)
+
+    # node state transitions
+    transitions = _load_lines(os.path.join(out_dir, "node_state_map.json"))
+    manifest["node_state_transitions_count"] = len(transitions)
+    manifest["boundary_interactions_count"] = 0
+
     with open(os.path.join(out_dir, "manifest.json"), "w") as f:
         json.dump(manifest, f, indent=2)
 
