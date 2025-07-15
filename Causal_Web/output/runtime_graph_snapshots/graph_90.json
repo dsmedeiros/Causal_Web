@@ -458,56 +458,6 @@
           "time": 90,
           "phase": 0.0,
           "origin": "seed"
-        },
-        {
-          "time": 91,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 92,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 93,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 94,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 95,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 96,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 97,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 98,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 99,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 100,
-          "phase": 0.0,
-          "origin": "seed"
         }
       ],
       "phase": 0.0,
@@ -607,22 +557,12 @@
         "87": "seed",
         "88": "seed",
         "89": "seed",
-        "90": "seed",
-        "91": "seed",
-        "92": "seed",
-        "93": "seed",
-        "94": "seed",
-        "95": "seed",
-        "96": "seed",
-        "97": "seed",
-        "98": "seed",
-        "99": "seed",
-        "100": "seed"
+        "90": "seed"
       },
       "is_classical": false,
       "decoherence_streak": 0,
-      "last_tick_time": 100,
-      "subjective_ticks": 101,
+      "last_tick_time": 90,
+      "subjective_ticks": 91,
       "law_wave_frequency": 0.05,
       "trust_profile": {
         "seed": 1.0
@@ -630,7 +570,7 @@
       "phase_confidence": 1.0,
       "goals": {},
       "node_type": "normal",
-      "coherence_credit": 22.700000000000053,
+      "coherence_credit": 20.700000000000024,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
@@ -642,7 +582,7 @@
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 1.0,
-      "refractory_period": 1.0999999999999992,
+      "refractory_period": 1.1999999999999993,
       "base_threshold": 0.5,
       "collapse_origin": {},
       "is_classical": false,
@@ -654,7 +594,7 @@
       "phase_confidence": 1.0,
       "goals": {},
       "node_type": "normal",
-      "coherence_credit": 11.999999999999973,
+      "coherence_credit": 10.999999999999977,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
@@ -666,7 +606,7 @@
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 1.0,
-      "refractory_period": 1.0999999999999992,
+      "refractory_period": 1.1999999999999993,
       "base_threshold": 0.5,
       "collapse_origin": {},
       "is_classical": false,
@@ -678,7 +618,7 @@
       "phase_confidence": 1.0,
       "goals": {},
       "node_type": "normal",
-      "coherence_credit": 12.69999999999997,
+      "coherence_credit": 11.699999999999974,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
@@ -690,7 +630,7 @@
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 1.0,
-      "refractory_period": 1.0999999999999992,
+      "refractory_period": 1.1999999999999993,
       "base_threshold": 0.5,
       "collapse_origin": {},
       "is_classical": false,
@@ -702,7 +642,7 @@
       "phase_confidence": 1.0,
       "goals": {},
       "node_type": "normal",
-      "coherence_credit": 12.199999999999973,
+      "coherence_credit": 11.199999999999976,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
@@ -714,7 +654,7 @@
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 1.0,
-      "refractory_period": 1.0999999999999992,
+      "refractory_period": 1.1999999999999993,
       "base_threshold": 0.5,
       "collapse_origin": {},
       "is_classical": false,
@@ -726,7 +666,7 @@
       "phase_confidence": 1.0,
       "goals": {},
       "node_type": "normal",
-      "coherence_credit": 12.399999999999972,
+      "coherence_credit": 11.399999999999975,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
@@ -1188,56 +1128,6 @@
           "time": 90,
           "phase": 0.0,
           "origin": "seed"
-        },
-        {
-          "time": 91,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 92,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 93,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 94,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 95,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 96,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 97,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 98,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 99,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 100,
-          "phase": 0.0,
-          "origin": "seed"
         }
       ],
       "phase": 0.0,
@@ -1337,22 +1227,12 @@
         "87": "seed",
         "88": "seed",
         "89": "seed",
-        "90": "seed",
-        "91": "seed",
-        "92": "seed",
-        "93": "seed",
-        "94": "seed",
-        "95": "seed",
-        "96": "seed",
-        "97": "seed",
-        "98": "seed",
-        "99": "seed",
-        "100": "seed"
+        "90": "seed"
       },
       "is_classical": false,
       "decoherence_streak": 0,
-      "last_tick_time": 100,
-      "subjective_ticks": 101,
+      "last_tick_time": 90,
+      "subjective_ticks": 91,
       "law_wave_frequency": 0.05,
       "trust_profile": {
         "seed": 1.0
@@ -1360,7 +1240,7 @@
       "phase_confidence": 1.0,
       "goals": {},
       "node_type": "normal",
-      "coherence_credit": 22.40000000000005,
+      "coherence_credit": 20.40000000000002,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
@@ -1372,7 +1252,55 @@
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 1.0,
-      "refractory_period": 1.0999999999999992,
+      "refractory_period": 1.1999999999999993,
+      "base_threshold": 0.5,
+      "collapse_origin": {},
+      "is_classical": false,
+      "decoherence_streak": 0,
+      "last_tick_time": -Infinity,
+      "subjective_ticks": 0,
+      "law_wave_frequency": 0.05,
+      "trust_profile": {},
+      "phase_confidence": 1.0,
+      "goals": {},
+      "node_type": "normal",
+      "coherence_credit": 11.099999999999977,
+      "decoherence_debt": 0.0,
+      "phase_lock": false
+    },
+    "H": {
+      "x": 300,
+      "y": 200,
+      "ticks": [],
+      "phase": 0.0,
+      "coherence": 1.0,
+      "decoherence": 0.0,
+      "frequency": 1.0,
+      "refractory_period": 1.1999999999999993,
+      "base_threshold": 0.5,
+      "collapse_origin": {},
+      "is_classical": false,
+      "decoherence_streak": 0,
+      "last_tick_time": -Infinity,
+      "subjective_ticks": 0,
+      "law_wave_frequency": 0.05,
+      "trust_profile": {},
+      "phase_confidence": 1.0,
+      "goals": {},
+      "node_type": "normal",
+      "coherence_credit": 11.699999999999974,
+      "decoherence_debt": 0.0,
+      "phase_lock": false
+    },
+    "I": {
+      "x": 300,
+      "y": 300,
+      "ticks": [],
+      "phase": 0.0,
+      "coherence": 1.0,
+      "decoherence": 0.0,
+      "frequency": 1.0,
+      "refractory_period": 1.1999999999999993,
       "base_threshold": 0.5,
       "collapse_origin": {},
       "is_classical": false,
@@ -1388,54 +1316,6 @@
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
-    "H": {
-      "x": 300,
-      "y": 200,
-      "ticks": [],
-      "phase": 0.0,
-      "coherence": 1.0,
-      "decoherence": 0.0,
-      "frequency": 1.0,
-      "refractory_period": 1.0999999999999992,
-      "base_threshold": 0.5,
-      "collapse_origin": {},
-      "is_classical": false,
-      "decoherence_streak": 0,
-      "last_tick_time": -Infinity,
-      "subjective_ticks": 0,
-      "law_wave_frequency": 0.05,
-      "trust_profile": {},
-      "phase_confidence": 1.0,
-      "goals": {},
-      "node_type": "normal",
-      "coherence_credit": 12.69999999999997,
-      "decoherence_debt": 0.0,
-      "phase_lock": false
-    },
-    "I": {
-      "x": 300,
-      "y": 300,
-      "ticks": [],
-      "phase": 0.0,
-      "coherence": 1.0,
-      "decoherence": 0.0,
-      "frequency": 1.0,
-      "refractory_period": 1.0999999999999992,
-      "base_threshold": 0.5,
-      "collapse_origin": {},
-      "is_classical": false,
-      "decoherence_streak": 0,
-      "last_tick_time": -Infinity,
-      "subjective_ticks": 0,
-      "law_wave_frequency": 0.05,
-      "trust_profile": {},
-      "phase_confidence": 1.0,
-      "goals": {},
-      "node_type": "normal",
-      "coherence_credit": 13.09999999999997,
-      "decoherence_debt": 0.0,
-      "phase_lock": false
-    },
     "J": {
       "x": 400,
       "y": 100,
@@ -1444,7 +1324,7 @@
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 1.0,
-      "refractory_period": 1.0999999999999992,
+      "refractory_period": 1.1999999999999993,
       "base_threshold": 0.5,
       "collapse_origin": {},
       "is_classical": false,
@@ -1456,7 +1336,7 @@
       "phase_confidence": 1.0,
       "goals": {},
       "node_type": "normal",
-      "coherence_credit": 11.599999999999975,
+      "coherence_credit": 10.599999999999978,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
@@ -1468,7 +1348,7 @@
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 1.0,
-      "refractory_period": 1.0999999999999992,
+      "refractory_period": 1.1999999999999993,
       "base_threshold": 0.5,
       "collapse_origin": {},
       "is_classical": false,
@@ -1480,7 +1360,7 @@
       "phase_confidence": 1.0,
       "goals": {},
       "node_type": "null",
-      "coherence_credit": 12.69999999999997,
+      "coherence_credit": 11.699999999999974,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
@@ -1492,7 +1372,7 @@
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 1.0,
-      "refractory_period": 1.0999999999999992,
+      "refractory_period": 1.1999999999999993,
       "base_threshold": 0.5,
       "collapse_origin": {},
       "is_classical": false,
@@ -1504,7 +1384,7 @@
       "phase_confidence": 1.0,
       "goals": {},
       "node_type": "null",
-      "coherence_credit": 12.399999999999972,
+      "coherence_credit": 11.399999999999975,
       "decoherence_debt": 0.0,
       "phase_lock": false
     }

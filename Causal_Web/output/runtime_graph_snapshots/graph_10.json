@@ -58,463 +58,13 @@
           "time": 10,
           "phase": 0.0,
           "origin": "seed"
-        },
-        {
-          "time": 11,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 12,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 13,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 14,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 15,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 16,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 17,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 18,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 19,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 20,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 21,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 22,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 23,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 24,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 25,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 26,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 27,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 28,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 29,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 30,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 31,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 32,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 33,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 34,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 35,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 36,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 37,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 38,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 39,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 40,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 41,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 42,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 43,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 44,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 45,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 46,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 47,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 48,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 49,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 50,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 51,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 52,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 53,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 54,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 55,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 56,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 57,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 58,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 59,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 60,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 61,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 62,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 63,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 64,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 65,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 66,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 67,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 68,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 69,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 70,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 71,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 72,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 73,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 74,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 75,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 76,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 77,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 78,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 79,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 80,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 81,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 82,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 83,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 84,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 85,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 86,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 87,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 88,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 89,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 90,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 91,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 92,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 93,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 94,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 95,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 96,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 97,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 98,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 99,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 100,
-          "phase": 0.0,
-          "origin": "seed"
         }
       ],
       "phase": 0.0,
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 1.0,
-      "refractory_period": 1.0,
+      "refractory_period": 1.4499999999999995,
       "base_threshold": 0.5,
       "collapse_origin": {
         "0": "seed",
@@ -527,102 +77,12 @@
         "7": "seed",
         "8": "seed",
         "9": "seed",
-        "10": "seed",
-        "11": "seed",
-        "12": "seed",
-        "13": "seed",
-        "14": "seed",
-        "15": "seed",
-        "16": "seed",
-        "17": "seed",
-        "18": "seed",
-        "19": "seed",
-        "20": "seed",
-        "21": "seed",
-        "22": "seed",
-        "23": "seed",
-        "24": "seed",
-        "25": "seed",
-        "26": "seed",
-        "27": "seed",
-        "28": "seed",
-        "29": "seed",
-        "30": "seed",
-        "31": "seed",
-        "32": "seed",
-        "33": "seed",
-        "34": "seed",
-        "35": "seed",
-        "36": "seed",
-        "37": "seed",
-        "38": "seed",
-        "39": "seed",
-        "40": "seed",
-        "41": "seed",
-        "42": "seed",
-        "43": "seed",
-        "44": "seed",
-        "45": "seed",
-        "46": "seed",
-        "47": "seed",
-        "48": "seed",
-        "49": "seed",
-        "50": "seed",
-        "51": "seed",
-        "52": "seed",
-        "53": "seed",
-        "54": "seed",
-        "55": "seed",
-        "56": "seed",
-        "57": "seed",
-        "58": "seed",
-        "59": "seed",
-        "60": "seed",
-        "61": "seed",
-        "62": "seed",
-        "63": "seed",
-        "64": "seed",
-        "65": "seed",
-        "66": "seed",
-        "67": "seed",
-        "68": "seed",
-        "69": "seed",
-        "70": "seed",
-        "71": "seed",
-        "72": "seed",
-        "73": "seed",
-        "74": "seed",
-        "75": "seed",
-        "76": "seed",
-        "77": "seed",
-        "78": "seed",
-        "79": "seed",
-        "80": "seed",
-        "81": "seed",
-        "82": "seed",
-        "83": "seed",
-        "84": "seed",
-        "85": "seed",
-        "86": "seed",
-        "87": "seed",
-        "88": "seed",
-        "89": "seed",
-        "90": "seed",
-        "91": "seed",
-        "92": "seed",
-        "93": "seed",
-        "94": "seed",
-        "95": "seed",
-        "96": "seed",
-        "97": "seed",
-        "98": "seed",
-        "99": "seed",
-        "100": "seed"
+        "10": "seed"
       },
       "is_classical": false,
       "decoherence_streak": 0,
-      "last_tick_time": 100,
-      "subjective_ticks": 101,
+      "last_tick_time": 10,
+      "subjective_ticks": 11,
       "law_wave_frequency": 0.05,
       "trust_profile": {
         "seed": 1.0
@@ -630,7 +90,7 @@
       "phase_confidence": 1.0,
       "goals": {},
       "node_type": "normal",
-      "coherence_credit": 22.700000000000053,
+      "coherence_credit": 2.2000000000000006,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
@@ -642,7 +102,7 @@
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 1.0,
-      "refractory_period": 1.0999999999999992,
+      "refractory_period": 2.0,
       "base_threshold": 0.5,
       "collapse_origin": {},
       "is_classical": false,
@@ -654,7 +114,7 @@
       "phase_confidence": 1.0,
       "goals": {},
       "node_type": "normal",
-      "coherence_credit": 11.999999999999973,
+      "coherence_credit": 1.0999999999999999,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
@@ -666,7 +126,7 @@
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 1.0,
-      "refractory_period": 1.0999999999999992,
+      "refractory_period": 2.0,
       "base_threshold": 0.5,
       "collapse_origin": {},
       "is_classical": false,
@@ -678,7 +138,7 @@
       "phase_confidence": 1.0,
       "goals": {},
       "node_type": "normal",
-      "coherence_credit": 12.69999999999997,
+      "coherence_credit": 1.2,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
@@ -690,7 +150,7 @@
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 1.0,
-      "refractory_period": 1.0999999999999992,
+      "refractory_period": 2.0,
       "base_threshold": 0.5,
       "collapse_origin": {},
       "is_classical": false,
@@ -702,7 +162,7 @@
       "phase_confidence": 1.0,
       "goals": {},
       "node_type": "normal",
-      "coherence_credit": 12.199999999999973,
+      "coherence_credit": 1.2,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
@@ -714,7 +174,7 @@
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 1.0,
-      "refractory_period": 1.0999999999999992,
+      "refractory_period": 2.0,
       "base_threshold": 0.5,
       "collapse_origin": {},
       "is_classical": false,
@@ -726,7 +186,7 @@
       "phase_confidence": 1.0,
       "goals": {},
       "node_type": "normal",
-      "coherence_credit": 12.399999999999972,
+      "coherence_credit": 1.2,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
@@ -788,463 +248,13 @@
           "time": 10,
           "phase": 0.0,
           "origin": "seed"
-        },
-        {
-          "time": 11,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 12,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 13,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 14,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 15,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 16,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 17,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 18,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 19,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 20,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 21,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 22,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 23,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 24,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 25,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 26,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 27,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 28,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 29,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 30,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 31,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 32,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 33,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 34,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 35,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 36,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 37,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 38,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 39,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 40,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 41,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 42,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 43,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 44,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 45,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 46,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 47,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 48,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 49,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 50,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 51,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 52,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 53,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 54,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 55,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 56,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 57,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 58,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 59,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 60,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 61,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 62,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 63,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 64,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 65,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 66,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 67,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 68,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 69,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 70,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 71,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 72,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 73,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 74,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 75,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 76,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 77,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 78,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 79,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 80,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 81,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 82,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 83,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 84,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 85,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 86,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 87,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 88,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 89,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 90,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 91,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 92,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 93,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 94,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 95,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 96,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 97,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 98,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 99,
-          "phase": 0.0,
-          "origin": "seed"
-        },
-        {
-          "time": 100,
-          "phase": 0.0,
-          "origin": "seed"
         }
       ],
       "phase": 0.0,
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 1.0,
-      "refractory_period": 1.0,
+      "refractory_period": 1.4499999999999995,
       "base_threshold": 0.5,
       "collapse_origin": {
         "0": "seed",
@@ -1257,102 +267,12 @@
         "7": "seed",
         "8": "seed",
         "9": "seed",
-        "10": "seed",
-        "11": "seed",
-        "12": "seed",
-        "13": "seed",
-        "14": "seed",
-        "15": "seed",
-        "16": "seed",
-        "17": "seed",
-        "18": "seed",
-        "19": "seed",
-        "20": "seed",
-        "21": "seed",
-        "22": "seed",
-        "23": "seed",
-        "24": "seed",
-        "25": "seed",
-        "26": "seed",
-        "27": "seed",
-        "28": "seed",
-        "29": "seed",
-        "30": "seed",
-        "31": "seed",
-        "32": "seed",
-        "33": "seed",
-        "34": "seed",
-        "35": "seed",
-        "36": "seed",
-        "37": "seed",
-        "38": "seed",
-        "39": "seed",
-        "40": "seed",
-        "41": "seed",
-        "42": "seed",
-        "43": "seed",
-        "44": "seed",
-        "45": "seed",
-        "46": "seed",
-        "47": "seed",
-        "48": "seed",
-        "49": "seed",
-        "50": "seed",
-        "51": "seed",
-        "52": "seed",
-        "53": "seed",
-        "54": "seed",
-        "55": "seed",
-        "56": "seed",
-        "57": "seed",
-        "58": "seed",
-        "59": "seed",
-        "60": "seed",
-        "61": "seed",
-        "62": "seed",
-        "63": "seed",
-        "64": "seed",
-        "65": "seed",
-        "66": "seed",
-        "67": "seed",
-        "68": "seed",
-        "69": "seed",
-        "70": "seed",
-        "71": "seed",
-        "72": "seed",
-        "73": "seed",
-        "74": "seed",
-        "75": "seed",
-        "76": "seed",
-        "77": "seed",
-        "78": "seed",
-        "79": "seed",
-        "80": "seed",
-        "81": "seed",
-        "82": "seed",
-        "83": "seed",
-        "84": "seed",
-        "85": "seed",
-        "86": "seed",
-        "87": "seed",
-        "88": "seed",
-        "89": "seed",
-        "90": "seed",
-        "91": "seed",
-        "92": "seed",
-        "93": "seed",
-        "94": "seed",
-        "95": "seed",
-        "96": "seed",
-        "97": "seed",
-        "98": "seed",
-        "99": "seed",
-        "100": "seed"
+        "10": "seed"
       },
       "is_classical": false,
       "decoherence_streak": 0,
-      "last_tick_time": 100,
-      "subjective_ticks": 101,
+      "last_tick_time": 10,
+      "subjective_ticks": 11,
       "law_wave_frequency": 0.05,
       "trust_profile": {
         "seed": 1.0
@@ -1360,7 +280,7 @@
       "phase_confidence": 1.0,
       "goals": {},
       "node_type": "normal",
-      "coherence_credit": 22.40000000000005,
+      "coherence_credit": 2.2000000000000006,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
@@ -1372,7 +292,7 @@
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 1.0,
-      "refractory_period": 1.0999999999999992,
+      "refractory_period": 2.0,
       "base_threshold": 0.5,
       "collapse_origin": {},
       "is_classical": false,
@@ -1384,7 +304,7 @@
       "phase_confidence": 1.0,
       "goals": {},
       "node_type": "normal",
-      "coherence_credit": 12.099999999999973,
+      "coherence_credit": 1.0999999999999999,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
@@ -1396,7 +316,7 @@
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 1.0,
-      "refractory_period": 1.0999999999999992,
+      "refractory_period": 2.0,
       "base_threshold": 0.5,
       "collapse_origin": {},
       "is_classical": false,
@@ -1408,7 +328,7 @@
       "phase_confidence": 1.0,
       "goals": {},
       "node_type": "normal",
-      "coherence_credit": 12.69999999999997,
+      "coherence_credit": 1.6000000000000003,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
@@ -1420,7 +340,7 @@
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 1.0,
-      "refractory_period": 1.0999999999999992,
+      "refractory_period": 2.0,
       "base_threshold": 0.5,
       "collapse_origin": {},
       "is_classical": false,
@@ -1432,7 +352,7 @@
       "phase_confidence": 1.0,
       "goals": {},
       "node_type": "normal",
-      "coherence_credit": 13.09999999999997,
+      "coherence_credit": 1.7000000000000004,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
@@ -1444,7 +364,7 @@
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 1.0,
-      "refractory_period": 1.0999999999999992,
+      "refractory_period": 2.0,
       "base_threshold": 0.5,
       "collapse_origin": {},
       "is_classical": false,
@@ -1456,7 +376,7 @@
       "phase_confidence": 1.0,
       "goals": {},
       "node_type": "normal",
-      "coherence_credit": 11.599999999999975,
+      "coherence_credit": 1.3,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
@@ -1468,7 +388,7 @@
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 1.0,
-      "refractory_period": 1.0999999999999992,
+      "refractory_period": 2.0,
       "base_threshold": 0.5,
       "collapse_origin": {},
       "is_classical": false,
@@ -1480,7 +400,7 @@
       "phase_confidence": 1.0,
       "goals": {},
       "node_type": "null",
-      "coherence_credit": 12.69999999999997,
+      "coherence_credit": 1.0999999999999999,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
@@ -1492,7 +412,7 @@
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 1.0,
-      "refractory_period": 1.0999999999999992,
+      "refractory_period": 2.0,
       "base_threshold": 0.5,
       "collapse_origin": {},
       "is_classical": false,
@@ -1504,7 +424,7 @@
       "phase_confidence": 1.0,
       "goals": {},
       "node_type": "null",
-      "coherence_credit": 12.399999999999972,
+      "coherence_credit": 1.0999999999999999,
       "decoherence_debt": 0.0,
       "phase_lock": false
     }
@@ -1520,7 +440,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": true,
@@ -1528,8 +448,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -1550,7 +470,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 0.8,
-      "current_strength": 0.0,
+      "current_strength": 0.30000000000000016,
       "medium_type": "standard",
       "mutable": true,
       "seeded": true,
@@ -1558,8 +478,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -1580,7 +500,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 0.6,
-      "current_strength": 0.0,
+      "current_strength": 0.10000000000000003,
       "medium_type": "standard",
       "mutable": true,
       "seeded": true,
@@ -1588,8 +508,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 11,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -1610,7 +530,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 0.5,
-      "current_strength": 0.0,
+      "current_strength": 2.7755575615628914e-17,
       "medium_type": "standard",
       "mutable": true,
       "seeded": true,
@@ -1618,8 +538,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 11,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -1670,7 +590,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 0.9,
-      "current_strength": 0.0,
+      "current_strength": 0.40000000000000013,
       "medium_type": "phase-sensitive",
       "mutable": true,
       "seeded": true,
@@ -1678,8 +598,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 14,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -1700,7 +620,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 0.9,
-      "current_strength": 0.0,
+      "current_strength": 0.40000000000000013,
       "medium_type": "standard",
       "mutable": true,
       "seeded": true,
@@ -1708,8 +628,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -1765,11 +685,11 @@
       "mutable": true,
       "seeded": true,
       "formed_at_tick": 0,
-      "active": true,
+      "active": false,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 12,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -1820,7 +740,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -1828,8 +748,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -1850,7 +770,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -1858,8 +778,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -1880,7 +800,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -1888,8 +808,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 18,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -1910,7 +830,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -1918,8 +838,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -1940,7 +860,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -1948,8 +868,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -1970,7 +890,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -1978,8 +898,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 17,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2000,7 +920,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2008,8 +928,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2030,7 +950,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2038,8 +958,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 17,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2060,7 +980,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2068,8 +988,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 20,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2090,7 +1010,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2098,8 +1018,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2120,7 +1040,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2128,8 +1048,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 17,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2150,7 +1070,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2158,8 +1078,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2180,7 +1100,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2188,8 +1108,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2210,7 +1130,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2218,8 +1138,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2240,7 +1160,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2248,8 +1168,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2270,7 +1190,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2278,8 +1198,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2300,7 +1220,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2308,8 +1228,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2330,7 +1250,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2338,8 +1258,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2360,7 +1280,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2368,8 +1288,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 17,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2390,7 +1310,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2398,8 +1318,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2420,7 +1340,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2428,8 +1348,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 21,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2450,7 +1370,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2458,8 +1378,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2480,7 +1400,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2488,8 +1408,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2510,7 +1430,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2518,8 +1438,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 18,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2540,7 +1460,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2548,8 +1468,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2570,7 +1490,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2578,8 +1498,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2600,7 +1520,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2608,8 +1528,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 17,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2630,7 +1550,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2638,8 +1558,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2660,7 +1580,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2668,8 +1588,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 19,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2690,7 +1610,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2698,8 +1618,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 17,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2720,7 +1640,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2728,8 +1648,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2750,7 +1670,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2758,8 +1678,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2780,7 +1700,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2788,8 +1708,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 20,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2810,7 +1730,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2818,8 +1738,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2840,7 +1760,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2848,8 +1768,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2870,7 +1790,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2878,8 +1798,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2900,7 +1820,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2908,8 +1828,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2930,7 +1850,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2938,8 +1858,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 18,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2960,7 +1880,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2968,8 +1888,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -2990,7 +1910,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -2998,8 +1918,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -3020,7 +1940,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -3028,8 +1948,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -3050,7 +1970,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -3058,8 +1978,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -3080,7 +2000,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -3088,8 +2008,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -3110,7 +2030,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -3118,8 +2038,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -3140,7 +2060,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -3148,8 +2068,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -3170,7 +2090,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -3178,8 +2098,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -3200,7 +2120,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -3208,8 +2128,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -3230,7 +2150,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -3238,8 +2158,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -3260,7 +2180,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -3268,8 +2188,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -3290,7 +2210,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -3298,8 +2218,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -3320,7 +2240,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -3328,8 +2248,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -3350,7 +2270,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -3358,8 +2278,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 19,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -3380,7 +2300,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -3388,8 +2308,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 17,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -3410,7 +2330,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -3418,8 +2338,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -3440,7 +2360,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -3448,8 +2368,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,
@@ -3470,7 +2390,7 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 0.5000000000000001,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
@@ -3478,8 +2398,8 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
-      "coherence_at_reform": 1.0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
       "last_active_tick": 0,

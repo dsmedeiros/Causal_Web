@@ -1,0 +1,107 @@
+The simulation recorded 202 ticks across 12 nodes.
+- Node A emitted 101 ticks.
+- Node B emitted 0 ticks.
+- Node C emitted 0 ticks.
+- Node D emitted 0 ticks.
+- Node E emitted 0 ticks.
+- Node F emitted 101 ticks.
+- Node G emitted 0 ticks.
+- Node H emitted 0 ticks.
+- Node I emitted 0 ticks.
+- Node J emitted 0 ticks.
+- Node Z emitted 0 ticks.
+- Node OBS emitted 0 ticks.
+- A coherence ranged from 1.000 to 1.000.
+- B coherence ranged from 1.000 to 1.000.
+- C coherence ranged from 1.000 to 1.000.
+- D coherence ranged from 1.000 to 1.000.
+- E coherence ranged from 1.000 to 1.000.
+- F coherence ranged from 1.000 to 1.000.
+- G coherence ranged from 1.000 to 1.000.
+- H coherence ranged from 1.000 to 1.000.
+- I coherence ranged from 1.000 to 1.000.
+- J coherence ranged from 1.000 to 1.000.
+- Z coherence ranged from 1.000 to 1.000.
+- OBS coherence ranged from 1.000 to 1.000.
+- A decoherence ranged from 0.000 to 0.000.
+- B decoherence ranged from 0.000 to 0.000.
+- C decoherence ranged from 0.000 to 0.000.
+- D decoherence ranged from 0.000 to 0.000.
+- E decoherence ranged from 0.000 to 0.000.
+- F decoherence ranged from 0.000 to 0.000.
+- G decoherence ranged from 0.000 to 0.000.
+- H decoherence ranged from 0.000 to 0.000.
+- I decoherence ranged from 0.000 to 0.000.
+- J decoherence ranged from 0.000 to 0.000.
+- Z decoherence ranged from 0.000 to 0.000.
+- OBS decoherence ranged from 0.000 to 0.000.
+Clusters first appeared at tick 0 with up to 1 cluster(s).
+Law drift events recorded: 108 total.
+- Bridge A->B ended active; last rupture at None
+- Bridge B->C ended active; last rupture at None
+- Bridge C->D ended active; last rupture at None
+- Bridge D->A ended active; last rupture at None
+- Bridge C->E ended active; last rupture at None
+- Bridge E->F ended active; last rupture at None
+- Bridge F->G ended active; last rupture at None
+- Bridge D->H ended active; last rupture at None
+- Bridge H->I ended active; last rupture at None
+- Bridge I->J ended active; last rupture at None
+- Bridge A->C ended active; last rupture at None
+- Bridge A->E ended active; last rupture at None
+- Bridge A->F ended active; last rupture at None
+- Bridge A->G ended active; last rupture at None
+- Bridge A->H ended active; last rupture at None
+- Bridge A->I ended active; last rupture at None
+- Bridge A->J ended active; last rupture at None
+- Bridge A->Z ended active; last rupture at None
+- Bridge A->OBS ended active; last rupture at None
+- Bridge B->D ended active; last rupture at None
+- Bridge B->E ended active; last rupture at None
+- Bridge B->F ended active; last rupture at None
+- Bridge B->G ended active; last rupture at None
+- Bridge B->H ended active; last rupture at None
+- Bridge B->I ended active; last rupture at None
+- Bridge B->J ended active; last rupture at None
+- Bridge B->Z ended active; last rupture at None
+- Bridge B->OBS ended active; last rupture at None
+- Bridge C->F ended active; last rupture at None
+- Bridge C->G ended active; last rupture at None
+- Bridge C->H ended active; last rupture at None
+- Bridge C->I ended active; last rupture at None
+- Bridge C->J ended active; last rupture at None
+- Bridge C->Z ended active; last rupture at None
+- Bridge C->OBS ended active; last rupture at None
+- Bridge D->E ended active; last rupture at None
+- Bridge D->F ended active; last rupture at None
+- Bridge D->G ended active; last rupture at None
+- Bridge D->I ended active; last rupture at None
+- Bridge D->J ended active; last rupture at None
+- Bridge D->Z ended active; last rupture at None
+- Bridge D->OBS ended active; last rupture at None
+- Bridge E->G ended active; last rupture at None
+- Bridge E->H ended active; last rupture at None
+- Bridge E->I ended active; last rupture at None
+- Bridge E->J ended active; last rupture at None
+- Bridge E->Z ended active; last rupture at None
+- Bridge E->OBS ended active; last rupture at None
+- Bridge F->H ended active; last rupture at None
+- Bridge F->I ended active; last rupture at None
+- Bridge F->J ended active; last rupture at None
+- Bridge F->Z ended active; last rupture at None
+- Bridge F->OBS ended active; last rupture at None
+- Bridge G->H ended active; last rupture at None
+- Bridge G->I ended active; last rupture at None
+- Bridge G->J ended active; last rupture at None
+- Bridge G->Z ended active; last rupture at None
+- Bridge G->OBS ended active; last rupture at None
+- Bridge H->J ended active; last rupture at None
+- Bridge H->Z ended active; last rupture at None
+- Bridge H->OBS ended active; last rupture at None
+- Bridge I->Z ended active; last rupture at None
+- Bridge I->OBS ended active; last rupture at None
+- Bridge J->Z ended active; last rupture at None
+- Bridge J->OBS ended active; last rupture at None
+- Bridge Z->OBS ended active; last rupture at None
+Recorded 0 superposition inspections.
+Console log contains 0 lines covering 0 ticks.

@@ -1,0 +1,790 @@
+{
+  "curvature": {},
+  "coherence": {
+    "A": {
+      "max": 1.0,
+      "min": 1.0
+    },
+    "B": {
+      "max": 1.0,
+      "min": 1.0
+    },
+    "C": {
+      "max": 1.0,
+      "min": 1.0
+    },
+    "D": {
+      "max": 1.0,
+      "min": 1.0
+    },
+    "E": {
+      "max": 1.0,
+      "min": 1.0
+    },
+    "F": {
+      "max": 1.0,
+      "min": 1.0
+    },
+    "G": {
+      "max": 1.0,
+      "min": 1.0
+    },
+    "H": {
+      "max": 1.0,
+      "min": 1.0
+    },
+    "I": {
+      "max": 1.0,
+      "min": 1.0
+    },
+    "J": {
+      "max": 1.0,
+      "min": 1.0
+    },
+    "Z": {
+      "max": 1.0,
+      "min": 1.0
+    },
+    "OBS": {
+      "max": 1.0,
+      "min": 1.0
+    }
+  },
+  "law_wave": {
+    "A": {
+      "mean": 0.05,
+      "variance": 0.0
+    },
+    "B": {
+      "mean": 0.0495,
+      "variance": 2.5e-05
+    },
+    "C": {
+      "mean": 0.0495,
+      "variance": 2.5e-05
+    },
+    "D": {
+      "mean": 0.0495,
+      "variance": 2.5e-05
+    },
+    "E": {
+      "mean": 0.0495,
+      "variance": 2.5e-05
+    },
+    "F": {
+      "mean": 0.05,
+      "variance": 0.0
+    },
+    "G": {
+      "mean": 0.0495,
+      "variance": 2.5e-05
+    },
+    "H": {
+      "mean": 0.0495,
+      "variance": 2.5e-05
+    },
+    "I": {
+      "mean": 0.0495,
+      "variance": 2.5e-05
+    },
+    "J": {
+      "mean": 0.0495,
+      "variance": 2.5e-05
+    },
+    "Z": {
+      "mean": 0.0495,
+      "variance": 2.5e-05
+    },
+    "OBS": {
+      "mean": 0.0495,
+      "variance": 2.5e-05
+    }
+  },
+  "decoherence": {
+    "A": {
+      "max": 0.0,
+      "min": 0.0
+    },
+    "B": {
+      "max": 0.0,
+      "min": 0.0
+    },
+    "C": {
+      "max": 0.0,
+      "min": 0.0
+    },
+    "D": {
+      "max": 0.0,
+      "min": 0.0
+    },
+    "E": {
+      "max": 0.0,
+      "min": 0.0
+    },
+    "F": {
+      "max": 0.0,
+      "min": 0.0
+    },
+    "G": {
+      "max": 0.0,
+      "min": 0.0
+    },
+    "H": {
+      "max": 0.0,
+      "min": 0.0
+    },
+    "I": {
+      "max": 0.0,
+      "min": 0.0
+    },
+    "J": {
+      "max": 0.0,
+      "min": 0.0
+    },
+    "Z": {
+      "max": 0.0,
+      "min": 0.0
+    },
+    "OBS": {
+      "max": 0.0,
+      "min": 0.0
+    }
+  },
+  "clusters": {
+    "first_detected": 0,
+    "max_clusters": 1
+  },
+  "bridges": {
+    "A->B": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "B->C": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 16,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "C->D": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 11,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "D->A": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 11,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "C->E": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 7,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "E->F": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 14,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "F->G": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "D->H": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 6,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "H->I": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 12,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "I->J": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 7,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "A->C": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "A->E": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "A->F": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 18,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "A->G": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 16,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "A->H": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "A->I": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 17,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "A->J": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "A->Z": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 17,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "A->OBS": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 20,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "B->D": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "B->E": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 17,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "B->F": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "B->G": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "B->H": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 16,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "B->I": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "B->J": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 16,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "B->Z": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 16,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "B->OBS": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "C->F": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 17,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "C->G": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 16,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "C->H": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 21,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "C->I": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "C->J": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "C->Z": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 18,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "C->OBS": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "D->E": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "D->F": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 17,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "D->G": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "D->I": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 19,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "D->J": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 17,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "D->Z": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 16,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "D->OBS": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "E->G": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 20,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "E->H": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 16,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "E->I": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "E->J": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "E->Z": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 16,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "E->OBS": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 18,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "F->H": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 16,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "F->I": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "F->J": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "F->Z": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 16,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "F->OBS": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 16,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "G->H": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "G->I": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "G->J": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "G->Z": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 16,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "G->OBS": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "H->J": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "H->Z": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "H->OBS": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "I->Z": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 19,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "I->OBS": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 17,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "J->Z": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "J->OBS": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    },
+    "Z->OBS": {
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 16,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement": 0
+    }
+  },
+  "law_drift": {
+    "A": 9,
+    "F": 9,
+    "B": 9,
+    "C": 9,
+    "D": 9,
+    "E": 9,
+    "G": 9,
+    "H": 9,
+    "I": 9,
+    "J": 9,
+    "Z": 9,
+    "OBS": 9
+  },
+  "meta_nodes": {
+    "meta_A_F": 101,
+    "meta_A_B_C_D_E_F_G_H_I_J_OBS_Z": 100
+  },
+  "tick_counts": {
+    "A": 101,
+    "B": 0,
+    "C": 0,
+    "D": 0,
+    "E": 0,
+    "F": 101,
+    "G": 0,
+    "H": 0,
+    "I": 0,
+    "J": 0,
+    "Z": 0,
+    "OBS": 0
+  },
+  "inspection_events": 0,
+  "console": {
+    "lines": 0,
+    "ticks_logged": 0
+  }
+}

@@ -1,0 +1,112 @@
+[0-4] E: Node E maintained stable law-wave variance 0.0004 from ticks 0-4.
+[0-4] B: Node B maintained stable law-wave variance 0.0004 from ticks 0-4.
+[0-4] D: Node D maintained stable law-wave variance 0.0004 from ticks 0-4.
+[0-4] C: Node C maintained stable law-wave variance 0.0004 from ticks 0-4.
+[0-4] A: Node A maintained stable law-wave variance 0.0000 from ticks 0-4.
+[0-4] Z: Node Z maintained stable law-wave variance 0.0004 from ticks 0-4.
+[0-4] G: Node G maintained stable law-wave variance 0.0004 from ticks 0-4.
+[0-4] OBS: Node OBS maintained stable law-wave variance 0.0004 from ticks 0-4.
+[0-4] H: Node H maintained stable law-wave variance 0.0004 from ticks 0-4.
+[0-4] F: Node F maintained stable law-wave variance 0.0000 from ticks 0-4.
+[0-4] I: Node I maintained stable law-wave variance 0.0004 from ticks 0-4.
+[0-4] J: Node J maintained stable law-wave variance 0.0004 from ticks 0-4.
+[1] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 1, indicating possible meta-node formation.
+[2] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 2, indicating possible meta-node formation.
+[3] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 3, indicating possible meta-node formation.
+[4] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 4, indicating possible meta-node formation.
+[5] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 5, indicating possible meta-node formation.
+[6] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 6, indicating possible meta-node formation.
+[7] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 7, indicating possible meta-node formation.
+[8] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 8, indicating possible meta-node formation.
+[9] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 9, indicating possible meta-node formation.
+[10] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 10, indicating possible meta-node formation.
+[11] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 11, indicating possible meta-node formation.
+[12] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 12, indicating possible meta-node formation.
+[13] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 13, indicating possible meta-node formation.
+[14] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 14, indicating possible meta-node formation.
+[15] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 15, indicating possible meta-node formation.
+[16] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 16, indicating possible meta-node formation.
+[17] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 17, indicating possible meta-node formation.
+[18] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 18, indicating possible meta-node formation.
+[19] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 19, indicating possible meta-node formation.
+[20] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 20, indicating possible meta-node formation.
+[21] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 21, indicating possible meta-node formation.
+[22] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 22, indicating possible meta-node formation.
+[23] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 23, indicating possible meta-node formation.
+[24] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 24, indicating possible meta-node formation.
+[25] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 25, indicating possible meta-node formation.
+[26] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 26, indicating possible meta-node formation.
+[27] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 27, indicating possible meta-node formation.
+[28] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 28, indicating possible meta-node formation.
+[29] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 29, indicating possible meta-node formation.
+[30] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 30, indicating possible meta-node formation.
+[31] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 31, indicating possible meta-node formation.
+[32] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 32, indicating possible meta-node formation.
+[33] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 33, indicating possible meta-node formation.
+[34] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 34, indicating possible meta-node formation.
+[35] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 35, indicating possible meta-node formation.
+[36] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 36, indicating possible meta-node formation.
+[37] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 37, indicating possible meta-node formation.
+[38] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 38, indicating possible meta-node formation.
+[39] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 39, indicating possible meta-node formation.
+[40] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 40, indicating possible meta-node formation.
+[41] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 41, indicating possible meta-node formation.
+[42] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 42, indicating possible meta-node formation.
+[43] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 43, indicating possible meta-node formation.
+[44] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 44, indicating possible meta-node formation.
+[45] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 45, indicating possible meta-node formation.
+[46] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 46, indicating possible meta-node formation.
+[47] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 47, indicating possible meta-node formation.
+[48] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 48, indicating possible meta-node formation.
+[49] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 49, indicating possible meta-node formation.
+[50] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 50, indicating possible meta-node formation.
+[51] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 51, indicating possible meta-node formation.
+[52] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 52, indicating possible meta-node formation.
+[53] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 53, indicating possible meta-node formation.
+[54] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 54, indicating possible meta-node formation.
+[55] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 55, indicating possible meta-node formation.
+[56] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 56, indicating possible meta-node formation.
+[57] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 57, indicating possible meta-node formation.
+[58] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 58, indicating possible meta-node formation.
+[59] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 59, indicating possible meta-node formation.
+[60] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 60, indicating possible meta-node formation.
+[61] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 61, indicating possible meta-node formation.
+[62] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 62, indicating possible meta-node formation.
+[63] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 63, indicating possible meta-node formation.
+[64] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 64, indicating possible meta-node formation.
+[65] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 65, indicating possible meta-node formation.
+[66] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 66, indicating possible meta-node formation.
+[67] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 67, indicating possible meta-node formation.
+[68] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 68, indicating possible meta-node formation.
+[69] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 69, indicating possible meta-node formation.
+[70] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 70, indicating possible meta-node formation.
+[71] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 71, indicating possible meta-node formation.
+[72] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 72, indicating possible meta-node formation.
+[73] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 73, indicating possible meta-node formation.
+[74] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 74, indicating possible meta-node formation.
+[75] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 75, indicating possible meta-node formation.
+[76] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 76, indicating possible meta-node formation.
+[77] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 77, indicating possible meta-node formation.
+[78] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 78, indicating possible meta-node formation.
+[79] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 79, indicating possible meta-node formation.
+[80] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 80, indicating possible meta-node formation.
+[81] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 81, indicating possible meta-node formation.
+[82] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 82, indicating possible meta-node formation.
+[83] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 83, indicating possible meta-node formation.
+[84] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 84, indicating possible meta-node formation.
+[85] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 85, indicating possible meta-node formation.
+[86] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 86, indicating possible meta-node formation.
+[87] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 87, indicating possible meta-node formation.
+[88] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 88, indicating possible meta-node formation.
+[89] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 89, indicating possible meta-node formation.
+[90] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 90, indicating possible meta-node formation.
+[91] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 91, indicating possible meta-node formation.
+[92] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 92, indicating possible meta-node formation.
+[93] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 93, indicating possible meta-node formation.
+[94] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 94, indicating possible meta-node formation.
+[95] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 95, indicating possible meta-node formation.
+[96] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 96, indicating possible meta-node formation.
+[97] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 97, indicating possible meta-node formation.
+[98] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 98, indicating possible meta-node formation.
+[99] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 99, indicating possible meta-node formation.
+[100] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 100, indicating possible meta-node formation.
