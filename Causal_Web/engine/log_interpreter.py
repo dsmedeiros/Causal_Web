@@ -118,6 +118,131 @@ class CWTLogInterpreter:
         self.summary["law_wave"] = summary
 
     # ------------------------------------------------------------
+    def interpret_collapse_origins(self) -> None:
+        """Summarize where collapses were first triggered."""
+        path = self._path("collapse_front_log.json")
+        if not os.path.exists(path):
+            return
+        origins: Dict[str, int] = {}
+        with open(path) as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    rec = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                tick = rec.get("tick")
+                if rec.get("event") == "collapse_start":
+                    node = rec.get("node")
+                    if node and node not in origins:
+                        origins[node] = tick
+        if origins:
+            self.summary["collapse_origins"] = origins
+
+    # ------------------------------------------------------------
+    def interpret_collapse_chains(self) -> None:
+        """Summarize lengths of collapse propagation chains."""
+        path = self._path("collapse_chain_log.json")
+        if not os.path.exists(path):
+            return
+        chains: Dict[str, int] = {}
+        with open(path) as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    rec = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                src = rec.get("source")
+                length = len(rec.get("collapsed", []))
+                chains[src] = max(chains.get(src, 0), length)
+        if chains:
+            self.summary["collapse_chains"] = chains
+
+    # ------------------------------------------------------------
+    def interpret_layer_transitions(self) -> None:
+        """Aggregate layer transition counts per node."""
+        path = self._path("layer_transition_log.json")
+        if not os.path.exists(path):
+            return
+        totals: Dict[str, int] = {}
+        by_node: Dict[str, Dict[str, int]] = {}
+        with open(path) as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    rec = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                frm = rec.get("from")
+                to = rec.get("to")
+                node = rec.get("node")
+                if not frm or not to or not node:
+                    continue
+                key = f"{frm}->{to}"
+                totals[key] = totals.get(key, 0) + 1
+                by_node.setdefault(node, {}).setdefault(to, 0)
+                by_node[node][to] += 1
+        if totals:
+            self.summary["layer_transitions"] = {"totals": totals, "by_node": by_node}
+
+    # ------------------------------------------------------------
+    def interpret_rerouting(self) -> None:
+        """Count tick rerouting events due to refraction."""
+        path = self._path("refraction_log.json")
+        if not os.path.exists(path):
+            return
+        counts = {"recursive": 0, "alt_path": 0}
+        with open(path) as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    rec = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if rec.get("recursion_from"):
+                    counts["recursive"] += 1
+                if rec.get("via"):
+                    counts["alt_path"] += 1
+        if counts["recursive"] or counts["alt_path"]:
+            self.summary["rerouting"] = counts
+
+    # ------------------------------------------------------------
+    def interpret_node_state_map(self) -> None:
+        """Summarize node state transitions."""
+        path = self._path("node_state_map.json")
+        if not os.path.exists(path):
+            return
+        transitions: Dict[str, Dict[str, int]] = {}
+        with open(path) as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    rec = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                node = rec.get("node")
+                frm = rec.get("from")
+                to = rec.get("to")
+                if not node or frm is None or to is None:
+                    continue
+                key = f"{frm}->{to}"
+                transitions.setdefault(node, {}).setdefault(key, 0)
+                transitions[node][key] += 1
+        if transitions:
+            self.summary["node_state_transitions"] = transitions
+
+    # ------------------------------------------------------------
     def interpret_decoherence(self) -> None:
         path = self._path("decoherence_log.json")
         lines = _load_json_lines(path)
@@ -198,7 +323,9 @@ class CWTLogInterpreter:
             return
         with open(path) as f:
             data = json.load(f)
-        counts = {nid: len(n.get("ticks", [])) for nid, n in data.get("nodes", {}).items()}
+        counts = {
+            nid: len(n.get("ticks", [])) for nid, n in data.get("nodes", {}).items()
+        }
         layer_summary: Dict[str, Dict[str, int]] = {}
         for nid, n in data.get("nodes", {}).items():
             for tick in n.get("ticks", []):
@@ -282,8 +409,28 @@ class CWTLogInterpreter:
                     f"- Bridge {b} ended {state}; last rupture at {data.get('last_rupture_tick')}"
                 )
 
+        if "collapse_origins" in self.summary:
+            parts = [f"{n} at {t}" for n, t in self.summary["collapse_origins"].items()]
+            lines.append("Collapse origins: " + ", ".join(parts))
+
+        if "collapse_chains" in self.summary:
+            for src, length in self.summary["collapse_chains"].items():
+                lines.append(f"- Collapse from {src} affected {length} nodes")
+
+        if "layer_transitions" in self.summary:
+            total = sum(self.summary["layer_transitions"]["totals"].values())
+            lines.append(f"Layer transitions recorded: {total}")
+
+        if "rerouting" in self.summary:
+            r = self.summary["rerouting"]
+            lines.append(
+                f"Rerouting events - recursive: {r['recursive']}, alt paths: {r['alt_path']}"
+            )
+
         if "inspection_events" in self.summary:
-            lines.append(f"Recorded {self.summary['inspection_events']} superposition inspections.")
+            lines.append(
+                f"Recorded {self.summary['inspection_events']} superposition inspections."
+            )
 
         if "console" in self.summary:
             c = self.summary["console"]
@@ -298,13 +445,18 @@ class CWTLogInterpreter:
         self.load_graph()
         self.interpret_curvature()
         self.interpret_collapse()
+        self.interpret_collapse_origins()
+        self.interpret_collapse_chains()
         self.interpret_coherence()
         self.interpret_law_wave()
         self.interpret_decoherence()
+        self.interpret_layer_transitions()
         self.interpret_clusters()
         self.interpret_bridge_state()
         self.interpret_law_drift()
         self.interpret_meta_nodes()
+        self.interpret_rerouting()
+        self.interpret_node_state_map()
         self.interpret_tick_trace()
         self.interpret_inspection()
         self.interpret_console_log()
