@@ -7,7 +7,10 @@ from .meta_node import MetaNode
 from ..config import Config
 import json
 
+
 class CausalGraph:
+    """Container for nodes, edges and bridges comprising the simulation."""
+
     def __init__(self):
         self.nodes = {}
         self.edges = []
@@ -15,15 +18,47 @@ class CausalGraph:
         self.tick_sources = []
         self.meta_nodes = {}
 
-    def add_node(self, node_id, x=0.0, y=0.0, frequency=1.0, refractory_period=2, base_threshold=0.5, phase=0.0):
-        self.nodes[node_id] = Node(node_id, x, y, frequency, refractory_period, base_threshold, phase)
+    def add_node(
+        self,
+        node_id,
+        x=0.0,
+        y=0.0,
+        frequency=1.0,
+        refractory_period=2,
+        base_threshold=0.5,
+        phase=0.0,
+    ):
+        self.nodes[node_id] = Node(
+            node_id, x, y, frequency, refractory_period, base_threshold, phase
+        )
 
-    def add_edge(self, source_id, target_id, attenuation=1.0, density=0.0, delay=1, phase_shift=0.0):
-        self.edges.append(Edge(source_id, target_id, attenuation, density, delay, phase_shift))
+    def add_edge(
+        self,
+        source_id,
+        target_id,
+        attenuation=1.0,
+        density=0.0,
+        delay=1,
+        phase_shift=0.0,
+    ):
+        self.edges.append(
+            Edge(source_id, target_id, attenuation, density, delay, phase_shift)
+        )
 
-    def add_bridge(self, node_a_id, node_b_id, bridge_type="braided", phase_offset=0.0,
-               drift_tolerance=None, decoherence_limit=None, initial_strength=1.0,
-               medium_type="standard", mutable=True, seeded=True, formed_at_tick=0):
+    def add_bridge(
+        self,
+        node_a_id,
+        node_b_id,
+        bridge_type="braided",
+        phase_offset=0.0,
+        drift_tolerance=None,
+        decoherence_limit=None,
+        initial_strength=1.0,
+        medium_type="standard",
+        mutable=True,
+        seeded=True,
+        formed_at_tick=0,
+    ):
         self.bridges.append(
             Bridge(
                 node_a_id,
@@ -70,7 +105,9 @@ class CausalGraph:
 
     def get_connected_nodes(self, node_id):
         """All neighbors reachable via edges or active bridges."""
-        connected = set(self.get_upstream_nodes(node_id) + self.get_downstream_nodes(node_id))
+        connected = set(
+            self.get_upstream_nodes(node_id) + self.get_downstream_nodes(node_id)
+        )
         connected.update(self.get_bridge_neighbors(node_id))
         return list(connected)
 
@@ -91,13 +128,12 @@ class CausalGraph:
             for tick, raw_phases in node.pending_superpositions.items():
                 if len(raw_phases) > 1:
                     # normalize each float to complex unit vector
-                    complex_phase = [cmath.rect(1.0, p % (2 * math.pi)) for p in raw_phases]
+                    complex_phase = [
+                        cmath.rect(1.0, p % (2 * math.pi)) for p in raw_phases
+                    ]
                     vector_sum = sum(complex_phase)
                     contributors = [
-                        {
-                            "phase": round(p % (2 * math.pi), 4),
-                            "magnitude": 1.0
-                        }
+                        {"phase": round(p % (2 * math.pi), 4), "magnitude": 1.0}
                         for p in raw_phases
                     ]
                     result = {
@@ -105,22 +141,26 @@ class CausalGraph:
                         "node": node.id,
                         "contributors": contributors,
                         "interference_result": {
-                            "resultant_phase": round(cmath.phase(vector_sum) % (2 * math.pi), 4),
+                            "resultant_phase": round(
+                                cmath.phase(vector_sum) % (2 * math.pi), 4
+                            ),
                             "amplitude": round(abs(vector_sum), 4),
-                            "type": self._interference_type(raw_phases)
+                            "type": self._interference_type(raw_phases),
                         },
-                        "collapsed": any(tick_obj.time == tick for tick_obj in node.tick_history),
+                        "collapsed": any(
+                            tick_obj.time == tick for tick_obj in node.tick_history
+                        ),
                         "bridge_status": [
                             {
                                 "between": [bridge.node_a_id, bridge.node_b_id],
                                 "active": bridge.active,
                                 "type": bridge.bridge_type,
                                 "drift_tolerance": bridge.drift_tolerance,
-                                "decoherence_limit": bridge.decoherence_limit
+                                "decoherence_limit": bridge.decoherence_limit,
                             }
                             for bridge in self.bridges
                             if node.id in (bridge.node_a_id, bridge.node_b_id)
-                        ]
+                        ],
                     }
                     inspection_log.append(result)
 
@@ -133,9 +173,9 @@ class CausalGraph:
         normalized = [p % (2 * math.pi) for p in phases]
 
         phase_diffs = [
-            abs((p1 - p2 + math.pi) % (2 * math.pi) - math.pi) 
-            for i, p1 in enumerate(normalized) 
-            for p2 in normalized[i+1:]
+            abs((p1 - p2 + math.pi) % (2 * math.pi) - math.pi)
+            for i, p1 in enumerate(normalized)
+            for p2 in normalized[i + 1 :]
         ]
         if all(d < 0.1 for d in phase_diffs):
             return "constructive"
@@ -144,7 +184,9 @@ class CausalGraph:
         else:
             return "partial"
 
-    def detect_clusters(self, coherence_threshold: float = 0.8, freq_tolerance: float = 0.1):
+    def detect_clusters(
+        self, coherence_threshold: float = 0.8, freq_tolerance: float = 0.1
+    ):
         """Detect sets of phase-aligned nodes."""
         clusters = []
         visited = set()
@@ -157,9 +199,12 @@ class CausalGraph:
             for other in node_list:
                 if other.id in visited or other.law_wave_frequency == 0.0:
                     continue
-                if (abs(node.law_wave_frequency - other.law_wave_frequency) <= freq_tolerance and
-                        node.coherence > coherence_threshold and
-                        other.coherence > coherence_threshold):
+                if (
+                    abs(node.law_wave_frequency - other.law_wave_frequency)
+                    <= freq_tolerance
+                    and node.coherence > coherence_threshold
+                    and other.coherence > coherence_threshold
+                ):
                     cluster.append(other.id)
                     visited.add(other.id)
             if len(cluster) > 1:
@@ -178,7 +223,16 @@ class CausalGraph:
                 nid: {
                     "x": n.x,
                     "y": n.y,
-                    "ticks": [{"time": tick.time, "phase": tick.phase, "origin": tick.origin, "layer": getattr(tick, "layer", "tick"), "trace_id": getattr(tick, "trace_id", "")} for tick in n.tick_history],
+                    "ticks": [
+                        {
+                            "time": tick.time,
+                            "phase": tick.phase,
+                            "origin": tick.origin,
+                            "layer": getattr(tick, "layer", "tick"),
+                            "trace_id": getattr(tick, "trace_id", ""),
+                        }
+                        for tick in n.tick_history
+                    ],
                     "phase": n.phase,
                     "coherence": n.coherence,
                     "decoherence": n.decoherence,
@@ -190,22 +244,24 @@ class CausalGraph:
                     "decoherence_streak": getattr(n, "_decoherence_streak", 0),
                     "last_tick_time": n.last_tick_time,
                     "subjective_ticks": n.subjective_ticks,
-                    "law_wave_frequency": n.law_wave_frequency
-                    ,"trust_profile": n.trust_profile
-                    ,"phase_confidence": n.phase_confidence_index
-                    ,"goals": n.goals
-                    ,"node_type": n.node_type.value
-                    ,"coherence_credit": n.coherence_credit
-                    ,"decoherence_debt": n.decoherence_debt
-                    ,"phase_lock": n.phase_lock
-                } for nid, n in self.nodes.items()
+                    "law_wave_frequency": n.law_wave_frequency,
+                    "trust_profile": n.trust_profile,
+                    "phase_confidence": n.phase_confidence_index,
+                    "goals": n.goals,
+                    "node_type": n.node_type.value,
+                    "coherence_credit": n.coherence_credit,
+                    "decoherence_debt": n.decoherence_debt,
+                    "phase_lock": n.phase_lock,
+                }
+                for nid, n in self.nodes.items()
             },
             "superpositions": {
                 nid: {
                     str(t): [round(float(p), 4) for p in node.pending_superpositions[t]]
                     for t in node.pending_superpositions
                 }
-                for nid, node in self.nodes.items() if node.pending_superpositions
+                for nid, node in self.nodes.items()
+                if node.pending_superpositions
             },
             "edges": [
                 {
@@ -214,21 +270,20 @@ class CausalGraph:
                     "delay": e.delay,
                     "attenuation": e.attenuation,
                     "density": e.density,
-                    "phase_shift": e.phase_shift
+                    "phase_shift": e.phase_shift,
                 }
                 for e in self.edges
             ],
             "bridges": [b.to_dict() for b in self.bridges],
-            "tick_sources": self.tick_sources
+            "tick_sources": self.tick_sources,
         }
 
     def save_to_file(self, path):
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             json.dump(self.to_dict(), f, indent=2)
 
-
     def load_from_file(self, path):
-        with open(path, 'r') as f:
+        with open(path, "r") as f:
             data = json.load(f)
 
         self.nodes.clear()
@@ -247,7 +302,7 @@ class CausalGraph:
                 frequency=node_data.get("frequency", 1.0),
                 refractory_period=node_data.get("refractory_period", 2.0),
                 base_threshold=node_data.get("base_threshold", 0.5),
-                phase=node_data.get("phase", 0.0)
+                phase=node_data.get("phase", 0.0),
             )
             goals = node_data.get("goals")
             if goals is not None:
@@ -259,11 +314,13 @@ class CausalGraph:
                 continue
             if src == tgt:
                 # treat self-edge as tick seed definition
-                self.tick_sources.append({
-                    "node_id": src,
-                    "tick_interval": edge.get("delay", 1),
-                    "phase": edge.get("phase_shift", 0.0),
-                })
+                self.tick_sources.append(
+                    {
+                        "node_id": src,
+                        "tick_interval": edge.get("delay", 1),
+                        "phase": edge.get("phase_shift", 0.0),
+                    }
+                )
                 continue
             self.add_edge(
                 src,
@@ -271,7 +328,8 @@ class CausalGraph:
                 attenuation=edge.get("attenuation", 1.0),
                 density=edge.get("density", 0.0),
                 delay=edge.get("delay", 1),
-                phase_shift=edge.get("phase_shift", 0.0))
+                phase_shift=edge.get("phase_shift", 0.0),
+            )
 
         for bridge in data.get("bridges", []):
             src = bridge.get("from")
@@ -349,5 +407,9 @@ class CausalGraph:
                     frontier.append((edge.target, dist + 1))
         if affected:
             with open(Config.output_path("law_wave_log.json"), "a") as f:
-                f.write(json.dumps({"tick": tick, "origin": origin_id, "affected": affected}) + "\n")
-
+                f.write(
+                    json.dumps(
+                        {"tick": tick, "origin": origin_id, "affected": affected}
+                    )
+                    + "\n"
+                )

@@ -32,7 +32,9 @@ def apply_global_forcing(tick: int) -> None:
     wave = Config.coherence_wave
     for node in graph.nodes.values():
         if jitter["amplitude"] and jitter.get("period", 0):
-            node.phase += jitter["amplitude"] * math.sin(2 * math.pi * tick / jitter["period"])
+            node.phase += jitter["amplitude"] * math.sin(
+                2 * math.pi * tick / jitter["period"]
+            )
         if wave["amplitude"] and wave.get("period", 0):
             mod = wave["amplitude"] * math.sin(2 * math.pi * tick / wave["period"])
             node.current_threshold = max(0.1, node.current_threshold - mod)
@@ -52,18 +54,22 @@ def clear_output_directory():
         elif os.path.isdir(path):
             shutil.rmtree(path)
 
+
 def build_graph():
     clear_output_directory()
     graph.load_from_file(Config.input_path("graph.json"))
     global seeder
     seeder = TickSeeder(graph)
 
+
 def add_observer(observer: Observer):
     observers.append(observer)
+
 
 def emit_ticks(global_tick):
     """Seed ticks into the graph via the configured seeder."""
     seeder.seed(global_tick)
+
 
 def propagate_phases(global_tick):
     """Propagate phases scheduled during node ticks.
@@ -76,9 +82,11 @@ def propagate_phases(global_tick):
     """
     pass
 
+
 def evaluate_nodes(global_tick):
     for node in graph.nodes.values():
         node.maybe_tick(global_tick, graph)
+
 
 def log_curvature_per_tick(global_tick):
     log = {}
@@ -88,10 +96,16 @@ def log_curvature_per_tick(global_tick):
         if not src or not tgt:
             continue
         df = abs(src.law_wave_frequency - tgt.law_wave_frequency)
-        curved = edge.adjusted_delay(src.law_wave_frequency, tgt.law_wave_frequency, kappa)
-        log[f"{edge.source}->{edge.target}"] = {"delta_f": round(df,4), "curved_delay": round(curved,4)}
+        curved = edge.adjusted_delay(
+            src.law_wave_frequency, tgt.law_wave_frequency, kappa
+        )
+        log[f"{edge.source}->{edge.target}"] = {
+            "delta_f": round(df, 4),
+            "curved_delay": round(curved, 4),
+        }
     with open(Config.output_path("curvature_log.json"), "a") as f:
         f.write(json.dumps({str(global_tick): log}) + "\n")
+
 
 def log_bridge_states(global_tick):
     snapshot = {
@@ -102,7 +116,7 @@ def log_bridge_states(global_tick):
             "last_reform_tick": b.last_reform_tick,
             "coherence_at_reform": b.coherence_at_reform,
             "trust_score": b.trust_score,
-            "reinforcement": b.reinforcement_streak
+            "reinforcement": b.reinforcement_streak,
         }
         for b in graph.bridges
     }
@@ -113,8 +127,11 @@ def log_bridge_states(global_tick):
 def log_meta_node_ticks(global_tick):
     events = {}
     for meta_id, meta in graph.meta_nodes.items():
-        member_ticks = [nid for nid in meta.member_ids
-                        if any(t.time == global_tick for t in graph.get_node(nid).tick_history)]
+        member_ticks = [
+            nid
+            for nid in meta.member_ids
+            if any(t.time == global_tick for t in graph.get_node(nid).tick_history)
+        ]
         if member_ticks:
             events[meta_id] = member_ticks
         if events:
@@ -133,6 +150,7 @@ def snapshot_graph(global_tick):
 
 
 def dynamic_bridge_management(global_tick):
+    """Form new bridges between coherent nodes on the fly."""
     ids = list(graph.nodes.keys())
     existing = {(b.node_a_id, b.node_b_id) for b in graph.bridges}
     existing |= {(b.node_b_id, b.node_a_id) for b in graph.bridges}
@@ -166,7 +184,15 @@ def _compute_metrics(node, tick_time):
     decoherence = node.compute_decoherence_field(tick_time)
     coherence = node.compute_coherence_level(tick_time)
     interference = len(node.pending_superpositions.get(tick_time, []))
-    return node.id, decoherence, coherence, interference, node.node_type.value, node.coherence_credit, node.decoherence_debt
+    return (
+        node.id,
+        decoherence,
+        coherence,
+        interference,
+        node.node_type.value,
+        node.coherence_credit,
+        node.decoherence_debt,
+    )
 
 
 def log_metrics_per_tick(global_tick):
@@ -185,7 +211,9 @@ def log_metrics_per_tick(global_tick):
         log_metrics_per_tick._last_coherence = {}
 
     with ThreadPoolExecutor() as ex:
-        results = list(ex.map(lambda n: _compute_metrics(n, global_tick), graph.nodes.values()))
+        results = list(
+            ex.map(lambda n: _compute_metrics(n, global_tick), graph.nodes.values())
+        )
 
     for node_id, decoherence, coherence, interference, ntype, credit, debt in results:
         node = graph.get_node(node_id)
@@ -209,7 +237,16 @@ def log_metrics_per_tick(global_tick):
         if record["stable"] >= 10:
             node.refractory_period = max(1.0, node.refractory_period - 0.1)
             with open(Config.output_path("law_drift_log.json"), "a") as f:
-                f.write(json.dumps({"tick": global_tick, "node": node_id, "new_refractory_period": node.refractory_period}) + "\n")
+                f.write(
+                    json.dumps(
+                        {
+                            "tick": global_tick,
+                            "node": node_id,
+                            "new_refractory_period": node.refractory_period,
+                        }
+                    )
+                    + "\n"
+                )
             record["stable"] = 0
 
         decoherence_log[node_id] = round(decoherence, 4)
@@ -244,10 +281,23 @@ def log_metrics_per_tick(global_tick):
     with open(Config.output_path("tick_density_map.json"), "a") as f:
         f.write(json.dumps({str(global_tick): interference_log}) + "\n")
     with open(Config.output_path("node_state_log.json"), "a") as f:
-        f.write(json.dumps({str(global_tick): {"type": type_log, "credit": credit_log, "debt": debt_log}}) + "\n")
+        f.write(
+            json.dumps(
+                {
+                    str(global_tick): {
+                        "type": type_log,
+                        "credit": credit_log,
+                        "debt": debt_log,
+                    }
+                }
+            )
+            + "\n"
+        )
 
 
 def simulation_loop():
+    """Start the main simulation thread."""
+
     def run():
         global_tick = 0
         while Config.is_running:
@@ -269,18 +319,35 @@ def simulation_loop():
             for obs in observers:
                 obs.observe(graph, global_tick)
                 inferred = obs.infer_field_state()
-                with open(Config.output_path("observer_perceived_field.json"), "a") as f:
-                    f.write(json.dumps({"tick": global_tick, "observer": obs.id, "state": inferred}) + "\n")
+                with open(
+                    Config.output_path("observer_perceived_field.json"), "a"
+                ) as f:
+                    f.write(
+                        json.dumps(
+                            {"tick": global_tick, "observer": obs.id, "state": inferred}
+                        )
+                        + "\n"
+                    )
 
                 actual = {n.id: len(n.tick_history) for n in graph.nodes.values()}
                 diff = {
-                    nid: {"actual": actual.get(nid, 0), "inferred": inferred.get(nid, 0)}
+                    nid: {
+                        "actual": actual.get(nid, 0),
+                        "inferred": inferred.get(nid, 0),
+                    }
                     for nid in set(actual) | set(inferred)
                     if actual.get(nid, 0) != inferred.get(nid, 0)
                 }
                 if diff:
-                    with open(Config.output_path("observer_disagreement_log.json"), "a") as f:
-                        f.write(json.dumps({"tick": global_tick, "observer": obs.id, "diff": diff}) + "\n")
+                    with open(
+                        Config.output_path("observer_disagreement_log.json"), "a"
+                    ) as f:
+                        f.write(
+                            json.dumps(
+                                {"tick": global_tick, "observer": obs.id, "diff": diff}
+                            )
+                            + "\n"
+                        )
 
             for bridge in graph.bridges:
                 bridge.apply(global_tick, graph)
@@ -296,6 +363,7 @@ def simulation_loop():
 
     threading.Thread(target=run, daemon=True).start()
 
+
 def write_output():
     with open(Config.output_path("tick_trace.json"), "w") as f:
         json.dump(graph.to_dict(), f, indent=2)
@@ -304,12 +372,15 @@ def write_output():
     inspection = graph.inspect_superpositions()
     with open(Config.output_path("inspection_log.json"), "w") as f:
         json.dump(inspection, f, indent=2)
-    print(f"✅ Superposition inspection saved to {Config.output_path('inspection_log.json')}")
+    print(
+        f"✅ Superposition inspection saved to {Config.output_path('inspection_log.json')}"
+    )
 
     export_curvature_map()
     export_regional_maps()
     export_global_diagnostics()
     run_interpreter()
+
 
 def export_curvature_map():
     """Aggregate curvature logs into a D3-friendly dataset."""
@@ -364,7 +435,9 @@ def export_global_diagnostics():
         with open(Config.output_path("classicalization_map.json")) as f:
             for line in f:
                 states = json.loads(line)
-                collapse_events += sum(1 for v in next(iter(states.values())).values() if v)
+                collapse_events += sum(
+                    1 for v in next(iter(states.values())).values() if v
+                )
     except FileNotFoundError:
         pass
     resilience = 0
