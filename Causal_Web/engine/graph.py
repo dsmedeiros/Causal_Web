@@ -54,6 +54,25 @@ class CausalGraph:
     def get_downstream_nodes(self, node_id):
         return [e.target for e in self.get_edges_from(node_id)]
 
+    # --- Bridge-aware connectivity helpers ---
+    def get_bridge_neighbors(self, node_id, active_only=True):
+        """Return IDs of nodes connected via bridges."""
+        neighbors = []
+        for b in self.bridges:
+            if active_only and not b.active:
+                continue
+            if b.node_a_id == node_id:
+                neighbors.append(b.node_b_id)
+            elif b.node_b_id == node_id:
+                neighbors.append(b.node_a_id)
+        return neighbors
+
+    def get_connected_nodes(self, node_id):
+        """All neighbors reachable via edges or active bridges."""
+        connected = set(self.get_upstream_nodes(node_id) + self.get_downstream_nodes(node_id))
+        connected.update(self.get_bridge_neighbors(node_id))
+        return list(connected)
+
     def reset_ticks(self):
         for node in self.nodes.values():
             node.tick_history.clear()
@@ -271,18 +290,33 @@ class CausalGraph:
     def identify_boundaries(self) -> None:
         self.void_nodes = []
         self.boundary_nodes = []
+        connectivity_log = {}
         for nid, node in self.nodes.items():
             outgoing = self.get_edges_from(nid)
             incoming = self.get_edges_to(nid)
-            if not outgoing and not incoming:
+            bridges = self.get_bridge_neighbors(nid)
+            total = len(outgoing) + len(incoming) + len(bridges)
+            connectivity_log[nid] = {
+                "edges_out": len(outgoing),
+                "edges_in": len(incoming),
+                "bridges": len(bridges),
+                "total": total,
+            }
+            if total == 0:
                 node.node_type = NodeType.NULL
                 self.void_nodes.append(nid)
-            if len(outgoing) + len(incoming) <= 1:
+            if total <= 1:
                 setattr(node, "boundary", True)
                 self.boundary_nodes.append(nid)
+            for b in bridges:
+                other = self.get_node(b)
+                if other and other.node_type == NodeType.NULL:
+                    print(f"[WARNING] Bridge {nid}<->{b} connected to NULL node")
         if self.void_nodes:
             with open("output/void_node_map.json", "w") as f:
                 json.dump(self.void_nodes, f, indent=2)
+        with open("output/connectivity_log.json", "w") as f:
+            json.dump(connectivity_log, f, indent=2)
 
     # ------------------------------------------------------------
     def emit_law_wave(self, origin_id: str, tick: int, radius: int = 2) -> None:
