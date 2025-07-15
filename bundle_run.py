@@ -29,6 +29,13 @@ DEFAULT_KEEP_FILES = [
     "tick_density_map.json",
     "refraction_log.json",
     "node_state_log.json",
+    "boundary_interaction_log.json",
+    "bridge_reformation_log.json",
+    "bridge_decay_log.json",
+    "regional_pressure_map.json",
+    "cluster_influence_matrix.json",
+    "global_diagnostics.json",
+    "void_node_map.json",
 ]
 
 
@@ -178,7 +185,47 @@ def _create_manifest(out_dir: str, run_id: str, timestamp: str) -> None:
     # node state transitions
     transitions = _load_lines(os.path.join(out_dir, "node_state_map.json"))
     manifest["node_state_transitions_count"] = len(transitions)
-    manifest["boundary_interactions_count"] = 0
+
+    boundary_events = _load_lines(os.path.join(out_dir, "boundary_interaction_log.json"))
+    manifest["boundary_interactions_count"] = len(boundary_events)
+    manifest["void_absorption_events"] = sum(1 for e in boundary_events if e.get("void"))
+
+    reforms = _load_lines(os.path.join(out_dir, "bridge_reformation_log.json"))
+    manifest["bridges_reformed"] = len(reforms)
+
+    decays = _load_lines(os.path.join(out_dir, "bridge_decay_log.json"))
+    durations = [d.get("duration", 0) for d in decays]
+    if durations:
+        manifest["mean_decay_duration"] = round(sum(durations) / len(durations), 2)
+    else:
+        manifest["mean_decay_duration"] = 0
+
+    try:
+        with open(os.path.join(out_dir, "global_diagnostics.json")) as f:
+            diag = json.load(f)
+            manifest.update(diag)
+    except FileNotFoundError:
+        pass
+
+    try:
+        with open(os.path.join(out_dir, "regional_pressure_map.json")) as f:
+            reg = json.load(f)
+            manifest["regions_over_pressure_threshold"] = sum(1 for v in reg.values() if v > 1)
+    except FileNotFoundError:
+        manifest["regions_over_pressure_threshold"] = 0
+
+    try:
+        with open(os.path.join(out_dir, "cluster_influence_matrix.json")) as f:
+            mat = json.load(f)
+            manifest["max_interregional_flow"] = max(mat.values()) if mat else 0
+    except FileNotFoundError:
+        manifest["max_interregional_flow"] = 0
+
+    try:
+        collapse = _load_lines(os.path.join(out_dir, "collapse_chain_log.json"))
+        manifest["collapse_clusters_detected"] = len(collapse)
+    except Exception:
+        manifest["collapse_clusters_detected"] = 0
 
     with open(os.path.join(out_dir, "manifest.json"), "w") as f:
         json.dump(manifest, f, indent=2)

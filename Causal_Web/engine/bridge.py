@@ -67,6 +67,11 @@ class Bridge:
         self.decoherence_exposure = []  # recent avg decoherence values
         self.trust_score = 0.5
 
+        # ---- Phase 6 additions ----
+        self.last_active_tick = formed_at_tick
+        self.reformable = True
+        self.memory_weight = 0.5
+
     def _log_dynamics(self, tick, event, conditions=None):
         record = {
             "bridge_id": self.bridge_id,
@@ -120,6 +125,36 @@ class Bridge:
             return True
         return False
 
+    # ---- Phase 6: plasticity ----
+    def decay(self, tick_time, inactive_threshold=5):
+        if self.last_active_tick is None:
+            self.last_active_tick = tick_time
+        if tick_time - self.last_active_tick >= inactive_threshold and self.current_strength > 0:
+            self.current_strength = max(0.0, self.current_strength - 0.1)
+            duration = tick_time - self.last_active_tick
+            with open("output/bridge_decay_log.json", "a") as f:
+                f.write(json.dumps({"tick": tick_time, "bridge": self.bridge_id, "strength": self.current_strength, "duration": duration}) + "\n")
+            if self.current_strength == 0.0:
+                self.active = False
+                import engine.tick_engine as te
+                te._decay_durations.append(duration)
+                self._log_dynamics(tick_time, "decayed")
+
+    def try_reform(self, tick_time, node_a, node_b, coherence_threshold=0.9):
+        if not self.reformable or self.active:
+            return
+        coherence = (node_a.compute_coherence_level(tick_time) + node_b.compute_coherence_level(tick_time)) / 2
+        if coherence > coherence_threshold and random() < self.memory_weight:
+            self.active = True
+            self.last_reform_tick = tick_time
+            self.coherence_at_reform = coherence
+            with open("output/bridge_reformation_log.json", "a") as f:
+                f.write(json.dumps({"tick": tick_time, "bridge": self.bridge_id, "coherence": coherence}) + "\n")
+            import engine.tick_engine as te
+            te.bridges_reformed_count += 1
+            self._log_event(tick_time, "bridge_reformed", coherence)
+            self._log_dynamics(tick_time, "recovered", {"coherence": coherence})
+
     def try_reactivate(self, tick_time, node_a, node_b, coherence_threshold=0.9):
         coherence = (node_a.compute_coherence_level(tick_time) + node_b.compute_coherence_level(tick_time)) / 2
         if not self.active and coherence > coherence_threshold:
@@ -134,7 +169,8 @@ class Bridge:
         node_a = graph.get_node(self.node_a_id)
         node_b = graph.get_node(self.node_b_id)
 
-        self.try_reactivate(tick_time, node_a, node_b)
+        self.decay(tick_time)
+        self.try_reform(tick_time, node_a, node_b)
 
         a_collapsed = node_a.collapse_origin.get(tick_time) == "self"
         b_collapsed = node_b.collapse_origin.get(tick_time) == "self"
@@ -213,6 +249,8 @@ class Bridge:
                 self.phase_drift += abs((phase_a - phase_b + math.pi) % (2 * math.pi) - math.pi)
             self.coherence_flux += (node_a.coherence + node_b.coherence) / 2
         self.last_activation = tick_time
+        if self.active:
+            self.last_active_tick = tick_time
         self.reinforcement_streak += 1
         self.trust_score = min(1.0, self.trust_score + 0.01)
         self.update_state(tick_time)
@@ -238,6 +276,9 @@ class Bridge:
             "coherence_at_reform": self.coherence_at_reform,
             "trust_score": self.trust_score,
             "reinforcement_streak": self.reinforcement_streak,
+            "last_active_tick": self.last_active_tick,
+            "reformable": self.reformable,
+            "memory_weight": self.memory_weight,
             "avg_decoherence": sum(self.decoherence_exposure)/len(self.decoherence_exposure) if self.decoherence_exposure else 0.0,
             "state": self.state.value,
             "fatigue": round(self.fatigue, 3),
