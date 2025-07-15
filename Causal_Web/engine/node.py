@@ -343,22 +343,6 @@ class Node:
         else:
             self.current_threshold = max(self.base_threshold, self.current_threshold - 0.01)
 
-    def emit_tick_if_ready(self, global_tick, graph):
-        """
-        Emits a self-tick only if the node is self-connected and not suppressed.
-        Triggers real collapse via apply_tick().
-        """
-        if self.is_classical:
-            return
-        if self.id not in graph.get_upstream_nodes(self.id):
-            return
-
-        if global_tick - self.last_tick_time < self.refractory_period:
-            return
-
-        phase = self.compute_phase(global_tick)
-        self.apply_tick(global_tick, phase, graph, origin="self")
-
 
     def _emit(self, tick_time):
         phase = self.compute_phase(tick_time)

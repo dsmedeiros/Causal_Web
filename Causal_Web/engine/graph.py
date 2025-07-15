@@ -233,6 +233,7 @@ class CausalGraph:
         self.nodes.clear()
         self.edges.clear()
         self.bridges.clear()
+        self.tick_sources = []
 
         for node_data in data.get("nodes", []):
             node_id = node_data.get("id")
@@ -254,6 +255,14 @@ class CausalGraph:
             src = edge.get("from")
             tgt = edge.get("to")
             if src is None or tgt is None:
+                continue
+            if src == tgt:
+                # treat self-edge as tick seed definition
+                self.tick_sources.append({
+                    "node_id": src,
+                    "tick_interval": edge.get("delay", 1),
+                    "phase": edge.get("phase_shift", 0.0),
+                })
                 continue
             self.add_edge(
                 src,
@@ -282,7 +291,7 @@ class CausalGraph:
                 formed_at_tick=0,
             )
 
-        self.tick_sources = data.get("tick_sources", [])
+        self.tick_sources.extend(data.get("tick_sources", []))
 
         self.identify_boundaries()
 
