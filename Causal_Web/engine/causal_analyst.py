@@ -95,6 +95,7 @@ class CausalAnalyst:
         self.explanations: List[ExplanationEvent] = []
         self.causal_chains: List[Dict] = []
         self.params = {"window": 8}
+        self.summary: Dict[str, Dict] = {}
 
     # ------------------------------------------------------------
     def _path(self, name: str) -> str:
