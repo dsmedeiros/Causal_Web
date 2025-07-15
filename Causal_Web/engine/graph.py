@@ -160,6 +160,10 @@ class CausalGraph:
                     ,"trust_profile": n.trust_profile
                     ,"phase_confidence": n.phase_confidence_index
                     ,"goals": n.goals
+                    ,"node_type": n.node_type.value
+                    ,"coherence_credit": n.coherence_credit
+                    ,"decoherence_debt": n.decoherence_debt
+                    ,"phase_lock": n.phase_lock
                 } for nid, n in self.nodes.items()
             },
             "superpositions": {

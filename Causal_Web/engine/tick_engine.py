@@ -114,7 +114,8 @@ def log_meta_node_ticks(global_tick):
 def _compute_metrics(node, tick_time):
     decoherence = node.compute_decoherence_field(tick_time)
     coherence = node.compute_coherence_level(tick_time)
-    return node.id, decoherence, coherence
+    interference = len(node.pending_superpositions.get(tick_time, []))
+    return node.id, decoherence, coherence, interference, node.node_type.value, node.coherence_credit, node.decoherence_debt
 
 
 def log_metrics_per_tick(global_tick):
@@ -123,6 +124,10 @@ def log_metrics_per_tick(global_tick):
     classical_state = {}
     coherence_velocity = {}
     law_wave_log = {}
+    interference_log = {}
+    credit_log = {}
+    debt_log = {}
+    type_log = {}
 
     # Store last coherence to compute delta
     if not hasattr(log_metrics_per_tick, "_last_coherence"):
@@ -131,7 +136,7 @@ def log_metrics_per_tick(global_tick):
     with ThreadPoolExecutor() as ex:
         results = list(ex.map(lambda n: _compute_metrics(n, global_tick), graph.nodes.values()))
 
-    for node_id, decoherence, coherence in results:
+    for node_id, decoherence, coherence, interference, ntype, credit, debt in results:
         node = graph.get_node(node_id)
         prev = log_metrics_per_tick._last_coherence.get(node_id, coherence)
         delta = coherence - prev
@@ -161,6 +166,10 @@ def log_metrics_per_tick(global_tick):
         classical_state[node_id] = getattr(node, "is_classical", False)
         coherence_velocity[node_id] = round(delta, 5)
         law_wave_log[node_id] = round(node.law_wave_frequency, 4)
+        interference_log[node_id] = interference
+        credit_log[node_id] = round(credit, 3)
+        debt_log[node_id] = round(debt, 3)
+        type_log[node_id] = ntype
 
     clusters = graph.detect_clusters()
     graph.create_meta_nodes(clusters)
@@ -179,6 +188,12 @@ def log_metrics_per_tick(global_tick):
         f.write(json.dumps({str(global_tick): coherence_velocity}) + "\\n")
     with open("output/classicalization_map.json", "a") as f:
         f.write(json.dumps({str(global_tick): classical_state}) + "\n")
+    with open("output/interference_log.json", "a") as f:
+        f.write(json.dumps({str(global_tick): interference_log}) + "\n")
+    with open("output/tick_density_map.json", "a") as f:
+        f.write(json.dumps({str(global_tick): interference_log}) + "\n")
+    with open("output/node_state_log.json", "a") as f:
+        f.write(json.dumps({str(global_tick): {"type": type_log, "credit": credit_log, "debt": debt_log}}) + "\n")
 
 
 def simulation_loop():

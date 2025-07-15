@@ -25,6 +25,10 @@ DEFAULT_KEEP_FILES = [
     "causal_explanations.json",
     "explanation_graph.json",
     "manifest.json",
+    "interference_log.json",
+    "tick_density_map.json",
+    "refraction_log.json",
+    "node_state_log.json",
 ]
 
 
@@ -79,6 +83,68 @@ def _create_manifest(out_dir: str, run_id: str, timestamp: str) -> None:
 
     # law drift
     manifest["law_drift_events"] = len(_load_lines(os.path.join(out_dir, "law_drift_log.json")))
+
+    # interference metrics
+    inter_lines = _load_lines(os.path.join(out_dir, "interference_log.json"))
+    max_inter = 0
+    for entry in inter_lines:
+        tick, states = next(iter(entry.items()))
+        if states:
+            m = max(states.values())
+            if m > max_inter:
+                max_inter = m
+    manifest["max_interference_density"] = max_inter
+
+    # decoherence zone width
+    deco_lines_dict = {int(list(d.keys())[0]): list(d.values())[0] for d in deco_lines}
+    widths = []
+    for node in {n for entry in deco_lines for n in list(entry.values())[0].keys()}:
+        streak = 0
+        prev_tick = None
+        for t in sorted(deco_lines_dict.keys()):
+            val = deco_lines_dict[t].get(node)
+            if val is not None and val > 0.4:
+                if prev_tick is None or t == prev_tick + 1:
+                    streak += 1
+                else:
+                    if streak:
+                        widths.append(streak)
+                    streak = 1
+                prev_tick = t
+        if streak:
+            widths.append(streak)
+    manifest["mean_decoherence_zone_width"] = round(sum(widths) / len(widths), 2) if widths else 0
+
+    # phase drift range
+    law_lines = _load_lines(os.path.join(out_dir, "law_wave_log.json"))
+    freqs = []
+    for entry in law_lines:
+        _, vals = next(iter(entry.items()))
+        freqs.extend(vals.values())
+    manifest["phase_drift_range"] = round(max(freqs) - min(freqs), 4) if freqs else 0
+
+    # collapsed nodes total
+    if collapse_lines:
+        last_states = list(collapse_lines)[-1]
+        _, states = next(iter(last_states.items()))
+        manifest["collapsed_nodes_total"] = sum(1 for s in states.values() if s)
+    else:
+        manifest["collapsed_nodes_total"] = 0
+
+    # coherence stabilizers
+    node_state_lines = _load_lines(os.path.join(out_dir, "node_state_log.json"))
+    stabilizers = set()
+    for entry in node_state_lines:
+        _, info = next(iter(entry.items()))
+        credit = info.get("credit", {})
+        debt = info.get("debt", {})
+        for node, c in credit.items():
+            if c > debt.get(node, 0):
+                stabilizers.add(node)
+    manifest["coherence_stabilizers_count"] = len(stabilizers)
+
+    # refraction events
+    manifest["refraction_events_logged"] = len(_load_lines(os.path.join(out_dir, "refraction_log.json")))
 
     with open(os.path.join(out_dir, "manifest.json"), "w") as f:
         json.dump(manifest, f, indent=2)
