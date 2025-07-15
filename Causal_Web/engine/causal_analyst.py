@@ -9,6 +9,7 @@ from typing import Dict, List, Tuple, Optional
 # ------------------------------------------------------------
 # Helper to load newline-delimited JSON where each line maps a tick to values
 
+
 def _load_json_lines(path: str) -> Dict[int, Dict]:
     """Load newline-delimited JSON where each line may take multiple forms.
 
@@ -111,11 +112,15 @@ class CausalAnalyst:
             "law_wave": self._path("law_wave_log.json"),
             "bridge_state": self._path("bridge_state_log.json"),
             "classicalization": self._path("classicalization_map.json"),
+            "collapse_front": self._path("collapse_front_log.json"),
+            "collapse_chain": self._path("collapse_chain_log.json"),
             "observer": self._path("observer_perceived_field.json"),
             "cluster": self._path("cluster_log.json"),
             "law_drift": self._path("law_drift_log.json"),
             "event": self._path("event_log.json"),
             "layer_transitions": self._path("layer_transition_log.json"),
+            "refraction": self._path("refraction_log.json"),
+            "node_state_map": self._path("node_state_map.json"),
         }
 
         for key, path in paths.items():
@@ -175,14 +180,18 @@ class CausalAnalyst:
         return events
 
     # ------------------------------------------------------------
-    def _get_last_bridge_rupture(self, node_id: str, before_tick: int) -> Optional[Tuple[int, Dict]]:
+    def _get_last_bridge_rupture(
+        self, node_id: str, before_tick: int
+    ) -> Optional[Tuple[int, Dict]]:
         """Return the last bridge rupture event involving node before given tick."""
         event_log = self.logs.get("event", {})
         if not event_log:
             return None
         for t in sorted([t for t in event_log if t < before_tick], reverse=True):
             for ev in event_log[t]:
-                if ev.get("event_type") == "bridge_ruptured" and (ev.get("source") == node_id or ev.get("target") == node_id):
+                if ev.get("event_type") == "bridge_ruptured" and (
+                    ev.get("source") == node_id or ev.get("target") == node_id
+                ):
                     return t, ev
         return None
 
@@ -203,17 +212,21 @@ class CausalAnalyst:
                     spike = s
             if last_rupture and tick - last_rupture[0] <= window:
                 ev = last_rupture[1]
-                chain_steps.append({
-                    "tick": last_rupture[0],
-                    "event": "bridge_ruptured",
-                    "target": [ev.get("source"), ev.get("target")],
-                })
+                chain_steps.append(
+                    {
+                        "tick": last_rupture[0],
+                        "event": "bridge_ruptured",
+                        "target": [ev.get("source"), ev.get("target")],
+                    }
+                )
             if spike:
-                chain_steps.append({
-                    "tick": spike[1],
-                    "event": "decoherence_spike",
-                    "value": spike[2],
-                })
+                chain_steps.append(
+                    {
+                        "tick": spike[1],
+                        "event": "decoherence_spike",
+                        "value": spike[2],
+                    }
+                )
             chain_steps.append({"tick": tick, "event": "node_collapsed", "node": node})
 
             conf = 0.5
@@ -222,11 +235,13 @@ class CausalAnalyst:
             if spike:
                 conf += 0.25
             conf = min(1.0, conf)
-            chains.append({
-                "root_event": f"Node {node} collapsed at tick {tick}",
-                "chain": chain_steps,
-                "confidence": round(conf, 2),
-            })
+            chains.append(
+                {
+                    "root_event": f"Node {node} collapsed at tick {tick}",
+                    "chain": chain_steps,
+                    "confidence": round(conf, 2),
+                }
+            )
 
         self.causal_chains = chains
 
@@ -243,7 +258,9 @@ class CausalAnalyst:
 
         for node, tick in collapse_events.items():
             # Rule: Decoherence-Induced Collapse
-            candidate = [s for s in spikes.get(node, []) if s[1] >= tick - 1 and s[0] <= tick - 3]
+            candidate = [
+                s for s in spikes.get(node, []) if s[1] >= tick - 1 and s[0] <= tick - 3
+            ]
             if candidate:
                 start, end, mx = candidate[-1]
                 text = (
@@ -251,13 +268,17 @@ class CausalAnalyst:
                     f"between ticks {start}-{end}."
                 )
                 self.explanations.append(
-                    ExplanationEvent((start, tick), [node], "rule:decoherence_induced_collapse", text)
+                    ExplanationEvent(
+                        (start, tick), [node], "rule:decoherence_induced_collapse", text
+                    )
                 )
 
         # Rule: Law-Wave Stabilization
         law_wave = self.logs.get("law_wave", {})
         for node in {n for tick in law_wave for n in law_wave[tick]}:
-            values = [law_wave[t][node] for t in sorted(law_wave) if node in law_wave[t]]
+            values = [
+                law_wave[t][node] for t in sorted(law_wave) if node in law_wave[t]
+            ]
             window = []
             for i, v in enumerate(values):
                 window.append(v)
@@ -274,7 +295,12 @@ class CausalAnalyst:
                             f"from ticks {start_tick}-{end_tick}."
                         )
                         self.explanations.append(
-                            ExplanationEvent((start_tick, end_tick), [node], "rule:law_wave_stabilization", text)
+                            ExplanationEvent(
+                                (start_tick, end_tick),
+                                [node],
+                                "rule:law_wave_stabilization",
+                                text,
+                            )
                         )
                         break
 
@@ -294,7 +320,9 @@ class CausalAnalyst:
                         "indicating possible meta-node formation."
                     )
                     self.explanations.append(
-                        ExplanationEvent((tick, tick), list(cluster), "rule:meta_node_onset", text)
+                        ExplanationEvent(
+                            (tick, tick), list(cluster), "rule:meta_node_onset", text
+                        )
                     )
 
         # Rule: Layer Transition Events
@@ -304,8 +332,33 @@ class CausalAnalyst:
                 if ev.get("from") == "decoherence" and ev.get("to") == "collapse":
                     text = f"Node {ev['node']} transitioned from decoherence to collapse at tick {t}."
                     self.explanations.append(
-                        ExplanationEvent((t, t), [ev['node']], "rule:layer_transition", text)
+                        ExplanationEvent(
+                            (t, t), [ev["node"]], "rule:layer_transition", text
+                        )
                     )
+
+        # Collapse origin events
+        front = self.logs.get("collapse_front", {})
+        for tick, info in front.items():
+            if info.get("event") == "collapse_start":
+                node = info.get("node")
+                text = f"Collapse initiated at node {node}"
+                self.explanations.append(
+                    ExplanationEvent((tick, tick), [node], "rule:collapse_origin", text)
+                )
+
+        # Entanglement chain propagation
+        chains = self.logs.get("collapse_chain", {})
+        for tick, info in chains.items():
+            src = info.get("source")
+            collapsed = [c.get("node") for c in info.get("collapsed", [])]
+            if src and collapsed:
+                text = f"Collapse from {src} propagated to {', '.join(collapsed)} at tick {tick}."
+                self.explanations.append(
+                    ExplanationEvent(
+                        (tick, tick), [src] + collapsed, "rule:collapse_chain", text
+                    )
+                )
 
     # ------------------------------------------------------------
     def generate_explanation_log(self) -> List[Dict]:
@@ -327,14 +380,20 @@ class CausalAnalyst:
     def generate_explanation_narrative(self) -> str:
         lines = []
         for e in self.explanations:
-            rng = f"{e.tick_range[0]}-{e.tick_range[1]}" if e.tick_range[0] != e.tick_range[1] else str(e.tick_range[0])
+            rng = (
+                f"{e.tick_range[0]}-{e.tick_range[1]}"
+                if e.tick_range[0] != e.tick_range[1]
+                else str(e.tick_range[0])
+            )
             nodes = ", ".join(e.affected_nodes)
             lines.append(f"[{rng}] {nodes}: {e.explanation_text}")
         if self.causal_chains:
             lines.append("")
             lines.append("Causal Chains:")
             for chain in self.causal_chains:
-                lines.append(f"- {chain['root_event']} (confidence {chain['confidence']:.2f})")
+                lines.append(
+                    f"- {chain['root_event']} (confidence {chain['confidence']:.2f})"
+                )
                 for step in chain.get("chain", []):
                     if step["event"] == "bridge_ruptured":
                         lines.append(
@@ -383,10 +442,13 @@ class CausalAnalyst:
                 ids.append(node["id"])
                 step_objs.append(step)
                 counter += 1
-            for (a, step_a), (b, step_b) in zip(zip(ids, step_objs), zip(ids[1:], step_objs[1:])):
+            for (a, step_a), (b, step_b) in zip(
+                zip(ids, step_objs), zip(ids[1:], step_objs[1:])
+            ):
                 label = (
                     "triggered"
-                    if step_a.get("event") == "decoherence_spike" and step_b.get("event") == "bridge_ruptured"
+                    if step_a.get("event") == "decoherence_spike"
+                    and step_b.get("event") == "bridge_ruptured"
                     else "caused"
                 )
                 edges.append({"source": a, "target": b, "label": label})
@@ -413,7 +475,9 @@ class CausalAnalyst:
 
         # Node collapses
         for node, tick in self._collapse_events().items():
-            timeline.setdefault(tick, []).append({"type": "node_collapsed", "nodes": [node]})
+            timeline.setdefault(tick, []).append(
+                {"type": "node_collapsed", "nodes": [node]}
+            )
 
         # Detected decoherence spikes
         for node, spikes in self.transitions.get("decoherence_spikes", {}).items():
@@ -461,4 +525,3 @@ class CausalAnalyst:
         self.generate_causal_timeline()
         self.summarize_layer_transitions()
         print("✅ Causal explanations generated")
-

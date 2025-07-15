@@ -30,7 +30,11 @@ DEFAULT_KEEP_FILES = [
     "tick_density_map.json",
     "tick_seed_log.json",
     "refraction_log.json",
+    "collapse_front_log.json",
+    "collapse_chain_log.json",
+    "layer_transition_log.json",
     "node_state_log.json",
+    "node_state_map.json",
     "boundary_interaction_log.json",
     "bridge_reformation_log.json",
     "bridge_decay_log.json",
@@ -42,6 +46,7 @@ DEFAULT_KEEP_FILES = [
 
 
 # ------------------------------------------------------------
+
 
 def _create_manifest(out_dir: str, run_id: str, timestamp: str) -> None:
     """Generate manifest.json with run metadata."""
@@ -93,10 +98,14 @@ def _create_manifest(out_dir: str, run_id: str, timestamp: str) -> None:
 
     # bridge ruptures
     events = _load_lines(os.path.join(out_dir, "event_log.json"))
-    manifest["bridge_ruptures"] = sum(1 for e in events if e.get("event_type") == "bridge_ruptured")
+    manifest["bridge_ruptures"] = sum(
+        1 for e in events if e.get("event_type") == "bridge_ruptured"
+    )
 
     # law drift
-    manifest["law_drift_events"] = len(_load_lines(os.path.join(out_dir, "law_drift_log.json")))
+    manifest["law_drift_events"] = len(
+        _load_lines(os.path.join(out_dir, "law_drift_log.json"))
+    )
 
     # interference metrics
     inter_lines = _load_lines(os.path.join(out_dir, "interference_log.json"))
@@ -127,7 +136,9 @@ def _create_manifest(out_dir: str, run_id: str, timestamp: str) -> None:
                 prev_tick = t
         if streak:
             widths.append(streak)
-    manifest["mean_decoherence_zone_width"] = round(sum(widths) / len(widths), 2) if widths else 0
+    manifest["mean_decoherence_zone_width"] = (
+        round(sum(widths) / len(widths), 2) if widths else 0
+    )
 
     # phase drift range
     law_lines = _load_lines(os.path.join(out_dir, "law_wave_log.json"))
@@ -158,7 +169,9 @@ def _create_manifest(out_dir: str, run_id: str, timestamp: str) -> None:
     manifest["coherence_stabilizers_count"] = len(stabilizers)
 
     # refraction events
-    manifest["refraction_events_logged"] = len(_load_lines(os.path.join(out_dir, "refraction_log.json")))
+    manifest["refraction_events_logged"] = len(
+        _load_lines(os.path.join(out_dir, "refraction_log.json"))
+    )
 
     # bridge dynamics
     dynamics = _load_lines(os.path.join(out_dir, "bridge_dynamics_log.json"))
@@ -166,7 +179,9 @@ def _create_manifest(out_dir: str, run_id: str, timestamp: str) -> None:
     manifest["spontaneous_bridges_formed"] = sum(
         1 for e in dynamics if e.get("event") == "formed" and not e.get("seeded")
     )
-    manifest["total_bridge_ruptures"] = sum(1 for e in dynamics if e.get("event") == "ruptured")
+    manifest["total_bridge_ruptures"] = sum(
+        1 for e in dynamics if e.get("event") == "ruptured"
+    )
     lifetimes = {}
     for e in dynamics:
         bid = e.get("bridge_id")
@@ -187,15 +202,21 @@ def _create_manifest(out_dir: str, run_id: str, timestamp: str) -> None:
     # law wave propagation
     law_wave_events = _load_lines(os.path.join(out_dir, "law_wave_log.json"))
     manifest["law_waves_emitted"] = sum(1 for e in law_wave_events if e.get("origin"))
-    manifest["collapse_pressure_events"] = sum(len(e.get("affected", [])) for e in law_wave_events)
+    manifest["collapse_pressure_events"] = sum(
+        len(e.get("affected", [])) for e in law_wave_events
+    )
 
     # node state transitions
     transitions = _load_lines(os.path.join(out_dir, "node_state_map.json"))
     manifest["node_state_transitions_count"] = len(transitions)
 
-    boundary_events = _load_lines(os.path.join(out_dir, "boundary_interaction_log.json"))
+    boundary_events = _load_lines(
+        os.path.join(out_dir, "boundary_interaction_log.json")
+    )
     manifest["boundary_interactions_count"] = len(boundary_events)
-    manifest["void_absorption_events"] = sum(1 for e in boundary_events if e.get("void"))
+    manifest["void_absorption_events"] = sum(
+        1 for e in boundary_events if e.get("void")
+    )
 
     reforms = _load_lines(os.path.join(out_dir, "bridge_reformation_log.json"))
     manifest["bridges_reformed"] = len(reforms)
@@ -217,7 +238,9 @@ def _create_manifest(out_dir: str, run_id: str, timestamp: str) -> None:
     try:
         with open(os.path.join(out_dir, "regional_pressure_map.json")) as f:
             reg = json.load(f)
-            manifest["regions_over_pressure_threshold"] = sum(1 for v in reg.values() if v > 1)
+            manifest["regions_over_pressure_threshold"] = sum(
+                1 for v in reg.values() if v > 1
+            )
     except FileNotFoundError:
         manifest["regions_over_pressure_threshold"] = 0
 
@@ -239,6 +262,7 @@ def _create_manifest(out_dir: str, run_id: str, timestamp: str) -> None:
 
 
 # ------------------------------------------------------------
+
 
 def bundle_run(output_dir: str, run_id: str, do_zip: bool = False) -> str:
     timestamp = datetime.utcnow().strftime("%Y-%m-%d_%H-%M")
@@ -276,11 +300,16 @@ def bundle_run(output_dir: str, run_id: str, do_zip: bool = False) -> str:
 
 # ------------------------------------------------------------
 
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Bundle CWT run outputs")
-    parser.add_argument("--output-dir", default="Causal_Web/output", help="Simulation output directory")
+    parser.add_argument(
+        "--output-dir", default="Causal_Web/output", help="Simulation output directory"
+    )
     parser.add_argument("--run-id", default="run", help="Run identifier")
-    parser.add_argument("--zip", action="store_true", help="Compress bundle into .cwbundle.zip")
+    parser.add_argument(
+        "--zip", action="store_true", help="Compress bundle into .cwbundle.zip"
+    )
     args = parser.parse_args()
 
     path = bundle_run(args.output_dir, args.run_id, args.zip)
