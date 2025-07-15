@@ -5,32 +5,21 @@
       4
     ],
     "affected_nodes": [
-      "E"
-    ],
-    "origin": "rule:law_wave_stabilization",
-    "explanation": "Node E maintained stable law-wave variance 0.0004 from ticks 0-4."
-  },
-  {
-    "tick_range": [
-      0,
-      4
-    ],
-    "affected_nodes": [
-      "B"
-    ],
-    "origin": "rule:law_wave_stabilization",
-    "explanation": "Node B maintained stable law-wave variance 0.0004 from ticks 0-4."
-  },
-  {
-    "tick_range": [
-      0,
-      4
-    ],
-    "affected_nodes": [
       "D"
     ],
     "origin": "rule:law_wave_stabilization",
     "explanation": "Node D maintained stable law-wave variance 0.0004 from ticks 0-4."
+  },
+  {
+    "tick_range": [
+      0,
+      4
+    ],
+    "affected_nodes": [
+      "F"
+    ],
+    "origin": "rule:law_wave_stabilization",
+    "explanation": "Node F maintained stable law-wave variance 0.0000 from ticks 0-4."
   },
   {
     "tick_range": [
@@ -49,10 +38,10 @@
       4
     ],
     "affected_nodes": [
-      "A"
+      "B"
     ],
     "origin": "rule:law_wave_stabilization",
-    "explanation": "Node A maintained stable law-wave variance 0.0000 from ticks 0-4."
+    "explanation": "Node B maintained stable law-wave variance 0.0004 from ticks 0-4."
   },
   {
     "tick_range": [
@@ -60,10 +49,10 @@
       4
     ],
     "affected_nodes": [
-      "Z"
+      "A"
     ],
     "origin": "rule:law_wave_stabilization",
-    "explanation": "Node Z maintained stable law-wave variance 0.0004 from ticks 0-4."
+    "explanation": "Node A maintained stable law-wave variance 0.0000 from ticks 0-4."
   },
   {
     "tick_range": [
@@ -93,10 +82,10 @@
       4
     ],
     "affected_nodes": [
-      "H"
+      "E"
     ],
     "origin": "rule:law_wave_stabilization",
-    "explanation": "Node H maintained stable law-wave variance 0.0004 from ticks 0-4."
+    "explanation": "Node E maintained stable law-wave variance 0.0004 from ticks 0-4."
   },
   {
     "tick_range": [
@@ -104,10 +93,10 @@
       4
     ],
     "affected_nodes": [
-      "F"
+      "Z"
     ],
     "origin": "rule:law_wave_stabilization",
-    "explanation": "Node F maintained stable law-wave variance 0.0000 from ticks 0-4."
+    "explanation": "Node Z maintained stable law-wave variance 0.0004 from ticks 0-4."
   },
   {
     "tick_range": [
@@ -130,6 +119,17 @@
     ],
     "origin": "rule:law_wave_stabilization",
     "explanation": "Node J maintained stable law-wave variance 0.0004 from ticks 0-4."
+  },
+  {
+    "tick_range": [
+      0,
+      4
+    ],
+    "affected_nodes": [
+      "H"
+    ],
+    "origin": "rule:law_wave_stabilization",
+    "explanation": "Node H maintained stable law-wave variance 0.0004 from ticks 0-4."
   },
   {
     "tick_range": [

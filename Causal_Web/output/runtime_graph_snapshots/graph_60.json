@@ -389,104 +389,1412 @@
       },
       "phase_confidence": 1.0,
       "goals": {},
-      "node_type": "normal",
-      "coherence_credit": 14.699999999999964,
+      "node_type": "entangled",
+      "coherence_credit": 13.899999999999967,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
     "B": {
       "x": 100,
       "y": 200,
-      "ticks": [],
+      "ticks": [
+        {
+          "time": 1,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 3,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 5,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 7,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 9,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 11,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 13,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 14,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 15,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 16,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 17,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 18,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 19,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 20,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 21,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 22,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 23,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 24,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 25,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 26,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 27,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 28,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 29,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 30,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 31,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 32,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 33,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 34,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 35,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 36,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 37,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 38,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 39,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 40,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 41,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 42,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 43,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 44,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 45,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 46,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 47,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 48,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 49,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 50,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 51,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 52,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 53,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 54,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 55,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 56,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 57,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 58,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 59,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 60,
+          "phase": 0.0,
+          "origin": "self"
+        }
+      ],
       "phase": 0.0,
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 1.0,
-      "refractory_period": 1.4999999999999996,
+      "refractory_period": 1.0,
       "base_threshold": 0.5,
-      "collapse_origin": {},
+      "collapse_origin": {
+        "1": "self",
+        "3": "self",
+        "5": "self",
+        "7": "self",
+        "9": "self",
+        "11": "self",
+        "13": "self",
+        "14": "self",
+        "15": "self",
+        "16": "self",
+        "17": "self",
+        "18": "self",
+        "19": "self",
+        "20": "self",
+        "21": "self",
+        "22": "self",
+        "23": "self",
+        "24": "self",
+        "25": "self",
+        "26": "self",
+        "27": "self",
+        "28": "self",
+        "29": "self",
+        "30": "self",
+        "31": "self",
+        "32": "self",
+        "33": "self",
+        "34": "self",
+        "35": "self",
+        "36": "self",
+        "37": "self",
+        "38": "self",
+        "39": "self",
+        "40": "self",
+        "41": "self",
+        "42": "self",
+        "43": "self",
+        "44": "self",
+        "45": "self",
+        "46": "self",
+        "47": "self",
+        "48": "self",
+        "49": "self",
+        "50": "self",
+        "51": "self",
+        "52": "self",
+        "53": "self",
+        "54": "self",
+        "55": "self",
+        "56": "self",
+        "57": "self",
+        "58": "self",
+        "59": "self",
+        "60": "self"
+      },
       "is_classical": false,
       "decoherence_streak": 0,
-      "last_tick_time": -Infinity,
-      "subjective_ticks": 0,
+      "last_tick_time": 60,
+      "subjective_ticks": 54,
       "law_wave_frequency": 0.05,
-      "trust_profile": {},
+      "trust_profile": {
+        "self": 1.0
+      },
       "phase_confidence": 1.0,
       "goals": {},
-      "node_type": "normal",
-      "coherence_credit": 7.999999999999988,
+      "node_type": "entangled",
+      "coherence_credit": 18.39999999999999,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
     "C": {
       "x": 100,
       "y": 300,
-      "ticks": [],
+      "ticks": [
+        {
+          "time": 1,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 3,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 5,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 7,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 9,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 11,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 13,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 14,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 15,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 16,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 17,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 18,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 19,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 20,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 21,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 22,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 23,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 24,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 25,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 26,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 27,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 28,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 29,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 30,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 31,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 32,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 33,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 34,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 35,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 36,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 37,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 38,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 39,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 40,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 41,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 42,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 43,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 44,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 45,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 46,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 47,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 48,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 49,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 50,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 51,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 52,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 53,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 54,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 55,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 56,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 57,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 58,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 59,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 60,
+          "phase": 0.0,
+          "origin": "self"
+        }
+      ],
       "phase": 0.0,
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 1.0,
-      "refractory_period": 1.4999999999999996,
+      "refractory_period": 1.0,
       "base_threshold": 0.5,
-      "collapse_origin": {},
+      "collapse_origin": {
+        "1": "bridge",
+        "3": "bridge",
+        "5": "bridge",
+        "7": "bridge",
+        "9": "bridge",
+        "11": "bridge",
+        "13": "bridge",
+        "14": "bridge",
+        "15": "bridge",
+        "16": "bridge",
+        "17": "self",
+        "18": "self",
+        "19": "self",
+        "20": "self",
+        "21": "self",
+        "22": "self",
+        "23": "self",
+        "24": "self",
+        "25": "self",
+        "26": "self",
+        "27": "self",
+        "28": "self",
+        "29": "self",
+        "30": "self",
+        "31": "self",
+        "32": "self",
+        "33": "self",
+        "34": "self",
+        "35": "self",
+        "36": "self",
+        "37": "self",
+        "38": "self",
+        "39": "self",
+        "40": "self",
+        "41": "self",
+        "42": "self",
+        "43": "self",
+        "44": "self",
+        "45": "self",
+        "46": "self",
+        "47": "self",
+        "48": "self",
+        "49": "self",
+        "50": "self",
+        "51": "self",
+        "52": "self",
+        "53": "self",
+        "54": "self",
+        "55": "self",
+        "56": "self",
+        "57": "self",
+        "58": "self",
+        "59": "self",
+        "60": "self"
+      },
       "is_classical": false,
       "decoherence_streak": 0,
-      "last_tick_time": -Infinity,
-      "subjective_ticks": 0,
+      "last_tick_time": 60,
+      "subjective_ticks": 54,
       "law_wave_frequency": 0.05,
-      "trust_profile": {},
+      "trust_profile": {
+        "bridge": 1.0,
+        "self": 1.0
+      },
       "phase_confidence": 1.0,
       "goals": {},
-      "node_type": "normal",
-      "coherence_credit": 8.699999999999985,
+      "node_type": "entangled",
+      "coherence_credit": 18.499999999999993,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
     "D": {
       "x": 200,
       "y": 100,
-      "ticks": [],
+      "ticks": [
+        {
+          "time": 1,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 3,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 5,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 7,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 9,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 11,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 13,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 14,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 15,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 16,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 17,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 18,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 19,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 20,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 21,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 22,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 23,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 24,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 25,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 26,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 27,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 28,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 29,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 30,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 31,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 32,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 33,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 34,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 35,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 36,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 37,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 38,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 39,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 40,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 41,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 42,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 43,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 44,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 45,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 46,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 47,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 48,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 49,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 50,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 51,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 52,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 53,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 54,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 55,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 56,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 57,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 58,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 59,
+          "phase": 0.0,
+          "origin": "bridge"
+        }
+      ],
       "phase": 0.0,
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 1.0,
-      "refractory_period": 1.4999999999999996,
+      "refractory_period": 1.0,
       "base_threshold": 0.5,
-      "collapse_origin": {},
+      "collapse_origin": {
+        "1": "bridge",
+        "3": "bridge",
+        "5": "bridge",
+        "7": "bridge",
+        "9": "bridge",
+        "11": "bridge",
+        "13": "bridge",
+        "14": "bridge",
+        "15": "bridge",
+        "16": "bridge",
+        "17": "bridge",
+        "18": "bridge",
+        "19": "bridge",
+        "20": "bridge",
+        "21": "bridge",
+        "22": "bridge",
+        "23": "bridge",
+        "24": "bridge",
+        "25": "bridge",
+        "26": "bridge",
+        "27": "bridge",
+        "28": "bridge",
+        "29": "bridge",
+        "30": "bridge",
+        "31": "bridge",
+        "32": "bridge",
+        "33": "bridge",
+        "34": "bridge",
+        "35": "bridge",
+        "36": "bridge",
+        "37": "bridge",
+        "38": "bridge",
+        "39": "bridge",
+        "40": "bridge",
+        "41": "bridge",
+        "42": "bridge",
+        "43": "bridge",
+        "44": "bridge",
+        "45": "bridge",
+        "46": "bridge",
+        "47": "bridge",
+        "48": "bridge",
+        "49": "bridge",
+        "50": "bridge",
+        "51": "bridge",
+        "52": "bridge",
+        "53": "bridge",
+        "54": "bridge",
+        "55": "bridge",
+        "56": "bridge",
+        "57": "bridge",
+        "58": "bridge",
+        "59": "bridge"
+      },
       "is_classical": false,
       "decoherence_streak": 0,
-      "last_tick_time": -Infinity,
-      "subjective_ticks": 0,
+      "last_tick_time": 59,
+      "subjective_ticks": 53,
       "law_wave_frequency": 0.05,
-      "trust_profile": {},
+      "trust_profile": {
+        "bridge": 1.0
+      },
       "phase_confidence": 1.0,
       "goals": {},
-      "node_type": "normal",
-      "coherence_credit": 8.199999999999987,
+      "node_type": "entangled",
+      "coherence_credit": 13.199999999999969,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
     "E": {
       "x": 200,
       "y": 200,
-      "ticks": [],
+      "ticks": [
+        {
+          "time": 1,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 3,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 5,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 7,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 9,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 11,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 13,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 14,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 15,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 16,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 17,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 18,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 19,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 20,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 21,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 22,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 23,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 24,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 25,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 26,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 27,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 28,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 29,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 30,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 31,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 32,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 33,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 34,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 35,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 36,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 37,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 38,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 39,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 40,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 41,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 42,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 43,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 44,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 45,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 46,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 47,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 48,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 49,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 50,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 51,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 52,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 53,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 54,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 55,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 56,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 57,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 58,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 59,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 60,
+          "phase": 0.0,
+          "origin": "self"
+        }
+      ],
       "phase": 0.0,
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 1.0,
-      "refractory_period": 1.4999999999999996,
+      "refractory_period": 1.0,
       "base_threshold": 0.5,
-      "collapse_origin": {},
+      "collapse_origin": {
+        "1": "bridge",
+        "3": "bridge",
+        "5": "bridge",
+        "7": "bridge",
+        "9": "bridge",
+        "11": "bridge",
+        "13": "bridge",
+        "14": "bridge",
+        "15": "bridge",
+        "16": "bridge",
+        "17": "self",
+        "18": "self",
+        "19": "self",
+        "20": "self",
+        "21": "self",
+        "22": "self",
+        "23": "self",
+        "24": "self",
+        "25": "self",
+        "26": "self",
+        "27": "self",
+        "28": "self",
+        "29": "self",
+        "30": "self",
+        "31": "self",
+        "32": "self",
+        "33": "self",
+        "34": "self",
+        "35": "self",
+        "36": "self",
+        "37": "self",
+        "38": "self",
+        "39": "self",
+        "40": "self",
+        "41": "self",
+        "42": "self",
+        "43": "self",
+        "44": "self",
+        "45": "self",
+        "46": "self",
+        "47": "self",
+        "48": "self",
+        "49": "self",
+        "50": "self",
+        "51": "self",
+        "52": "self",
+        "53": "self",
+        "54": "self",
+        "55": "self",
+        "56": "self",
+        "57": "self",
+        "58": "self",
+        "59": "self",
+        "60": "self"
+      },
       "is_classical": false,
       "decoherence_streak": 0,
-      "last_tick_time": -Infinity,
-      "subjective_ticks": 0,
+      "last_tick_time": 60,
+      "subjective_ticks": 54,
       "law_wave_frequency": 0.05,
-      "trust_profile": {},
+      "trust_profile": {
+        "bridge": 1.0,
+        "self": 1.0
+      },
       "phase_confidence": 1.0,
       "goals": {},
-      "node_type": "normal",
-      "coherence_credit": 8.399999999999986,
+      "node_type": "entangled",
+      "coherence_credit": 19.200000000000003,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
@@ -879,104 +2187,1419 @@
       },
       "phase_confidence": 1.0,
       "goals": {},
-      "node_type": "normal",
-      "coherence_credit": 14.399999999999965,
+      "node_type": "entangled",
+      "coherence_credit": 18.799999999999997,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
     "G": {
       "x": 300,
       "y": 100,
-      "ticks": [],
+      "ticks": [
+        {
+          "time": 1,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 3,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 5,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 7,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 9,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 11,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 13,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 14,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 15,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 16,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 17,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 18,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 19,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 20,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 21,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 22,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 23,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 24,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 25,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 26,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 27,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 28,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 29,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 30,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 31,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 32,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 33,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 34,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 35,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 36,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 37,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 38,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 39,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 40,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 41,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 42,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 43,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 44,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 45,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 46,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 47,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 48,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 49,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 50,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 51,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 52,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 53,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 54,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 55,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 56,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 57,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 58,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 59,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 60,
+          "phase": 0.0,
+          "origin": "self"
+        }
+      ],
       "phase": 0.0,
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 1.0,
-      "refractory_period": 1.4999999999999996,
+      "refractory_period": 1.0,
       "base_threshold": 0.5,
-      "collapse_origin": {},
+      "collapse_origin": {
+        "1": "self",
+        "3": "self",
+        "5": "self",
+        "7": "self",
+        "9": "self",
+        "11": "self",
+        "13": "self",
+        "14": "self",
+        "15": "self",
+        "16": "self",
+        "17": "self",
+        "18": "self",
+        "19": "self",
+        "20": "self",
+        "21": "self",
+        "22": "self",
+        "23": "self",
+        "24": "self",
+        "25": "self",
+        "26": "self",
+        "27": "self",
+        "28": "self",
+        "29": "self",
+        "30": "self",
+        "31": "self",
+        "32": "self",
+        "33": "self",
+        "34": "self",
+        "35": "self",
+        "36": "self",
+        "37": "self",
+        "38": "self",
+        "39": "self",
+        "40": "self",
+        "41": "self",
+        "42": "self",
+        "43": "self",
+        "44": "self",
+        "45": "self",
+        "46": "self",
+        "47": "self",
+        "48": "self",
+        "49": "self",
+        "50": "self",
+        "51": "self",
+        "52": "self",
+        "53": "self",
+        "54": "self",
+        "55": "self",
+        "56": "self",
+        "57": "self",
+        "58": "self",
+        "59": "self",
+        "60": "self"
+      },
       "is_classical": false,
       "decoherence_streak": 0,
-      "last_tick_time": -Infinity,
-      "subjective_ticks": 0,
+      "last_tick_time": 60,
+      "subjective_ticks": 54,
       "law_wave_frequency": 0.05,
-      "trust_profile": {},
+      "trust_profile": {
+        "self": 1.0
+      },
       "phase_confidence": 1.0,
       "goals": {},
-      "node_type": "normal",
-      "coherence_credit": 8.099999999999987,
+      "node_type": "entangled",
+      "coherence_credit": 18.599999999999994,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
     "H": {
       "x": 300,
       "y": 200,
-      "ticks": [],
+      "ticks": [
+        {
+          "time": 1,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 3,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 5,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 7,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 9,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 11,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 13,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 14,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 15,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 16,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 17,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 18,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 19,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 20,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 21,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 22,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 23,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 24,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 25,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 26,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 27,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 28,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 29,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 30,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 31,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 32,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 33,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 34,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 35,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 36,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 37,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 38,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 39,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 40,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 41,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 42,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 43,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 44,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 45,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 46,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 47,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 48,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 49,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 50,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 51,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 52,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 53,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 54,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 55,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 56,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 57,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 58,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 59,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 60,
+          "phase": 0.0,
+          "origin": "self"
+        }
+      ],
       "phase": 0.0,
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 1.0,
-      "refractory_period": 1.4999999999999996,
+      "refractory_period": 1.0,
       "base_threshold": 0.5,
-      "collapse_origin": {},
+      "collapse_origin": {
+        "1": "bridge",
+        "3": "bridge",
+        "5": "bridge",
+        "7": "bridge",
+        "9": "bridge",
+        "11": "bridge",
+        "13": "bridge",
+        "14": "bridge",
+        "15": "bridge",
+        "16": "bridge",
+        "17": "self",
+        "18": "self",
+        "19": "self",
+        "20": "self",
+        "21": "self",
+        "22": "self",
+        "23": "self",
+        "24": "self",
+        "25": "self",
+        "26": "self",
+        "27": "self",
+        "28": "self",
+        "29": "self",
+        "30": "self",
+        "31": "self",
+        "32": "self",
+        "33": "self",
+        "34": "self",
+        "35": "self",
+        "36": "self",
+        "37": "self",
+        "38": "self",
+        "39": "self",
+        "40": "self",
+        "41": "self",
+        "42": "self",
+        "43": "self",
+        "44": "self",
+        "45": "self",
+        "46": "self",
+        "47": "self",
+        "48": "self",
+        "49": "self",
+        "50": "self",
+        "51": "self",
+        "52": "self",
+        "53": "self",
+        "54": "self",
+        "55": "self",
+        "56": "self",
+        "57": "self",
+        "58": "self",
+        "59": "self",
+        "60": "self"
+      },
       "is_classical": false,
       "decoherence_streak": 0,
-      "last_tick_time": -Infinity,
-      "subjective_ticks": 0,
+      "last_tick_time": 60,
+      "subjective_ticks": 54,
       "law_wave_frequency": 0.05,
-      "trust_profile": {},
+      "trust_profile": {
+        "bridge": 1.0,
+        "self": 1.0
+      },
       "phase_confidence": 1.0,
       "goals": {},
-      "node_type": "normal",
-      "coherence_credit": 8.699999999999985,
+      "node_type": "entangled",
+      "coherence_credit": 19.1,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
     "I": {
       "x": 300,
       "y": 300,
-      "ticks": [],
+      "ticks": [
+        {
+          "time": 1,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 3,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 5,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 7,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 9,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 11,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 13,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 14,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 15,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 16,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 17,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 18,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 19,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 20,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 21,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 22,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 23,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 24,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 25,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 26,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 27,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 28,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 29,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 30,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 31,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 32,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 33,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 34,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 35,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 36,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 37,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 38,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 39,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 40,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 41,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 42,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 43,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 44,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 45,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 46,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 47,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 48,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 49,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 50,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 51,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 52,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 53,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 54,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 55,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 56,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 57,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 58,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 59,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 60,
+          "phase": 0.0,
+          "origin": "self"
+        }
+      ],
       "phase": 0.0,
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 1.0,
-      "refractory_period": 1.4999999999999996,
+      "refractory_period": 1.0,
       "base_threshold": 0.5,
-      "collapse_origin": {},
+      "collapse_origin": {
+        "1": "bridge",
+        "3": "bridge",
+        "5": "bridge",
+        "7": "bridge",
+        "9": "bridge",
+        "11": "bridge",
+        "13": "bridge",
+        "14": "bridge",
+        "15": "bridge",
+        "16": "bridge",
+        "17": "self",
+        "18": "self",
+        "19": "self",
+        "20": "self",
+        "21": "self",
+        "22": "self",
+        "23": "self",
+        "24": "self",
+        "25": "self",
+        "26": "self",
+        "27": "self",
+        "28": "self",
+        "29": "self",
+        "30": "self",
+        "31": "self",
+        "32": "self",
+        "33": "self",
+        "34": "self",
+        "35": "self",
+        "36": "self",
+        "37": "self",
+        "38": "self",
+        "39": "self",
+        "40": "self",
+        "41": "self",
+        "42": "self",
+        "43": "self",
+        "44": "self",
+        "45": "self",
+        "46": "self",
+        "47": "self",
+        "48": "self",
+        "49": "self",
+        "50": "self",
+        "51": "self",
+        "52": "self",
+        "53": "self",
+        "54": "self",
+        "55": "self",
+        "56": "self",
+        "57": "self",
+        "58": "self",
+        "59": "self",
+        "60": "self"
+      },
       "is_classical": false,
       "decoherence_streak": 0,
-      "last_tick_time": -Infinity,
-      "subjective_ticks": 0,
+      "last_tick_time": 60,
+      "subjective_ticks": 54,
       "law_wave_frequency": 0.05,
-      "trust_profile": {},
+      "trust_profile": {
+        "bridge": 1.0,
+        "self": 1.0
+      },
       "phase_confidence": 1.0,
       "goals": {},
-      "node_type": "normal",
-      "coherence_credit": 9.099999999999984,
+      "node_type": "entangled",
+      "coherence_credit": 18.39999999999999,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
     "J": {
       "x": 400,
       "y": 100,
-      "ticks": [],
+      "ticks": [
+        {
+          "time": 1,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 3,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 5,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 7,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 9,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 11,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 13,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 14,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 15,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 16,
+          "phase": 0.0,
+          "origin": "bridge"
+        },
+        {
+          "time": 17,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 18,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 19,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 20,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 21,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 22,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 23,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 24,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 25,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 26,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 27,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 28,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 29,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 30,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 31,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 32,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 33,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 34,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 35,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 36,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 37,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 38,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 39,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 40,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 41,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 42,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 43,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 44,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 45,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 46,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 47,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 48,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 49,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 50,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 51,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 52,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 53,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 54,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 55,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 56,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 57,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 58,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 59,
+          "phase": 0.0,
+          "origin": "self"
+        },
+        {
+          "time": 60,
+          "phase": 0.0,
+          "origin": "self"
+        }
+      ],
       "phase": 0.0,
       "coherence": 1.0,
       "decoherence": 0.0,
       "frequency": 1.0,
-      "refractory_period": 1.4999999999999996,
+      "refractory_period": 1.0,
       "base_threshold": 0.5,
-      "collapse_origin": {},
+      "collapse_origin": {
+        "1": "bridge",
+        "3": "bridge",
+        "5": "bridge",
+        "7": "bridge",
+        "9": "bridge",
+        "11": "bridge",
+        "13": "bridge",
+        "14": "bridge",
+        "15": "bridge",
+        "16": "bridge",
+        "17": "self",
+        "18": "self",
+        "19": "self",
+        "20": "self",
+        "21": "self",
+        "22": "self",
+        "23": "self",
+        "24": "self",
+        "25": "self",
+        "26": "self",
+        "27": "self",
+        "28": "self",
+        "29": "self",
+        "30": "self",
+        "31": "self",
+        "32": "self",
+        "33": "self",
+        "34": "self",
+        "35": "self",
+        "36": "self",
+        "37": "self",
+        "38": "self",
+        "39": "self",
+        "40": "self",
+        "41": "self",
+        "42": "self",
+        "43": "self",
+        "44": "self",
+        "45": "self",
+        "46": "self",
+        "47": "self",
+        "48": "self",
+        "49": "self",
+        "50": "self",
+        "51": "self",
+        "52": "self",
+        "53": "self",
+        "54": "self",
+        "55": "self",
+        "56": "self",
+        "57": "self",
+        "58": "self",
+        "59": "self",
+        "60": "self"
+      },
       "is_classical": false,
       "decoherence_streak": 0,
-      "last_tick_time": -Infinity,
-      "subjective_ticks": 0,
+      "last_tick_time": 60,
+      "subjective_ticks": 54,
       "law_wave_frequency": 0.05,
-      "trust_profile": {},
+      "trust_profile": {
+        "bridge": 1.0,
+        "self": 1.0
+      },
       "phase_confidence": 1.0,
       "goals": {},
-      "node_type": "normal",
-      "coherence_credit": 7.599999999999989,
+      "node_type": "entangled",
+      "coherence_credit": 18.29999999999999,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
@@ -1000,7 +3623,7 @@
       "phase_confidence": 1.0,
       "goals": {},
       "node_type": "null",
-      "coherence_credit": 8.699999999999985,
+      "coherence_credit": 7.499999999999989,
       "decoherence_debt": 0.0,
       "phase_lock": false
     },
@@ -1024,13 +3647,114 @@
       "phase_confidence": 1.0,
       "goals": {},
       "node_type": "null",
-      "coherence_credit": 8.399999999999986,
+      "coherence_credit": 7.999999999999988,
       "decoherence_debt": 0.0,
       "phase_lock": false
     }
   },
-  "superpositions": {},
-  "edges": [],
+  "superpositions": {
+    "B": {
+      "61": [
+        0.0
+      ]
+    },
+    "C": {
+      "61": [
+        0.0
+      ]
+    },
+    "E": {
+      "61": [
+        0.0
+      ]
+    },
+    "F": {
+      "61": [
+        0.0
+      ]
+    },
+    "G": {
+      "61": [
+        0.0
+      ]
+    },
+    "I": {
+      "61": [
+        0.0
+      ]
+    },
+    "J": {
+      "61": [
+        0.0
+      ]
+    }
+  },
+  "edges": [
+    {
+      "from": "A",
+      "to": "B",
+      "delay": 1,
+      "attenuation": 1.0,
+      "density": 0.0,
+      "phase_shift": 0.0
+    },
+    {
+      "from": "B",
+      "to": "C",
+      "delay": 1,
+      "attenuation": 1.0,
+      "density": 0.0,
+      "phase_shift": 0.0
+    },
+    {
+      "from": "C",
+      "to": "E",
+      "delay": 1,
+      "attenuation": 1.0,
+      "density": 0.0,
+      "phase_shift": 0.0
+    },
+    {
+      "from": "E",
+      "to": "F",
+      "delay": 1,
+      "attenuation": 1.0,
+      "density": 0.0,
+      "phase_shift": 0.0
+    },
+    {
+      "from": "F",
+      "to": "G",
+      "delay": 1,
+      "attenuation": 1.0,
+      "density": 0.0,
+      "phase_shift": 0.0
+    },
+    {
+      "from": "D",
+      "to": "H",
+      "delay": 1,
+      "attenuation": 1.0,
+      "density": 0.0,
+      "phase_shift": 0.0
+    },
+    {
+      "from": "H",
+      "to": "I",
+      "delay": 1,
+      "attenuation": 1.0,
+      "density": 0.0,
+      "phase_shift": 0.0
+    },
+    {
+      "from": "I",
+      "to": "J",
+      "delay": 1,
+      "attenuation": 1.0,
+      "density": 0.0,
+      "phase_shift": 0.0
+    }
+  ],
   "bridges": [
     {
       "source": "A",
@@ -1040,27 +3764,27 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 1.0,
       "medium_type": "standard",
       "mutable": true,
       "seeded": true,
       "formed_at_tick": 0,
       "active": true,
-      "last_activation": null,
+      "last_activation": 59,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
+      "trust_score": 1.0,
+      "reinforcement_streak": 53,
+      "last_active_tick": 59,
       "reformable": true,
       "memory_weight": 0.5,
       "avg_decoherence": 0.0,
-      "state": "forming",
+      "state": "stable",
       "fatigue": 0.0,
-      "tick_load": 0,
+      "tick_load": 53,
       "phase_drift": 0.0,
-      "coherence_flux": 0.0
+      "coherence_flux": 53.0
     },
     {
       "source": "B",
@@ -1076,21 +3800,21 @@
       "seeded": true,
       "formed_at_tick": 0,
       "active": true,
-      "last_activation": null,
+      "last_activation": 16,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
+      "last_reform_tick": 29,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
+      "trust_score": 0.6000000000000001,
+      "reinforcement_streak": 10,
+      "last_active_tick": 16,
       "reformable": true,
       "memory_weight": 0.5,
       "avg_decoherence": 0.0,
-      "state": "forming",
+      "state": "stable",
       "fatigue": 0.0,
-      "tick_load": 0,
+      "tick_load": 10,
       "phase_drift": 0.0,
-      "coherence_flux": 0.0
+      "coherence_flux": 10.0
     },
     {
       "source": "C",
@@ -1106,21 +3830,21 @@
       "seeded": true,
       "formed_at_tick": 0,
       "active": true,
-      "last_activation": null,
+      "last_activation": 59,
       "last_rupture_tick": null,
       "last_reform_tick": 11,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
+      "trust_score": 0.9300000000000004,
+      "reinforcement_streak": 43,
+      "last_active_tick": 59,
       "reformable": true,
       "memory_weight": 0.5,
       "avg_decoherence": 0.0,
-      "state": "forming",
+      "state": "stable",
       "fatigue": 0.0,
-      "tick_load": 0,
+      "tick_load": 43,
       "phase_drift": 0.0,
-      "coherence_flux": 0.0
+      "coherence_flux": 43.0
     },
     {
       "source": "D",
@@ -1138,7 +3862,7 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 11,
+      "last_reform_tick": 10,
       "coherence_at_reform": 1.0,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
@@ -1196,21 +3920,21 @@
       "seeded": true,
       "formed_at_tick": 0,
       "active": true,
-      "last_activation": null,
+      "last_activation": 59,
       "last_rupture_tick": null,
       "last_reform_tick": 14,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
+      "trust_score": 0.9300000000000004,
+      "reinforcement_streak": 43,
+      "last_active_tick": 59,
       "reformable": true,
       "memory_weight": 0.5,
       "avg_decoherence": 0.0,
-      "state": "forming",
+      "state": "stable",
       "fatigue": 0.0,
-      "tick_load": 0,
+      "tick_load": 43,
       "phase_drift": 0.0,
-      "coherence_flux": 0.0
+      "coherence_flux": 43.0
     },
     {
       "source": "F",
@@ -1220,31 +3944,61 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 0.9,
-      "current_strength": 0.0,
+      "current_strength": 0.9,
       "medium_type": "standard",
       "mutable": true,
       "seeded": true,
       "formed_at_tick": 0,
       "active": true,
-      "last_activation": null,
+      "last_activation": 59,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
+      "trust_score": 1.0,
+      "reinforcement_streak": 53,
+      "last_active_tick": 59,
       "reformable": true,
       "memory_weight": 0.5,
       "avg_decoherence": 0.0,
-      "state": "forming",
+      "state": "stable",
       "fatigue": 0.0,
-      "tick_load": 0,
+      "tick_load": 53,
       "phase_drift": 0.0,
-      "coherence_flux": 0.0
+      "coherence_flux": 53.0
     },
     {
       "source": "D",
       "target": "H",
+      "type": "braided",
+      "phase_offset": 0.0,
+      "drift_tolerance": null,
+      "decoherence_limit": null,
+      "initial_strength": 0.2,
+      "current_strength": 0.0,
+      "medium_type": "fragile",
+      "mutable": true,
+      "seeded": true,
+      "formed_at_tick": 0,
+      "active": true,
+      "last_activation": 59,
+      "last_rupture_tick": null,
+      "last_reform_tick": 7,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.9300000000000004,
+      "reinforcement_streak": 43,
+      "last_active_tick": 59,
+      "reformable": true,
+      "memory_weight": 0.5,
+      "avg_decoherence": 0.0,
+      "state": "stable",
+      "fatigue": 0.0,
+      "tick_load": 43,
+      "phase_drift": 0.0,
+      "coherence_flux": 43.0
+    },
+    {
+      "source": "H",
+      "target": "I",
       "type": "braided",
       "phase_offset": 0.0,
       "drift_tolerance": null,
@@ -1273,36 +4027,6 @@
       "coherence_flux": 0.0
     },
     {
-      "source": "H",
-      "target": "I",
-      "type": "braided",
-      "phase_offset": 0.0,
-      "drift_tolerance": null,
-      "decoherence_limit": null,
-      "initial_strength": 0.2,
-      "current_strength": 0.0,
-      "medium_type": "fragile",
-      "mutable": true,
-      "seeded": true,
-      "formed_at_tick": 0,
-      "active": true,
-      "last_activation": null,
-      "last_rupture_tick": null,
-      "last_reform_tick": 12,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
-      "reformable": true,
-      "memory_weight": 0.5,
-      "avg_decoherence": 0.0,
-      "state": "forming",
-      "fatigue": 0.0,
-      "tick_load": 0,
-      "phase_drift": 0.0,
-      "coherence_flux": 0.0
-    },
-    {
       "source": "I",
       "target": "J",
       "type": "braided",
@@ -1318,7 +4042,7 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 7,
+      "last_reform_tick": 6,
       "coherence_at_reform": 1.0,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
@@ -1346,21 +4070,21 @@
       "seeded": false,
       "formed_at_tick": 0,
       "active": true,
-      "last_activation": null,
+      "last_activation": 59,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
+      "last_reform_tick": 16,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
+      "trust_score": 0.9300000000000004,
+      "reinforcement_streak": 43,
+      "last_active_tick": 59,
       "reformable": true,
       "memory_weight": 0.5,
       "avg_decoherence": 0.0,
       "state": "stable",
       "fatigue": 0.0,
-      "tick_load": 0,
+      "tick_load": 43,
       "phase_drift": 0.0,
-      "coherence_flux": 0.0
+      "coherence_flux": 43.0
     },
     {
       "source": "A",
@@ -1376,55 +4100,25 @@
       "seeded": false,
       "formed_at_tick": 0,
       "active": true,
-      "last_activation": null,
+      "last_activation": 59,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
+      "last_reform_tick": 16,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
+      "trust_score": 0.9300000000000004,
+      "reinforcement_streak": 43,
+      "last_active_tick": 59,
       "reformable": true,
       "memory_weight": 0.5,
       "avg_decoherence": 0.0,
       "state": "stable",
       "fatigue": 0.0,
-      "tick_load": 0,
+      "tick_load": 43,
       "phase_drift": 0.0,
-      "coherence_flux": 0.0
+      "coherence_flux": 43.0
     },
     {
       "source": "A",
       "target": "F",
-      "type": "braided",
-      "phase_offset": 0.0,
-      "drift_tolerance": null,
-      "decoherence_limit": null,
-      "initial_strength": 1.0,
-      "current_strength": 0.0,
-      "medium_type": "standard",
-      "mutable": true,
-      "seeded": false,
-      "formed_at_tick": 0,
-      "active": true,
-      "last_activation": null,
-      "last_rupture_tick": null,
-      "last_reform_tick": 18,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
-      "reformable": true,
-      "memory_weight": 0.5,
-      "avg_decoherence": 0.0,
-      "state": "stable",
-      "fatigue": 0.0,
-      "tick_load": 0,
-      "phase_drift": 0.0,
-      "coherence_flux": 0.0
-    },
-    {
-      "source": "A",
-      "target": "G",
       "type": "braided",
       "phase_offset": 0.0,
       "drift_tolerance": null,
@@ -1454,6 +4148,36 @@
     },
     {
       "source": "A",
+      "target": "G",
+      "type": "braided",
+      "phase_offset": 0.0,
+      "drift_tolerance": null,
+      "decoherence_limit": null,
+      "initial_strength": 1.0,
+      "current_strength": 1.0,
+      "medium_type": "standard",
+      "mutable": true,
+      "seeded": false,
+      "formed_at_tick": 0,
+      "active": true,
+      "last_activation": 59,
+      "last_rupture_tick": null,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
+      "trust_score": 1.0,
+      "reinforcement_streak": 53,
+      "last_active_tick": 59,
+      "reformable": true,
+      "memory_weight": 0.5,
+      "avg_decoherence": 0.0,
+      "state": "stable",
+      "fatigue": 0.0,
+      "tick_load": 53,
+      "phase_drift": 0.0,
+      "coherence_flux": 53.0
+    },
+    {
+      "source": "A",
       "target": "H",
       "type": "braided",
       "phase_offset": 0.0,
@@ -1466,21 +4190,21 @@
       "seeded": false,
       "formed_at_tick": 0,
       "active": true,
-      "last_activation": null,
+      "last_activation": 59,
       "last_rupture_tick": null,
       "last_reform_tick": 15,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
+      "trust_score": 0.9300000000000004,
+      "reinforcement_streak": 43,
+      "last_active_tick": 59,
       "reformable": true,
       "memory_weight": 0.5,
       "avg_decoherence": 0.0,
       "state": "stable",
       "fatigue": 0.0,
-      "tick_load": 0,
+      "tick_load": 43,
       "phase_drift": 0.0,
-      "coherence_flux": 0.0
+      "coherence_flux": 43.0
     },
     {
       "source": "A",
@@ -1496,21 +4220,21 @@
       "seeded": false,
       "formed_at_tick": 0,
       "active": true,
-      "last_activation": null,
+      "last_activation": 59,
       "last_rupture_tick": null,
       "last_reform_tick": 17,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
+      "trust_score": 0.9300000000000004,
+      "reinforcement_streak": 43,
+      "last_active_tick": 59,
       "reformable": true,
       "memory_weight": 0.5,
       "avg_decoherence": 0.0,
       "state": "stable",
       "fatigue": 0.0,
-      "tick_load": 0,
+      "tick_load": 43,
       "phase_drift": 0.0,
-      "coherence_flux": 0.0
+      "coherence_flux": 43.0
     },
     {
       "source": "A",
@@ -1526,21 +4250,21 @@
       "seeded": false,
       "formed_at_tick": 0,
       "active": true,
-      "last_activation": null,
+      "last_activation": 59,
       "last_rupture_tick": null,
       "last_reform_tick": 15,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
+      "trust_score": 0.9300000000000004,
+      "reinforcement_streak": 43,
+      "last_active_tick": 59,
       "reformable": true,
       "memory_weight": 0.5,
       "avg_decoherence": 0.0,
       "state": "stable",
       "fatigue": 0.0,
-      "tick_load": 0,
+      "tick_load": 43,
       "phase_drift": 0.0,
-      "coherence_flux": 0.0
+      "coherence_flux": 43.0
     },
     {
       "source": "A",
@@ -1558,7 +4282,7 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 17,
+      "last_reform_tick": 18,
       "coherence_at_reform": 1.0,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
@@ -1588,7 +4312,7 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 20,
+      "last_reform_tick": 15,
       "coherence_at_reform": 1.0,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
@@ -1610,27 +4334,27 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 1.0,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
       "formed_at_tick": 0,
       "active": true,
-      "last_activation": null,
+      "last_activation": 59,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
+      "trust_score": 1.0,
+      "reinforcement_streak": 53,
+      "last_active_tick": 59,
       "reformable": true,
       "memory_weight": 0.5,
       "avg_decoherence": 0.0,
       "state": "stable",
       "fatigue": 0.0,
-      "tick_load": 0,
+      "tick_load": 53,
       "phase_drift": 0.0,
-      "coherence_flux": 0.0
+      "coherence_flux": 53.0
     },
     {
       "source": "B",
@@ -1646,21 +4370,21 @@
       "seeded": false,
       "formed_at_tick": 0,
       "active": true,
-      "last_activation": null,
+      "last_activation": 16,
       "last_rupture_tick": null,
-      "last_reform_tick": 17,
+      "last_reform_tick": 31,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
+      "trust_score": 0.6000000000000001,
+      "reinforcement_streak": 10,
+      "last_active_tick": 16,
       "reformable": true,
       "memory_weight": 0.5,
       "avg_decoherence": 0.0,
       "state": "stable",
       "fatigue": 0.0,
-      "tick_load": 0,
+      "tick_load": 10,
       "phase_drift": 0.0,
-      "coherence_flux": 0.0
+      "coherence_flux": 10.0
     },
     {
       "source": "B",
@@ -1670,27 +4394,27 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 1.0,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
       "formed_at_tick": 0,
       "active": true,
-      "last_activation": null,
+      "last_activation": 59,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
+      "trust_score": 1.0,
+      "reinforcement_streak": 53,
+      "last_active_tick": 59,
       "reformable": true,
       "memory_weight": 0.5,
       "avg_decoherence": 0.0,
       "state": "stable",
       "fatigue": 0.0,
-      "tick_load": 0,
+      "tick_load": 53,
       "phase_drift": 0.0,
-      "coherence_flux": 0.0
+      "coherence_flux": 53.0
     },
     {
       "source": "B",
@@ -1736,21 +4460,21 @@
       "seeded": false,
       "formed_at_tick": 0,
       "active": true,
-      "last_activation": null,
+      "last_activation": 16,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
+      "last_reform_tick": 32,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
+      "trust_score": 0.6000000000000001,
+      "reinforcement_streak": 10,
+      "last_active_tick": 16,
       "reformable": true,
       "memory_weight": 0.5,
       "avg_decoherence": 0.0,
       "state": "stable",
       "fatigue": 0.0,
-      "tick_load": 0,
+      "tick_load": 10,
       "phase_drift": 0.0,
-      "coherence_flux": 0.0
+      "coherence_flux": 10.0
     },
     {
       "source": "B",
@@ -1766,21 +4490,21 @@
       "seeded": false,
       "formed_at_tick": 0,
       "active": true,
-      "last_activation": null,
+      "last_activation": 16,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
+      "last_reform_tick": 31,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
+      "trust_score": 0.6000000000000001,
+      "reinforcement_streak": 10,
+      "last_active_tick": 16,
       "reformable": true,
       "memory_weight": 0.5,
       "avg_decoherence": 0.0,
       "state": "stable",
       "fatigue": 0.0,
-      "tick_load": 0,
+      "tick_load": 10,
       "phase_drift": 0.0,
-      "coherence_flux": 0.0
+      "coherence_flux": 10.0
     },
     {
       "source": "B",
@@ -1796,21 +4520,21 @@
       "seeded": false,
       "formed_at_tick": 0,
       "active": true,
-      "last_activation": null,
+      "last_activation": 16,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
+      "last_reform_tick": 33,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
+      "trust_score": 0.6000000000000001,
+      "reinforcement_streak": 10,
+      "last_active_tick": 16,
       "reformable": true,
       "memory_weight": 0.5,
       "avg_decoherence": 0.0,
       "state": "stable",
       "fatigue": 0.0,
-      "tick_load": 0,
+      "tick_load": 10,
       "phase_drift": 0.0,
-      "coherence_flux": 0.0
+      "coherence_flux": 10.0
     },
     {
       "source": "B",
@@ -1820,27 +4544,27 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 1.0,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
       "formed_at_tick": 0,
       "active": true,
-      "last_activation": null,
+      "last_activation": 59,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
+      "trust_score": 1.0,
+      "reinforcement_streak": 53,
+      "last_active_tick": 59,
       "reformable": true,
       "memory_weight": 0.5,
       "avg_decoherence": 0.0,
       "state": "stable",
       "fatigue": 0.0,
-      "tick_load": 0,
+      "tick_load": 53,
       "phase_drift": 0.0,
-      "coherence_flux": 0.0
+      "coherence_flux": 53.0
     },
     {
       "source": "B",
@@ -1850,27 +4574,27 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 1.0,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
       "formed_at_tick": 0,
       "active": true,
-      "last_activation": null,
+      "last_activation": 59,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
+      "trust_score": 1.0,
+      "reinforcement_streak": 53,
+      "last_active_tick": 59,
       "reformable": true,
       "memory_weight": 0.5,
       "avg_decoherence": 0.0,
       "state": "stable",
       "fatigue": 0.0,
-      "tick_load": 0,
+      "tick_load": 53,
       "phase_drift": 0.0,
-      "coherence_flux": 0.0
+      "coherence_flux": 53.0
     },
     {
       "source": "C",
@@ -1886,21 +4610,21 @@
       "seeded": false,
       "formed_at_tick": 0,
       "active": true,
-      "last_activation": null,
+      "last_activation": 59,
       "last_rupture_tick": null,
-      "last_reform_tick": 17,
+      "last_reform_tick": 15,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
+      "trust_score": 0.9300000000000004,
+      "reinforcement_streak": 43,
+      "last_active_tick": 59,
       "reformable": true,
       "memory_weight": 0.5,
       "avg_decoherence": 0.0,
       "state": "stable",
       "fatigue": 0.0,
-      "tick_load": 0,
+      "tick_load": 43,
       "phase_drift": 0.0,
-      "coherence_flux": 0.0
+      "coherence_flux": 43.0
     },
     {
       "source": "C",
@@ -1916,21 +4640,21 @@
       "seeded": false,
       "formed_at_tick": 0,
       "active": true,
-      "last_activation": null,
+      "last_activation": 16,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
+      "last_reform_tick": 33,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
+      "trust_score": 0.6000000000000001,
+      "reinforcement_streak": 10,
+      "last_active_tick": 16,
       "reformable": true,
       "memory_weight": 0.5,
       "avg_decoherence": 0.0,
       "state": "stable",
       "fatigue": 0.0,
-      "tick_load": 0,
+      "tick_load": 10,
       "phase_drift": 0.0,
-      "coherence_flux": 0.0
+      "coherence_flux": 10.0
     },
     {
       "source": "C",
@@ -1948,7 +4672,7 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 21,
+      "last_reform_tick": 16,
       "coherence_at_reform": 1.0,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
@@ -2036,21 +4760,21 @@
       "seeded": false,
       "formed_at_tick": 0,
       "active": true,
-      "last_activation": null,
+      "last_activation": 59,
       "last_rupture_tick": null,
-      "last_reform_tick": 18,
+      "last_reform_tick": 15,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
+      "trust_score": 0.9300000000000004,
+      "reinforcement_streak": 43,
+      "last_active_tick": 59,
       "reformable": true,
       "memory_weight": 0.5,
       "avg_decoherence": 0.0,
       "state": "stable",
       "fatigue": 0.0,
-      "tick_load": 0,
+      "tick_load": 43,
       "phase_drift": 0.0,
-      "coherence_flux": 0.0
+      "coherence_flux": 43.0
     },
     {
       "source": "C",
@@ -2066,21 +4790,21 @@
       "seeded": false,
       "formed_at_tick": 0,
       "active": true,
-      "last_activation": null,
+      "last_activation": 59,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
+      "last_reform_tick": 17,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
+      "trust_score": 0.9300000000000004,
+      "reinforcement_streak": 43,
+      "last_active_tick": 59,
       "reformable": true,
       "memory_weight": 0.5,
       "avg_decoherence": 0.0,
       "state": "stable",
       "fatigue": 0.0,
-      "tick_load": 0,
+      "tick_load": 43,
       "phase_drift": 0.0,
-      "coherence_flux": 0.0
+      "coherence_flux": 43.0
     },
     {
       "source": "D",
@@ -2096,21 +4820,21 @@
       "seeded": false,
       "formed_at_tick": 0,
       "active": true,
-      "last_activation": null,
+      "last_activation": 59,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
+      "last_reform_tick": 17,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
+      "trust_score": 0.9300000000000004,
+      "reinforcement_streak": 43,
+      "last_active_tick": 59,
       "reformable": true,
       "memory_weight": 0.5,
       "avg_decoherence": 0.0,
       "state": "stable",
       "fatigue": 0.0,
-      "tick_load": 0,
+      "tick_load": 43,
       "phase_drift": 0.0,
-      "coherence_flux": 0.0
+      "coherence_flux": 43.0
     },
     {
       "source": "D",
@@ -2128,7 +4852,7 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 17,
+      "last_reform_tick": 15,
       "coherence_at_reform": 1.0,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
@@ -2150,27 +4874,27 @@
       "drift_tolerance": null,
       "decoherence_limit": null,
       "initial_strength": 1.0,
-      "current_strength": 0.0,
+      "current_strength": 1.0,
       "medium_type": "standard",
       "mutable": true,
       "seeded": false,
       "formed_at_tick": 0,
       "active": true,
-      "last_activation": null,
+      "last_activation": 59,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
+      "trust_score": 1.0,
+      "reinforcement_streak": 53,
+      "last_active_tick": 59,
       "reformable": true,
       "memory_weight": 0.5,
       "avg_decoherence": 0.0,
       "state": "stable",
       "fatigue": 0.0,
-      "tick_load": 0,
+      "tick_load": 53,
       "phase_drift": 0.0,
-      "coherence_flux": 0.0
+      "coherence_flux": 53.0
     },
     {
       "source": "D",
@@ -2186,21 +4910,21 @@
       "seeded": false,
       "formed_at_tick": 0,
       "active": true,
-      "last_activation": null,
+      "last_activation": 59,
       "last_rupture_tick": null,
-      "last_reform_tick": 19,
+      "last_reform_tick": 16,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
+      "trust_score": 0.9300000000000004,
+      "reinforcement_streak": 43,
+      "last_active_tick": 59,
       "reformable": true,
       "memory_weight": 0.5,
       "avg_decoherence": 0.0,
       "state": "stable",
       "fatigue": 0.0,
-      "tick_load": 0,
+      "tick_load": 43,
       "phase_drift": 0.0,
-      "coherence_flux": 0.0
+      "coherence_flux": 43.0
     },
     {
       "source": "D",
@@ -2216,21 +4940,21 @@
       "seeded": false,
       "formed_at_tick": 0,
       "active": true,
-      "last_activation": null,
+      "last_activation": 59,
       "last_rupture_tick": null,
-      "last_reform_tick": 17,
+      "last_reform_tick": 15,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
+      "trust_score": 0.9300000000000004,
+      "reinforcement_streak": 43,
+      "last_active_tick": 59,
       "reformable": true,
       "memory_weight": 0.5,
       "avg_decoherence": 0.0,
       "state": "stable",
       "fatigue": 0.0,
-      "tick_load": 0,
+      "tick_load": 43,
       "phase_drift": 0.0,
-      "coherence_flux": 0.0
+      "coherence_flux": 43.0
     },
     {
       "source": "D",
@@ -2248,7 +4972,7 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
+      "last_reform_tick": 15,
       "coherence_at_reform": 1.0,
       "trust_score": 0.5,
       "reinforcement_streak": 0,
@@ -2265,36 +4989,6 @@
     {
       "source": "D",
       "target": "OBS",
-      "type": "braided",
-      "phase_offset": 0.0,
-      "drift_tolerance": null,
-      "decoherence_limit": null,
-      "initial_strength": 1.0,
-      "current_strength": 0.0,
-      "medium_type": "standard",
-      "mutable": true,
-      "seeded": false,
-      "formed_at_tick": 0,
-      "active": true,
-      "last_activation": null,
-      "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
-      "reformable": true,
-      "memory_weight": 0.5,
-      "avg_decoherence": 0.0,
-      "state": "stable",
-      "fatigue": 0.0,
-      "tick_load": 0,
-      "phase_drift": 0.0,
-      "coherence_flux": 0.0
-    },
-    {
-      "source": "E",
-      "target": "G",
       "type": "braided",
       "phase_offset": 0.0,
       "drift_tolerance": null,
@@ -2324,547 +5018,37 @@
     },
     {
       "source": "E",
+      "target": "G",
+      "type": "braided",
+      "phase_offset": 0.0,
+      "drift_tolerance": null,
+      "decoherence_limit": null,
+      "initial_strength": 1.0,
+      "current_strength": 0.0,
+      "medium_type": "standard",
+      "mutable": true,
+      "seeded": false,
+      "formed_at_tick": 0,
+      "active": true,
+      "last_activation": 16,
+      "last_rupture_tick": null,
+      "last_reform_tick": 33,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.6000000000000001,
+      "reinforcement_streak": 10,
+      "last_active_tick": 16,
+      "reformable": true,
+      "memory_weight": 0.5,
+      "avg_decoherence": 0.0,
+      "state": "stable",
+      "fatigue": 0.0,
+      "tick_load": 10,
+      "phase_drift": 0.0,
+      "coherence_flux": 10.0
+    },
+    {
+      "source": "E",
       "target": "H",
-      "type": "braided",
-      "phase_offset": 0.0,
-      "drift_tolerance": null,
-      "decoherence_limit": null,
-      "initial_strength": 1.0,
-      "current_strength": 0.0,
-      "medium_type": "standard",
-      "mutable": true,
-      "seeded": false,
-      "formed_at_tick": 0,
-      "active": true,
-      "last_activation": null,
-      "last_rupture_tick": null,
-      "last_reform_tick": 16,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
-      "reformable": true,
-      "memory_weight": 0.5,
-      "avg_decoherence": 0.0,
-      "state": "stable",
-      "fatigue": 0.0,
-      "tick_load": 0,
-      "phase_drift": 0.0,
-      "coherence_flux": 0.0
-    },
-    {
-      "source": "E",
-      "target": "I",
-      "type": "braided",
-      "phase_offset": 0.0,
-      "drift_tolerance": null,
-      "decoherence_limit": null,
-      "initial_strength": 1.0,
-      "current_strength": 0.0,
-      "medium_type": "standard",
-      "mutable": true,
-      "seeded": false,
-      "formed_at_tick": 0,
-      "active": true,
-      "last_activation": null,
-      "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
-      "reformable": true,
-      "memory_weight": 0.5,
-      "avg_decoherence": 0.0,
-      "state": "stable",
-      "fatigue": 0.0,
-      "tick_load": 0,
-      "phase_drift": 0.0,
-      "coherence_flux": 0.0
-    },
-    {
-      "source": "E",
-      "target": "J",
-      "type": "braided",
-      "phase_offset": 0.0,
-      "drift_tolerance": null,
-      "decoherence_limit": null,
-      "initial_strength": 1.0,
-      "current_strength": 0.0,
-      "medium_type": "standard",
-      "mutable": true,
-      "seeded": false,
-      "formed_at_tick": 0,
-      "active": true,
-      "last_activation": null,
-      "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
-      "reformable": true,
-      "memory_weight": 0.5,
-      "avg_decoherence": 0.0,
-      "state": "stable",
-      "fatigue": 0.0,
-      "tick_load": 0,
-      "phase_drift": 0.0,
-      "coherence_flux": 0.0
-    },
-    {
-      "source": "E",
-      "target": "Z",
-      "type": "braided",
-      "phase_offset": 0.0,
-      "drift_tolerance": null,
-      "decoherence_limit": null,
-      "initial_strength": 1.0,
-      "current_strength": 0.0,
-      "medium_type": "standard",
-      "mutable": true,
-      "seeded": false,
-      "formed_at_tick": 0,
-      "active": true,
-      "last_activation": null,
-      "last_rupture_tick": null,
-      "last_reform_tick": 16,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
-      "reformable": true,
-      "memory_weight": 0.5,
-      "avg_decoherence": 0.0,
-      "state": "stable",
-      "fatigue": 0.0,
-      "tick_load": 0,
-      "phase_drift": 0.0,
-      "coherence_flux": 0.0
-    },
-    {
-      "source": "E",
-      "target": "OBS",
-      "type": "braided",
-      "phase_offset": 0.0,
-      "drift_tolerance": null,
-      "decoherence_limit": null,
-      "initial_strength": 1.0,
-      "current_strength": 0.0,
-      "medium_type": "standard",
-      "mutable": true,
-      "seeded": false,
-      "formed_at_tick": 0,
-      "active": true,
-      "last_activation": null,
-      "last_rupture_tick": null,
-      "last_reform_tick": 18,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
-      "reformable": true,
-      "memory_weight": 0.5,
-      "avg_decoherence": 0.0,
-      "state": "stable",
-      "fatigue": 0.0,
-      "tick_load": 0,
-      "phase_drift": 0.0,
-      "coherence_flux": 0.0
-    },
-    {
-      "source": "F",
-      "target": "H",
-      "type": "braided",
-      "phase_offset": 0.0,
-      "drift_tolerance": null,
-      "decoherence_limit": null,
-      "initial_strength": 1.0,
-      "current_strength": 0.0,
-      "medium_type": "standard",
-      "mutable": true,
-      "seeded": false,
-      "formed_at_tick": 0,
-      "active": true,
-      "last_activation": null,
-      "last_rupture_tick": null,
-      "last_reform_tick": 16,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
-      "reformable": true,
-      "memory_weight": 0.5,
-      "avg_decoherence": 0.0,
-      "state": "stable",
-      "fatigue": 0.0,
-      "tick_load": 0,
-      "phase_drift": 0.0,
-      "coherence_flux": 0.0
-    },
-    {
-      "source": "F",
-      "target": "I",
-      "type": "braided",
-      "phase_offset": 0.0,
-      "drift_tolerance": null,
-      "decoherence_limit": null,
-      "initial_strength": 1.0,
-      "current_strength": 0.0,
-      "medium_type": "standard",
-      "mutable": true,
-      "seeded": false,
-      "formed_at_tick": 0,
-      "active": true,
-      "last_activation": null,
-      "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
-      "reformable": true,
-      "memory_weight": 0.5,
-      "avg_decoherence": 0.0,
-      "state": "stable",
-      "fatigue": 0.0,
-      "tick_load": 0,
-      "phase_drift": 0.0,
-      "coherence_flux": 0.0
-    },
-    {
-      "source": "F",
-      "target": "J",
-      "type": "braided",
-      "phase_offset": 0.0,
-      "drift_tolerance": null,
-      "decoherence_limit": null,
-      "initial_strength": 1.0,
-      "current_strength": 0.0,
-      "medium_type": "standard",
-      "mutable": true,
-      "seeded": false,
-      "formed_at_tick": 0,
-      "active": true,
-      "last_activation": null,
-      "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
-      "reformable": true,
-      "memory_weight": 0.5,
-      "avg_decoherence": 0.0,
-      "state": "stable",
-      "fatigue": 0.0,
-      "tick_load": 0,
-      "phase_drift": 0.0,
-      "coherence_flux": 0.0
-    },
-    {
-      "source": "F",
-      "target": "Z",
-      "type": "braided",
-      "phase_offset": 0.0,
-      "drift_tolerance": null,
-      "decoherence_limit": null,
-      "initial_strength": 1.0,
-      "current_strength": 0.0,
-      "medium_type": "standard",
-      "mutable": true,
-      "seeded": false,
-      "formed_at_tick": 0,
-      "active": true,
-      "last_activation": null,
-      "last_rupture_tick": null,
-      "last_reform_tick": 16,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
-      "reformable": true,
-      "memory_weight": 0.5,
-      "avg_decoherence": 0.0,
-      "state": "stable",
-      "fatigue": 0.0,
-      "tick_load": 0,
-      "phase_drift": 0.0,
-      "coherence_flux": 0.0
-    },
-    {
-      "source": "F",
-      "target": "OBS",
-      "type": "braided",
-      "phase_offset": 0.0,
-      "drift_tolerance": null,
-      "decoherence_limit": null,
-      "initial_strength": 1.0,
-      "current_strength": 0.0,
-      "medium_type": "standard",
-      "mutable": true,
-      "seeded": false,
-      "formed_at_tick": 0,
-      "active": true,
-      "last_activation": null,
-      "last_rupture_tick": null,
-      "last_reform_tick": 16,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
-      "reformable": true,
-      "memory_weight": 0.5,
-      "avg_decoherence": 0.0,
-      "state": "stable",
-      "fatigue": 0.0,
-      "tick_load": 0,
-      "phase_drift": 0.0,
-      "coherence_flux": 0.0
-    },
-    {
-      "source": "G",
-      "target": "H",
-      "type": "braided",
-      "phase_offset": 0.0,
-      "drift_tolerance": null,
-      "decoherence_limit": null,
-      "initial_strength": 1.0,
-      "current_strength": 0.0,
-      "medium_type": "standard",
-      "mutable": true,
-      "seeded": false,
-      "formed_at_tick": 0,
-      "active": true,
-      "last_activation": null,
-      "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
-      "reformable": true,
-      "memory_weight": 0.5,
-      "avg_decoherence": 0.0,
-      "state": "stable",
-      "fatigue": 0.0,
-      "tick_load": 0,
-      "phase_drift": 0.0,
-      "coherence_flux": 0.0
-    },
-    {
-      "source": "G",
-      "target": "I",
-      "type": "braided",
-      "phase_offset": 0.0,
-      "drift_tolerance": null,
-      "decoherence_limit": null,
-      "initial_strength": 1.0,
-      "current_strength": 0.0,
-      "medium_type": "standard",
-      "mutable": true,
-      "seeded": false,
-      "formed_at_tick": 0,
-      "active": true,
-      "last_activation": null,
-      "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
-      "reformable": true,
-      "memory_weight": 0.5,
-      "avg_decoherence": 0.0,
-      "state": "stable",
-      "fatigue": 0.0,
-      "tick_load": 0,
-      "phase_drift": 0.0,
-      "coherence_flux": 0.0
-    },
-    {
-      "source": "G",
-      "target": "J",
-      "type": "braided",
-      "phase_offset": 0.0,
-      "drift_tolerance": null,
-      "decoherence_limit": null,
-      "initial_strength": 1.0,
-      "current_strength": 0.0,
-      "medium_type": "standard",
-      "mutable": true,
-      "seeded": false,
-      "formed_at_tick": 0,
-      "active": true,
-      "last_activation": null,
-      "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
-      "reformable": true,
-      "memory_weight": 0.5,
-      "avg_decoherence": 0.0,
-      "state": "stable",
-      "fatigue": 0.0,
-      "tick_load": 0,
-      "phase_drift": 0.0,
-      "coherence_flux": 0.0
-    },
-    {
-      "source": "G",
-      "target": "Z",
-      "type": "braided",
-      "phase_offset": 0.0,
-      "drift_tolerance": null,
-      "decoherence_limit": null,
-      "initial_strength": 1.0,
-      "current_strength": 0.0,
-      "medium_type": "standard",
-      "mutable": true,
-      "seeded": false,
-      "formed_at_tick": 0,
-      "active": true,
-      "last_activation": null,
-      "last_rupture_tick": null,
-      "last_reform_tick": 16,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
-      "reformable": true,
-      "memory_weight": 0.5,
-      "avg_decoherence": 0.0,
-      "state": "stable",
-      "fatigue": 0.0,
-      "tick_load": 0,
-      "phase_drift": 0.0,
-      "coherence_flux": 0.0
-    },
-    {
-      "source": "G",
-      "target": "OBS",
-      "type": "braided",
-      "phase_offset": 0.0,
-      "drift_tolerance": null,
-      "decoherence_limit": null,
-      "initial_strength": 1.0,
-      "current_strength": 0.0,
-      "medium_type": "standard",
-      "mutable": true,
-      "seeded": false,
-      "formed_at_tick": 0,
-      "active": true,
-      "last_activation": null,
-      "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
-      "reformable": true,
-      "memory_weight": 0.5,
-      "avg_decoherence": 0.0,
-      "state": "stable",
-      "fatigue": 0.0,
-      "tick_load": 0,
-      "phase_drift": 0.0,
-      "coherence_flux": 0.0
-    },
-    {
-      "source": "H",
-      "target": "J",
-      "type": "braided",
-      "phase_offset": 0.0,
-      "drift_tolerance": null,
-      "decoherence_limit": null,
-      "initial_strength": 1.0,
-      "current_strength": 0.0,
-      "medium_type": "standard",
-      "mutable": true,
-      "seeded": false,
-      "formed_at_tick": 0,
-      "active": true,
-      "last_activation": null,
-      "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
-      "reformable": true,
-      "memory_weight": 0.5,
-      "avg_decoherence": 0.0,
-      "state": "stable",
-      "fatigue": 0.0,
-      "tick_load": 0,
-      "phase_drift": 0.0,
-      "coherence_flux": 0.0
-    },
-    {
-      "source": "H",
-      "target": "Z",
-      "type": "braided",
-      "phase_offset": 0.0,
-      "drift_tolerance": null,
-      "decoherence_limit": null,
-      "initial_strength": 1.0,
-      "current_strength": 0.0,
-      "medium_type": "standard",
-      "mutable": true,
-      "seeded": false,
-      "formed_at_tick": 0,
-      "active": true,
-      "last_activation": null,
-      "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
-      "reformable": true,
-      "memory_weight": 0.5,
-      "avg_decoherence": 0.0,
-      "state": "stable",
-      "fatigue": 0.0,
-      "tick_load": 0,
-      "phase_drift": 0.0,
-      "coherence_flux": 0.0
-    },
-    {
-      "source": "H",
-      "target": "OBS",
-      "type": "braided",
-      "phase_offset": 0.0,
-      "drift_tolerance": null,
-      "decoherence_limit": null,
-      "initial_strength": 1.0,
-      "current_strength": 0.0,
-      "medium_type": "standard",
-      "mutable": true,
-      "seeded": false,
-      "formed_at_tick": 0,
-      "active": true,
-      "last_activation": null,
-      "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement_streak": 0,
-      "last_active_tick": 0,
-      "reformable": true,
-      "memory_weight": 0.5,
-      "avg_decoherence": 0.0,
-      "state": "stable",
-      "fatigue": 0.0,
-      "tick_load": 0,
-      "phase_drift": 0.0,
-      "coherence_flux": 0.0
-    },
-    {
-      "source": "I",
-      "target": "Z",
       "type": "braided",
       "phase_offset": 0.0,
       "drift_tolerance": null,
@@ -2893,8 +5077,38 @@
       "coherence_flux": 0.0
     },
     {
-      "source": "I",
-      "target": "OBS",
+      "source": "E",
+      "target": "I",
+      "type": "braided",
+      "phase_offset": 0.0,
+      "drift_tolerance": null,
+      "decoherence_limit": null,
+      "initial_strength": 1.0,
+      "current_strength": 0.0,
+      "medium_type": "standard",
+      "mutable": true,
+      "seeded": false,
+      "formed_at_tick": 0,
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 16,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement_streak": 0,
+      "last_active_tick": 0,
+      "reformable": true,
+      "memory_weight": 0.5,
+      "avg_decoherence": 0.0,
+      "state": "stable",
+      "fatigue": 0.0,
+      "tick_load": 0,
+      "phase_drift": 0.0,
+      "coherence_flux": 0.0
+    },
+    {
+      "source": "E",
+      "target": "J",
       "type": "braided",
       "phase_offset": 0.0,
       "drift_tolerance": null,
@@ -2923,8 +5137,188 @@
       "coherence_flux": 0.0
     },
     {
-      "source": "J",
+      "source": "E",
       "target": "Z",
+      "type": "braided",
+      "phase_offset": 0.0,
+      "drift_tolerance": null,
+      "decoherence_limit": null,
+      "initial_strength": 1.0,
+      "current_strength": 0.0,
+      "medium_type": "standard",
+      "mutable": true,
+      "seeded": false,
+      "formed_at_tick": 0,
+      "active": true,
+      "last_activation": 59,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.9300000000000004,
+      "reinforcement_streak": 43,
+      "last_active_tick": 59,
+      "reformable": true,
+      "memory_weight": 0.5,
+      "avg_decoherence": 0.0,
+      "state": "stable",
+      "fatigue": 0.0,
+      "tick_load": 43,
+      "phase_drift": 0.0,
+      "coherence_flux": 43.0
+    },
+    {
+      "source": "E",
+      "target": "OBS",
+      "type": "braided",
+      "phase_offset": 0.0,
+      "drift_tolerance": null,
+      "decoherence_limit": null,
+      "initial_strength": 1.0,
+      "current_strength": 0.0,
+      "medium_type": "standard",
+      "mutable": true,
+      "seeded": false,
+      "formed_at_tick": 0,
+      "active": true,
+      "last_activation": 59,
+      "last_rupture_tick": null,
+      "last_reform_tick": 16,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.9300000000000004,
+      "reinforcement_streak": 43,
+      "last_active_tick": 59,
+      "reformable": true,
+      "memory_weight": 0.5,
+      "avg_decoherence": 0.0,
+      "state": "stable",
+      "fatigue": 0.0,
+      "tick_load": 43,
+      "phase_drift": 0.0,
+      "coherence_flux": 43.0
+    },
+    {
+      "source": "F",
+      "target": "H",
+      "type": "braided",
+      "phase_offset": 0.0,
+      "drift_tolerance": null,
+      "decoherence_limit": null,
+      "initial_strength": 1.0,
+      "current_strength": 0.0,
+      "medium_type": "standard",
+      "mutable": true,
+      "seeded": false,
+      "formed_at_tick": 0,
+      "active": true,
+      "last_activation": 59,
+      "last_rupture_tick": null,
+      "last_reform_tick": 16,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.9300000000000004,
+      "reinforcement_streak": 43,
+      "last_active_tick": 59,
+      "reformable": true,
+      "memory_weight": 0.5,
+      "avg_decoherence": 0.0,
+      "state": "stable",
+      "fatigue": 0.0,
+      "tick_load": 43,
+      "phase_drift": 0.0,
+      "coherence_flux": 43.0
+    },
+    {
+      "source": "F",
+      "target": "I",
+      "type": "braided",
+      "phase_offset": 0.0,
+      "drift_tolerance": null,
+      "decoherence_limit": null,
+      "initial_strength": 1.0,
+      "current_strength": 0.0,
+      "medium_type": "standard",
+      "mutable": true,
+      "seeded": false,
+      "formed_at_tick": 0,
+      "active": true,
+      "last_activation": 59,
+      "last_rupture_tick": null,
+      "last_reform_tick": 16,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.9300000000000004,
+      "reinforcement_streak": 43,
+      "last_active_tick": 59,
+      "reformable": true,
+      "memory_weight": 0.5,
+      "avg_decoherence": 0.0,
+      "state": "stable",
+      "fatigue": 0.0,
+      "tick_load": 43,
+      "phase_drift": 0.0,
+      "coherence_flux": 43.0
+    },
+    {
+      "source": "F",
+      "target": "J",
+      "type": "braided",
+      "phase_offset": 0.0,
+      "drift_tolerance": null,
+      "decoherence_limit": null,
+      "initial_strength": 1.0,
+      "current_strength": 0.0,
+      "medium_type": "standard",
+      "mutable": true,
+      "seeded": false,
+      "formed_at_tick": 0,
+      "active": true,
+      "last_activation": 59,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.9300000000000004,
+      "reinforcement_streak": 43,
+      "last_active_tick": 59,
+      "reformable": true,
+      "memory_weight": 0.5,
+      "avg_decoherence": 0.0,
+      "state": "stable",
+      "fatigue": 0.0,
+      "tick_load": 43,
+      "phase_drift": 0.0,
+      "coherence_flux": 43.0
+    },
+    {
+      "source": "F",
+      "target": "Z",
+      "type": "braided",
+      "phase_offset": 0.0,
+      "drift_tolerance": null,
+      "decoherence_limit": null,
+      "initial_strength": 1.0,
+      "current_strength": 0.0,
+      "medium_type": "standard",
+      "mutable": true,
+      "seeded": false,
+      "formed_at_tick": 0,
+      "active": true,
+      "last_activation": null,
+      "last_rupture_tick": null,
+      "last_reform_tick": 16,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.5,
+      "reinforcement_streak": 0,
+      "last_active_tick": 0,
+      "reformable": true,
+      "memory_weight": 0.5,
+      "avg_decoherence": 0.0,
+      "state": "stable",
+      "fatigue": 0.0,
+      "tick_load": 0,
+      "phase_drift": 0.0,
+      "coherence_flux": 0.0
+    },
+    {
+      "source": "F",
+      "target": "OBS",
       "type": "braided",
       "phase_offset": 0.0,
       "drift_tolerance": null,
@@ -2953,8 +5347,158 @@
       "coherence_flux": 0.0
     },
     {
-      "source": "J",
+      "source": "G",
+      "target": "H",
+      "type": "braided",
+      "phase_offset": 0.0,
+      "drift_tolerance": null,
+      "decoherence_limit": null,
+      "initial_strength": 1.0,
+      "current_strength": 0.0,
+      "medium_type": "standard",
+      "mutable": true,
+      "seeded": false,
+      "formed_at_tick": 0,
+      "active": true,
+      "last_activation": 16,
+      "last_rupture_tick": null,
+      "last_reform_tick": 32,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.6000000000000001,
+      "reinforcement_streak": 10,
+      "last_active_tick": 16,
+      "reformable": true,
+      "memory_weight": 0.5,
+      "avg_decoherence": 0.0,
+      "state": "stable",
+      "fatigue": 0.0,
+      "tick_load": 10,
+      "phase_drift": 0.0,
+      "coherence_flux": 10.0
+    },
+    {
+      "source": "G",
+      "target": "I",
+      "type": "braided",
+      "phase_offset": 0.0,
+      "drift_tolerance": null,
+      "decoherence_limit": null,
+      "initial_strength": 1.0,
+      "current_strength": 0.0,
+      "medium_type": "standard",
+      "mutable": true,
+      "seeded": false,
+      "formed_at_tick": 0,
+      "active": true,
+      "last_activation": 16,
+      "last_rupture_tick": null,
+      "last_reform_tick": 31,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.6000000000000001,
+      "reinforcement_streak": 10,
+      "last_active_tick": 16,
+      "reformable": true,
+      "memory_weight": 0.5,
+      "avg_decoherence": 0.0,
+      "state": "stable",
+      "fatigue": 0.0,
+      "tick_load": 10,
+      "phase_drift": 0.0,
+      "coherence_flux": 10.0
+    },
+    {
+      "source": "G",
+      "target": "J",
+      "type": "braided",
+      "phase_offset": 0.0,
+      "drift_tolerance": null,
+      "decoherence_limit": null,
+      "initial_strength": 1.0,
+      "current_strength": 0.0,
+      "medium_type": "standard",
+      "mutable": true,
+      "seeded": false,
+      "formed_at_tick": 0,
+      "active": true,
+      "last_activation": 16,
+      "last_rupture_tick": null,
+      "last_reform_tick": 31,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.6000000000000001,
+      "reinforcement_streak": 10,
+      "last_active_tick": 16,
+      "reformable": true,
+      "memory_weight": 0.5,
+      "avg_decoherence": 0.0,
+      "state": "stable",
+      "fatigue": 0.0,
+      "tick_load": 10,
+      "phase_drift": 0.0,
+      "coherence_flux": 10.0
+    },
+    {
+      "source": "G",
+      "target": "Z",
+      "type": "braided",
+      "phase_offset": 0.0,
+      "drift_tolerance": null,
+      "decoherence_limit": null,
+      "initial_strength": 1.0,
+      "current_strength": 1.0,
+      "medium_type": "standard",
+      "mutable": true,
+      "seeded": false,
+      "formed_at_tick": 0,
+      "active": true,
+      "last_activation": 59,
+      "last_rupture_tick": null,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
+      "trust_score": 1.0,
+      "reinforcement_streak": 53,
+      "last_active_tick": 59,
+      "reformable": true,
+      "memory_weight": 0.5,
+      "avg_decoherence": 0.0,
+      "state": "stable",
+      "fatigue": 0.0,
+      "tick_load": 53,
+      "phase_drift": 0.0,
+      "coherence_flux": 53.0
+    },
+    {
+      "source": "G",
       "target": "OBS",
+      "type": "braided",
+      "phase_offset": 0.0,
+      "drift_tolerance": null,
+      "decoherence_limit": null,
+      "initial_strength": 1.0,
+      "current_strength": 1.0,
+      "medium_type": "standard",
+      "mutable": true,
+      "seeded": false,
+      "formed_at_tick": 0,
+      "active": true,
+      "last_activation": 59,
+      "last_rupture_tick": null,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
+      "trust_score": 1.0,
+      "reinforcement_streak": 53,
+      "last_active_tick": 59,
+      "reformable": true,
+      "memory_weight": 0.5,
+      "avg_decoherence": 0.0,
+      "state": "stable",
+      "fatigue": 0.0,
+      "tick_load": 53,
+      "phase_drift": 0.0,
+      "coherence_flux": 53.0
+    },
+    {
+      "source": "H",
+      "target": "J",
       "type": "braided",
       "phase_offset": 0.0,
       "drift_tolerance": null,
@@ -2981,6 +5525,186 @@
       "tick_load": 0,
       "phase_drift": 0.0,
       "coherence_flux": 0.0
+    },
+    {
+      "source": "H",
+      "target": "Z",
+      "type": "braided",
+      "phase_offset": 0.0,
+      "drift_tolerance": null,
+      "decoherence_limit": null,
+      "initial_strength": 1.0,
+      "current_strength": 0.0,
+      "medium_type": "standard",
+      "mutable": true,
+      "seeded": false,
+      "formed_at_tick": 0,
+      "active": true,
+      "last_activation": 59,
+      "last_rupture_tick": null,
+      "last_reform_tick": 16,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.9300000000000004,
+      "reinforcement_streak": 43,
+      "last_active_tick": 59,
+      "reformable": true,
+      "memory_weight": 0.5,
+      "avg_decoherence": 0.0,
+      "state": "stable",
+      "fatigue": 0.0,
+      "tick_load": 43,
+      "phase_drift": 0.0,
+      "coherence_flux": 43.0
+    },
+    {
+      "source": "H",
+      "target": "OBS",
+      "type": "braided",
+      "phase_offset": 0.0,
+      "drift_tolerance": null,
+      "decoherence_limit": null,
+      "initial_strength": 1.0,
+      "current_strength": 0.0,
+      "medium_type": "standard",
+      "mutable": true,
+      "seeded": false,
+      "formed_at_tick": 0,
+      "active": true,
+      "last_activation": 59,
+      "last_rupture_tick": null,
+      "last_reform_tick": 17,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.9300000000000004,
+      "reinforcement_streak": 43,
+      "last_active_tick": 59,
+      "reformable": true,
+      "memory_weight": 0.5,
+      "avg_decoherence": 0.0,
+      "state": "stable",
+      "fatigue": 0.0,
+      "tick_load": 43,
+      "phase_drift": 0.0,
+      "coherence_flux": 43.0
+    },
+    {
+      "source": "I",
+      "target": "Z",
+      "type": "braided",
+      "phase_offset": 0.0,
+      "drift_tolerance": null,
+      "decoherence_limit": null,
+      "initial_strength": 1.0,
+      "current_strength": 0.0,
+      "medium_type": "standard",
+      "mutable": true,
+      "seeded": false,
+      "formed_at_tick": 0,
+      "active": true,
+      "last_activation": 59,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.9300000000000004,
+      "reinforcement_streak": 43,
+      "last_active_tick": 59,
+      "reformable": true,
+      "memory_weight": 0.5,
+      "avg_decoherence": 0.0,
+      "state": "stable",
+      "fatigue": 0.0,
+      "tick_load": 43,
+      "phase_drift": 0.0,
+      "coherence_flux": 43.0
+    },
+    {
+      "source": "I",
+      "target": "OBS",
+      "type": "braided",
+      "phase_offset": 0.0,
+      "drift_tolerance": null,
+      "decoherence_limit": null,
+      "initial_strength": 1.0,
+      "current_strength": 0.0,
+      "medium_type": "standard",
+      "mutable": true,
+      "seeded": false,
+      "formed_at_tick": 0,
+      "active": true,
+      "last_activation": 59,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.9300000000000004,
+      "reinforcement_streak": 43,
+      "last_active_tick": 59,
+      "reformable": true,
+      "memory_weight": 0.5,
+      "avg_decoherence": 0.0,
+      "state": "stable",
+      "fatigue": 0.0,
+      "tick_load": 43,
+      "phase_drift": 0.0,
+      "coherence_flux": 43.0
+    },
+    {
+      "source": "J",
+      "target": "Z",
+      "type": "braided",
+      "phase_offset": 0.0,
+      "drift_tolerance": null,
+      "decoherence_limit": null,
+      "initial_strength": 1.0,
+      "current_strength": 0.0,
+      "medium_type": "standard",
+      "mutable": true,
+      "seeded": false,
+      "formed_at_tick": 0,
+      "active": true,
+      "last_activation": 59,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.9300000000000004,
+      "reinforcement_streak": 43,
+      "last_active_tick": 59,
+      "reformable": true,
+      "memory_weight": 0.5,
+      "avg_decoherence": 0.0,
+      "state": "stable",
+      "fatigue": 0.0,
+      "tick_load": 43,
+      "phase_drift": 0.0,
+      "coherence_flux": 43.0
+    },
+    {
+      "source": "J",
+      "target": "OBS",
+      "type": "braided",
+      "phase_offset": 0.0,
+      "drift_tolerance": null,
+      "decoherence_limit": null,
+      "initial_strength": 1.0,
+      "current_strength": 0.0,
+      "medium_type": "standard",
+      "mutable": true,
+      "seeded": false,
+      "formed_at_tick": 0,
+      "active": true,
+      "last_activation": 59,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 0.9300000000000004,
+      "reinforcement_streak": 43,
+      "last_active_tick": 59,
+      "reformable": true,
+      "memory_weight": 0.5,
+      "avg_decoherence": 0.0,
+      "state": "stable",
+      "fatigue": 0.0,
+      "tick_load": 43,
+      "phase_drift": 0.0,
+      "coherence_flux": 43.0
     },
     {
       "source": "Z",
@@ -2998,7 +5722,7 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
+      "last_reform_tick": 15,
       "coherence_at_reform": 1.0,
       "trust_score": 0.5,
       "reinforcement_streak": 0,

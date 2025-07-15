@@ -1,14 +1,14 @@
-The simulation recorded 202 ticks across 12 nodes.
+The simulation recorded 954 ticks across 12 nodes.
 - Node A emitted 101 ticks.
-- Node B emitted 0 ticks.
-- Node C emitted 0 ticks.
-- Node D emitted 0 ticks.
-- Node E emitted 0 ticks.
+- Node B emitted 94 ticks.
+- Node C emitted 94 ticks.
+- Node D emitted 94 ticks.
+- Node E emitted 94 ticks.
 - Node F emitted 101 ticks.
-- Node G emitted 0 ticks.
-- Node H emitted 0 ticks.
-- Node I emitted 0 ticks.
-- Node J emitted 0 ticks.
+- Node G emitted 94 ticks.
+- Node H emitted 94 ticks.
+- Node I emitted 94 ticks.
+- Node J emitted 94 ticks.
 - Node Z emitted 0 ticks.
 - Node OBS emitted 0 ticks.
 - A coherence ranged from 1.000 to 1.000.
@@ -104,4 +104,4 @@ Law drift events recorded: 108 total.
 - Bridge J->OBS ended active; last rupture at None
 - Bridge Z->OBS ended active; last rupture at None
 Recorded 0 superposition inspections.
-Console log contains 0 lines covering 0 ticks.
+Console log contains 2121 lines covering 101 ticks.

@@ -1,15 +1,15 @@
-[0-4] E: Node E maintained stable law-wave variance 0.0004 from ticks 0-4.
-[0-4] B: Node B maintained stable law-wave variance 0.0004 from ticks 0-4.
 [0-4] D: Node D maintained stable law-wave variance 0.0004 from ticks 0-4.
+[0-4] F: Node F maintained stable law-wave variance 0.0000 from ticks 0-4.
 [0-4] C: Node C maintained stable law-wave variance 0.0004 from ticks 0-4.
+[0-4] B: Node B maintained stable law-wave variance 0.0004 from ticks 0-4.
 [0-4] A: Node A maintained stable law-wave variance 0.0000 from ticks 0-4.
-[0-4] Z: Node Z maintained stable law-wave variance 0.0004 from ticks 0-4.
 [0-4] G: Node G maintained stable law-wave variance 0.0004 from ticks 0-4.
 [0-4] OBS: Node OBS maintained stable law-wave variance 0.0004 from ticks 0-4.
-[0-4] H: Node H maintained stable law-wave variance 0.0004 from ticks 0-4.
-[0-4] F: Node F maintained stable law-wave variance 0.0000 from ticks 0-4.
+[0-4] E: Node E maintained stable law-wave variance 0.0004 from ticks 0-4.
+[0-4] Z: Node Z maintained stable law-wave variance 0.0004 from ticks 0-4.
 [0-4] I: Node I maintained stable law-wave variance 0.0004 from ticks 0-4.
 [0-4] J: Node J maintained stable law-wave variance 0.0004 from ticks 0-4.
+[0-4] H: Node H maintained stable law-wave variance 0.0004 from ticks 0-4.
 [1] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 1, indicating possible meta-node formation.
 [2] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 2, indicating possible meta-node formation.
 [3] A, B, C, D, E, F, G, H, I, J, Z, OBS: Cluster A, B, C, D, E, F, G, H, I, J, Z, OBS exhibited high coherence at tick 3, indicating possible meta-node formation.

@@ -110,31 +110,26 @@
 {"bridge_id": "J->OBS", "source": "J", "target": "OBS", "event": "stable", "tick": 0, "seeded": false, "conditions": {"from": "forming"}}
 {"bridge_id": "Z->OBS", "source": "Z", "target": "OBS", "event": "formed", "tick": 0, "seeded": false, "conditions": {"phase_delta": 0.0, "coherence": 1.0}}
 {"bridge_id": "Z->OBS", "source": "Z", "target": "OBS", "event": "stable", "tick": 0, "seeded": false, "conditions": {"from": "forming"}}
+{"bridge_id": "A->B", "source": "A", "target": "B", "event": "stable", "tick": 1, "seeded": true, "conditions": {"from": "forming"}}
+{"bridge_id": "B->C", "source": "B", "target": "C", "event": "stable", "tick": 1, "seeded": true, "conditions": {"from": "forming"}}
+{"bridge_id": "F->G", "source": "F", "target": "G", "event": "stable", "tick": 1, "seeded": true, "conditions": {"from": "forming"}}
 {"bridge_id": "D->H", "source": "D", "target": "H", "event": "decayed", "tick": 6, "seeded": true}
-{"bridge_id": "D->H", "source": "D", "target": "H", "event": "recovered", "tick": 6, "seeded": true, "conditions": {"coherence": 1.0}}
 {"bridge_id": "H->I", "source": "H", "target": "I", "event": "decayed", "tick": 6, "seeded": true}
+{"bridge_id": "H->I", "source": "H", "target": "I", "event": "recovered", "tick": 6, "seeded": true, "conditions": {"coherence": 1.0}}
 {"bridge_id": "I->J", "source": "I", "target": "J", "event": "decayed", "tick": 6, "seeded": true}
+{"bridge_id": "I->J", "source": "I", "target": "J", "event": "recovered", "tick": 6, "seeded": true, "conditions": {"coherence": 1.0}}
 {"bridge_id": "C->E", "source": "C", "target": "E", "event": "decayed", "tick": 7, "seeded": true}
 {"bridge_id": "C->E", "source": "C", "target": "E", "event": "recovered", "tick": 7, "seeded": true, "conditions": {"coherence": 1.0}}
-{"bridge_id": "I->J", "source": "I", "target": "J", "event": "recovered", "tick": 7, "seeded": true, "conditions": {"coherence": 1.0}}
+{"bridge_id": "D->H", "source": "D", "target": "H", "event": "recovered", "tick": 7, "seeded": true, "conditions": {"coherence": 1.0}}
 {"bridge_id": "D->A", "source": "D", "target": "A", "event": "decayed", "tick": 10, "seeded": true}
+{"bridge_id": "D->A", "source": "D", "target": "A", "event": "recovered", "tick": 10, "seeded": true, "conditions": {"coherence": 1.0}}
 {"bridge_id": "C->D", "source": "C", "target": "D", "event": "decayed", "tick": 11, "seeded": true}
 {"bridge_id": "C->D", "source": "C", "target": "D", "event": "recovered", "tick": 11, "seeded": true, "conditions": {"coherence": 1.0}}
-{"bridge_id": "D->A", "source": "D", "target": "A", "event": "recovered", "tick": 11, "seeded": true, "conditions": {"coherence": 1.0}}
-{"bridge_id": "H->I", "source": "H", "target": "I", "event": "recovered", "tick": 12, "seeded": true, "conditions": {"coherence": 1.0}}
-{"bridge_id": "B->C", "source": "B", "target": "C", "event": "decayed", "tick": 13, "seeded": true}
 {"bridge_id": "E->F", "source": "E", "target": "F", "event": "decayed", "tick": 14, "seeded": true}
 {"bridge_id": "E->F", "source": "E", "target": "F", "event": "recovered", "tick": 14, "seeded": true, "conditions": {"coherence": 1.0}}
-{"bridge_id": "F->G", "source": "F", "target": "G", "event": "decayed", "tick": 14, "seeded": true}
-{"bridge_id": "A->B", "source": "A", "target": "B", "event": "decayed", "tick": 15, "seeded": true}
-{"bridge_id": "A->B", "source": "A", "target": "B", "event": "recovered", "tick": 15, "seeded": true, "conditions": {"coherence": 1.0}}
-{"bridge_id": "F->G", "source": "F", "target": "G", "event": "recovered", "tick": 15, "seeded": true, "conditions": {"coherence": 1.0}}
 {"bridge_id": "A->C", "source": "A", "target": "C", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "A->C", "source": "A", "target": "C", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "A->E", "source": "A", "target": "E", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "A->E", "source": "A", "target": "E", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "A->F", "source": "A", "target": "F", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "A->G", "source": "A", "target": "G", "event": "decayed", "tick": 15, "seeded": false}
 {"bridge_id": "A->H", "source": "A", "target": "H", "event": "decayed", "tick": 15, "seeded": false}
 {"bridge_id": "A->H", "source": "A", "target": "H", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "A->I", "source": "A", "target": "I", "event": "decayed", "tick": 15, "seeded": false}
@@ -142,103 +137,94 @@
 {"bridge_id": "A->J", "source": "A", "target": "J", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "A->Z", "source": "A", "target": "Z", "event": "decayed", "tick": 15, "seeded": false}
 {"bridge_id": "A->OBS", "source": "A", "target": "OBS", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "B->D", "source": "B", "target": "D", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "B->D", "source": "B", "target": "D", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "B->E", "source": "B", "target": "E", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "B->F", "source": "B", "target": "F", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "B->F", "source": "B", "target": "F", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "A->OBS", "source": "A", "target": "OBS", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "B->G", "source": "B", "target": "G", "event": "decayed", "tick": 15, "seeded": false}
 {"bridge_id": "B->G", "source": "B", "target": "G", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "B->H", "source": "B", "target": "H", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "B->I", "source": "B", "target": "I", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "B->I", "source": "B", "target": "I", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "B->J", "source": "B", "target": "J", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "B->Z", "source": "B", "target": "Z", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "B->OBS", "source": "B", "target": "OBS", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "B->OBS", "source": "B", "target": "OBS", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "C->F", "source": "C", "target": "F", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "C->G", "source": "C", "target": "G", "event": "decayed", "tick": 15, "seeded": false}
+{"bridge_id": "C->F", "source": "C", "target": "F", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "C->H", "source": "C", "target": "H", "event": "decayed", "tick": 15, "seeded": false}
 {"bridge_id": "C->I", "source": "C", "target": "I", "event": "decayed", "tick": 15, "seeded": false}
 {"bridge_id": "C->I", "source": "C", "target": "I", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "C->J", "source": "C", "target": "J", "event": "decayed", "tick": 15, "seeded": false}
 {"bridge_id": "C->J", "source": "C", "target": "J", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "C->Z", "source": "C", "target": "Z", "event": "decayed", "tick": 15, "seeded": false}
+{"bridge_id": "C->Z", "source": "C", "target": "Z", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "C->OBS", "source": "C", "target": "OBS", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "C->OBS", "source": "C", "target": "OBS", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "D->E", "source": "D", "target": "E", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "D->E", "source": "D", "target": "E", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "D->F", "source": "D", "target": "F", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "D->G", "source": "D", "target": "G", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "D->G", "source": "D", "target": "G", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "D->F", "source": "D", "target": "F", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "D->I", "source": "D", "target": "I", "event": "decayed", "tick": 15, "seeded": false}
 {"bridge_id": "D->J", "source": "D", "target": "J", "event": "decayed", "tick": 15, "seeded": false}
+{"bridge_id": "D->J", "source": "D", "target": "J", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "D->Z", "source": "D", "target": "Z", "event": "decayed", "tick": 15, "seeded": false}
+{"bridge_id": "D->Z", "source": "D", "target": "Z", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "D->OBS", "source": "D", "target": "OBS", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "D->OBS", "source": "D", "target": "OBS", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "E->G", "source": "E", "target": "G", "event": "decayed", "tick": 15, "seeded": false}
 {"bridge_id": "E->H", "source": "E", "target": "H", "event": "decayed", "tick": 15, "seeded": false}
 {"bridge_id": "E->I", "source": "E", "target": "I", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "E->I", "source": "E", "target": "I", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "E->J", "source": "E", "target": "J", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "E->J", "source": "E", "target": "J", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "E->Z", "source": "E", "target": "Z", "event": "decayed", "tick": 15, "seeded": false}
+{"bridge_id": "E->Z", "source": "E", "target": "Z", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "E->OBS", "source": "E", "target": "OBS", "event": "decayed", "tick": 15, "seeded": false}
 {"bridge_id": "F->H", "source": "F", "target": "H", "event": "decayed", "tick": 15, "seeded": false}
 {"bridge_id": "F->I", "source": "F", "target": "I", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "F->I", "source": "F", "target": "I", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "F->J", "source": "F", "target": "J", "event": "decayed", "tick": 15, "seeded": false}
 {"bridge_id": "F->J", "source": "F", "target": "J", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "F->Z", "source": "F", "target": "Z", "event": "decayed", "tick": 15, "seeded": false}
 {"bridge_id": "F->OBS", "source": "F", "target": "OBS", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "G->H", "source": "G", "target": "H", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "G->H", "source": "G", "target": "H", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "G->I", "source": "G", "target": "I", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "G->I", "source": "G", "target": "I", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "G->J", "source": "G", "target": "J", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "G->J", "source": "G", "target": "J", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "G->Z", "source": "G", "target": "Z", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "G->OBS", "source": "G", "target": "OBS", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "G->OBS", "source": "G", "target": "OBS", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "F->OBS", "source": "F", "target": "OBS", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "H->J", "source": "H", "target": "J", "event": "decayed", "tick": 15, "seeded": false}
 {"bridge_id": "H->J", "source": "H", "target": "J", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "H->Z", "source": "H", "target": "Z", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "H->Z", "source": "H", "target": "Z", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "H->OBS", "source": "H", "target": "OBS", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "H->OBS", "source": "H", "target": "OBS", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "I->Z", "source": "I", "target": "Z", "event": "decayed", "tick": 15, "seeded": false}
+{"bridge_id": "I->Z", "source": "I", "target": "Z", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "I->OBS", "source": "I", "target": "OBS", "event": "decayed", "tick": 15, "seeded": false}
+{"bridge_id": "I->OBS", "source": "I", "target": "OBS", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "J->Z", "source": "J", "target": "Z", "event": "decayed", "tick": 15, "seeded": false}
 {"bridge_id": "J->Z", "source": "J", "target": "Z", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "J->OBS", "source": "J", "target": "OBS", "event": "decayed", "tick": 15, "seeded": false}
 {"bridge_id": "J->OBS", "source": "J", "target": "OBS", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "Z->OBS", "source": "Z", "target": "OBS", "event": "decayed", "tick": 15, "seeded": false}
-{"bridge_id": "B->C", "source": "B", "target": "C", "event": "recovered", "tick": 16, "seeded": true, "conditions": {"coherence": 1.0}}
-{"bridge_id": "A->G", "source": "A", "target": "G", "event": "recovered", "tick": 16, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "B->H", "source": "B", "target": "H", "event": "recovered", "tick": 16, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "B->J", "source": "B", "target": "J", "event": "recovered", "tick": 16, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "B->Z", "source": "B", "target": "Z", "event": "recovered", "tick": 16, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "C->G", "source": "C", "target": "G", "event": "recovered", "tick": 16, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "D->Z", "source": "D", "target": "Z", "event": "recovered", "tick": 16, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "E->H", "source": "E", "target": "H", "event": "recovered", "tick": 16, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "E->Z", "source": "E", "target": "Z", "event": "recovered", "tick": 16, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "Z->OBS", "source": "Z", "target": "OBS", "event": "recovered", "tick": 15, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "A->C", "source": "A", "target": "C", "event": "recovered", "tick": 16, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "A->E", "source": "A", "target": "E", "event": "recovered", "tick": 16, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "A->F", "source": "A", "target": "F", "event": "recovered", "tick": 16, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "C->H", "source": "C", "target": "H", "event": "recovered", "tick": 16, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "D->I", "source": "D", "target": "I", "event": "recovered", "tick": 16, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "E->I", "source": "E", "target": "I", "event": "recovered", "tick": 16, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "E->OBS", "source": "E", "target": "OBS", "event": "recovered", "tick": 16, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "F->H", "source": "F", "target": "H", "event": "recovered", "tick": 16, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "F->I", "source": "F", "target": "I", "event": "recovered", "tick": 16, "seeded": false, "conditions": {"coherence": 1.0}}
 {"bridge_id": "F->Z", "source": "F", "target": "Z", "event": "recovered", "tick": 16, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "F->OBS", "source": "F", "target": "OBS", "event": "recovered", "tick": 16, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "G->Z", "source": "G", "target": "Z", "event": "recovered", "tick": 16, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "Z->OBS", "source": "Z", "target": "OBS", "event": "recovered", "tick": 16, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "H->Z", "source": "H", "target": "Z", "event": "recovered", "tick": 16, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "C->D", "source": "C", "target": "D", "event": "stable", "tick": 17, "seeded": true, "conditions": {"from": "forming"}}
+{"bridge_id": "E->F", "source": "E", "target": "F", "event": "stable", "tick": 17, "seeded": true, "conditions": {"from": "forming"}}
+{"bridge_id": "D->H", "source": "D", "target": "H", "event": "stable", "tick": 17, "seeded": true, "conditions": {"from": "forming"}}
 {"bridge_id": "A->I", "source": "A", "target": "I", "event": "recovered", "tick": 17, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "A->Z", "source": "A", "target": "Z", "event": "recovered", "tick": 17, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "B->E", "source": "B", "target": "E", "event": "recovered", "tick": 17, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "C->F", "source": "C", "target": "F", "event": "recovered", "tick": 17, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "D->F", "source": "D", "target": "F", "event": "recovered", "tick": 17, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "D->J", "source": "D", "target": "J", "event": "recovered", "tick": 17, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "I->OBS", "source": "I", "target": "OBS", "event": "recovered", "tick": 17, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "A->F", "source": "A", "target": "F", "event": "recovered", "tick": 18, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "C->Z", "source": "C", "target": "Z", "event": "recovered", "tick": 18, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "E->OBS", "source": "E", "target": "OBS", "event": "recovered", "tick": 18, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "D->I", "source": "D", "target": "I", "event": "recovered", "tick": 19, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "I->Z", "source": "I", "target": "Z", "event": "recovered", "tick": 19, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "A->OBS", "source": "A", "target": "OBS", "event": "recovered", "tick": 20, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "E->G", "source": "E", "target": "G", "event": "recovered", "tick": 20, "seeded": false, "conditions": {"coherence": 1.0}}
-{"bridge_id": "C->H", "source": "C", "target": "H", "event": "recovered", "tick": 21, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "C->OBS", "source": "C", "target": "OBS", "event": "recovered", "tick": 17, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "D->E", "source": "D", "target": "E", "event": "recovered", "tick": 17, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "E->J", "source": "E", "target": "J", "event": "recovered", "tick": 17, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "H->OBS", "source": "H", "target": "OBS", "event": "recovered", "tick": 17, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "A->Z", "source": "A", "target": "Z", "event": "recovered", "tick": 18, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "E->H", "source": "E", "target": "H", "event": "recovered", "tick": 19, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "D->OBS", "source": "D", "target": "OBS", "event": "recovered", "tick": 20, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "B->C", "source": "B", "target": "C", "event": "decayed", "tick": 29, "seeded": true}
+{"bridge_id": "B->C", "source": "B", "target": "C", "event": "recovered", "tick": 29, "seeded": true, "conditions": {"coherence": 1.0}}
+{"bridge_id": "B->E", "source": "B", "target": "E", "event": "decayed", "tick": 31, "seeded": false}
+{"bridge_id": "B->E", "source": "B", "target": "E", "event": "recovered", "tick": 31, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "B->H", "source": "B", "target": "H", "event": "decayed", "tick": 31, "seeded": false}
+{"bridge_id": "B->I", "source": "B", "target": "I", "event": "decayed", "tick": 31, "seeded": false}
+{"bridge_id": "B->I", "source": "B", "target": "I", "event": "recovered", "tick": 31, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "B->J", "source": "B", "target": "J", "event": "decayed", "tick": 31, "seeded": false}
+{"bridge_id": "C->G", "source": "C", "target": "G", "event": "decayed", "tick": 31, "seeded": false}
+{"bridge_id": "E->G", "source": "E", "target": "G", "event": "decayed", "tick": 31, "seeded": false}
+{"bridge_id": "G->H", "source": "G", "target": "H", "event": "decayed", "tick": 31, "seeded": false}
+{"bridge_id": "G->I", "source": "G", "target": "I", "event": "decayed", "tick": 31, "seeded": false}
+{"bridge_id": "G->I", "source": "G", "target": "I", "event": "recovered", "tick": 31, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "G->J", "source": "G", "target": "J", "event": "decayed", "tick": 31, "seeded": false}
+{"bridge_id": "G->J", "source": "G", "target": "J", "event": "recovered", "tick": 31, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "B->H", "source": "B", "target": "H", "event": "recovered", "tick": 32, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "G->H", "source": "G", "target": "H", "event": "recovered", "tick": 32, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "B->J", "source": "B", "target": "J", "event": "recovered", "tick": 33, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "C->G", "source": "C", "target": "G", "event": "recovered", "tick": 33, "seeded": false, "conditions": {"coherence": 1.0}}
+{"bridge_id": "E->G", "source": "E", "target": "G", "event": "recovered", "tick": 33, "seeded": false, "conditions": {"coherence": 1.0}}

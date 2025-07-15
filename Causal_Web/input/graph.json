@@ -35,7 +35,6 @@
       "x": 300,
       "y": 100
     },
-
     {
       "id": "H",
       "x": 300,
@@ -51,19 +50,51 @@
       "x": 400,
       "y": 100
     },
-
     {
       "id": "Z",
       "x": 400,
       "y": 200,
       "void": true
     },
-
     {
       "id": "OBS",
       "x": 2.5,
       "y": -1,
       "type": "observer"
+    }
+  ],
+  "edges": [
+    {
+      "from": "A",
+      "to": "B"
+    },
+    {
+      "from": "B",
+      "to": "C"
+    },
+    {
+      "from": "C",
+      "to": "E"
+    },
+    {
+      "from": "E",
+      "to": "F"
+    },
+    {
+      "from": "F",
+      "to": "G"
+    },
+    {
+      "from": "D",
+      "to": "H"
+    },
+    {
+      "from": "H",
+      "to": "I"
+    },
+    {
+      "from": "I",
+      "to": "J"
     }
   ],
   "bridges": [
@@ -95,7 +126,6 @@
       "medium_type": "standard",
       "mutable": true
     },
-
     {
       "from": "C",
       "to": "E",
@@ -117,7 +147,6 @@
       "medium_type": "standard",
       "mutable": true
     },
-
     {
       "from": "D",
       "to": "H",

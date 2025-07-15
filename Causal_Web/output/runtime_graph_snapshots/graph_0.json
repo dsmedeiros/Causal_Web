@@ -309,8 +309,84 @@
       "phase_lock": false
     }
   },
-  "superpositions": {},
-  "edges": [],
+  "superpositions": {
+    "B": {
+      "1": [
+        0.0
+      ]
+    },
+    "G": {
+      "1": [
+        0.0
+      ]
+    }
+  },
+  "edges": [
+    {
+      "from": "A",
+      "to": "B",
+      "delay": 1,
+      "attenuation": 1.0,
+      "density": 0.0,
+      "phase_shift": 0.0
+    },
+    {
+      "from": "B",
+      "to": "C",
+      "delay": 1,
+      "attenuation": 1.0,
+      "density": 0.0,
+      "phase_shift": 0.0
+    },
+    {
+      "from": "C",
+      "to": "E",
+      "delay": 1,
+      "attenuation": 1.0,
+      "density": 0.0,
+      "phase_shift": 0.0
+    },
+    {
+      "from": "E",
+      "to": "F",
+      "delay": 1,
+      "attenuation": 1.0,
+      "density": 0.0,
+      "phase_shift": 0.0
+    },
+    {
+      "from": "F",
+      "to": "G",
+      "delay": 1,
+      "attenuation": 1.0,
+      "density": 0.0,
+      "phase_shift": 0.0
+    },
+    {
+      "from": "D",
+      "to": "H",
+      "delay": 1,
+      "attenuation": 1.0,
+      "density": 0.0,
+      "phase_shift": 0.0
+    },
+    {
+      "from": "H",
+      "to": "I",
+      "delay": 1,
+      "attenuation": 1.0,
+      "density": 0.0,
+      "phase_shift": 0.0
+    },
+    {
+      "from": "I",
+      "to": "J",
+      "delay": 1,
+      "attenuation": 1.0,
+      "density": 0.0,
+      "phase_shift": 0.0
+    }
+  ],
   "bridges": [
     {
       "source": "A",

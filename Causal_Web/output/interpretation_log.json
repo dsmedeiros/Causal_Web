@@ -1,5 +1,54 @@
 {
-  "curvature": {},
+  "curvature": {
+    "A->B": {
+      "delay_range": [
+        1,
+        1
+      ]
+    },
+    "B->C": {
+      "delay_range": [
+        1,
+        1
+      ]
+    },
+    "C->E": {
+      "delay_range": [
+        1,
+        1
+      ]
+    },
+    "E->F": {
+      "delay_range": [
+        1,
+        1
+      ]
+    },
+    "F->G": {
+      "delay_range": [
+        1,
+        1
+      ]
+    },
+    "D->H": {
+      "delay_range": [
+        1,
+        1
+      ]
+    },
+    "H->I": {
+      "delay_range": [
+        1,
+        1
+      ]
+    },
+    "I->J": {
+      "delay_range": [
+        1,
+        1
+      ]
+    }
+  },
   "coherence": {
     "A": {
       "max": 1.0,
@@ -157,36 +206,36 @@
   "bridges": {
     "A->B": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
+      "trust_score": 1.0,
+      "reinforcement": 93
     },
     "B->C": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 16,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
+      "last_reform_tick": 29,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 0.6000000000000001,
+      "reinforcement": 10
     },
     "C->D": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
       "last_reform_tick": 11,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 1.0,
+      "reinforcement": 83
     },
     "D->A": {
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 11,
+      "last_reform_tick": 10,
       "coherence_at_reform": 1.0,
       "trust_score": 0.5,
       "reinforcement": 0
@@ -202,23 +251,32 @@
     },
     "E->F": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
       "last_reform_tick": 14,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 1.0,
+      "reinforcement": 83
     },
     "F->G": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
+      "trust_score": 1.0,
+      "reinforcement": 93
     },
     "D->H": {
+      "active": true,
+      "last_activation": 99,
+      "last_rupture_tick": null,
+      "last_reform_tick": 7,
+      "coherence_at_reform": 1.0,
+      "trust_score": 1.0,
+      "reinforcement": 83
+    },
+    "H->I": {
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
@@ -227,52 +285,34 @@
       "trust_score": 0.5,
       "reinforcement": 0
     },
-    "H->I": {
-      "active": true,
-      "last_activation": null,
-      "last_rupture_tick": null,
-      "last_reform_tick": 12,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
-    },
     "I->J": {
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 7,
+      "last_reform_tick": 6,
       "coherence_at_reform": 1.0,
       "trust_score": 0.5,
       "reinforcement": 0
     },
     "A->C": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
+      "last_reform_tick": 16,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 1.0,
+      "reinforcement": 83
     },
     "A->E": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
+      "last_reform_tick": 16,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 1.0,
+      "reinforcement": 83
     },
     "A->F": {
-      "active": true,
-      "last_activation": null,
-      "last_rupture_tick": null,
-      "last_reform_tick": 18,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
-    },
-    "A->G": {
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
@@ -281,38 +321,47 @@
       "trust_score": 0.5,
       "reinforcement": 0
     },
+    "A->G": {
+      "active": true,
+      "last_activation": 99,
+      "last_rupture_tick": null,
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
+      "trust_score": 1.0,
+      "reinforcement": 93
+    },
     "A->H": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
       "last_reform_tick": 15,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 1.0,
+      "reinforcement": 83
     },
     "A->I": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
       "last_reform_tick": 17,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 1.0,
+      "reinforcement": 83
     },
     "A->J": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
       "last_reform_tick": 15,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 1.0,
+      "reinforcement": 83
     },
     "A->Z": {
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 17,
+      "last_reform_tick": 18,
       "coherence_at_reform": 1.0,
       "trust_score": 0.5,
       "reinforcement": 0
@@ -321,37 +370,37 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 20,
+      "last_reform_tick": 15,
       "coherence_at_reform": 1.0,
       "trust_score": 0.5,
       "reinforcement": 0
     },
     "B->D": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
+      "trust_score": 1.0,
+      "reinforcement": 93
     },
     "B->E": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 16,
       "last_rupture_tick": null,
-      "last_reform_tick": 17,
+      "last_reform_tick": 31,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 0.6000000000000001,
+      "reinforcement": 10
     },
     "B->F": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
+      "trust_score": 1.0,
+      "reinforcement": 93
     },
     "B->G": {
       "active": true,
@@ -364,72 +413,72 @@
     },
     "B->H": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 16,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
+      "last_reform_tick": 32,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 0.6000000000000001,
+      "reinforcement": 10
     },
     "B->I": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 16,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
+      "last_reform_tick": 31,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 0.6000000000000001,
+      "reinforcement": 10
     },
     "B->J": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 16,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
+      "last_reform_tick": 33,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 0.6000000000000001,
+      "reinforcement": 10
     },
     "B->Z": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
+      "trust_score": 1.0,
+      "reinforcement": 93
     },
     "B->OBS": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
+      "trust_score": 1.0,
+      "reinforcement": 93
     },
     "C->F": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
-      "last_reform_tick": 17,
+      "last_reform_tick": 15,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 1.0,
+      "reinforcement": 83
     },
     "C->G": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 16,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
+      "last_reform_tick": 33,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 0.6000000000000001,
+      "reinforcement": 10
     },
     "C->H": {
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 21,
+      "last_reform_tick": 16,
       "coherence_at_reform": 1.0,
       "trust_score": 0.5,
       "reinforcement": 0
@@ -454,72 +503,72 @@
     },
     "C->Z": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
-      "last_reform_tick": 18,
+      "last_reform_tick": 15,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 1.0,
+      "reinforcement": 83
     },
     "C->OBS": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
+      "last_reform_tick": 17,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 1.0,
+      "reinforcement": 83
     },
     "D->E": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
+      "last_reform_tick": 17,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 1.0,
+      "reinforcement": 83
     },
     "D->F": {
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 17,
+      "last_reform_tick": 15,
       "coherence_at_reform": 1.0,
       "trust_score": 0.5,
       "reinforcement": 0
     },
     "D->G": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
+      "trust_score": 1.0,
+      "reinforcement": 93
     },
     "D->I": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
-      "last_reform_tick": 19,
+      "last_reform_tick": 16,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 1.0,
+      "reinforcement": 83
     },
     "D->J": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
-      "last_reform_tick": 17,
+      "last_reform_tick": 15,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 1.0,
+      "reinforcement": 83
     },
     "D->Z": {
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
+      "last_reform_tick": 15,
       "coherence_at_reform": 1.0,
       "trust_score": 0.5,
       "reinforcement": 0
@@ -528,25 +577,25 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
+      "last_reform_tick": 20,
       "coherence_at_reform": 1.0,
       "trust_score": 0.5,
       "reinforcement": 0
     },
     "E->G": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 16,
       "last_rupture_tick": null,
-      "last_reform_tick": 20,
+      "last_reform_tick": 33,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 0.6000000000000001,
+      "reinforcement": 10
     },
     "E->H": {
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
+      "last_reform_tick": 19,
       "coherence_at_reform": 1.0,
       "trust_score": 0.5,
       "reinforcement": 0
@@ -555,7 +604,7 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
+      "last_reform_tick": 16,
       "coherence_at_reform": 1.0,
       "trust_score": 0.5,
       "reinforcement": 0
@@ -564,55 +613,55 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
+      "last_reform_tick": 17,
       "coherence_at_reform": 1.0,
       "trust_score": 0.5,
       "reinforcement": 0
     },
     "E->Z": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
+      "last_reform_tick": 15,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 1.0,
+      "reinforcement": 83
     },
     "E->OBS": {
       "active": true,
-      "last_activation": null,
-      "last_rupture_tick": null,
-      "last_reform_tick": 18,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
-    },
-    "F->H": {
-      "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
       "last_reform_tick": 16,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 1.0,
+      "reinforcement": 83
+    },
+    "F->H": {
+      "active": true,
+      "last_activation": 99,
+      "last_rupture_tick": null,
+      "last_reform_tick": 16,
+      "coherence_at_reform": 1.0,
+      "trust_score": 1.0,
+      "reinforcement": 83
     },
     "F->I": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
+      "last_reform_tick": 16,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 1.0,
+      "reinforcement": 83
     },
     "F->J": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
       "last_reform_tick": 15,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 1.0,
+      "reinforcement": 83
     },
     "F->Z": {
       "active": true,
@@ -627,55 +676,55 @@
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
+      "last_reform_tick": 15,
       "coherence_at_reform": 1.0,
       "trust_score": 0.5,
       "reinforcement": 0
     },
     "G->H": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 16,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
+      "last_reform_tick": 32,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 0.6000000000000001,
+      "reinforcement": 10
     },
     "G->I": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 16,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
+      "last_reform_tick": 31,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 0.6000000000000001,
+      "reinforcement": 10
     },
     "G->J": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 16,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
+      "last_reform_tick": 31,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 0.6000000000000001,
+      "reinforcement": 10
     },
     "G->Z": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
+      "trust_score": 1.0,
+      "reinforcement": 93
     },
     "G->OBS": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "last_reform_tick": null,
+      "coherence_at_reform": null,
+      "trust_score": 1.0,
+      "reinforcement": 93
     },
     "H->J": {
       "active": true,
@@ -688,63 +737,63 @@
     },
     "H->Z": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
-      "last_reform_tick": 15,
+      "last_reform_tick": 16,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 1.0,
+      "reinforcement": 83
     },
     "H->OBS": {
       "active": true,
-      "last_activation": null,
-      "last_rupture_tick": null,
-      "last_reform_tick": 15,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
-    },
-    "I->Z": {
-      "active": true,
-      "last_activation": null,
-      "last_rupture_tick": null,
-      "last_reform_tick": 19,
-      "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
-    },
-    "I->OBS": {
-      "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
       "last_reform_tick": 17,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 1.0,
+      "reinforcement": 83
+    },
+    "I->Z": {
+      "active": true,
+      "last_activation": 99,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 1.0,
+      "reinforcement": 83
+    },
+    "I->OBS": {
+      "active": true,
+      "last_activation": 99,
+      "last_rupture_tick": null,
+      "last_reform_tick": 15,
+      "coherence_at_reform": 1.0,
+      "trust_score": 1.0,
+      "reinforcement": 83
     },
     "J->Z": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
       "last_reform_tick": 15,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 1.0,
+      "reinforcement": 83
     },
     "J->OBS": {
       "active": true,
-      "last_activation": null,
+      "last_activation": 99,
       "last_rupture_tick": null,
       "last_reform_tick": 15,
       "coherence_at_reform": 1.0,
-      "trust_score": 0.5,
-      "reinforcement": 0
+      "trust_score": 1.0,
+      "reinforcement": 83
     },
     "Z->OBS": {
       "active": true,
       "last_activation": null,
       "last_rupture_tick": null,
-      "last_reform_tick": 16,
+      "last_reform_tick": 15,
       "coherence_at_reform": 1.0,
       "trust_score": 0.5,
       "reinforcement": 0
@@ -770,21 +819,21 @@
   },
   "tick_counts": {
     "A": 101,
-    "B": 0,
-    "C": 0,
-    "D": 0,
-    "E": 0,
+    "B": 94,
+    "C": 94,
+    "D": 94,
+    "E": 94,
     "F": 101,
-    "G": 0,
-    "H": 0,
-    "I": 0,
-    "J": 0,
+    "G": 94,
+    "H": 94,
+    "I": 94,
+    "J": 94,
     "Z": 0,
     "OBS": 0
   },
   "inspection_events": 0,
   "console": {
-    "lines": 0,
-    "ticks_logged": 0
+    "lines": 2121,
+    "ticks_logged": 101
   }
 }

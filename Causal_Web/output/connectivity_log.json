@@ -1,63 +1,63 @@
 {
   "A": {
-    "edges_out": 0,
+    "edges_out": 1,
     "edges_in": 0,
     "bridges": 2,
-    "total": 2
+    "total": 3
   },
   "B": {
-    "edges_out": 0,
-    "edges_in": 0,
+    "edges_out": 1,
+    "edges_in": 1,
     "bridges": 2,
-    "total": 2
+    "total": 4
   },
   "C": {
-    "edges_out": 0,
-    "edges_in": 0,
+    "edges_out": 1,
+    "edges_in": 1,
     "bridges": 3,
-    "total": 3
+    "total": 5
   },
   "D": {
-    "edges_out": 0,
+    "edges_out": 1,
     "edges_in": 0,
     "bridges": 3,
-    "total": 3
+    "total": 4
   },
   "E": {
-    "edges_out": 0,
-    "edges_in": 0,
+    "edges_out": 1,
+    "edges_in": 1,
     "bridges": 2,
-    "total": 2
+    "total": 4
   },
   "F": {
-    "edges_out": 0,
-    "edges_in": 0,
+    "edges_out": 1,
+    "edges_in": 1,
     "bridges": 2,
-    "total": 2
+    "total": 4
   },
   "G": {
     "edges_out": 0,
-    "edges_in": 0,
+    "edges_in": 1,
     "bridges": 1,
-    "total": 1
+    "total": 2
   },
   "H": {
-    "edges_out": 0,
-    "edges_in": 0,
+    "edges_out": 1,
+    "edges_in": 1,
     "bridges": 2,
-    "total": 2
+    "total": 4
   },
   "I": {
-    "edges_out": 0,
-    "edges_in": 0,
+    "edges_out": 1,
+    "edges_in": 1,
     "bridges": 2,
-    "total": 2
+    "total": 4
   },
   "J": {
     "edges_out": 0,
-    "edges_in": 0,
+    "edges_in": 1,
     "bridges": 1,
-    "total": 1
+    "total": 2
   },
   "Z": {
     "edges_out": 0,

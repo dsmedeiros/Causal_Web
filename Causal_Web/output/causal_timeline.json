@@ -5,8 +5,15 @@
       {
         "type": "bridge_reformed",
         "nodes": [
-          "D",
-          "H"
+          "H",
+          "I"
+        ]
+      },
+      {
+        "type": "bridge_reformed",
+        "nodes": [
+          "I",
+          "J"
         ]
       }
     ]
@@ -24,8 +31,20 @@
       {
         "type": "bridge_reformed",
         "nodes": [
-          "I",
-          "J"
+          "D",
+          "H"
+        ]
+      }
+    ]
+  },
+  {
+    "tick": 10,
+    "events": [
+      {
+        "type": "bridge_reformed",
+        "nodes": [
+          "D",
+          "A"
         ]
       }
     ]
@@ -38,25 +57,6 @@
         "nodes": [
           "C",
           "D"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "D",
-          "A"
-        ]
-      }
-    ]
-  },
-  {
-    "tick": 12,
-    "events": [
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "H",
-          "I"
         ]
       }
     ]
@@ -80,34 +80,6 @@
         "type": "bridge_reformed",
         "nodes": [
           "A",
-          "B"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "F",
-          "G"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "A",
-          "C"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "A",
-          "E"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "A",
           "H"
         ]
       },
@@ -121,41 +93,27 @@
       {
         "type": "bridge_reformed",
         "nodes": [
-          "B",
-          "D"
+          "A",
+          "OBS"
         ]
       },
       {
         "type": "bridge_reformed",
         "nodes": [
           "B",
+          "G"
+        ]
+      },
+      {
+        "type": "bridge_reformed",
+        "nodes": [
+          "C",
           "F"
         ]
       },
       {
         "type": "bridge_reformed",
         "nodes": [
-          "B",
-          "G"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "B",
-          "I"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "B",
-          "OBS"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
           "C",
           "I"
         ]
@@ -171,104 +129,69 @@
         "type": "bridge_reformed",
         "nodes": [
           "C",
-          "OBS"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "D",
-          "E"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "D",
-          "G"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "D",
-          "OBS"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "E",
-          "I"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "E",
-          "J"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "F",
-          "I"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "F",
-          "J"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "G",
-          "H"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "G",
-          "I"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "G",
-          "J"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "G",
-          "OBS"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "H",
-          "J"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "H",
           "Z"
         ]
       },
       {
         "type": "bridge_reformed",
         "nodes": [
+          "D",
+          "F"
+        ]
+      },
+      {
+        "type": "bridge_reformed",
+        "nodes": [
+          "D",
+          "J"
+        ]
+      },
+      {
+        "type": "bridge_reformed",
+        "nodes": [
+          "D",
+          "Z"
+        ]
+      },
+      {
+        "type": "bridge_reformed",
+        "nodes": [
+          "E",
+          "Z"
+        ]
+      },
+      {
+        "type": "bridge_reformed",
+        "nodes": [
+          "F",
+          "J"
+        ]
+      },
+      {
+        "type": "bridge_reformed",
+        "nodes": [
+          "F",
+          "OBS"
+        ]
+      },
+      {
+        "type": "bridge_reformed",
+        "nodes": [
           "H",
+          "J"
+        ]
+      },
+      {
+        "type": "bridge_reformed",
+        "nodes": [
+          "I",
+          "Z"
+        ]
+      },
+      {
+        "type": "bridge_reformed",
+        "nodes": [
+          "I",
           "OBS"
         ]
       },
@@ -283,6 +206,13 @@
         "type": "bridge_reformed",
         "nodes": [
           "J",
+          "OBS"
+        ]
+      },
+      {
+        "type": "bridge_reformed",
+        "nodes": [
+          "Z",
           "OBS"
         ]
       }
@@ -294,7 +224,7 @@
       {
         "type": "bridge_reformed",
         "nodes": [
-          "B",
+          "A",
           "C"
         ]
       },
@@ -302,56 +232,42 @@
         "type": "bridge_reformed",
         "nodes": [
           "A",
-          "G"
+          "E"
         ]
       },
       {
         "type": "bridge_reformed",
         "nodes": [
-          "B",
-          "H"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "B",
-          "J"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "B",
-          "Z"
+          "A",
+          "F"
         ]
       },
       {
         "type": "bridge_reformed",
         "nodes": [
           "C",
-          "G"
+          "H"
         ]
       },
       {
         "type": "bridge_reformed",
         "nodes": [
           "D",
-          "Z"
+          "I"
         ]
       },
       {
         "type": "bridge_reformed",
         "nodes": [
           "E",
-          "H"
+          "I"
         ]
       },
       {
         "type": "bridge_reformed",
         "nodes": [
           "E",
-          "Z"
+          "OBS"
         ]
       },
       {
@@ -365,28 +281,21 @@
         "type": "bridge_reformed",
         "nodes": [
           "F",
-          "Z"
+          "I"
         ]
       },
       {
         "type": "bridge_reformed",
         "nodes": [
           "F",
-          "OBS"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "G",
           "Z"
         ]
       },
       {
         "type": "bridge_reformed",
         "nodes": [
-          "Z",
-          "OBS"
+          "H",
+          "Z"
         ]
       }
     ]
@@ -404,42 +313,28 @@
       {
         "type": "bridge_reformed",
         "nodes": [
-          "A",
-          "Z"
+          "C",
+          "OBS"
         ]
       },
       {
         "type": "bridge_reformed",
         "nodes": [
-          "B",
+          "D",
           "E"
         ]
       },
       {
         "type": "bridge_reformed",
         "nodes": [
-          "C",
-          "F"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "D",
-          "F"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "D",
+          "E",
           "J"
         ]
       },
       {
         "type": "bridge_reformed",
         "nodes": [
-          "I",
+          "H",
           "OBS"
         ]
       }
@@ -452,21 +347,7 @@
         "type": "bridge_reformed",
         "nodes": [
           "A",
-          "F"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "C",
           "Z"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "E",
-          "OBS"
         ]
       }
     ]
@@ -477,15 +358,8 @@
       {
         "type": "bridge_reformed",
         "nodes": [
-          "D",
-          "I"
-        ]
-      },
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "I",
-          "Z"
+          "E",
+          "H"
         ]
       }
     ]
@@ -496,8 +370,91 @@
       {
         "type": "bridge_reformed",
         "nodes": [
-          "A",
+          "D",
           "OBS"
+        ]
+      }
+    ]
+  },
+  {
+    "tick": 29,
+    "events": [
+      {
+        "type": "bridge_reformed",
+        "nodes": [
+          "B",
+          "C"
+        ]
+      }
+    ]
+  },
+  {
+    "tick": 31,
+    "events": [
+      {
+        "type": "bridge_reformed",
+        "nodes": [
+          "B",
+          "E"
+        ]
+      },
+      {
+        "type": "bridge_reformed",
+        "nodes": [
+          "B",
+          "I"
+        ]
+      },
+      {
+        "type": "bridge_reformed",
+        "nodes": [
+          "G",
+          "I"
+        ]
+      },
+      {
+        "type": "bridge_reformed",
+        "nodes": [
+          "G",
+          "J"
+        ]
+      }
+    ]
+  },
+  {
+    "tick": 32,
+    "events": [
+      {
+        "type": "bridge_reformed",
+        "nodes": [
+          "B",
+          "H"
+        ]
+      },
+      {
+        "type": "bridge_reformed",
+        "nodes": [
+          "G",
+          "H"
+        ]
+      }
+    ]
+  },
+  {
+    "tick": 33,
+    "events": [
+      {
+        "type": "bridge_reformed",
+        "nodes": [
+          "B",
+          "J"
+        ]
+      },
+      {
+        "type": "bridge_reformed",
+        "nodes": [
+          "C",
+          "G"
         ]
       },
       {
@@ -505,18 +462,6 @@
         "nodes": [
           "E",
           "G"
-        ]
-      }
-    ]
-  },
-  {
-    "tick": 21,
-    "events": [
-      {
-        "type": "bridge_reformed",
-        "nodes": [
-          "C",
-          "H"
         ]
       }
     ]
