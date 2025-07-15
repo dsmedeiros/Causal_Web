@@ -54,6 +54,27 @@ def _load_json_lines(path: str) -> Dict[int, Dict]:
     return records
 
 
+# Specialized loader for event_log.json where multiple entries
+# may share the same tick and we want to preserve them all.
+def _load_event_log(path: str) -> Dict[int, List[Dict]]:
+    records: Dict[int, List[Dict]] = {}
+    if not os.path.exists(path):
+        return records
+
+    with open(path) as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                obj = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            tick = int(obj.get("tick", 0))
+            records.setdefault(tick, []).append(obj)
+    return records
+
+
 @dataclass
 class ExplanationEvent:
     tick_range: Tuple[int, int]
@@ -72,6 +93,8 @@ class CausalAnalyst:
         self.logs: Dict[str, Dict[int, Dict]] = {}
         self.graph: Dict = {}
         self.explanations: List[ExplanationEvent] = []
+        self.causal_chains: List[Dict] = []
+        self.params = {"window": 8}
 
     # ------------------------------------------------------------
     def _path(self, name: str) -> str:
@@ -90,10 +113,13 @@ class CausalAnalyst:
             "observer": self._path("observer_perceived_field.json"),
             "cluster": self._path("cluster_log.json"),
             "law_drift": self._path("law_drift_log.json"),
+            "event": self._path("event_log.json"),
         }
 
         for key, path in paths.items():
-            if path.endswith(".json") and not path.endswith("tick_trace.json"):
+            if key == "event":
+                self.logs[key] = _load_event_log(path)
+            elif path.endswith(".json") and not path.endswith("tick_trace.json"):
                 self.logs[key] = _load_json_lines(path)
             elif key == "tick_trace" and os.path.exists(path):
                 with open(path) as f:
@@ -145,6 +171,67 @@ class CausalAnalyst:
                     events[node] = tick
                 prev[node] = state
         return events
+
+    # ------------------------------------------------------------
+    def _get_last_bridge_rupture(self, node_id: str, before_tick: int) -> Optional[Tuple[int, Dict]]:
+        """Return the last bridge rupture event involving node before given tick."""
+        event_log = self.logs.get("event", {})
+        if not event_log:
+            return None
+        for t in sorted([t for t in event_log if t < before_tick], reverse=True):
+            for ev in event_log[t]:
+                if ev.get("event_type") == "bridge_ruptured" and (ev.get("source") == node_id or ev.get("target") == node_id):
+                    return t, ev
+        return None
+
+    # ------------------------------------------------------------
+    def infer_causal_chains(self) -> None:
+        """Infer causal chains leading to collapses or other events."""
+        collapse_events = self._collapse_events()
+        spikes = self.transitions.get("decoherence_spikes", {})
+        window = self.params.get("window", 5)
+
+        chains: List[Dict] = []
+        for node, tick in collapse_events.items():
+            chain_steps: List[Dict] = []
+            last_rupture = self._get_last_bridge_rupture(node, tick)
+            spike = None
+            for s in spikes.get(node, []):
+                if s[1] >= tick - 1 and s[0] >= tick - window:
+                    spike = s
+            if last_rupture and tick - last_rupture[0] <= window:
+                ev = last_rupture[1]
+                chain_steps.append({
+                    "tick": last_rupture[0],
+                    "event": "bridge_ruptured",
+                    "target": [ev.get("source"), ev.get("target")],
+                })
+            if spike:
+                chain_steps.append({
+                    "tick": spike[1],
+                    "event": "decoherence_spike",
+                    "value": spike[2],
+                })
+            chain_steps.append({"tick": tick, "event": "node_collapsed", "node": node})
+
+            conf = 0.5
+            if last_rupture and tick - last_rupture[0] <= window:
+                conf += 0.25
+            if spike:
+                conf += 0.25
+            conf = min(1.0, conf)
+            chains.append({
+                "root_event": f"Node {node} collapsed at tick {tick}",
+                "chain": chain_steps,
+                "confidence": round(conf, 2),
+            })
+
+        self.causal_chains = chains
+
+        path = os.path.join(self.output_dir, "causal_chains.json")
+        with open(path, "w") as f:
+            json.dump(chains, f, indent=2)
+        return chains
 
     # ------------------------------------------------------------
     def match_explanatory_rules(self) -> None:
@@ -231,6 +318,24 @@ class CausalAnalyst:
             rng = f"{e.tick_range[0]}-{e.tick_range[1]}" if e.tick_range[0] != e.tick_range[1] else str(e.tick_range[0])
             nodes = ", ".join(e.affected_nodes)
             lines.append(f"[{rng}] {nodes}: {e.explanation_text}")
+        if self.causal_chains:
+            lines.append("")
+            lines.append("Causal Chains:")
+            for chain in self.causal_chains:
+                lines.append(f"- {chain['root_event']} (confidence {chain['confidence']:.2f})")
+                for step in chain.get("chain", []):
+                    if step["event"] == "bridge_ruptured":
+                        lines.append(
+                            f"    * Bridge {step['target'][0]}→{step['target'][1]} ruptured at tick {step['tick']}."
+                        )
+                    elif step["event"] == "decoherence_spike":
+                        lines.append(
+                            f"    * Decoherence spike until tick {step['tick']} (max {step['value']:.2f})."
+                        )
+                    elif step["event"] == "node_collapsed":
+                        lines.append(
+                            f"    * Node {step['node']} collapsed at tick {step['tick']}."
+                        )
         text = "\n".join(lines)
         path = os.path.join(self.output_dir, "causal_summary.txt")
         with open(path, "w") as f:
@@ -242,6 +347,7 @@ class CausalAnalyst:
         self.load_logs()
         self.detect_transitions()
         self.match_explanatory_rules()
+        self.infer_causal_chains()
         self.generate_explanation_log()
         self.generate_explanation_narrative()
         print("✅ Causal explanations generated")
