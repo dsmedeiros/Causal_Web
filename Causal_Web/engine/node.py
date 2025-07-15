@@ -175,7 +175,7 @@ class Node:
             self.is_classical = True
             if tick_time is not None:
                 record = {"tick": tick_time, "node": self.id, "event": "collapse_start"}
-                with open("output/collapse_front_log.json", "a") as f:
+                with open(Config.output_path("collapse_front_log.json"), "a") as f:
                     f.write(json.dumps(record) + "\n")
                 if graph is not None:
                     graph.emit_law_wave(self.id, tick_time)
@@ -194,7 +194,7 @@ class Node:
             self.node_type = NodeType.NORMAL
 
         if old != self.node_type:
-            with open("output/node_state_map.json", "a") as f:
+            with open(Config.output_path("node_state_map.json"), "a") as f:
                 rec = {"node": self.id, "from": old.value, "to": self.node_type.value}
                 f.write(json.dumps(rec) + "\n")
         self.prev_node_type = old
@@ -228,7 +228,7 @@ class Node:
 
     def apply_tick(self, tick_time, phase, graph, origin="self"):
         if self.node_type == NodeType.NULL:
-            with open("output/boundary_interaction_log.json", "a") as f:
+            with open(Config.output_path("boundary_interaction_log.json"), "a") as f:
                 f.write(json.dumps({"tick": tick_time, "void": self.id, "origin": origin}) + "\n")
             from . import tick_engine as te
             te.void_absorption_events += 1
@@ -239,7 +239,7 @@ class Node:
             return
 
         if getattr(self, "boundary", False):
-            with open("output/boundary_interaction_log.json", "a") as f:
+            with open(Config.output_path("boundary_interaction_log.json"), "a") as f:
                 f.write(json.dumps({"tick": tick_time, "node": self.id, "origin": origin}) + "\n")
             from . import tick_engine as te
             te.boundary_interactions_count += 1
@@ -262,7 +262,7 @@ class Node:
         self.update_node_type()
 
         if origin != "self" and any(e.target == origin for e in graph.get_edges_from(self.id)):
-            with open("output/refraction_log.json", "a") as f:
+            with open(Config.output_path("refraction_log.json"), "a") as f:
                 f.write(json.dumps({"tick": tick_time, "recursion_from": origin, "node": self.id}) + "\n")
         
         # Recursive phase propagation with refraction
@@ -285,7 +285,7 @@ class Node:
                     alt_delay = alt.adjusted_delay(target.law_wave_frequency, alt_tgt.law_wave_frequency, kappa)
                     alt_tgt.schedule_tick(tick_time + delay + alt_delay, shifted)
                     target.node_type = NodeType.REFRACTIVE
-                    with open("output/refraction_log.json", "a") as f:
+                    with open(Config.output_path("refraction_log.json"), "a") as f:
                         f.write(json.dumps({"tick": tick_time, "from": self.id, "via": target.id, "to": alt_tgt.id}) + "\n")
                     continue
 
@@ -316,14 +316,14 @@ class Node:
                 chain.extend(other.propagate_collapse(tick_time, graph, threshold, depth + 1, visited))
         if chain:
             record = {"tick": tick_time, "source": self.id, "chain": chain}
-            with open("output/collapse_front_log.json", "a") as f:
+            with open(Config.output_path("collapse_front_log.json"), "a") as f:
                 f.write(json.dumps(record) + "\n")
         return chain
 
     def _log_collapse_chain(self, tick_time, collapsed):
         """Log collapse propagation events to file with depth info."""
         record = {"tick": tick_time, "source": self.id, "collapsed": collapsed}
-        with open("output/collapse_chain_log.json", "a") as f:
+        with open(Config.output_path("collapse_chain_log.json"), "a") as f:
             f.write(json.dumps(record) + "\n")
 
 

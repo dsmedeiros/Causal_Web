@@ -1,6 +1,23 @@
 # config.py
 
+import os
+
+
 class Config:
+    # Base directories for package resources
+    base_dir = os.path.abspath(os.path.dirname(__file__))
+    input_dir = os.path.join(base_dir, "input")
+    output_dir = os.path.join(base_dir, "output")
+
+    @staticmethod
+    def input_path(*parts: str) -> str:
+        """Return absolute path under the ``input`` directory."""
+        return os.path.join(Config.input_dir, *parts)
+
+    @staticmethod
+    def output_path(*parts: str) -> str:
+        """Return absolute path under the ``output`` directory."""
+        return os.path.join(Config.output_dir, *parts)
     tick_rate = 1.0  # Seconds between ticks (adjustable via GUI)
     is_running = False  # Whether the simulation loop is active
     max_ticks = 100  # Stop after this many ticks unless set to 0 for infinite

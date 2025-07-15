@@ -30,8 +30,10 @@ nodes, propagates phases along edges and records the results to
 starting, pausing and adjusting the tick rate while visualising the graph in real time.
 - **`main.py`** – Entry point that simply launches the dashboard.
 
-Graphs are expected to be defined in `input/graph.json` which is loaded when the GUI
-starts. Simulation output is written to the `output` directory when the run finishes.
+Graphs are expected to be defined in `input/graph.json` inside the package. The
+code now resolves this path relative to the package location so the module can
+be executed from any working directory. Simulation output is written to the
+`output` folder located next to the code.
 
 ## Running
 

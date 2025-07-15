@@ -1,3 +1,4 @@
+import os
 import dearpygui.dearpygui as dpg
 from ..config import Config
 from ..engine.tick_engine import simulation_loop
@@ -109,7 +110,8 @@ def dashboard():
     dpg.create_context()
 
     with dpg.font_registry():
-        default_font = dpg.add_font("assets/fonts/consola.ttf", 20)
+        font_path = os.path.join(os.path.dirname(__file__), "..", "assets", "fonts", "consola.ttf")
+        default_font = dpg.add_font(font_path, 20)
 
     dpg.bind_font(default_font)
     dpg.create_viewport(title="CWT Simulation Dashboard", width=800, height=800)
