@@ -231,46 +231,49 @@ class CausalGraph:
             self.meta_nodes[meta.id] = meta
 
     def to_dict(self):
+        node_list = [
+            {
+                "id": nid,
+                "x": n.x,
+                "y": n.y,
+                "ticks": [
+                    {
+                        "time": tick.time,
+                        "phase": tick.phase,
+                        "origin": tick.origin,
+                        "layer": getattr(tick, "layer", "tick"),
+                        "trace_id": getattr(tick, "trace_id", ""),
+                    }
+                    for tick in n.tick_history
+                ],
+                "phase": n.phase,
+                "coherence": n.coherence,
+                "decoherence": n.decoherence,
+                "frequency": n.frequency,
+                "refractory_period": n.refractory_period,
+                "base_threshold": n.base_threshold,
+                "collapse_origin": n.collapse_origin,
+                "is_classical": getattr(n, "is_classical", False),
+                "decoherence_streak": getattr(n, "_decoherence_streak", 0),
+                "last_tick_time": n.last_tick_time,
+                "subjective_ticks": n.subjective_ticks,
+                "law_wave_frequency": n.law_wave_frequency,
+                "trust_profile": n.trust_profile,
+                "phase_confidence": n.phase_confidence_index,
+                "goals": n.goals,
+                "origin_type": n.origin_type,
+                "generation_tick": n.generation_tick,
+                "parent_ids": n.parent_ids,
+                "node_type": n.node_type.value,
+                "coherence_credit": n.coherence_credit,
+                "decoherence_debt": n.decoherence_debt,
+                "phase_lock": n.phase_lock,
+            }
+            for nid, n in self.nodes.items()
+        ]
+
         return {
-            "nodes": {
-                nid: {
-                    "x": n.x,
-                    "y": n.y,
-                    "ticks": [
-                        {
-                            "time": tick.time,
-                            "phase": tick.phase,
-                            "origin": tick.origin,
-                            "layer": getattr(tick, "layer", "tick"),
-                            "trace_id": getattr(tick, "trace_id", ""),
-                        }
-                        for tick in n.tick_history
-                    ],
-                    "phase": n.phase,
-                    "coherence": n.coherence,
-                    "decoherence": n.decoherence,
-                    "frequency": n.frequency,
-                    "refractory_period": n.refractory_period,
-                    "base_threshold": n.base_threshold,
-                    "collapse_origin": n.collapse_origin,
-                    "is_classical": getattr(n, "is_classical", False),
-                    "decoherence_streak": getattr(n, "_decoherence_streak", 0),
-                    "last_tick_time": n.last_tick_time,
-                    "subjective_ticks": n.subjective_ticks,
-                    "law_wave_frequency": n.law_wave_frequency,
-                    "trust_profile": n.trust_profile,
-                    "phase_confidence": n.phase_confidence_index,
-                    "goals": n.goals,
-                    "origin_type": n.origin_type,
-                    "generation_tick": n.generation_tick,
-                    "parent_ids": n.parent_ids,
-                    "node_type": n.node_type.value,
-                    "coherence_credit": n.coherence_credit,
-                    "decoherence_debt": n.decoherence_debt,
-                    "phase_lock": n.phase_lock,
-                }
-                for nid, n in self.nodes.items()
-            },
+            "nodes": node_list,
             "superpositions": {
                 nid: {
                     str(t): [round(float(p), 4) for p in node.pending_superpositions[t]]
@@ -307,7 +310,13 @@ class CausalGraph:
         self.bridges.clear()
         self.tick_sources = []
 
-        for node_data in data.get("nodes", []):
+        nodes_data = data.get("nodes", [])
+        if isinstance(nodes_data, dict):
+            nodes_iter = [dict(v, id=k) for k, v in nodes_data.items()]
+        else:
+            nodes_iter = nodes_data
+
+        for node_data in nodes_iter:
             node_id = node_data.get("id")
             if node_id is None:
                 continue
