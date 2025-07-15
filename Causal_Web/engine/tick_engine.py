@@ -22,9 +22,9 @@ def apply_global_forcing(tick: int) -> None:
     jitter = Config.phase_jitter
     wave = Config.coherence_wave
     for node in graph.nodes.values():
-        if jitter["amplitude"]:
+        if jitter["amplitude"] and jitter.get("period", 0):
             node.phase += jitter["amplitude"] * math.sin(2 * math.pi * tick / jitter["period"])
-        if wave["amplitude"]:
+        if wave["amplitude"] and wave.get("period", 0):
             mod = wave["amplitude"] * math.sin(2 * math.pi * tick / wave["period"])
             node.current_threshold = max(0.1, node.current_threshold - mod)
 

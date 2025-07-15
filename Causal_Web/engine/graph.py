@@ -216,8 +216,11 @@ class CausalGraph:
         self.bridges.clear()
 
         for node_data in data.get("nodes", []):
+            node_id = node_data.get("id")
+            if node_id is None:
+                continue
             self.add_node(
-                node_data["id"],
+                node_id,
                 x=node_data.get("x", 0.0),
                 y=node_data.get("y", 0.0),
                 frequency=node_data.get("frequency", 1.0),
@@ -225,21 +228,30 @@ class CausalGraph:
                 base_threshold=node_data.get("base_threshold", 0.5),
                 phase=node_data.get("phase", 0.0)
             )
-            if "goals" in node_data:
-                self.nodes[node_data["id"].__str__()].goals = node_data["goals"]
+            goals = node_data.get("goals")
+            if goals is not None:
+                self.nodes[node_id].goals = goals
         for edge in data.get("edges", []):
+            src = edge.get("from")
+            tgt = edge.get("to")
+            if src is None or tgt is None:
+                continue
             self.add_edge(
-                edge["from"], 
-                edge["to"],
+                src,
+                tgt,
                 attenuation=edge.get("attenuation", 1.0),
                 density=edge.get("density", 0.0),
                 delay=edge.get("delay", 1),
                 phase_shift=edge.get("phase_shift", 0.0))
 
         for bridge in data.get("bridges", []):
+            src = bridge.get("from")
+            tgt = bridge.get("to")
+            if src is None or tgt is None:
+                continue
             self.add_bridge(
-                bridge["from"],
-                bridge["to"],
+                src,
+                tgt,
                 bridge_type=bridge.get("bridge_type", "braided"),
                 phase_offset=bridge.get("phase_offset", 0.0),
                 drift_tolerance=bridge.get("drift_tolerance"),
