@@ -27,9 +27,22 @@ class CausalGraph:
         refractory_period=2,
         base_threshold=0.5,
         phase=0.0,
+        *,
+        origin_type="seed",
+        generation_tick=0,
+        parent_ids=None,
     ):
         self.nodes[node_id] = Node(
-            node_id, x, y, frequency, refractory_period, base_threshold, phase
+            node_id,
+            x,
+            y,
+            frequency,
+            refractory_period,
+            base_threshold,
+            phase,
+            origin_type=origin_type,
+            generation_tick=generation_tick,
+            parent_ids=parent_ids,
         )
 
     def add_edge(
@@ -248,6 +261,9 @@ class CausalGraph:
                     "trust_profile": n.trust_profile,
                     "phase_confidence": n.phase_confidence_index,
                     "goals": n.goals,
+                    "origin_type": n.origin_type,
+                    "generation_tick": n.generation_tick,
+                    "parent_ids": n.parent_ids,
                     "node_type": n.node_type.value,
                     "coherence_credit": n.coherence_credit,
                     "decoherence_debt": n.decoherence_debt,
@@ -303,6 +319,9 @@ class CausalGraph:
                 refractory_period=node_data.get("refractory_period", 2.0),
                 base_threshold=node_data.get("base_threshold", 0.5),
                 phase=node_data.get("phase", 0.0),
+                origin_type=node_data.get("origin_type", "seed"),
+                generation_tick=node_data.get("generation_tick", 0),
+                parent_ids=node_data.get("parent_ids"),
             )
             goals = node_data.get("goals")
             if goals is not None:
