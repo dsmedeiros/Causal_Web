@@ -31,6 +31,7 @@
     <Compile Include="engine\simulation.py" />
     <Compile Include="engine\tick_engine.py" />
     <Compile Include="engine\log_interpreter.py" />
+    <Compile Include="engine\tick_router.py" />
     <Compile Include="engine\tick_seeder.py" />
     <Compile Include="engine\__init__.py" />
     <Compile Include="gui\dashboard.py" />
