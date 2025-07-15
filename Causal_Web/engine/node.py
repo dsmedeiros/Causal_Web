@@ -15,6 +15,7 @@ class NodeType(Enum):
     CLASSICALIZED = "classicalized"
     ENTANGLED = "entangled"
     REFRACTIVE = "refractive"
+    NULL = "null"
 
 
 
@@ -53,9 +54,11 @@ class Node:
         self.entangled_with: Set[str] = set()
         self.coherence_velocity: float = 0.0
         self.node_type: NodeType = NodeType.NORMAL
+        self.prev_node_type: NodeType = NodeType.NORMAL
         self.coherence_credit: float = 0.0
         self.decoherence_debt: float = 0.0
         self.phase_lock: bool = False
+        self.collapse_pressure: float = 0.0
 
         # ---- Phase 4 additions ----
         self.memory_window = 20
@@ -162,7 +165,7 @@ class Node:
                 idx = int(np.argmax(np.abs(spectrum[1:])) + 1)
                 self.law_wave_frequency = idx / window
 
-    def update_classical_state(self, decoherence_strength, tick_time=None, threshold=0.4, streak_required=2):
+    def update_classical_state(self, decoherence_strength, tick_time=None, graph=None, threshold=0.4, streak_required=2):
         if decoherence_strength > threshold:
             self._decoherence_streak += 1
         else:
@@ -174,20 +177,27 @@ class Node:
                 record = {"tick": tick_time, "node": self.id, "event": "collapse_start"}
                 with open("output/collapse_front_log.json", "a") as f:
                     f.write(json.dumps(record) + "\n")
+                if graph is not None:
+                    graph.emit_law_wave(self.id, tick_time)
             self.update_node_type()
 
     def update_node_type(self) -> None:
+        old = self.node_type
         if self.is_classical:
             self.node_type = NodeType.CLASSICALIZED
             self.phase_lock = True
-            return
-
-        if self.decoherence_debt > 3.0:
+        elif self.decoherence_debt > 3.0:
             self.node_type = NodeType.DECOHERENT
         elif self.entangled_with:
             self.node_type = NodeType.ENTANGLED
         else:
             self.node_type = NodeType.NORMAL
+
+        if old != self.node_type:
+            with open("output/node_state_map.json", "a") as f:
+                rec = {"node": self.id, "from": old.value, "to": self.node_type.value}
+                f.write(json.dumps(rec) + "\n")
+        self.prev_node_type = old
 
     def schedule_tick(self, tick_time, incoming_phase):
         self.incoming_phase_queue[tick_time].append(incoming_phase)
