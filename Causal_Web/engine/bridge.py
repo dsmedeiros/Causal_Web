@@ -95,11 +95,13 @@ class Bridge:
         decoherence_a = node_a.compute_decoherence_field(tick_time)
         decoherence_b = node_b.compute_decoherence_field(tick_time)
         avg_decoherence = (decoherence_a + decoherence_b) / 2
+        debt_influence = (node_a.decoherence_debt + node_b.decoherence_debt) / 6.0
+        rupture_chance = avg_decoherence + debt_influence
         self.decoherence_exposure.append(avg_decoherence)
         if len(self.decoherence_exposure) > 20:
             self.decoherence_exposure.pop(0)
 
-        if self.probabilistic_bridge_failure(avg_decoherence):
+        if self.probabilistic_bridge_failure(rupture_chance):
             self.last_rupture_tick = tick_time
             self._log_event(tick_time, "bridge_ruptured", avg_decoherence)
             self.rupture_history.append((tick_time, avg_decoherence))

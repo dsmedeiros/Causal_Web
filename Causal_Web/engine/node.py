@@ -2,10 +2,19 @@ import math
 import cmath
 from collections import defaultdict, deque
 from dataclasses import dataclass
+from enum import Enum
 from typing import Set, List, Dict, Optional
 import numpy as np
 import json
 from config import Config
+
+
+class NodeType(Enum):
+    NORMAL = "normal"
+    DECOHERENT = "decoherent"
+    CLASSICALIZED = "classicalized"
+    ENTANGLED = "entangled"
+    REFRACTIVE = "refractive"
 
 
 
@@ -43,6 +52,10 @@ class Node:
         self.law_wave_frequency: float = 0.0
         self.entangled_with: Set[str] = set()
         self.coherence_velocity: float = 0.0
+        self.node_type: NodeType = NodeType.NORMAL
+        self.coherence_credit: float = 0.0
+        self.decoherence_debt: float = 0.0
+        self.phase_lock: bool = False
 
         # ---- Phase 4 additions ----
         self.memory_window = 20
@@ -69,10 +82,16 @@ class Node:
         if len(phases) < 2:
             self.coherence = 1.0
             self._update_law_wave()
+            self.coherence_credit += 0.1
+            self.decoherence_debt = max(0.0, self.decoherence_debt - 0.1)
             return self.coherence
         complex_vecs = [cmath.rect(1.0, p % (2 * math.pi)) for p in phases]
         vector_sum = sum(complex_vecs)
         self.coherence = abs(vector_sum) / len(phases)
+        if self.coherence > 0.8:
+            self.coherence_credit += self.coherence - 0.8
+        else:
+            self.decoherence_debt += 0.1
         self._update_law_wave()
         return self.coherence
 
@@ -80,11 +99,16 @@ class Node:
         phases = self.pending_superpositions.get(tick_time, [])
         if len(phases) < 2:
             self.decoherence = 0.0
+            self.decoherence_debt = max(0.0, self.decoherence_debt - 0.1)
             return self.decoherence
         normalized = [(p % (2 * math.pi)) for p in phases]
         mean_phase = sum(normalized) / len(normalized)
         variance = sum((p - mean_phase) ** 2 for p in normalized) / len(normalized)
         self.decoherence = variance
+        if self.decoherence > 0.4:
+            self.decoherence_debt += self.decoherence - 0.4
+        else:
+            self.coherence_credit += 0.05
         return self.decoherence
 
     # ------------------------------------------------------------------
@@ -150,6 +174,20 @@ class Node:
                 record = {"tick": tick_time, "node": self.id, "event": "collapse_start"}
                 with open("output/collapse_front_log.json", "a") as f:
                     f.write(json.dumps(record) + "\n")
+            self.update_node_type()
+
+    def update_node_type(self) -> None:
+        if self.is_classical:
+            self.node_type = NodeType.CLASSICALIZED
+            self.phase_lock = True
+            return
+
+        if self.decoherence_debt > 3.0:
+            self.node_type = NodeType.DECOHERENT
+        elif self.entangled_with:
+            self.node_type = NodeType.ENTANGLED
+        else:
+            self.node_type = NodeType.NORMAL
 
     def schedule_tick(self, tick_time, incoming_phase):
         self.incoming_phase_queue[tick_time].append(incoming_phase)
@@ -198,11 +236,15 @@ class Node:
         # Update memory and adapt behaviour
         self._update_memory(tick_time, origin)
         self._adapt_behavior()
+        self.update_node_type()
+
+        if origin != "self" and any(e.target == origin for e in graph.get_edges_from(self.id)):
+            with open("output/refraction_log.json", "a") as f:
+                f.write(json.dumps({"tick": tick_time, "recursion_from": origin, "node": self.id}) + "\n")
         
         # Recursive phase propagation with refraction
         for edge in graph.get_edges_from(self.id):
             target = graph.get_node(edge.target)
-            # Import here to avoid circular dependency during module load
             from .tick_engine import kappa
             delay = edge.adjusted_delay(
                 self.law_wave_frequency,
@@ -211,6 +253,19 @@ class Node:
             )
             attenuated = phase * edge.attenuation
             shifted = attenuated + edge.phase_shift
+
+            if target.node_type == NodeType.DECOHERENT:
+                alts = graph.get_edges_from(target.id)
+                if alts:
+                    alt = alts[0]
+                    alt_tgt = graph.get_node(alt.target)
+                    alt_delay = alt.adjusted_delay(target.law_wave_frequency, alt_tgt.law_wave_frequency, kappa)
+                    alt_tgt.schedule_tick(tick_time + delay + alt_delay, shifted)
+                    target.node_type = NodeType.REFRACTIVE
+                    with open("output/refraction_log.json", "a") as f:
+                        f.write(json.dumps({"tick": tick_time, "from": self.id, "via": target.id, "to": alt_tgt.id}) + "\n")
+                    continue
+
             target.schedule_tick(tick_time + delay, shifted)
 
         if origin == "self":
@@ -261,6 +316,7 @@ class Node:
                 del self.pending_superpositions[global_tick]
             self._update_memory(global_tick)
             self._adapt_behavior()
+            self.update_node_type()
         else:
             self.current_threshold = max(self.base_threshold, self.current_threshold - 0.01)
 
