@@ -2,7 +2,7 @@
 
 import time
 from threading import Thread
-from config import Config
+from ..config import Config
 
 
 def simulation_loop():

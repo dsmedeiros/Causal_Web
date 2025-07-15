@@ -3,7 +3,7 @@ import random
 from typing import Dict, List
 
 from .graph import CausalGraph
-from config import Config
+from ..config import Config
 
 
 class TickSeeder:
@@ -32,9 +32,18 @@ class TickSeeder:
     # ------------------------------------------------------------
     def _seed_static(self, global_tick: int) -> None:
         for source in getattr(self.graph, "tick_sources", []):
-            node = self.graph.get_node(source.get("node_id"))
-            interval = source.get("tick_interval", 1)
-            phase = source.get("phase", 0.0)
+            if isinstance(source, str):
+                node_id = source
+                interval = 1
+                phase = 0.0
+            elif isinstance(source, dict):
+                node_id = source.get("node_id")
+                interval = source.get("tick_interval", 1)
+                phase = source.get("phase", 0.0)
+            else:
+                continue
+
+            node = self.graph.get_node(node_id)
             if node and not node.is_classical and global_tick % interval == 0:
                 node.apply_tick(global_tick, phase, self.graph, origin="seed")
                 self._log({
