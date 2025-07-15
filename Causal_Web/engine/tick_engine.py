@@ -39,7 +39,7 @@ def apply_global_forcing(tick: int) -> None:
 
 def clear_output_directory():
     """Remove or truncate JSON output files from previous runs."""
-    out_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "output"))
+    out_dir = Config.output_dir
     if not os.path.isdir(out_dir):
         return
     for name in os.listdir(out_dir):
@@ -49,7 +49,7 @@ def clear_output_directory():
 
 def build_graph():
     clear_output_directory()
-    graph.load_from_file("input/graph.json")
+    graph.load_from_file(Config.input_path("graph.json"))
     global seeder
     seeder = TickSeeder(graph)
 
@@ -85,7 +85,7 @@ def log_curvature_per_tick(global_tick):
         df = abs(src.law_wave_frequency - tgt.law_wave_frequency)
         curved = edge.adjusted_delay(src.law_wave_frequency, tgt.law_wave_frequency, kappa)
         log[f"{edge.source}->{edge.target}"] = {"delta_f": round(df,4), "curved_delay": round(curved,4)}
-    with open("output/curvature_log.json", "a") as f:
+    with open(Config.output_path("curvature_log.json"), "a") as f:
         f.write(json.dumps({str(global_tick): log}) + "\n")
 
 def log_bridge_states(global_tick):
@@ -101,7 +101,7 @@ def log_bridge_states(global_tick):
         }
         for b in graph.bridges
     }
-    with open("output/bridge_state_log.json", "a") as f:
+    with open(Config.output_path("bridge_state_log.json"), "a") as f:
         f.write(json.dumps({str(global_tick): snapshot}) + "\n")
 
 
@@ -113,14 +113,14 @@ def log_meta_node_ticks(global_tick):
         if member_ticks:
             events[meta_id] = member_ticks
         if events:
-            with open("output/meta_node_tick_log.json", "a") as f:
+            with open(Config.output_path("meta_node_tick_log.json"), "a") as f:
                 f.write(json.dumps({str(global_tick): events}) + "\n")
 
 
 def snapshot_graph(global_tick):
     interval = getattr(Config, "snapshot_interval", 0)
     if interval and global_tick % interval == 0:
-        path_dir = os.path.join("output", "runtime_graph_snapshots")
+        path_dir = os.path.join(Config.output_dir, "runtime_graph_snapshots")
         os.makedirs(path_dir, exist_ok=True)
         path = os.path.join(path_dir, f"graph_{global_tick}.json")
         with open(path, "w") as f:
@@ -203,7 +203,7 @@ def log_metrics_per_tick(global_tick):
                 record["stable"] = 0
         if record["stable"] >= 10:
             node.refractory_period = max(1.0, node.refractory_period - 0.1)
-            with open("output/law_drift_log.json", "a") as f:
+            with open(Config.output_path("law_drift_log.json"), "a") as f:
                 f.write(json.dumps({"tick": global_tick, "node": node_id, "new_refractory_period": node.refractory_period}) + "\n")
             record["stable"] = 0
 
@@ -220,25 +220,25 @@ def log_metrics_per_tick(global_tick):
     clusters = graph.detect_clusters()
     graph.create_meta_nodes(clusters)
 
-    with open("output/cluster_log.json", "a") as f:
+    with open(Config.output_path("cluster_log.json"), "a") as f:
         f.write(json.dumps({str(global_tick): clusters}) + "\n")
 
-    with open("output/law_wave_log.json", "a") as f:
+    with open(Config.output_path("law_wave_log.json"), "a") as f:
         f.write(json.dumps({str(global_tick): law_wave_log}) + "\n")
 
-    with open("output/decoherence_log.json", "a") as f:
+    with open(Config.output_path("decoherence_log.json"), "a") as f:
         f.write(json.dumps({str(global_tick): decoherence_log}) + "\n")
-    with open("output/coherence_log.json", "a") as f:
+    with open(Config.output_path("coherence_log.json"), "a") as f:
         f.write(json.dumps({str(global_tick): coherence_log}) + "\n")
-    with open("output/coherence_velocity_log.json", "a") as f:
+    with open(Config.output_path("coherence_velocity_log.json"), "a") as f:
         f.write(json.dumps({str(global_tick): coherence_velocity}) + "\\n")
-    with open("output/classicalization_map.json", "a") as f:
+    with open(Config.output_path("classicalization_map.json"), "a") as f:
         f.write(json.dumps({str(global_tick): classical_state}) + "\n")
-    with open("output/interference_log.json", "a") as f:
+    with open(Config.output_path("interference_log.json"), "a") as f:
         f.write(json.dumps({str(global_tick): interference_log}) + "\n")
-    with open("output/tick_density_map.json", "a") as f:
+    with open(Config.output_path("tick_density_map.json"), "a") as f:
         f.write(json.dumps({str(global_tick): interference_log}) + "\n")
-    with open("output/node_state_log.json", "a") as f:
+    with open(Config.output_path("node_state_log.json"), "a") as f:
         f.write(json.dumps({str(global_tick): {"type": type_log, "credit": credit_log, "debt": debt_log}}) + "\n")
 
 
@@ -264,7 +264,7 @@ def simulation_loop():
             for obs in observers:
                 obs.observe(graph, global_tick)
                 inferred = obs.infer_field_state()
-                with open("output/observer_perceived_field.json", "a") as f:
+                with open(Config.output_path("observer_perceived_field.json"), "a") as f:
                     f.write(json.dumps({"tick": global_tick, "observer": obs.id, "state": inferred}) + "\n")
 
                 actual = {n.id: len(n.tick_history) for n in graph.nodes.values()}
@@ -274,7 +274,7 @@ def simulation_loop():
                     if actual.get(nid, 0) != inferred.get(nid, 0)
                 }
                 if diff:
-                    with open("output/observer_disagreement_log.json", "a") as f:
+                    with open(Config.output_path("observer_disagreement_log.json"), "a") as f:
                         f.write(json.dumps({"tick": global_tick, "observer": obs.id, "diff": diff}) + "\n")
 
             for bridge in graph.bridges:
@@ -292,14 +292,14 @@ def simulation_loop():
     threading.Thread(target=run, daemon=True).start()
 
 def write_output():
-    with open("output/tick_trace.json", "w") as f:
+    with open(Config.output_path("tick_trace.json"), "w") as f:
         json.dump(graph.to_dict(), f, indent=2)
-    print("✅ Tick trace saved to output/tick_trace.json")
+    print(f"✅ Tick trace saved to {Config.output_path('tick_trace.json')}")
 
     inspection = graph.inspect_superpositions()
-    with open("output/inspection_log.json", "w") as f:
+    with open(Config.output_path("inspection_log.json"), "w") as f:
         json.dump(inspection, f, indent=2)
-    print("✅ Superposition inspection saved to output/inspection_log.json")
+    print(f"✅ Superposition inspection saved to {Config.output_path('inspection_log.json')}")
 
     export_curvature_map()
     export_regional_maps()
@@ -310,7 +310,7 @@ def export_curvature_map():
     """Aggregate curvature logs into a D3-friendly dataset."""
     grid = []
     try:
-        with open("output/curvature_log.json") as f:
+        with open(Config.output_path("curvature_log.json")) as f:
             for line in f:
                 data = json.loads(line.strip())
                 tick, edges = next(iter(data.items()))
@@ -326,16 +326,16 @@ def export_curvature_map():
     except FileNotFoundError:
         return
 
-    with open("output/curvature_map.json", "w") as f:
+    with open(Config.output_path("curvature_map.json"), "w") as f:
         json.dump(grid, f, indent=2)
-    print("✅ Curvature map exported to output/curvature_map.json")
+    print(f"✅ Curvature map exported to {Config.output_path('curvature_map.json')}")
 
 
 def export_global_diagnostics():
     """Simple run-level metrics for diagnostics."""
     deco_lines = []
     try:
-        with open("output/decoherence_log.json") as f:
+        with open(Config.output_path("decoherence_log.json")) as f:
             for line in f:
                 deco_lines.append(json.loads(line))
     except FileNotFoundError:
@@ -356,7 +356,7 @@ def export_global_diagnostics():
 
     collapse_events = 0
     try:
-        with open("output/classicalization_map.json") as f:
+        with open(Config.output_path("classicalization_map.json")) as f:
             for line in f:
                 states = json.loads(line)
                 collapse_events += sum(1 for v in next(iter(states.values())).values() if v)
@@ -364,7 +364,7 @@ def export_global_diagnostics():
         pass
     resilience = 0
     try:
-        with open("output/law_wave_log.json") as f:
+        with open(Config.output_path("law_wave_log.json")) as f:
             resilience = sum(1 for _ in f)
     except FileNotFoundError:
         pass
@@ -381,7 +381,7 @@ def export_global_diagnostics():
         "collapse_resilience_index": collapse_resilience_index,
         "network_adaptivity_index": round(adaptivity, 3),
     }
-    with open("output/global_diagnostics.json", "w") as f:
+    with open(Config.output_path("global_diagnostics.json"), "w") as f:
         json.dump(diagnostics, f, indent=2)
     print("✅ Global diagnostics exported")
 
@@ -404,8 +404,8 @@ def export_regional_maps():
         key = f"{src_r}->{tgt_r}"
         matrix[key] = matrix.get(key, 0) + 1
 
-    with open("output/regional_pressure_map.json", "w") as f:
+    with open(Config.output_path("regional_pressure_map.json"), "w") as f:
         json.dump(regional_pressure, f, indent=2)
-    with open("output/cluster_influence_matrix.json", "w") as f:
+    with open(Config.output_path("cluster_influence_matrix.json"), "w") as f:
         json.dump(matrix, f, indent=2)
     print("✅ Regional influence maps exported")

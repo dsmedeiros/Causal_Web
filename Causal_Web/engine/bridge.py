@@ -3,6 +3,7 @@ import math
 from random import random
 from typing import Optional
 import json
+from ..config import Config
 
 from enum import Enum
 
@@ -83,7 +84,7 @@ class Bridge:
         }
         if conditions is not None:
             record["conditions"] = conditions
-        with open("output/bridge_dynamics_log.json", "a") as f:
+        with open(Config.output_path("bridge_dynamics_log.json"), "a") as f:
             f.write(json.dumps(record) + "\n")
 
     def update_state(self, tick: int) -> None:
@@ -115,7 +116,7 @@ class Bridge:
             target=self.node_b_id,
             coherence_at_event=value
         )
-        with open("output/event_log.json", "a") as f:
+        with open(Config.output_path("event_log.json"), "a") as f:
             f.write(json.dumps(event.__dict__) + "\n")
 
     def probabilistic_bridge_failure(self, decoherence_strength, rupture_threshold=0.3, rupture_prob=0.9):
@@ -132,7 +133,7 @@ class Bridge:
         if tick_time - self.last_active_tick >= inactive_threshold and self.current_strength > 0:
             self.current_strength = max(0.0, self.current_strength - 0.1)
             duration = tick_time - self.last_active_tick
-            with open("output/bridge_decay_log.json", "a") as f:
+            with open(Config.output_path("bridge_decay_log.json"), "a") as f:
                 f.write(json.dumps({"tick": tick_time, "bridge": self.bridge_id, "strength": self.current_strength, "duration": duration}) + "\n")
             if self.current_strength == 0.0:
                 self.active = False
@@ -148,7 +149,7 @@ class Bridge:
             self.active = True
             self.last_reform_tick = tick_time
             self.coherence_at_reform = coherence
-            with open("output/bridge_reformation_log.json", "a") as f:
+            with open(Config.output_path("bridge_reformation_log.json"), "a") as f:
                 f.write(json.dumps({"tick": tick_time, "bridge": self.bridge_id, "coherence": coherence}) + "\n")
             from . import tick_engine as te
             te.bridges_reformed_count += 1

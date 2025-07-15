@@ -9,10 +9,10 @@ from ..config import Config
 class TickSeeder:
     """Injects ticks into the graph under configurable strategies."""
 
-    def __init__(self, graph: CausalGraph, config: Dict = None, log_path: str = "output/tick_seed_log.json"):
+    def __init__(self, graph: CausalGraph, config: Dict = None, log_path: str = None):
         self.graph = graph
         self.config = config or getattr(Config, "seeding", {"strategy": "static"})
-        self.log_path = log_path
+        self.log_path = log_path or Config.output_path("tick_seed_log.json")
         self.seed_count = 0
 
     # ------------------------------------------------------------

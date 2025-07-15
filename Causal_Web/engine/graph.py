@@ -4,6 +4,7 @@ import math
 from .bridge import Bridge
 from .node import Node, Edge, NodeType
 from .meta_node import MetaNode
+from ..config import Config
 import json
 
 class CausalGraph:
@@ -322,9 +323,9 @@ class CausalGraph:
                 if other and other.node_type == NodeType.NULL:
                     print(f"[WARNING] Bridge {nid}<->{b} connected to NULL node")
         if self.void_nodes:
-            with open("output/void_node_map.json", "w") as f:
+            with open(Config.output_path("void_node_map.json"), "w") as f:
                 json.dump(self.void_nodes, f, indent=2)
-        with open("output/connectivity_log.json", "w") as f:
+        with open(Config.output_path("connectivity_log.json"), "w") as f:
             json.dump(connectivity_log, f, indent=2)
 
     # ------------------------------------------------------------
@@ -347,6 +348,6 @@ class CausalGraph:
                     visited.add(edge.target)
                     frontier.append((edge.target, dist + 1))
         if affected:
-            with open("output/law_wave_log.json", "a") as f:
+            with open(Config.output_path("law_wave_log.json"), "a") as f:
                 f.write(json.dumps({"tick": tick, "origin": origin_id, "affected": affected}) + "\n")
 
