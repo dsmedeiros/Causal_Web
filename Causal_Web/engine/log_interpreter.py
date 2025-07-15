@@ -198,11 +198,17 @@ class CWTLogInterpreter:
             return
         with open(path) as f:
             data = json.load(f)
-        counts = {
-            nid: len(n.get("ticks", [])) for nid, n in data.get("nodes", {}).items()
-        }
+        counts = {nid: len(n.get("ticks", [])) for nid, n in data.get("nodes", {}).items()}
+        layer_summary: Dict[str, Dict[str, int]] = {}
+        for nid, n in data.get("nodes", {}).items():
+            for tick in n.get("ticks", []):
+                layer = tick.get("layer", "tick")
+                layer_summary.setdefault(nid, {}).setdefault(layer, 0)
+                layer_summary[nid][layer] += 1
         if counts:
             self.summary["tick_counts"] = counts
+        if layer_summary:
+            self.summary["layer_summary"] = layer_summary
 
     # ------------------------------------------------------------
     def interpret_inspection(self) -> None:

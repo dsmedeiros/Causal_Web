@@ -114,10 +114,11 @@ class CausalAnalyst:
             "cluster": self._path("cluster_log.json"),
             "law_drift": self._path("law_drift_log.json"),
             "event": self._path("event_log.json"),
+            "layer_transitions": self._path("layer_transition_log.json"),
         }
 
         for key, path in paths.items():
-            if key == "event":
+            if key in ("event", "layer_transitions"):
                 self.logs[key] = _load_event_log(path)
             elif path.endswith(".json") and not path.endswith("tick_trace.json"):
                 self.logs[key] = _load_json_lines(path)
@@ -295,6 +296,16 @@ class CausalAnalyst:
                         ExplanationEvent((tick, tick), list(cluster), "rule:meta_node_onset", text)
                     )
 
+        # Rule: Layer Transition Events
+        transitions = self.logs.get("layer_transitions", {})
+        for t in sorted(transitions):
+            for ev in transitions[t]:
+                if ev.get("from") == "decoherence" and ev.get("to") == "collapse":
+                    text = f"Node {ev['node']} transitioned from decoherence to collapse at tick {t}."
+                    self.explanations.append(
+                        ExplanationEvent((t, t), [ev['node']], "rule:layer_transition", text)
+                    )
+
     # ------------------------------------------------------------
     def generate_explanation_log(self) -> List[Dict]:
         data = [
@@ -423,6 +434,21 @@ class CausalAnalyst:
         return data
 
     # ------------------------------------------------------------
+    def summarize_layer_transitions(self) -> None:
+        events = self.logs.get("layer_transitions", {})
+        counts: Dict[str, Dict[str, int]] = {}
+        for tick, lst in events.items():
+            for ev in lst:
+                node = ev.get("node")
+                to_layer = ev.get("to")
+                counts.setdefault(node, {}).setdefault(to_layer, 0)
+                counts[node][to_layer] += 1
+        path = os.path.join(self.output_dir, "layer_transition_events.json")
+        with open(path, "w") as f:
+            json.dump(counts, f, indent=2)
+        self.summary["layer_transition_events"] = counts
+
+    # ------------------------------------------------------------
     def run(self) -> None:
         self.load_logs()
         self.detect_transitions()
@@ -432,5 +458,6 @@ class CausalAnalyst:
         self.generate_explanation_narrative()
         self.generate_explanation_graph()
         self.generate_causal_timeline()
+        self.summarize_layer_transitions()
         print("✅ Causal explanations generated")
 
