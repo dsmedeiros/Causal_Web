@@ -386,6 +386,43 @@ class CausalAnalyst:
         return graph
 
     # ------------------------------------------------------------
+    def generate_causal_timeline(self) -> List[Dict]:
+        """Generate a simple tick-ordered timeline of notable events."""
+        timeline: Dict[int, List[Dict]] = {}
+
+        # Raw events from event_log.json
+        for tick, events in self.logs.get("event", {}).items():
+            for ev in events:
+                entry = {
+                    "type": ev.get("event_type"),
+                    "nodes": [n for n in (ev.get("source"), ev.get("target")) if n],
+                }
+                timeline.setdefault(tick, []).append(entry)
+
+        # Node collapses
+        for node, tick in self._collapse_events().items():
+            timeline.setdefault(tick, []).append({"type": "node_collapsed", "nodes": [node]})
+
+        # Detected decoherence spikes
+        for node, spikes in self.transitions.get("decoherence_spikes", {}).items():
+            for start, end, val in spikes:
+                timeline.setdefault(end, []).append(
+                    {
+                        "type": "decoherence_spike",
+                        "nodes": [node],
+                        "start": start,
+                        "end": end,
+                        "value": val,
+                    }
+                )
+
+        data = [{"tick": t, "events": timeline[t]} for t in sorted(timeline)]
+        path = os.path.join(self.output_dir, "causal_timeline.json")
+        with open(path, "w") as f:
+            json.dump(data, f, indent=2)
+        return data
+
+    # ------------------------------------------------------------
     def run(self) -> None:
         self.load_logs()
         self.detect_transitions()
@@ -394,5 +431,6 @@ class CausalAnalyst:
         self.generate_explanation_log()
         self.generate_explanation_narrative()
         self.generate_explanation_graph()
+        self.generate_causal_timeline()
         print("✅ Causal explanations generated")
 
