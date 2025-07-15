@@ -76,7 +76,7 @@ class Node:
     def compute_phase(self, tick_time):
         base = 2 * math.pi * self.frequency * tick_time
         jitter = Config.phase_jitter
-        if jitter["amplitude"]:
+        if jitter["amplitude"] and jitter.get("period", 0):
             base += jitter["amplitude"] * math.sin(2 * math.pi * tick_time / jitter["period"])
         return base
 
@@ -367,7 +367,9 @@ class Edge:
         base = self.delay + int(self.density)
         delta_f = abs(source_freq - target_freq)
         modifier = kappa * math.sin(2 * math.pi * delta_f) * self.density
-        return int(round(base + modifier))
+        adjusted = base + modifier
+        # ensure delay remains positive to avoid scheduling errors
+        return max(1, int(round(adjusted)))
 
     def propagate_phase(self, phase, global_tick, graph):
         target_node = graph.get_node(self.target)
