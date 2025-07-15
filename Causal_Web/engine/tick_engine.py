@@ -25,6 +25,15 @@ boundary_interactions_count = 0
 bridges_reformed_count = 0
 _decay_durations = []
 
+# --- Propagation tracking ---
+_sip_pending = []  # list of (child_id, parents, spawn_tick)
+_csp_seeds = []  # list of (seed_id, parent_id, x, y, spawn_tick)
+
+_sip_success_count = 0
+_sip_failure_count = 0
+_csp_success_count = 0
+_csp_failure_count = 0
+
 # --- Phase 8 parameters ---
 SIP_COHERENCE_DURATION = 3
 SIP_DECOHERENCE_THRESHOLD = 0.5
@@ -188,12 +197,21 @@ def dynamic_bridge_management(global_tick):
 
 def _update_growth_log(tick: int) -> None:
     """Record structural growth per tick."""
+    global _sip_success_count, _sip_failure_count, _csp_success_count, _csp_failure_count
     record = {
         "tick": tick,
         "node_count": len(graph.nodes),
+        "sip_success": _sip_success_count,
+        "sip_failures": _sip_failure_count,
+        "csp_success": _csp_success_count,
+        "csp_failures": _csp_failure_count,
     }
     with open(Config.output_path("structural_growth_log.json"), "a") as f:
         f.write(json.dumps(record) + "\n")
+    _sip_success_count = 0
+    _sip_failure_count = 0
+    _csp_success_count = 0
+    _csp_failure_count = 0
 
 
 def _spawn_sip_child(parent, tick: int):
@@ -226,6 +244,166 @@ def _spawn_sip_child(parent, tick: int):
             + "\n"
         )
     _update_growth_log(tick)
+    global _sip_pending, _sip_success_count
+    _sip_pending.append((child_id, [parent.id], tick))
+    _sip_success_count += 1
+
+
+def _spawn_sip_recomb_child(parent_a, parent_b, tick: int):
+    """Generate a new node via dual-parent recombination."""
+    child_id = f"{parent_a.id}_{parent_b.id}_R{tick}"
+    if child_id in graph.nodes:
+        return
+    freq = (parent_a.frequency + parent_b.frequency) / 2 + np.random.normal(
+        0, Config.SIP_MUTATION_SCALE
+    )
+    x = (parent_a.x + parent_b.x) / 2 + np.random.uniform(-5, 5)
+    y = (parent_a.y + parent_b.y) / 2 + np.random.uniform(-5, 5)
+    graph.add_node(
+        child_id,
+        x=x,
+        y=y,
+        frequency=freq,
+        origin_type="SIP_RECOMB",
+        generation_tick=tick,
+        parent_ids=[parent_a.id, parent_b.id],
+    )
+    graph.add_edge(parent_a.id, child_id)
+    graph.add_edge(parent_b.id, child_id)
+    with open(Config.output_path("node_emergence_log.json"), "a") as f:
+        f.write(
+            json.dumps(
+                {
+                    "id": child_id,
+                    "tick": tick,
+                    "parents": [parent_a.id, parent_b.id],
+                    "origin_type": "SIP_RECOMB",
+                    "coherence": (parent_a.coherence + parent_b.coherence) / 2,
+                    "sigma_phi": freq,
+                }
+            )
+            + "\n"
+        )
+    global _sip_pending, _sip_success_count
+    _sip_pending.append((child_id, [parent_a.id, parent_b.id], tick))
+    _sip_success_count += 1
+
+
+def _check_sip_failures(tick: int) -> None:
+    """Assess pending SIP offspring for stabilization failures."""
+    global _sip_pending, _sip_failure_count
+    for child_id, parents, start in list(_sip_pending):
+        if tick - start < Config.SIP_STABILIZATION_WINDOW:
+            continue
+        node = graph.get_node(child_id)
+        success = node and len(node.tick_history) > 0 and node.coherence > 0.5
+        if not success:
+            if node:
+                graph.edges = [
+                    e
+                    for e in graph.edges
+                    if e.source != child_id and e.target != child_id
+                ]
+                del graph.nodes[child_id]
+            for pid in parents:
+                p = graph.get_node(pid)
+                if p:
+                    p.decoherence_debt += Config.SIP_FAILURE_ENTROPY_INJECTION
+            with open(Config.output_path("propagation_failure_log.json"), "a") as f:
+                f.write(
+                    json.dumps(
+                        {
+                            "tick": tick,
+                            "type": "SIP_FAILURE",
+                            "parent": parents[0],
+                            "reason": "Insufficient coherence after "
+                            f"{Config.SIP_STABILIZATION_WINDOW} ticks",
+                            "entropy_injected": Config.SIP_FAILURE_ENTROPY_INJECTION,
+                        }
+                    )
+                    + "\n"
+                )
+            _sip_failure_count += 1
+        _sip_pending.remove((child_id, parents, start))
+
+
+def trigger_csp(parent_id: str, x: float, y: float, tick: int) -> None:
+    """Initiate collapse-seeded propagation from the given location."""
+    for i in range(Config.CSP_MAX_NODES):
+        seed_id = f"{parent_id}_CSPseed{i}_{tick}"
+        dx = np.random.uniform(-Config.CSP_RADIUS, Config.CSP_RADIUS)
+        dy = np.random.uniform(-Config.CSP_RADIUS, Config.CSP_RADIUS)
+        _csp_seeds.append(
+            {
+                "id": seed_id,
+                "parent": parent_id,
+                "x": x + dx,
+                "y": y + dy,
+                "tick": tick,
+            }
+        )
+
+
+def _process_csp_seeds(tick: int) -> None:
+    global _csp_seeds, _csp_success_count, _csp_failure_count
+    for seed in list(_csp_seeds):
+        if tick - seed["tick"] < Config.CSP_STABILIZATION_WINDOW:
+            continue
+        coherence = np.random.rand()
+        if coherence > 0.5:
+            node_id = seed["id"].replace("CSPseed", "CSP")
+            graph.add_node(
+                node_id,
+                x=seed["x"],
+                y=seed["y"],
+                origin_type="CSP",
+                generation_tick=tick,
+                parent_ids=[seed["parent"]],
+            )
+            graph.add_edge(seed["parent"], node_id)
+            with open(Config.output_path("node_emergence_log.json"), "a") as f:
+                f.write(
+                    json.dumps(
+                        {
+                            "id": node_id,
+                            "tick": tick,
+                            "parents": [seed["parent"]],
+                            "origin_type": "CSP",
+                        }
+                    )
+                    + "\n"
+                )
+            with open(Config.output_path("collapse_chain_log.json"), "a") as f:
+                f.write(
+                    json.dumps(
+                        {
+                            "tick": tick,
+                            "source": seed["parent"],
+                            "children_spawned": [node_id],
+                        }
+                    )
+                    + "\n"
+                )
+            _csp_success_count += 1
+        else:
+            parent = graph.get_node(seed["parent"])
+            if parent:
+                parent.decoherence_debt += Config.CSP_ENTROPY_INJECTION
+            with open(Config.output_path("propagation_failure_log.json"), "a") as f:
+                f.write(
+                    json.dumps(
+                        {
+                            "tick": tick,
+                            "type": "CSP_FAILURE",
+                            "parent": seed["parent"],
+                            "reason": "Seed failed to cohere",
+                            "entropy_injected": Config.CSP_ENTROPY_INJECTION,
+                        }
+                    )
+                    + "\n"
+                )
+            _csp_failure_count += 1
+        _csp_seeds.remove(seed)
 
 
 def _update_simulation_state(
@@ -244,6 +422,8 @@ def _update_simulation_state(
 
 def check_propagation(tick: int) -> None:
     """Evaluate nodes for propagation triggers."""
+    _check_sip_failures(tick)
+    _process_csp_seeds(tick)
     for node in list(graph.nodes.values()):
         if (
             node.sip_streak >= SIP_COHERENCE_DURATION
@@ -251,6 +431,26 @@ def check_propagation(tick: int) -> None:
         ):
             _spawn_sip_child(node, tick)
             node.sip_streak = 0
+
+    # recombination across stable, trusted bridges
+    for bridge in graph.bridges:
+        if not bridge.active or bridge.state.name != "STABLE":
+            continue
+        if bridge.trust_score < Config.SIP_RECOMB_MIN_TRUST:
+            continue
+        a = graph.get_node(bridge.node_a_id)
+        b = graph.get_node(bridge.node_b_id)
+        if not a or not b:
+            continue
+        if (
+            a.sip_streak >= SIP_COHERENCE_DURATION
+            and b.sip_streak >= SIP_COHERENCE_DURATION
+            and a.decoherence_debt < SIP_DECOHERENCE_THRESHOLD
+            and b.decoherence_debt < SIP_DECOHERENCE_THRESHOLD
+        ):
+            _spawn_sip_recomb_child(a, b, tick)
+            a.sip_streak = 0
+            b.sip_streak = 0
 
 
 def _compute_metrics(node, tick_time):

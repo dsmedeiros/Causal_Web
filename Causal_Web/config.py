@@ -37,3 +37,20 @@ class Config:
         "strategy": "static",  # static or probabilistic
         "probability": 0.1,  # used when strategy == "probabilistic"
     }
+
+    # SIP recombination
+    SIP_RECOMB_MIN_TRUST = 0.75
+    SIP_MUTATION_SCALE = 0.005
+
+    # SIP failure
+    SIP_STABILIZATION_WINDOW = 5
+    SIP_FAILURE_ENTROPY_INJECTION = 0.1
+
+    # CSP
+    CSP_RADIUS = 80
+    CSP_MAX_NODES = 3
+    CSP_TICK_BURST = 25
+    CSP_STABILIZATION_WINDOW = 6
+    CSP_COLLAPSE_INTENSITY_THRESHOLD = 0.4
+    CSP_DECOHERENCE_THRESHOLD = 0.3
+    CSP_ENTROPY_INJECTION = 0.2

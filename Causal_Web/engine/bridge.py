@@ -16,6 +16,7 @@ class BridgeState(Enum):
     RUPTURED = "ruptured"
     DORMANT = "dormant"
 
+
 @dataclass
 class BridgeEvent:
     tick: int
@@ -25,19 +26,22 @@ class BridgeEvent:
     target: str
     coherence_at_event: Optional[float] = None
 
+
 class Bridge:
-    def __init__(self,
-                 node_a_id,
-                 node_b_id,
-                 bridge_type="braided",
-                 phase_offset=0.0,
-                 drift_tolerance=None,
-                 decoherence_limit=None,
-                 initial_strength=1.0,
-                 medium_type="standard",
-                 mutable=True,
-                 seeded=True,
-                 formed_at_tick=0):
+    def __init__(
+        self,
+        node_a_id,
+        node_b_id,
+        bridge_type="braided",
+        phase_offset=0.0,
+        drift_tolerance=None,
+        decoherence_limit=None,
+        initial_strength=1.0,
+        medium_type="standard",
+        mutable=True,
+        seeded=True,
+        formed_at_tick=0,
+    ):
         self.node_a_id = node_a_id
         self.node_b_id = node_b_id
         self.bridge_type = bridge_type  # "braided", "mirror", "unidirectional", etc.
@@ -80,7 +84,7 @@ class Bridge:
             "target": self.node_b_id,
             "event": event,
             "tick": tick,
-            "seeded": self.seeded
+            "seeded": self.seeded,
         }
         if conditions is not None:
             record["conditions"] = conditions
@@ -95,7 +99,12 @@ class Bridge:
             else:
                 self.state = BridgeState.RUPTURED
         else:
-            avg = sum(self.decoherence_exposure[-5:]) / len(self.decoherence_exposure[-5:]) if self.decoherence_exposure else 0.0
+            avg = (
+                sum(self.decoherence_exposure[-5:])
+                / len(self.decoherence_exposure[-5:])
+                if self.decoherence_exposure
+                else 0.0
+            )
             self.fatigue += avg
             if self.fatigue > 3.0:
                 self.state = BridgeState.RUPTURING
@@ -114,14 +123,18 @@ class Bridge:
             bridge_id=self.bridge_id,
             source=self.node_a_id,
             target=self.node_b_id,
-            coherence_at_event=value
+            coherence_at_event=value,
         )
         with open(Config.output_path("event_log.json"), "a") as f:
             f.write(json.dumps(event.__dict__) + "\n")
 
-    def probabilistic_bridge_failure(self, decoherence_strength, rupture_threshold=0.3, rupture_prob=0.9):
+    def probabilistic_bridge_failure(
+        self, decoherence_strength, rupture_threshold=0.3, rupture_prob=0.9
+    ):
         if decoherence_strength > rupture_threshold and random() < rupture_prob:
-            print(f"[BRIDGE] Probabilistic rupture at tick due to decoherence={decoherence_strength:.2f}")
+            print(
+                f"[BRIDGE] Probabilistic rupture at tick due to decoherence={decoherence_strength:.2f}"
+            )
             self.active = False
             return True
         return False
@@ -130,39 +143,71 @@ class Bridge:
     def decay(self, tick_time, inactive_threshold=5):
         if self.last_active_tick is None:
             self.last_active_tick = tick_time
-        if tick_time - self.last_active_tick >= inactive_threshold and self.current_strength > 0:
+        if (
+            tick_time - self.last_active_tick >= inactive_threshold
+            and self.current_strength > 0
+        ):
             self.current_strength = max(0.0, self.current_strength - 0.1)
             duration = tick_time - self.last_active_tick
             with open(Config.output_path("bridge_decay_log.json"), "a") as f:
-                f.write(json.dumps({"tick": tick_time, "bridge": self.bridge_id, "strength": self.current_strength, "duration": duration}) + "\n")
+                f.write(
+                    json.dumps(
+                        {
+                            "tick": tick_time,
+                            "bridge": self.bridge_id,
+                            "strength": self.current_strength,
+                            "duration": duration,
+                        }
+                    )
+                    + "\n"
+                )
             if self.current_strength == 0.0:
                 self.active = False
                 from . import tick_engine as te
+
                 te._decay_durations.append(duration)
                 self._log_dynamics(tick_time, "decayed")
 
     def try_reform(self, tick_time, node_a, node_b, coherence_threshold=0.9):
         if not self.reformable or self.active:
             return
-        coherence = (node_a.compute_coherence_level(tick_time) + node_b.compute_coherence_level(tick_time)) / 2
+        coherence = (
+            node_a.compute_coherence_level(tick_time)
+            + node_b.compute_coherence_level(tick_time)
+        ) / 2
         if coherence > coherence_threshold and random() < self.memory_weight:
             self.active = True
             self.last_reform_tick = tick_time
             self.coherence_at_reform = coherence
             with open(Config.output_path("bridge_reformation_log.json"), "a") as f:
-                f.write(json.dumps({"tick": tick_time, "bridge": self.bridge_id, "coherence": coherence}) + "\n")
+                f.write(
+                    json.dumps(
+                        {
+                            "tick": tick_time,
+                            "bridge": self.bridge_id,
+                            "coherence": coherence,
+                        }
+                    )
+                    + "\n"
+                )
             from . import tick_engine as te
+
             te.bridges_reformed_count += 1
             self._log_event(tick_time, "bridge_reformed", coherence)
             self._log_dynamics(tick_time, "recovered", {"coherence": coherence})
 
     def try_reactivate(self, tick_time, node_a, node_b, coherence_threshold=0.9):
-        coherence = (node_a.compute_coherence_level(tick_time) + node_b.compute_coherence_level(tick_time)) / 2
+        coherence = (
+            node_a.compute_coherence_level(tick_time)
+            + node_b.compute_coherence_level(tick_time)
+        ) / 2
         if not self.active and coherence > coherence_threshold:
             self.active = True
             self.last_reform_tick = tick_time
             self.coherence_at_reform = coherence
-            print(f"[BRIDGE] Reactivated at tick {tick_time} with coherence={coherence:.2f}")
+            print(
+                f"[BRIDGE] Reactivated at tick {tick_time} with coherence={coherence:.2f}"
+            )
             self._log_event(tick_time, "bridge_reformed", coherence)
             self._log_dynamics(tick_time, "recovered", {"coherence": coherence})
 
@@ -186,10 +231,16 @@ class Bridge:
         if a_collapsed == b_collapsed:
             return
 
-        if self.drift_tolerance is not None and phase_a is not None and phase_b is not None:
+        if (
+            self.drift_tolerance is not None
+            and phase_a is not None
+            and phase_b is not None
+        ):
             drift = abs((phase_a - phase_b + math.pi) % (2 * math.pi) - math.pi)
             if drift > self.drift_tolerance:
-                print(f"[BRIDGE] Drift too high at tick {tick_time}: {drift:.2f} > {self.drift_tolerance}")
+                print(
+                    f"[BRIDGE] Drift too high at tick {tick_time}: {drift:.2f} > {self.drift_tolerance}"
+                )
                 self._log_event(tick_time, "bridge_drift", drift)
                 self.trust_score = max(0.0, self.trust_score - 0.05)
                 self.reinforcement_streak = 0
@@ -211,6 +262,9 @@ class Bridge:
             self.rupture_history.append((tick_time, avg_decoherence))
             self.trust_score = max(0.0, self.trust_score - 0.1)
             self.reinforcement_streak = 0
+            from . import tick_engine as te
+
+            te.trigger_csp(self.bridge_id, node_a.x, node_a.y, tick_time)
             self.update_state(tick_time)
             return
 
@@ -220,10 +274,15 @@ class Bridge:
                 self.active = False
                 self.last_rupture_tick = tick_time
                 self._log_event(tick_time, "bridge_ruptured", avg_decoherence)
-                self._log_dynamics(tick_time, "ruptured", {"decoherence": avg_decoherence})
+                self._log_dynamics(
+                    tick_time, "ruptured", {"decoherence": avg_decoherence}
+                )
                 self.rupture_history.append((tick_time, avg_decoherence))
                 self.trust_score = max(0.0, self.trust_score - 0.1)
                 self.reinforcement_streak = 0
+                from . import tick_engine as te
+
+                te.trigger_csp(self.bridge_id, node_a.x, node_a.y, tick_time)
                 self.update_state(tick_time)
                 return
 
@@ -234,24 +293,32 @@ class Bridge:
         if self.bridge_type == "braided":
             if a_collapsed:
                 phase = node_a.get_phase_at(tick_time)
-                node_b.apply_tick(tick_time, phase + self.phase_offset, graph, origin="bridge")
+                node_b.apply_tick(
+                    tick_time, phase + self.phase_offset, graph, origin="bridge"
+                )
                 node_a.entangled_with.add(node_b.id)
                 node_b.entangled_with.add(node_a.id)
             elif b_collapsed:
                 phase = node_b.get_phase_at(tick_time)
-                node_a.apply_tick(tick_time, phase + self.phase_offset, graph, origin="bridge")
+                node_a.apply_tick(
+                    tick_time, phase + self.phase_offset, graph, origin="bridge"
+                )
                 node_a.entangled_with.add(node_b.id)
                 node_b.entangled_with.add(node_a.id)
         elif self.bridge_type in {"unidirectional", "mirror"}:
             if a_collapsed:
                 phase = node_a.get_phase_at(tick_time)
-                node_b.apply_tick(tick_time, phase + self.phase_offset, graph, origin="bridge")
+                node_b.apply_tick(
+                    tick_time, phase + self.phase_offset, graph, origin="bridge"
+                )
                 node_a.entangled_with.add(node_b.id)
                 node_b.entangled_with.add(node_a.id)
         if self.active:
             self.tick_load += 1
             if phase_a is not None and phase_b is not None:
-                self.phase_drift += abs((phase_a - phase_b + math.pi) % (2 * math.pi) - math.pi)
+                self.phase_drift += abs(
+                    (phase_a - phase_b + math.pi) % (2 * math.pi) - math.pi
+                )
             self.coherence_flux += (node_a.coherence + node_b.coherence) / 2
         self.last_activation = tick_time
         if self.active:
@@ -284,7 +351,11 @@ class Bridge:
             "last_active_tick": self.last_active_tick,
             "reformable": self.reformable,
             "memory_weight": self.memory_weight,
-            "avg_decoherence": sum(self.decoherence_exposure)/len(self.decoherence_exposure) if self.decoherence_exposure else 0.0,
+            "avg_decoherence": (
+                sum(self.decoherence_exposure) / len(self.decoherence_exposure)
+                if self.decoherence_exposure
+                else 0.0
+            ),
             "state": self.state.value,
             "fatigue": round(self.fatigue, 3),
             "tick_load": self.tick_load,

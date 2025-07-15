@@ -360,6 +360,64 @@ class CausalAnalyst:
                     )
                 )
 
+            children = info.get("children_spawned")
+            if src and children:
+                text = f"Node {children[0]} condensed from chaos following collapse of MetaNode {src}."
+                self.explanations.append(
+                    ExplanationEvent(
+                        (tick, tick), children, "rule:csp_generation", text
+                    )
+                )
+
+        # SIP recombination and failures
+        emergence_path = os.path.join(self.output_dir, "node_emergence_log.json")
+        if os.path.exists(emergence_path):
+            with open(emergence_path) as f:
+                for line in f:
+                    rec = json.loads(line)
+                    if rec.get("origin_type") == "SIP_RECOMB":
+                        c = rec.get("id")
+                        parents = rec.get("parents", [])
+                        text = f"Node {c} was generated via recombination of {parents[0]} and {parents[1]} across a stable bridge."
+                        self.explanations.append(
+                            ExplanationEvent(
+                                (rec.get("tick", 0), rec.get("tick", 0)),
+                                [c],
+                                "rule:sip_recomb",
+                                text,
+                            )
+                        )
+
+        fail_path = os.path.join(self.output_dir, "propagation_failure_log.json")
+        if os.path.exists(fail_path):
+            with open(fail_path) as f:
+                for line in f:
+                    rec = json.loads(line)
+                    if rec.get("type") == "SIP_FAILURE":
+                        node = rec.get("parent")
+                        text = f"Attempted SIP at node {node} failed to stabilize and increased local decoherence."
+                        self.explanations.append(
+                            ExplanationEvent(
+                                (rec.get("tick", 0), rec.get("tick", 0)),
+                                [node],
+                                "rule:propagation_failure",
+                                text,
+                            )
+                        )
+                    elif rec.get("type") == "CSP_FAILURE":
+                        loc = rec.get("parent")
+                        text = "Seed at location {loc} failed to cohere. Chaotic ticks dissipated into entropy.".format(
+                            loc=loc
+                        )
+                        self.explanations.append(
+                            ExplanationEvent(
+                                (rec.get("tick", 0), rec.get("tick", 0)),
+                                [loc],
+                                "rule:csp_seed_dissolution",
+                                text,
+                            )
+                        )
+
     # ------------------------------------------------------------
     def generate_explanation_log(self) -> List[Dict]:
         data = [
