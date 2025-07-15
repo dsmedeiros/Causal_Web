@@ -6,7 +6,7 @@ from enum import Enum
 from typing import Set, List, Dict, Optional
 import numpy as np
 import json
-from config import Config
+from ..config import Config
 
 
 class NodeType(Enum):
@@ -230,7 +230,7 @@ class Node:
         if self.node_type == NodeType.NULL:
             with open("output/boundary_interaction_log.json", "a") as f:
                 f.write(json.dumps({"tick": tick_time, "void": self.id, "origin": origin}) + "\n")
-            import engine.tick_engine as te
+            from . import tick_engine as te
             te.void_absorption_events += 1
             return
 
@@ -241,7 +241,7 @@ class Node:
         if getattr(self, "boundary", False):
             with open("output/boundary_interaction_log.json", "a") as f:
                 f.write(json.dumps({"tick": tick_time, "node": self.id, "origin": origin}) + "\n")
-            import engine.tick_engine as te
+            from . import tick_engine as te
             te.boundary_interactions_count += 1
 
         if any(tick.time == tick_time for tick in self.tick_history):

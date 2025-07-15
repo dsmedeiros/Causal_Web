@@ -1,6 +1,6 @@
 import time
 import threading
-from config import Config
+from ..config import Config
 from .graph import CausalGraph
 from .observer import Observer
 from .log_interpreter import run_interpreter

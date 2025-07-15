@@ -1,7 +1,7 @@
 import cmath
 import math
 
-from engine.bridge import Bridge
+from .bridge import Bridge
 from .node import Node, Edge, NodeType
 from .meta_node import MetaNode
 import json

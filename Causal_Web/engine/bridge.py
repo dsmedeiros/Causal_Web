@@ -136,7 +136,7 @@ class Bridge:
                 f.write(json.dumps({"tick": tick_time, "bridge": self.bridge_id, "strength": self.current_strength, "duration": duration}) + "\n")
             if self.current_strength == 0.0:
                 self.active = False
-                import engine.tick_engine as te
+                from . import tick_engine as te
                 te._decay_durations.append(duration)
                 self._log_dynamics(tick_time, "decayed")
 
@@ -150,7 +150,7 @@ class Bridge:
             self.coherence_at_reform = coherence
             with open("output/bridge_reformation_log.json", "a") as f:
                 f.write(json.dumps({"tick": tick_time, "bridge": self.bridge_id, "coherence": coherence}) + "\n")
-            import engine.tick_engine as te
+            from . import tick_engine as te
             te.bridges_reformed_count += 1
             self._log_event(tick_time, "bridge_reformed", coherence)
             self._log_dynamics(tick_time, "recovered", {"coherence": coherence})

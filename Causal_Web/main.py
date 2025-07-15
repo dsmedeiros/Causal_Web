@@ -1,6 +1,6 @@
 # main.py
 
-from gui.dashboard import launch  # uses dashboard -> start_dearpygui internally
+from .gui.dashboard import launch  # uses dashboard -> start_dearpygui internally
 
 def main():
     launch()

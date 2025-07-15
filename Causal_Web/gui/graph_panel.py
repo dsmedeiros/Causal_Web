@@ -1,7 +1,7 @@
 import dearpygui.dearpygui as dpg
-from config import Config
-from engine.tick_engine import simulation_loop
-from engine.tick_engine import graph
+from ..config import Config
+from ..engine.tick_engine import simulation_loop
+from ..engine.tick_engine import graph
 import threading
 
 # Tick stores for visual update
