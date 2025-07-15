@@ -367,3 +367,5 @@ FodyWeavers.xsd
 /Causal_Web/input/destructive_interference_test.json
 /Causal_Web/input/dilation_baseline_test_case.json
 /Causal_Web/input/partial_interference_test.json
+/Causal_Web/output/run_2025-07-15_01-28
+*.zip

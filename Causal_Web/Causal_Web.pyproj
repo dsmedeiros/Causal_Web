@@ -53,6 +53,9 @@
     <Content Include="input\graph.json" />
     <Content Include="input\partial_interference_test.json" />
     <Content Include="output\bridge_state_log.json" />
+    <Content Include="output\causal_chains.json" />
+    <Content Include="output\causal_explanations.json" />
+    <Content Include="output\causal_summary.txt" />
     <Content Include="output\classicalization_map.json" />
     <Content Include="output\cluster_log.json" />
     <Content Include="output\coherence_log.json" />
@@ -64,11 +67,13 @@
     <Content Include="output\cwt_console_output.txt" />
     <Content Include="output\decoherence_log.json" />
     <Content Include="output\event_log.json" />
+    <Content Include="output\explanation_graph.json" />
     <Content Include="output\inspection_log.json" />
     <Content Include="output\interpretation_log.json" />
     <Content Include="output\interpretation_summary.txt" />
     <Content Include="output\law_drift_log.json" />
     <Content Include="output\law_wave_log.json" />
+    <Content Include="output\manifest.json" />
     <Content Include="output\meta_node_tick_log.json" />
     <Content Include="output\tick_trace.json" />
   </ItemGroup>
