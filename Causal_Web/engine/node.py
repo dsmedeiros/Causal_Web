@@ -19,10 +19,10 @@ class NodeType(Enum):
     NULL = "null"
 
 
-
 @dataclass
 class Tick:
     """Discrete causal pulse with layer metadata."""
+
     origin: str
     time: float
     amplitude: float
@@ -30,8 +30,20 @@ class Tick:
     layer: str = "tick"
     trace_id: str = ""
 
+
 class Node:
-    def __init__(self, node_id, x=0.0, y=0.0, frequency=1.0, refractory_period=2, base_threshold=0.5, phase=0.0):
+    """Represents a single oscillator in the causal graph."""
+
+    def __init__(
+        self,
+        node_id,
+        x=0.0,
+        y=0.0,
+        frequency=1.0,
+        refractory_period=2,
+        base_threshold=0.5,
+        phase=0.0,
+    ):
         self.id = node_id
         self.x = x
         self.y = y
@@ -41,7 +53,7 @@ class Node:
         self.decoherence = 0.0
         self.tick_history = []  # List[Tick]
         self.incoming_phase_queue = defaultdict(list)  # tick_time -> [phase_i]
-        self.pending_superpositions = defaultdict(list) # for logging and analysis
+        self.pending_superpositions = defaultdict(list)  # for logging and analysis
         self.current_tick = 0
         self.subjective_ticks = 0  # For relativistic tracking
         self.last_emission_tick = None
@@ -49,7 +61,7 @@ class Node:
         self.last_tick_time = -math.inf
         self.base_threshold = base_threshold
         self.current_threshold = self.base_threshold
-        self.collapse_origin = {} # tick_time -> "self" or "bridge"
+        self.collapse_origin = {}  # tick_time -> "self" or "bridge"
         self._decoherence_streak = 0
         self.is_classical = False
         self.coherence_series: List[float] = []
@@ -75,12 +87,13 @@ class Node:
         self.goals: Dict[str, float] = {}
         self.goal_error: Dict[str, float] = {}
 
-
     def compute_phase(self, tick_time):
         base = 2 * math.pi * self.frequency * tick_time
         jitter = Config.phase_jitter
         if jitter["amplitude"] and jitter.get("period", 0):
-            base += jitter["amplitude"] * math.sin(2 * math.pi * tick_time / jitter["period"])
+            base += jitter["amplitude"] * math.sin(
+                2 * math.pi * tick_time / jitter["period"]
+            )
         return base
 
     def compute_coherence_level(self, tick_time):
@@ -144,7 +157,9 @@ class Node:
 
         # adjust thresholds based on recent stability
         if avg_coh > 0.9:
-            self.current_threshold = max(self.base_threshold * 0.8, self.current_threshold - 0.01)
+            self.current_threshold = max(
+                self.base_threshold * 0.8, self.current_threshold - 0.01
+            )
             self.refractory_period = max(1.0, self.refractory_period - 0.05)
         elif avg_coh < 0.5:
             self.current_threshold = min(1.0, self.current_threshold + 0.02)
@@ -168,7 +183,14 @@ class Node:
                 idx = int(np.argmax(np.abs(spectrum[1:])) + 1)
                 self.law_wave_frequency = idx / window
 
-    def update_classical_state(self, decoherence_strength, tick_time=None, graph=None, threshold=0.4, streak_required=2):
+    def update_classical_state(
+        self,
+        decoherence_strength,
+        tick_time=None,
+        graph=None,
+        threshold=0.4,
+        streak_required=2,
+    ):
         if decoherence_strength > threshold:
             self._decoherence_streak += 1
         else:
@@ -204,8 +226,12 @@ class Node:
 
     def schedule_tick(self, tick_time, incoming_phase):
         self.incoming_phase_queue[tick_time].append(incoming_phase)
-        self.pending_superpositions[tick_time].append(incoming_phase) # track unresolved states
-        print(f"[{self.id}] Received tick at {tick_time} with phase {incoming_phase:.2f}")
+        self.pending_superpositions[tick_time].append(
+            incoming_phase
+        )  # track unresolved states
+        print(
+            f"[{self.id}] Received tick at {tick_time} with phase {incoming_phase:.2f}"
+        )
 
     def should_tick(self, tick_time):
         if tick_time - self.last_tick_time < self.refractory_period:
@@ -230,52 +256,86 @@ class Node:
         return None
 
     def apply_tick(self, tick_time, phase, graph, origin="self"):
+        """Emit a tick and propagate resulting phases to neighbours."""
+
+        # Boundary and state checks -------------------------------------------------
         if self.node_type == NodeType.NULL:
             with open(Config.output_path("boundary_interaction_log.json"), "a") as f:
-                f.write(json.dumps({"tick": tick_time, "void": self.id, "origin": origin}) + "\n")
+                f.write(
+                    json.dumps({"tick": tick_time, "void": self.id, "origin": origin})
+                    + "\n"
+                )
             from . import tick_engine as te
+
             te.void_absorption_events += 1
             return
 
         if self.is_classical:
+            # Collapsed nodes do not emit further ticks
             print(f"[{self.id}] Classical node cannot emit ticks")
             return
 
+        # Log any interactions with boundary nodes
         if getattr(self, "boundary", False):
             with open(Config.output_path("boundary_interaction_log.json"), "a") as f:
-                f.write(json.dumps({"tick": tick_time, "node": self.id, "origin": origin}) + "\n")
+                f.write(
+                    json.dumps({"tick": tick_time, "node": self.id, "origin": origin})
+                    + "\n"
+                )
             from . import tick_engine as te
+
             te.boundary_interactions_count += 1
 
+        # Avoid duplicate ticks at the same moment
         if any(tick.time == tick_time for tick in self.tick_history):
             return
 
+        # Register the emission
         self.current_tick += 1
         self.subjective_ticks += 1
         self.last_tick_time = tick_time
-        self.current_threshold = min(self.current_threshold + 0.05, 1.0) # Slight adaptation
+        # Each tick slightly increases threshold making firing harder
+        self.current_threshold = min(self.current_threshold + 0.05, 1.0)
         self.phase = phase
         trace_id = str(uuid.uuid4())
-        tick_obj = Tick(origin=origin, time=tick_time, amplitude=1.0, phase=phase, layer="tick", trace_id=trace_id)
+        tick_obj = Tick(
+            origin=origin,
+            time=tick_time,
+            amplitude=1.0,
+            phase=phase,
+            layer="tick",
+            trace_id=trace_id,
+        )
         self.tick_history.append(tick_obj)
         from .tick_router import TickRouter
+
         TickRouter.route_tick(self, tick_obj)
         self.collapse_origin[tick_time] = origin
-        print(f"[{self.id}] Tick at {tick_time} via {origin.upper()} | Phase: {phase:.2f}")
+        print(
+            f"[{self.id}] Tick at {tick_time} via {origin.upper()} | Phase: {phase:.2f}"
+        )
 
         # Update memory and adapt behaviour
         self._update_memory(tick_time, origin)
         self._adapt_behavior()
         self.update_node_type()
 
-        if origin != "self" and any(e.target == origin for e in graph.get_edges_from(self.id)):
+        if origin != "self" and any(
+            e.target == origin for e in graph.get_edges_from(self.id)
+        ):
             with open(Config.output_path("refraction_log.json"), "a") as f:
-                f.write(json.dumps({"tick": tick_time, "recursion_from": origin, "node": self.id}) + "\n")
-        
+                f.write(
+                    json.dumps(
+                        {"tick": tick_time, "recursion_from": origin, "node": self.id}
+                    )
+                    + "\n"
+                )
+
         # Recursive phase propagation with refraction
         for edge in graph.get_edges_from(self.id):
             target = graph.get_node(edge.target)
             from .tick_engine import kappa
+
             delay = edge.adjusted_delay(
                 self.law_wave_frequency,
                 target.law_wave_frequency,
@@ -285,15 +345,28 @@ class Node:
             shifted = attenuated + edge.phase_shift
 
             if target.node_type == NodeType.DECOHERENT:
+                # Redirect through alternative path when hitting a decoherent node
                 alts = graph.get_edges_from(target.id)
                 if alts:
                     alt = alts[0]
                     alt_tgt = graph.get_node(alt.target)
-                    alt_delay = alt.adjusted_delay(target.law_wave_frequency, alt_tgt.law_wave_frequency, kappa)
+                    alt_delay = alt.adjusted_delay(
+                        target.law_wave_frequency, alt_tgt.law_wave_frequency, kappa
+                    )
                     alt_tgt.schedule_tick(tick_time + delay + alt_delay, shifted)
                     target.node_type = NodeType.REFRACTIVE
                     with open(Config.output_path("refraction_log.json"), "a") as f:
-                        f.write(json.dumps({"tick": tick_time, "from": self.id, "via": target.id, "to": alt_tgt.id}) + "\n")
+                        f.write(
+                            json.dumps(
+                                {
+                                    "tick": tick_time,
+                                    "from": self.id,
+                                    "via": target.id,
+                                    "to": alt_tgt.id,
+                                }
+                            )
+                            + "\n"
+                        )
                     continue
 
             target.schedule_tick(tick_time + delay, shifted)
@@ -303,7 +376,9 @@ class Node:
             if collapsed:
                 self._log_collapse_chain(tick_time, collapsed)
 
-    def propagate_collapse(self, tick_time, graph, threshold: float = 0.5, depth: int = 1, visited=None):
+    def propagate_collapse(
+        self, tick_time, graph, threshold: float = 0.5, depth: int = 1, visited=None
+    ):
         """Recursively propagate collapse and track chain depth."""
         if visited is None:
             visited = set()
@@ -320,7 +395,11 @@ class Node:
             if deco > threshold:
                 other.apply_tick(tick_time, self.phase, graph, origin="entanglement")
                 chain.append({"node": nid, "depth": depth})
-                chain.extend(other.propagate_collapse(tick_time, graph, threshold, depth + 1, visited))
+                chain.extend(
+                    other.propagate_collapse(
+                        tick_time, graph, threshold, depth + 1, visited
+                    )
+                )
         if chain:
             record = {"tick": tick_time, "source": self.id, "chain": chain}
             with open(Config.output_path("collapse_front_log.json"), "a") as f:
@@ -333,10 +412,11 @@ class Node:
         with open(Config.output_path("collapse_chain_log.json"), "a") as f:
             f.write(json.dumps(record) + "\n")
 
-
     def maybe_tick(self, global_tick, graph):
+        """Evaluate queued phases and emit a tick if conditions are met."""
         if self.tick_history:
             from .tick_router import TickRouter
+
             TickRouter.route_tick(self, self.tick_history[-1])
 
         if global_tick in self.incoming_phase_queue:
@@ -352,25 +432,39 @@ class Node:
             self._adapt_behavior()
             self.update_node_type()
         else:
-            self.current_threshold = max(self.base_threshold, self.current_threshold - 0.01)
-
+            self.current_threshold = max(
+                self.base_threshold, self.current_threshold - 0.01
+            )
 
     def _emit(self, tick_time):
         phase = self.compute_phase(tick_time)
-        self.tick_history.append(Tick(origin="self", time=tick_time, amplitude=1.0, phase=phase, layer="tick", trace_id=str(uuid.uuid4())))
+        self.tick_history.append(
+            Tick(
+                origin="self",
+                time=tick_time,
+                amplitude=1.0,
+                phase=phase,
+                layer="tick",
+                trace_id=str(uuid.uuid4()),
+            )
+        )
         print(f"[{self.id}] Emitted tick at {tick_time} | Phase: {phase:.2f}")
 
 
 class Edge:
+    """Directional connection carrying phase between nodes."""
+
     def __init__(self, source, target, attenuation, density, delay=1, phase_shift=0.0):
         self.source = source
         self.target = target
         self.attenuation = attenuation  # Multiplier for phase amplitude
-        self.density = density          # Can affect delay dynamically
+        self.density = density  # Can affect delay dynamically
         self.delay = delay
         self.phase_shift = phase_shift
 
-    def adjusted_delay(self, source_freq: float = 0.0, target_freq: float = 0.0, kappa: float = 1.0):
+    def adjusted_delay(
+        self, source_freq: float = 0.0, target_freq: float = 0.0, kappa: float = 1.0
+    ):
         """Delay adjusted by local law-wave gradient."""
         base = self.delay + int(self.density)
         delta_f = abs(source_freq - target_freq)
@@ -395,10 +489,16 @@ class Edge:
             else:
                 raise ValueError(f"Unknown phase shift mode: {mode}")
         else:
-            drift_phase = self.phase_shift # static phase shift
+            drift_phase = self.phase_shift  # static phase shift
 
         shifted_phase = phase + drift_phase
         attenuated_phase = shifted_phase * self.attenuation
-        scheduled_tick = global_tick + self.adjusted_delay(graph.get_node(self.source).law_wave_frequency if hasattr(self, 'source') else 0.0,
-                                                           target_node.law_wave_frequency)
+        scheduled_tick = global_tick + self.adjusted_delay(
+            (
+                graph.get_node(self.source).law_wave_frequency
+                if hasattr(self, "source")
+                else 0.0
+            ),
+            target_node.law_wave_frequency,
+        )
         target_node.schedule_tick(scheduled_tick, attenuated_phase)
