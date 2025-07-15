@@ -43,6 +43,10 @@ class Node:
         refractory_period=2,
         base_threshold=0.5,
         phase=0.0,
+        *,
+        origin_type: str = "seed",
+        generation_tick: int = 0,
+        parent_ids: Optional[List[str]] = None,
     ):
         self.id = node_id
         self.x = x
@@ -74,6 +78,12 @@ class Node:
         self.decoherence_debt: float = 0.0
         self.phase_lock: bool = False
         self.collapse_pressure: float = 0.0
+
+        # ---- Propagation metadata ----
+        self.origin_type = origin_type
+        self.generation_tick = generation_tick
+        self.parent_ids = parent_ids or []
+        self.sip_streak = 0
 
         # ---- Phase 4 additions ----
         self.memory_window = 20
@@ -148,6 +158,11 @@ class Node:
             self.phase_confidence_index = 1.0 - float(np.var(self.memory["coherence"]))
         else:
             self.phase_confidence_index = 1.0
+
+        if coherence > 0.9:
+            self.sip_streak += 1
+        else:
+            self.sip_streak = 0
 
     def _adapt_behavior(self) -> None:
         if self.memory["coherence"]:

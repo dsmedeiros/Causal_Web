@@ -25,6 +25,10 @@ boundary_interactions_count = 0
 bridges_reformed_count = 0
 _decay_durations = []
 
+# --- Phase 8 parameters ---
+SIP_COHERENCE_DURATION = 3
+SIP_DECOHERENCE_THRESHOLD = 0.5
+
 
 def apply_global_forcing(tick: int) -> None:
     """Apply rhythmic modulation to all nodes."""
@@ -147,6 +151,8 @@ def snapshot_graph(global_tick):
         path = os.path.join(path_dir, f"graph_{global_tick}.json")
         with open(path, "w") as f:
             json.dump(graph.to_dict(), f, indent=2)
+        return path
+    return None
 
 
 def dynamic_bridge_management(global_tick):
@@ -178,6 +184,73 @@ def dynamic_bridge_management(global_tick):
                     },
                 )
                 bridge.update_state(global_tick)
+
+
+def _update_growth_log(tick: int) -> None:
+    """Record structural growth per tick."""
+    record = {
+        "tick": tick,
+        "node_count": len(graph.nodes),
+    }
+    with open(Config.output_path("structural_growth_log.json"), "a") as f:
+        f.write(json.dumps(record) + "\n")
+
+
+def _spawn_sip_child(parent, tick: int):
+    """Generate a new node via Stability-Induced Propagation."""
+    child_id = f"{parent.id}_S{tick}"
+    if child_id in graph.nodes:
+        return
+    graph.add_node(
+        child_id,
+        x=parent.x + 10,
+        y=parent.y + 10,
+        frequency=parent.frequency,
+        origin_type="SIP_BUD",
+        generation_tick=tick,
+        parent_ids=[parent.id],
+    )
+    graph.add_edge(parent.id, child_id)
+    with open(Config.output_path("node_emergence_log.json"), "a") as f:
+        f.write(
+            json.dumps(
+                {
+                    "id": child_id,
+                    "tick": tick,
+                    "parents": [parent.id],
+                    "origin_type": "SIP_BUD",
+                    "coherence": parent.coherence,
+                    "sigma_phi": parent.law_wave_frequency,
+                }
+            )
+            + "\n"
+        )
+    _update_growth_log(tick)
+
+
+def _update_simulation_state(
+    paused: bool, stopped: bool, tick: int, snapshot: str | None
+) -> None:
+    """Persist runtime simulation state."""
+    state = {
+        "paused": paused,
+        "stopped": stopped,
+        "current_tick": tick,
+        "graph_snapshot": snapshot,
+    }
+    with open(Config.output_path("simulation_state.json"), "w") as f:
+        json.dump(state, f, indent=2)
+
+
+def check_propagation(tick: int) -> None:
+    """Evaluate nodes for propagation triggers."""
+    for node in list(graph.nodes.values()):
+        if (
+            node.sip_streak >= SIP_COHERENCE_DURATION
+            and node.decoherence_debt < SIP_DECOHERENCE_THRESHOLD
+        ):
+            _spawn_sip_child(node, tick)
+            node.sip_streak = 0
 
 
 def _compute_metrics(node, tick_time):
@@ -300,6 +373,7 @@ def simulation_loop():
 
     def run():
         global_tick = 0
+        _update_simulation_state(False, False, global_tick, None)
         while Config.is_running:
             print(f"== Tick {global_tick} ==")
 
@@ -308,13 +382,15 @@ def simulation_loop():
             emit_ticks(global_tick)
             propagate_phases(global_tick)
             evaluate_nodes(global_tick)
+            check_propagation(global_tick)
 
             log_metrics_per_tick(global_tick)
             log_bridge_states(global_tick)
             log_meta_node_ticks(global_tick)
             log_curvature_per_tick(global_tick)
             dynamic_bridge_management(global_tick)
-            snapshot_graph(global_tick)
+            snapshot_path = snapshot_graph(global_tick)
+            _update_simulation_state(False, False, global_tick, snapshot_path)
 
             for obs in observers:
                 obs.observe(graph, global_tick)
@@ -354,8 +430,12 @@ def simulation_loop():
 
             Config.current_tick = global_tick
 
-            if Config.max_ticks and global_tick >= Config.max_ticks:
+            limit = (
+                Config.tick_limit if Config.allow_tick_override else Config.max_ticks
+            )
+            if limit and limit != -1 and global_tick >= limit:
                 Config.is_running = False
+                _update_simulation_state(False, True, global_tick, snapshot_path)
                 write_output()
 
             global_tick += 1
