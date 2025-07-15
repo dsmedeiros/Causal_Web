@@ -148,8 +148,27 @@ def _create_manifest(out_dir: str, run_id: str, timestamp: str) -> None:
 
     # bridge dynamics
     dynamics = _load_lines(os.path.join(out_dir, "bridge_dynamics_log.json"))
-    manifest["bridge_formations"] = sum(1 for e in dynamics if e.get("from") is None)
-    manifest["ruptures_total"] = sum(1 for e in dynamics if e.get("to") == "ruptured")
+    manifest["initial_bridges_count"] = manifest.get("bridge_count", 0)
+    manifest["spontaneous_bridges_formed"] = sum(
+        1 for e in dynamics if e.get("event") == "formed" and not e.get("seeded")
+    )
+    manifest["total_bridge_ruptures"] = sum(1 for e in dynamics if e.get("event") == "ruptured")
+    lifetimes = {}
+    for e in dynamics:
+        bid = e.get("bridge_id")
+        if e.get("event") == "formed" and not e.get("seeded"):
+            lifetimes[bid] = e.get("tick", 0)
+        elif e.get("event") == "ruptured" and bid in lifetimes:
+            start = lifetimes[bid]
+            duration = e.get("tick", 0) - start
+            lifetimes[bid] = duration
+    completed = [v for v in lifetimes.values() if isinstance(v, int)]
+    if completed:
+        manifest["longest_lived_dynamic_bridge"] = max(completed)
+        manifest["mean_bridge_lifetime"] = round(sum(completed) / len(completed), 2)
+    else:
+        manifest["longest_lived_dynamic_bridge"] = 0
+        manifest["mean_bridge_lifetime"] = 0
 
     # law wave propagation
     law_wave_events = _load_lines(os.path.join(out_dir, "law_wave_log.json"))

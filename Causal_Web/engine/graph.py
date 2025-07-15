@@ -21,9 +21,23 @@ class CausalGraph:
         self.edges.append(Edge(source_id, target_id, attenuation, density, delay, phase_shift))
 
     def add_bridge(self, node_a_id, node_b_id, bridge_type="braided", phase_offset=0.0,
-               drift_tolerance=None, decoherence_limit=None):
-        self.bridges.append(Bridge(node_a_id, node_b_id, bridge_type, phase_offset,
-                               drift_tolerance, decoherence_limit))
+               drift_tolerance=None, decoherence_limit=None, initial_strength=1.0,
+               medium_type="standard", mutable=True, seeded=True, formed_at_tick=0):
+        self.bridges.append(
+            Bridge(
+                node_a_id,
+                node_b_id,
+                bridge_type,
+                phase_offset,
+                drift_tolerance,
+                decoherence_limit,
+                initial_strength,
+                medium_type,
+                mutable,
+                seeded,
+                formed_at_tick,
+            )
+        )
 
     def get_node(self, node_id):
         return self.nodes.get(node_id)
@@ -184,6 +198,7 @@ class CausalGraph:
                 }
                 for e in self.edges
             ],
+            "bridges": [b.to_dict() for b in self.bridges],
             "tick_sources": self.tick_sources
         }
 
@@ -228,7 +243,12 @@ class CausalGraph:
                 bridge_type=bridge.get("bridge_type", "braided"),
                 phase_offset=bridge.get("phase_offset", 0.0),
                 drift_tolerance=bridge.get("drift_tolerance"),
-                decoherence_limit=bridge.get("decoherence_limit")
+                decoherence_limit=bridge.get("decoherence_limit"),
+                initial_strength=bridge.get("initial_strength", 1.0),
+                medium_type=bridge.get("medium_type", "standard"),
+                mutable=bridge.get("mutable", True),
+                seeded=True,
+                formed_at_tick=0,
             )
 
         self.tick_sources = data.get("tick_sources", [])
