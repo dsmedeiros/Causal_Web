@@ -269,7 +269,7 @@ def bundle_run(output_dir: str, run_id: str, do_zip: bool = False) -> str:
     out_dir = os.path.abspath(output_dir)
 
     # Run interpreter chain first
-    run_interpreter()
+    run_interpreter(output_dir=out_dir)
 
     _create_manifest(out_dir, run_id, timestamp)
 

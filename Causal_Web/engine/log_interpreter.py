@@ -482,8 +482,21 @@ class CWTLogInterpreter:
             print(f"⚠️ Causal analyst failed: {e}")
 
 
-def run_interpreter() -> None:
-    interpreter = CWTLogInterpreter()
+def run_interpreter(
+    output_dir: str | None = None, graph_path: str | None = None
+) -> None:
+    """Execute the multilayer log interpreter.
+
+    Parameters
+    ----------
+    output_dir:
+        Optional path to the directory containing log files. If ``None`` the
+        default package output directory is used.
+    graph_path:
+        Optional path to the input graph JSON used for the run.
+    """
+
+    interpreter = CWTLogInterpreter(output_dir=output_dir, graph_path=graph_path)
     interpreter.run()
 
 
