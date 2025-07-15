@@ -2,7 +2,7 @@ import cmath
 import math
 
 from engine.bridge import Bridge
-from .node import Node, Edge
+from .node import Node, Edge, NodeType
 from .meta_node import MetaNode
 import json
 
@@ -264,6 +264,25 @@ class CausalGraph:
             )
 
         self.tick_sources = data.get("tick_sources", [])
+
+        self.identify_boundaries()
+
+    # ------------------------------------------------------------
+    def identify_boundaries(self) -> None:
+        self.void_nodes = []
+        self.boundary_nodes = []
+        for nid, node in self.nodes.items():
+            outgoing = self.get_edges_from(nid)
+            incoming = self.get_edges_to(nid)
+            if not outgoing and not incoming:
+                node.node_type = NodeType.NULL
+                self.void_nodes.append(nid)
+            if len(outgoing) + len(incoming) <= 1:
+                setattr(node, "boundary", True)
+                self.boundary_nodes.append(nid)
+        if self.void_nodes:
+            with open("output/void_node_map.json", "w") as f:
+                json.dump(self.void_nodes, f, indent=2)
 
     # ------------------------------------------------------------
     def emit_law_wave(self, origin_id: str, tick: int, radius: int = 2) -> None:

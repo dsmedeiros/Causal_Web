@@ -227,9 +227,22 @@ class Node:
         return None
 
     def apply_tick(self, tick_time, phase, graph, origin="self"):
+        if self.node_type == NodeType.NULL:
+            with open("output/boundary_interaction_log.json", "a") as f:
+                f.write(json.dumps({"tick": tick_time, "void": self.id, "origin": origin}) + "\n")
+            import engine.tick_engine as te
+            te.void_absorption_events += 1
+            return
+
         if self.is_classical:
             print(f"[{self.id}] Classical node cannot emit ticks")
             return
+
+        if getattr(self, "boundary", False):
+            with open("output/boundary_interaction_log.json", "a") as f:
+                f.write(json.dumps({"tick": tick_time, "node": self.id, "origin": origin}) + "\n")
+            import engine.tick_engine as te
+            te.boundary_interactions_count += 1
 
         if any(tick.time == tick_time for tick in self.tick_history):
             return

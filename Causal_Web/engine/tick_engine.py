@@ -16,6 +16,12 @@ observers = []
 kappa = 0.5  # curvature strength for refraction fields
 _law_wave_stability = {}
 
+# Phase 6 metrics
+void_absorption_events = 0
+boundary_interactions_count = 0
+bridges_reformed_count = 0
+_decay_durations = []
+
 
 def apply_global_forcing(tick: int) -> None:
     """Apply rhythmic modulation to all nodes."""
@@ -296,6 +302,8 @@ def write_output():
     print("✅ Superposition inspection saved to output/inspection_log.json")
 
     export_curvature_map()
+    export_regional_maps()
+    export_global_diagnostics()
     run_interpreter()
 
 def export_curvature_map():
@@ -321,3 +329,83 @@ def export_curvature_map():
     with open("output/curvature_map.json", "w") as f:
         json.dump(grid, f, indent=2)
     print("✅ Curvature map exported to output/curvature_map.json")
+
+
+def export_global_diagnostics():
+    """Simple run-level metrics for diagnostics."""
+    deco_lines = []
+    try:
+        with open("output/decoherence_log.json") as f:
+            for line in f:
+                deco_lines.append(json.loads(line))
+    except FileNotFoundError:
+        pass
+    if not deco_lines:
+        return
+    first = next(iter(deco_lines[0].values()))
+    last = next(iter(deco_lines[-1].values()))
+    entropy_first = sum(first.values())
+    entropy_last = sum(last.values())
+    entropy_delta = entropy_last - entropy_first
+
+    stability = []
+    for entry in deco_lines:
+        vals = list(entry.values())[0]
+        stability.append(sum(1 for v in vals.values() if v < 0.4) / len(vals))
+    coherence_stability_score = round(sum(stability) / len(stability), 3)
+
+    collapse_events = 0
+    try:
+        with open("output/classicalization_map.json") as f:
+            for line in f:
+                states = json.loads(line)
+                collapse_events += sum(1 for v in next(iter(states.values())).values() if v)
+    except FileNotFoundError:
+        pass
+    resilience = 0
+    try:
+        with open("output/law_wave_log.json") as f:
+            resilience = sum(1 for _ in f)
+    except FileNotFoundError:
+        pass
+    collapse_resilience_index = round(resilience / (collapse_events or 1), 3)
+
+    adaptivity = 0
+    if graph.bridges:
+        active = sum(1 for b in graph.bridges if b.active)
+        adaptivity = active / len(graph.bridges)
+
+    diagnostics = {
+        "coherence_stability_score": coherence_stability_score,
+        "entropy_delta": round(entropy_delta, 3),
+        "collapse_resilience_index": collapse_resilience_index,
+        "network_adaptivity_index": round(adaptivity, 3),
+    }
+    with open("output/global_diagnostics.json", "w") as f:
+        json.dump(diagnostics, f, indent=2)
+    print("✅ Global diagnostics exported")
+
+
+def export_regional_maps():
+    regions = {}
+    for nid, node in graph.nodes.items():
+        region = nid[0]
+        regions.setdefault(region, []).append(node)
+
+    regional_pressure = {}
+    for reg, nodes in regions.items():
+        pressure = sum(n.collapse_pressure for n in nodes) / len(nodes)
+        regional_pressure[reg] = round(pressure, 3)
+
+    matrix = {}
+    for edge in graph.edges:
+        src_r = edge.source[0]
+        tgt_r = edge.target[0]
+        key = f"{src_r}->{tgt_r}"
+        matrix[key] = matrix.get(key, 0) + 1
+
+    with open("output/regional_pressure_map.json", "w") as f:
+        json.dump(regional_pressure, f, indent=2)
+    with open("output/cluster_influence_matrix.json", "w") as f:
+        json.dump(matrix, f, indent=2)
+    print("✅ Regional influence maps exported")
