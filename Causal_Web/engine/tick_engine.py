@@ -8,6 +8,7 @@ from .tick_seeder import TickSeeder
 import json
 import numpy as np
 import os
+import shutil
 from concurrent.futures import ThreadPoolExecutor
 import math
 
@@ -45,7 +46,11 @@ def clear_output_directory():
     for name in os.listdir(out_dir):
         if name == "__init__.py":
             continue
-        open(os.path.join(out_dir, name), "w").close()
+        path = os.path.join(out_dir, name)
+        if os.path.isfile(path):
+            open(path, "w").close()
+        elif os.path.isdir(path):
+            shutil.rmtree(path)
 
 def build_graph():
     clear_output_directory()
