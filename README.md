@@ -47,3 +47,13 @@ This command loads the logs and generates several summary files:
 - **`causal_timeline.json`** – ordered timeline of notable events.
 
 The raw logs (`tick_trace.json`, `coherence_log.json`, `event_log.json`, etc.) remain in `output/` for detailed inspection. For convenience, running `bundle_run.py` packages the important files with a manifest describing the run.
+
+## Testing
+
+Basic unit tests cover some of the utility methods inside the engine. They verify
+phase interference detection, cluster formation logic, edge delay adjustment and
+several node behaviours. Run them with:
+
+```bash
+pytest
+```
