@@ -114,8 +114,10 @@ def update_graph_visuals():
 
     # Draw edges with curvature overlays
     for edge in graph.edges:
-        from_node = graph.nodes[edge.source]
-        to_node = graph.nodes[edge.target]
+        from_node = graph.nodes.get(edge.source)
+        to_node = graph.nodes.get(edge.target)
+        if from_node is None or to_node is None:
+            continue
 
         delay = edge.adjusted_delay(
             from_node.law_wave_frequency, to_node.law_wave_frequency

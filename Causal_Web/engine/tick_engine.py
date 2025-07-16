@@ -472,7 +472,14 @@ def _process_csp_seeds(tick: int) -> None:
                 generation_tick=tick,
                 parent_ids=[seed["parent"]],
             )
-            graph.add_edge(seed["parent"], node_id)
+            parent_id = seed["parent"]
+            if "->" in parent_id:
+                src, tgt = parent_id.split("->", 1)
+                for pid in (src, tgt):
+                    if pid in graph.nodes:
+                        graph.add_edge(pid, node_id)
+            else:
+                graph.add_edge(parent_id, node_id)
             log_json(
                 Config.output_path("node_emergence_log.json"),
                 {
