@@ -106,6 +106,11 @@ class Node:
         # additional offset applied from global network constraints
         self.dynamic_offset = 0.0
 
+        # ---- Spatial indexing ----
+        cell_size = getattr(Config, "SPATIAL_GRID_SIZE", 50)
+        self.grid_x = int(self.x // cell_size)
+        self.grid_y = int(self.y // cell_size)
+
     def compute_phase(self, tick_time):
         """Return phase value incorporating time-dependent global jitter."""
         base = 2 * math.pi * self.frequency * tick_time

@@ -70,3 +70,6 @@ class Config:
 
     # Bridge stabilization
     BRIDGE_STABILIZATION_TICKS = 50
+
+    # Spatial partitioning
+    SPATIAL_GRID_SIZE = 50
