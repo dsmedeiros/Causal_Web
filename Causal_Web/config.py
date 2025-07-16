@@ -58,5 +58,8 @@ class Config:
     CSP_DECOHERENCE_THRESHOLD = 0.3
     CSP_ENTROPY_INJECTION = 0.2
 
+    # Propagation limits
+    max_children_per_node = 0  # 0 disables limit
+
     # Bridge stabilization
     BRIDGE_STABILIZATION_TICKS = 50

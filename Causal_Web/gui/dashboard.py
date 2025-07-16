@@ -45,6 +45,10 @@ def max_ticks_changed(sender, app_data):
     Config.max_ticks = app_data
 
 
+def max_children_changed(sender, app_data):
+    Config.max_children_per_node = app_data
+
+
 def start_sim_callback():
     if not Config.is_running:
         Config.is_running = True
@@ -182,6 +186,12 @@ def dashboard():
             default_value=Config.max_ticks,
             callback=max_ticks_changed,
             tag="max_ticks_input",
+        )
+        dpg.add_input_int(
+            label="Max Children/Node",
+            default_value=Config.max_children_per_node,
+            callback=max_children_changed,
+            tag="max_children_input",
         )
         dpg.add_button(
             label="Pause", callback=pause_resume_callback, tag="pause_button"
