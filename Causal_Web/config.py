@@ -61,5 +61,12 @@ class Config:
     # Propagation limits
     max_children_per_node = 0  # 0 disables limit
 
+    # Tick fan-out
+    max_tick_fanout = 0  # limit edges a tick propagates across (0 = unlimited)
+
+    # Early formation tuning
+    DRIFT_TOLERANCE_RAMP = 10
+    FORMATION_REFRACTORY_RAMP = 20
+
     # Bridge stabilization
     BRIDGE_STABILIZATION_TICKS = 50

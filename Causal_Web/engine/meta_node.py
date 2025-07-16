@@ -23,4 +23,3 @@ class MetaNode:
             node = self.graph.get_node(nid)
             if node:
                 node.maybe_tick(tick_time, self.graph)
-
