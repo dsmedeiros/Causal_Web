@@ -8,7 +8,6 @@ from ..engine.tick_engine import (
     _update_simulation_state,
     recent_csp_failures,
 )
-import threading
 
 # Tick stores for visual update
 node_colors = {
@@ -31,35 +30,46 @@ tick_counters = {}
 
 
 def pause_resume_callback():
-    Config.is_running = not Config.is_running
+    with Config.state_lock:
+        Config.is_running = not Config.is_running
+        running = Config.is_running
+        tick = Config.current_tick
     if dpg.does_item_exist("pause_button"):
-        dpg.set_value("pause_button", "Pause" if Config.is_running else "Resume")
-    _update_simulation_state(not Config.is_running, False, Config.current_tick, None)
+        dpg.set_value("pause_button", "Pause" if running else "Resume")
+    _update_simulation_state(not running, False, tick, None)
 
 
 def tick_rate_changed(sender, app_data):
-    Config.tick_rate = app_data
+    with Config.state_lock:
+        Config.tick_rate = app_data
 
 
 def max_ticks_changed(sender, app_data):
-    Config.max_ticks = app_data
+    with Config.state_lock:
+        Config.max_ticks = app_data
 
 
 def max_children_changed(sender, app_data):
-    Config.max_children_per_node = app_data
+    with Config.state_lock:
+        Config.max_children_per_node = app_data
 
 
 def start_sim_callback():
-    if not Config.is_running:
+    with Config.state_lock:
+        if Config.is_running:
+            return
         Config.is_running = True
-        simulation_loop()
-        dpg.configure_item("start_button", enabled=False)
-        _update_simulation_state(False, False, Config.current_tick, None)
+        tick = Config.current_tick
+    simulation_loop()
+    dpg.configure_item("start_button", enabled=False)
+    _update_simulation_state(False, False, tick, None)
 
 
 def update_display():
     if dpg.does_item_exist("tick_counter"):
-        dpg.set_value("tick_counter", f"Tick: {Config.current_tick}")
+        with Config.state_lock:
+            tick = Config.current_tick
+        dpg.set_value("tick_counter", f"Tick: {tick}")
 
 
 def update_graph_visuals():
@@ -123,7 +133,8 @@ def update_graph_visuals():
         )
 
     # Draw ripples for recent CSP failures
-    now = Config.current_tick
+    with Config.state_lock:
+        now = Config.current_tick
     for rip in list(recent_csp_failures):
         age = now - rip["tick"]
         if age > 10:
@@ -143,7 +154,9 @@ def update_graph_visuals():
 def refresh():
     update_graph_visuals()
     if dpg.does_item_exist("tick_counter"):
-        dpg.set_value("tick_counter", f"Tick: {Config.current_tick}")
+        with Config.state_lock:
+            tick = Config.current_tick
+        dpg.set_value("tick_counter", f"Tick: {tick}")
     dpg.render_dearpygui_frame()
 
 
@@ -154,7 +167,9 @@ def launch():
 def gui_update_callback():
     update_graph_visuals()
     if dpg.does_item_exist("tick_counter"):
-        dpg.set_value("tick_counter", f"Tick: {Config.current_tick}")
+        with Config.state_lock:
+            tick = Config.current_tick
+        dpg.set_value("tick_counter", f"Tick: {tick}")
     next_frame = dpg.get_frame_count() + 1
     dpg.set_frame_callback(next_frame, gui_update_callback)
 

@@ -8,14 +8,20 @@ from ..config import Config
 def simulation_loop():
     def run():
         while True:
-            if Config.is_running:
-                Config.current_tick += 1
-                print(f"Tick: {Config.current_tick}")
-
-                if Config.max_ticks and Config.current_tick >= Config.max_ticks:
-                    Config.is_running = False
-
-                time.sleep(Config.tick_rate)
+            with Config.state_lock:
+                running = Config.is_running
+                rate = Config.tick_rate
+                tick = Config.current_tick
+                max_ticks = Config.max_ticks
+            if running:
+                tick += 1
+                with Config.state_lock:
+                    Config.current_tick = tick
+                print(f"Tick: {tick}")
+                if max_ticks and tick >= max_ticks:
+                    with Config.state_lock:
+                        Config.is_running = False
+                time.sleep(rate)
             else:
                 time.sleep(0.1)  # Wait until resumed
 

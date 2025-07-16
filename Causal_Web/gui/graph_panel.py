@@ -67,7 +67,8 @@ def update_graph_visuals():
             parent="graph_drawlist",
         )
 
-    now = Config.current_tick
+    with Config.state_lock:
+        now = Config.current_tick
     for rip in list(recent_csp_failures):
         age = now - rip["tick"]
         if age > 10:
@@ -116,7 +117,9 @@ def gui_loop():
     def refresh():
         while dpg.is_dearpygui_running():
             update_graph_visuals()
-            dpg.set_value("tick_counter", f"Tick: {Config.current_tick}")
+            with Config.state_lock:
+                tick = Config.current_tick
+            dpg.set_value("tick_counter", f"Tick: {tick}")
             dpg.render_dearpygui_frame()
 
     threading.Thread(target=refresh, daemon=True).start()
@@ -125,6 +128,8 @@ def gui_loop():
 
 
 def start_sim():
-    if not Config.is_running:
+    with Config.state_lock:
+        if Config.is_running:
+            return
         Config.is_running = True
-        simulation_loop()
+    simulation_loop()

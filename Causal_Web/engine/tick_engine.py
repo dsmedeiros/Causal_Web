@@ -694,13 +694,24 @@ def log_metrics_per_tick(global_tick):
 
 
 def simulation_loop():
-    """Start the main simulation thread."""
+    """Start the main simulation thread on a background worker."""
 
     def run():
         global_tick = 0
         _update_simulation_state(False, False, global_tick, None)
-        while Config.is_running:
-            Config.current_tick = global_tick
+        while True:
+            with Config.state_lock:
+                running = Config.is_running
+                Config.current_tick = global_tick
+                rate = Config.tick_rate
+                limit = (
+                    Config.tick_limit
+                    if Config.allow_tick_override
+                    else Config.max_ticks
+                )
+            if not running:
+                time.sleep(0.1)
+                continue
             print(f"== Tick {global_tick} ==")
 
             apply_global_forcing(global_tick)
@@ -755,16 +766,14 @@ def simulation_loop():
             for bridge in graph.bridges:
                 bridge.apply(global_tick, graph)
 
-            limit = (
-                Config.tick_limit if Config.allow_tick_override else Config.max_ticks
-            )
             if limit and limit != -1 and global_tick >= limit:
-                Config.is_running = False
+                with Config.state_lock:
+                    Config.is_running = False
                 _update_simulation_state(False, True, global_tick, snapshot_path)
                 write_output()
 
             global_tick += 1
-            time.sleep(Config.tick_rate)
+            time.sleep(rate)
 
     threading.Thread(target=run, daemon=True).start()
 
