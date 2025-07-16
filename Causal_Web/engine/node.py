@@ -103,11 +103,15 @@ class Node:
         self.coherence_ramp_ticks = 10
 
     def compute_phase(self, tick_time):
+        """Return phase value incorporating time-dependent global jitter."""
         base = 2 * math.pi * self.frequency * tick_time
         jitter = Config.phase_jitter
         if jitter["amplitude"] and jitter.get("period", 0):
-            base += jitter["amplitude"] * math.sin(
-                2 * math.pi * tick_time / jitter["period"]
+            ramp = min(tick_time / max(1, Config.forcing_ramp_ticks), 1.0)
+            base += (
+                ramp
+                * jitter["amplitude"]
+                * math.sin(2 * math.pi * tick_time / jitter["period"])
             )
         return base
 
