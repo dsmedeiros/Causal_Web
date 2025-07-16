@@ -31,27 +31,50 @@ class TickSeeder:
 
     # ------------------------------------------------------------
     def _seed_static(self, global_tick: int) -> None:
+        phase_offsets = self.config.get("phase_offsets", {})
         for source in getattr(self.graph, "tick_sources", []):
             if isinstance(source, str):
                 node_id = source
                 interval = 1
                 phase = 0.0
+                offset = phase_offsets.get(node_id)
             elif isinstance(source, dict):
                 node_id = source.get("node_id")
                 interval = source.get("tick_interval", 1)
                 phase = source.get("phase", 0.0)
+                offset = source.get("phase_offset")
+                if offset is None:
+                    offset = phase_offsets.get(node_id)
             else:
                 continue
 
             node = self.graph.get_node(node_id)
             if node and not node.is_classical and global_tick % interval == 0:
-                node.apply_tick(global_tick, phase, self.graph, origin="seed")
-                self._log({
-                    "tick": global_tick,
-                    "node": node.id,
-                    "phase": phase,
-                    "strategy": "static",
-                })
+                final_phase = (
+                    node.compute_phase(global_tick) + offset
+                    if offset is not None
+                    else phase
+                )
+                node.apply_tick(global_tick, final_phase, self.graph, origin="seed")
+                coherence = getattr(node, "coherence", 0.0)
+                threshold = node._coherence_threshold()
+                success = coherence >= threshold
+                reason = (
+                    None
+                    if success
+                    else f"coherence {coherence:.3f} below {threshold:.3f}"
+                )
+                self._log(
+                    {
+                        "tick": global_tick,
+                        "node": node.id,
+                        "phase": final_phase,
+                        "strategy": "static",
+                        "coherence": round(coherence, 4),
+                        "success": success,
+                        "failure_reason": reason,
+                    }
+                )
 
     # ------------------------------------------------------------
     def _seed_probabilistic(self, global_tick: int) -> None:
@@ -63,9 +86,22 @@ class TickSeeder:
             if random.random() < prob:
                 phase = node.compute_phase(global_tick)
                 node.apply_tick(global_tick, phase, self.graph, origin="seed")
-                self._log({
-                    "tick": global_tick,
-                    "node": node.id,
-                    "phase": phase,
-                    "strategy": "probabilistic",
-                })
+                coherence = getattr(node, "coherence", 0.0)
+                threshold = node._coherence_threshold()
+                success = coherence >= threshold
+                reason = (
+                    None
+                    if success
+                    else f"coherence {coherence:.3f} below {threshold:.3f}"
+                )
+                self._log(
+                    {
+                        "tick": global_tick,
+                        "node": node.id,
+                        "phase": phase,
+                        "strategy": "probabilistic",
+                        "coherence": round(coherence, 4),
+                        "success": success,
+                        "failure_reason": reason,
+                    }
+                )

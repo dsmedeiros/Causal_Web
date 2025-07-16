@@ -36,6 +36,7 @@ class Config:
     seeding = {
         "strategy": "static",  # static or probabilistic
         "probability": 0.1,  # used when strategy == "probabilistic"
+        "phase_offsets": {},  # per-node phase offsets when strategy == "static"
     }
 
     # SIP recombination
