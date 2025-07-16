@@ -20,4 +20,3 @@ def simulation_loop():
                 time.sleep(0.1)  # Wait until resumed
 
     Thread(target=run, daemon=True).start()
-

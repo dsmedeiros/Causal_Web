@@ -84,7 +84,11 @@ def update_coherence_constraints() -> None:
     _dynamic_coherence_offset = offset
     for node in graph.nodes.values():
         node.dynamic_offset = offset
-        node.refractory_period = max(1.0, 2 + offset * 5)
+        base = max(1.0, 2 + offset * 5)
+        ramp = getattr(Config, "FORMATION_REFRACTORY_RAMP", 20)
+        progress = min(Config.current_tick, ramp) / ramp
+        scale = 0.5 + 0.5 * progress
+        node.refractory_period = max(0.5, base * scale)
 
 
 def clear_output_directory():

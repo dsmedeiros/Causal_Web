@@ -214,6 +214,36 @@ class Node:
             self.goal_error["coherence"] = error
             self.current_threshold -= error * 0.05
 
+    def _phase_drift_tolerance(self, tick_time: int) -> float:
+        """Return allowable phase drift during early formation."""
+        ramp = getattr(Config, "DRIFT_TOLERANCE_RAMP", 10)
+        progress = min(tick_time, ramp) / ramp
+        return (math.pi / 2) * (1 - progress) + 0.1 * progress
+
+    def _fanout_edges(self, graph) -> list:
+        """Return outbound edges limited by ``Config.max_tick_fanout``."""
+        edges = graph.get_edges_from(self.id)
+        limit = getattr(Config, "max_tick_fanout", 0)
+        if limit and len(edges) > limit:
+            return edges[:limit]
+        return edges
+
+    def _resolve_interference(
+        self, tick_time: int, raw_phases: list, vector_sum: complex
+    ):
+        """Attempt to merge near-aligned phases into a single tick."""
+        tol = self._phase_drift_tolerance(tick_time)
+        diffs = [
+            abs((p1 - p2 + math.pi) % (2 * math.pi) - math.pi)
+            for i, p1 in enumerate(raw_phases)
+            for p2 in raw_phases[i + 1 :]
+        ]
+        if diffs and max(diffs) < tol:
+            return True, cmath.phase(vector_sum)
+        if abs(vector_sum) >= self.current_threshold * 0.8:
+            return True, cmath.phase(vector_sum)
+        return False, None
+
     def _update_law_wave(self, window: int = 20):
         """Compute dominant coherence frequency over a sliding window."""
         self.coherence_series.append(self.coherence)
@@ -353,6 +383,18 @@ class Node:
             )
             return True, resultant_phase
 
+        merged, phase = self._resolve_interference(tick_time, raw_phases, vector_sum)
+        if merged:
+            self._log_tick_evaluation(
+                tick_time,
+                coherence,
+                self.current_threshold,
+                False,
+                True,
+                "merged",
+            )
+            return True, phase
+
         self._log_tick_evaluation(
             tick_time,
             coherence,
@@ -444,7 +486,7 @@ class Node:
             )
 
         # Recursive phase propagation with refraction
-        for edge in graph.get_edges_from(self.id):
+        for edge in self._fanout_edges(graph):
             target = graph.get_node(edge.target)
             from .tick_engine import kappa
 
