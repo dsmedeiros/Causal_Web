@@ -97,6 +97,11 @@ class Node:
         self.goals: Dict[str, float] = {}
         self.goal_error: Dict[str, float] = {}
 
+        # ---- Coherence threshold ramp parameters ----
+        self.initial_coherence_threshold = 0.6
+        self.steady_coherence_threshold = 0.85
+        self.coherence_ramp_ticks = 10
+
     def compute_phase(self, tick_time):
         base = 2 * math.pi * self.frequency * tick_time
         jitter = Config.phase_jitter
@@ -105,6 +110,18 @@ class Node:
                 2 * math.pi * tick_time / jitter["period"]
             )
         return base
+
+    def _coherence_threshold(self) -> float:
+        """Return dynamic coherence acceptance threshold."""
+        progress = (
+            min(self.subjective_ticks, self.coherence_ramp_ticks)
+            / self.coherence_ramp_ticks
+        )
+        return (
+            self.initial_coherence_threshold
+            + (self.steady_coherence_threshold - self.initial_coherence_threshold)
+            * progress
+        )
 
     def compute_coherence_level(self, tick_time):
         phases = self.pending_superpositions.get(tick_time, [])
@@ -117,8 +134,9 @@ class Node:
         complex_vecs = [cmath.rect(1.0, p % (2 * math.pi)) for p in phases]
         vector_sum = sum(complex_vecs)
         self.coherence = abs(vector_sum) / len(phases)
-        if self.coherence > 0.8:
-            self.coherence_credit += self.coherence - 0.8
+        threshold = self._coherence_threshold()
+        if self.coherence > threshold:
+            self.coherence_credit += self.coherence - threshold
         else:
             self.decoherence_debt += 0.1
         self._update_law_wave()
@@ -149,7 +167,8 @@ class Node:
         if origin is not None:
             self.memory["origins"].append(origin)
             score = self.trust_profile.get(origin, 0.5)
-            if coherence > 0.8:
+            threshold = self._coherence_threshold()
+            if coherence > threshold:
                 score = min(1.0, score + 0.05)
             else:
                 score = max(0.0, score - 0.05)
@@ -159,7 +178,7 @@ class Node:
         else:
             self.phase_confidence_index = 1.0
 
-        if coherence > 0.9:
+        if coherence > self._coherence_threshold() + 0.1:
             self.sip_streak += 1
         else:
             self.sip_streak = 0
