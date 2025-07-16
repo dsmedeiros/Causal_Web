@@ -5,6 +5,7 @@ from .graph import CausalGraph
 from .observer import Observer
 from .log_interpreter import run_interpreter
 from .tick_seeder import TickSeeder
+from .logger import log_json, logger
 import json
 import numpy as np
 import os
@@ -124,8 +125,7 @@ def log_curvature_per_tick(global_tick):
             "delta_f": round(df, 4),
             "curved_delay": round(curved, 4),
         }
-    with open(Config.output_path("curvature_log.json"), "a") as f:
-        f.write(json.dumps({str(global_tick): log}) + "\n")
+    log_json(Config.output_path("curvature_log.json"), {str(global_tick): log})
 
 
 def log_bridge_states(global_tick):
@@ -141,8 +141,7 @@ def log_bridge_states(global_tick):
         }
         for b in graph.bridges
     }
-    with open(Config.output_path("bridge_state_log.json"), "a") as f:
-        f.write(json.dumps({str(global_tick): snapshot}) + "\n")
+    log_json(Config.output_path("bridge_state_log.json"), {str(global_tick): snapshot})
 
 
 def log_meta_node_ticks(global_tick):
@@ -156,8 +155,10 @@ def log_meta_node_ticks(global_tick):
         if member_ticks:
             events[meta_id] = member_ticks
         if events:
-            with open(Config.output_path("meta_node_tick_log.json"), "a") as f:
-                f.write(json.dumps({str(global_tick): events}) + "\n")
+            log_json(
+                Config.output_path("meta_node_tick_log.json"),
+                {str(global_tick): events},
+            )
 
 
 def snapshot_graph(global_tick):
@@ -231,8 +232,7 @@ def _update_growth_log(tick: int) -> None:
         "csp_success": _csp_success_count,
         "csp_failures": _csp_failure_count,
     }
-    with open(Config.output_path("structural_growth_log.json"), "a") as f:
-        f.write(json.dumps(record) + "\n")
+    log_json(Config.output_path("structural_growth_log.json"), record)
     _sip_success_count = 0
     _sip_failure_count = 0
     _csp_success_count = 0
@@ -254,23 +254,18 @@ def _spawn_sip_child(parent, tick: int):
         parent_ids=[parent.id],
     )
     graph.add_edge(parent.id, child_id)
-    with open(Config.output_path("node_emergence_log.json"), "a") as f:
-        f.write(
-            json.dumps(
-                {
-                    "id": child_id,
-                    "tick": tick,
-                    "parents": [parent.id],
-                    "origin_type": "SIP_BUD",
-                    "generation_tick": tick,
-                    "sigma_phi": parent.law_wave_frequency,
-                    "phase_confidence_index": graph.get_node(
-                        child_id
-                    ).phase_confidence_index,
-                }
-            )
-            + "\n"
-        )
+    log_json(
+        Config.output_path("node_emergence_log.json"),
+        {
+            "id": child_id,
+            "tick": tick,
+            "parents": [parent.id],
+            "origin_type": "SIP_BUD",
+            "generation_tick": tick,
+            "sigma_phi": parent.law_wave_frequency,
+            "phase_confidence_index": graph.get_node(child_id).phase_confidence_index,
+        },
+    )
     _update_growth_log(tick)
     global _sip_pending, _sip_success_count
     _sip_pending.append((child_id, [parent.id], tick, "SIP_BUD"))
@@ -298,23 +293,18 @@ def _spawn_sip_recomb_child(parent_a, parent_b, tick: int):
     )
     graph.add_edge(parent_a.id, child_id)
     graph.add_edge(parent_b.id, child_id)
-    with open(Config.output_path("node_emergence_log.json"), "a") as f:
-        f.write(
-            json.dumps(
-                {
-                    "id": child_id,
-                    "tick": tick,
-                    "parents": [parent_a.id, parent_b.id],
-                    "origin_type": "SIP_RECOMB",
-                    "generation_tick": tick,
-                    "sigma_phi": freq,
-                    "phase_confidence_index": graph.get_node(
-                        child_id
-                    ).phase_confidence_index,
-                }
-            )
-            + "\n"
-        )
+    log_json(
+        Config.output_path("node_emergence_log.json"),
+        {
+            "id": child_id,
+            "tick": tick,
+            "parents": [parent_a.id, parent_b.id],
+            "origin_type": "SIP_RECOMB",
+            "generation_tick": tick,
+            "sigma_phi": freq,
+            "phase_confidence_index": graph.get_node(child_id).phase_confidence_index,
+        },
+    )
     global _sip_pending, _sip_success_count
     _sip_pending.append((child_id, [parent_a.id, parent_b.id], tick, "SIP_RECOMB"))
     _sip_success_count += 1
@@ -340,22 +330,19 @@ def _check_sip_failures(tick: int) -> None:
                 p = graph.get_node(pid)
                 if p:
                     p.decoherence_debt += Config.SIP_FAILURE_ENTROPY_INJECTION
-            with open(Config.output_path("propagation_failure_log.json"), "a") as f:
-                f.write(
-                    json.dumps(
-                        {
-                            "tick": tick,
-                            "type": "SIP_FAILURE",
-                            "parent": parents[0],
-                            "child": child_id,
-                            "reason": "Insufficient coherence after "
-                            f"{Config.SIP_STABILIZATION_WINDOW} ticks",
-                            "entropy_injected": Config.SIP_FAILURE_ENTROPY_INJECTION,
-                            "origin_type": otype,
-                        }
-                    )
-                    + "\n"
-                )
+            log_json(
+                Config.output_path("propagation_failure_log.json"),
+                {
+                    "tick": tick,
+                    "type": "SIP_FAILURE",
+                    "parent": parents[0],
+                    "child": child_id,
+                    "reason": "Insufficient coherence after "
+                    f"{Config.SIP_STABILIZATION_WINDOW} ticks",
+                    "entropy_injected": Config.SIP_FAILURE_ENTROPY_INJECTION,
+                    "origin_type": otype,
+                },
+            )
             _sip_failure_count += 1
         _sip_pending.remove((child_id, parents, start, otype))
 
@@ -394,54 +381,45 @@ def _process_csp_seeds(tick: int) -> None:
                 parent_ids=[seed["parent"]],
             )
             graph.add_edge(seed["parent"], node_id)
-            with open(Config.output_path("node_emergence_log.json"), "a") as f:
-                f.write(
-                    json.dumps(
-                        {
-                            "id": node_id,
-                            "tick": tick,
-                            "parents": [seed["parent"]],
-                            "origin_type": "CSP",
-                            "generation_tick": tick,
-                            "sigma_phi": graph.get_node(node_id).law_wave_frequency,
-                            "phase_confidence_index": graph.get_node(
-                                node_id
-                            ).phase_confidence_index,
-                        }
-                    )
-                    + "\n"
-                )
-            with open(Config.output_path("collapse_chain_log.json"), "a") as f:
-                f.write(
-                    json.dumps(
-                        {
-                            "tick": tick,
-                            "source": seed["parent"],
-                            "children_spawned": [node_id],
-                        }
-                    )
-                    + "\n"
-                )
+            log_json(
+                Config.output_path("node_emergence_log.json"),
+                {
+                    "id": node_id,
+                    "tick": tick,
+                    "parents": [seed["parent"]],
+                    "origin_type": "CSP",
+                    "generation_tick": tick,
+                    "sigma_phi": graph.get_node(node_id).law_wave_frequency,
+                    "phase_confidence_index": graph.get_node(
+                        node_id
+                    ).phase_confidence_index,
+                },
+            )
+            log_json(
+                Config.output_path("collapse_chain_log.json"),
+                {
+                    "tick": tick,
+                    "source": seed["parent"],
+                    "children_spawned": [node_id],
+                },
+            )
             _csp_success_count += 1
         else:
             parent = graph.get_node(seed["parent"])
             if parent:
                 parent.decoherence_debt += Config.CSP_ENTROPY_INJECTION
-            with open(Config.output_path("propagation_failure_log.json"), "a") as f:
-                f.write(
-                    json.dumps(
-                        {
-                            "tick": tick,
-                            "type": "CSP_FAILURE",
-                            "parent": seed["parent"],
-                            "reason": "Seed failed to cohere",
-                            "entropy_injected": Config.CSP_ENTROPY_INJECTION,
-                            "origin_type": "CSP",
-                            "location": [seed["x"], seed["y"]],
-                        }
-                    )
-                    + "\n"
-                )
+            log_json(
+                Config.output_path("propagation_failure_log.json"),
+                {
+                    "tick": tick,
+                    "type": "CSP_FAILURE",
+                    "parent": seed["parent"],
+                    "reason": "Seed failed to cohere",
+                    "entropy_injected": Config.CSP_ENTROPY_INJECTION,
+                    "origin_type": "CSP",
+                    "location": [seed["x"], seed["y"]],
+                },
+            )
             recent_csp_failures.append(
                 {
                     "x": seed["x"],
@@ -557,17 +535,14 @@ def log_metrics_per_tick(global_tick):
                 record["stable"] = 0
         if record["stable"] >= 10:
             node.refractory_period = max(1.0, node.refractory_period - 0.1)
-            with open(Config.output_path("law_drift_log.json"), "a") as f:
-                f.write(
-                    json.dumps(
-                        {
-                            "tick": global_tick,
-                            "node": node_id,
-                            "new_refractory_period": node.refractory_period,
-                        }
-                    )
-                    + "\n"
-                )
+            log_json(
+                Config.output_path("law_drift_log.json"),
+                {
+                    "tick": global_tick,
+                    "node": node_id,
+                    "new_refractory_period": node.refractory_period,
+                },
+            )
             record["stable"] = 0
 
         decoherence_log[node_id] = round(decoherence, 4)
@@ -583,37 +558,42 @@ def log_metrics_per_tick(global_tick):
     clusters = graph.detect_clusters()
     graph.create_meta_nodes(clusters)
 
-    with open(Config.output_path("cluster_log.json"), "a") as f:
-        f.write(json.dumps({str(global_tick): clusters}) + "\n")
+    log_json(Config.output_path("cluster_log.json"), {str(global_tick): clusters})
 
-    with open(Config.output_path("law_wave_log.json"), "a") as f:
-        f.write(json.dumps({str(global_tick): law_wave_log}) + "\n")
+    log_json(Config.output_path("law_wave_log.json"), {str(global_tick): law_wave_log})
 
-    with open(Config.output_path("decoherence_log.json"), "a") as f:
-        f.write(json.dumps({str(global_tick): decoherence_log}) + "\n")
-    with open(Config.output_path("coherence_log.json"), "a") as f:
-        f.write(json.dumps({str(global_tick): coherence_log}) + "\n")
-    with open(Config.output_path("coherence_velocity_log.json"), "a") as f:
-        f.write(json.dumps({str(global_tick): coherence_velocity}) + "\\n")
-    with open(Config.output_path("classicalization_map.json"), "a") as f:
-        f.write(json.dumps({str(global_tick): classical_state}) + "\n")
-    with open(Config.output_path("interference_log.json"), "a") as f:
-        f.write(json.dumps({str(global_tick): interference_log}) + "\n")
-    with open(Config.output_path("tick_density_map.json"), "a") as f:
-        f.write(json.dumps({str(global_tick): interference_log}) + "\n")
-    with open(Config.output_path("node_state_log.json"), "a") as f:
-        f.write(
-            json.dumps(
-                {
-                    str(global_tick): {
-                        "type": type_log,
-                        "credit": credit_log,
-                        "debt": debt_log,
-                    }
-                }
-            )
-            + "\n"
-        )
+    log_json(
+        Config.output_path("decoherence_log.json"), {str(global_tick): decoherence_log}
+    )
+    log_json(
+        Config.output_path("coherence_log.json"), {str(global_tick): coherence_log}
+    )
+    log_json(
+        Config.output_path("coherence_velocity_log.json"),
+        {str(global_tick): coherence_velocity},
+    )
+    log_json(
+        Config.output_path("classicalization_map.json"),
+        {str(global_tick): classical_state},
+    )
+    log_json(
+        Config.output_path("interference_log.json"),
+        {str(global_tick): interference_log},
+    )
+    log_json(
+        Config.output_path("tick_density_map.json"),
+        {str(global_tick): interference_log},
+    )
+    log_json(
+        Config.output_path("node_state_log.json"),
+        {
+            str(global_tick): {
+                "type": type_log,
+                "credit": credit_log,
+                "debt": debt_log,
+            }
+        },
+    )
 
 
 def simulation_loop():
@@ -692,6 +672,7 @@ def simulation_loop():
 
 
 def write_output():
+    logger.stop()
     with open(Config.output_path("tick_trace.json"), "w") as f:
         json.dump(graph.to_dict(), f, indent=2)
     print(f"✅ Tick trace saved to {Config.output_path('tick_trace.json')}")

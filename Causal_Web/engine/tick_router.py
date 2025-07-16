@@ -1,5 +1,6 @@
 class TickRouter:
     """Route ticks across LCCM layers"""
+
     LAYERS = [
         "tick",
         "phase",
@@ -24,6 +25,8 @@ class TickRouter:
     def route_tick(cls, node, tick):
         from ..config import Config
         import json
+        from .logger import log_json
+
         new_layer = cls.next_layer(tick.layer)
         if new_layer != tick.layer:
             record = {
@@ -33,6 +36,5 @@ class TickRouter:
                 "to": new_layer,
                 "trace_id": tick.trace_id,
             }
-            with open(Config.output_path("layer_transition_log.json"), "a") as f:
-                f.write(json.dumps(record) + "\n")
+            log_json(Config.output_path("layer_transition_log.json"), record)
             tick.layer = new_layer
