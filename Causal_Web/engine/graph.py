@@ -1,5 +1,6 @@
 import cmath
 import math
+from collections import defaultdict
 
 from .bridge import Bridge
 from .node import Node, Edge, NodeType
@@ -18,6 +19,7 @@ class CausalGraph:
         self.bridges = []
         self.tick_sources = []
         self.meta_nodes = {}
+        self.spatial_index = defaultdict(set)
 
     def add_node(
         self,
@@ -45,6 +47,8 @@ class CausalGraph:
             generation_tick=generation_tick,
             parent_ids=parent_ids,
         )
+        node = self.nodes[node_id]
+        self.spatial_index[(node.grid_x, node.grid_y)].add(node_id)
 
     def add_edge(
         self,
@@ -103,6 +107,19 @@ class CausalGraph:
 
     def get_downstream_nodes(self, node_id):
         return [e.target for e in self.get_edges_from(node_id)]
+
+    def nearby_nodes(self, node, radius=1):
+        """Return nodes in adjacent spatial partitions."""
+        cells = [
+            (node.grid_x + dx, node.grid_y + dy)
+            for dx in range(-radius, radius + 1)
+            for dy in range(-radius, radius + 1)
+        ]
+        ids = set()
+        for c in cells:
+            ids.update(self.spatial_index.get(c, set()))
+        ids.discard(node.id)
+        return [self.nodes[i] for i in ids]
 
     # --- Bridge-aware connectivity helpers ---
     def get_bridge_neighbors(self, node_id, active_only=True):

@@ -215,15 +215,14 @@ def _bridge_thresholds(global_tick: int) -> tuple[float, float]:
 
 
 def dynamic_bridge_management(global_tick):
-    """Form new bridges between coherent nodes on the fly."""
-    ids = list(graph.nodes.keys())
+    """Form new bridges between coherent nodes using spatial bins."""
     existing = {(b.node_a_id, b.node_b_id) for b in graph.bridges}
     existing |= {(b.node_b_id, b.node_a_id) for b in graph.bridges}
     coherence_thresh, drift_thresh = _bridge_thresholds(global_tick)
-    for i in range(len(ids)):
-        for j in range(i + 1, len(ids)):
-            a = graph.get_node(ids[i])
-            b = graph.get_node(ids[j])
+    for a in graph.nodes.values():
+        for b in graph.nearby_nodes(a):
+            if a.id >= b.id:
+                continue
             if (a.id, b.id) in existing:
                 continue
             drift = abs((a.phase - b.phase + math.pi) % (2 * math.pi) - math.pi)
@@ -232,12 +231,7 @@ def dynamic_bridge_management(global_tick):
                 and a.coherence > coherence_thresh
                 and b.coherence > coherence_thresh
             ):
-                graph.add_bridge(
-                    a.id,
-                    b.id,
-                    formed_at_tick=global_tick,
-                    seeded=False,
-                )
+                graph.add_bridge(a.id, b.id, formed_at_tick=global_tick, seeded=False)
                 bridge = graph.bridges[-1]
                 bridge._log_dynamics(
                     global_tick,
