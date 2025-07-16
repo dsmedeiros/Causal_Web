@@ -84,6 +84,10 @@ class Node:
         self.phase_lock: bool = False
         self.collapse_pressure: float = 0.0
 
+        # ---- Cluster metadata ----
+        # Mapping of hierarchy level -> cluster id
+        self.cluster_ids: Dict[int, int] = {}
+
         # ---- Propagation metadata ----
         self.origin_type = origin_type
         self.generation_tick = generation_tick
@@ -265,6 +269,14 @@ class Node:
     def _fanout_edges(self, graph) -> list:
         """Return outbound edges limited by ``Config.max_tick_fanout``."""
         edges = graph.get_edges_from(self.id)
+        # limit propagation to nodes within the same primary cluster
+        cluster = self.cluster_ids.get(0)
+        if cluster is not None:
+            edges = [
+                e
+                for e in edges
+                if graph.get_node(e.target).cluster_ids.get(0) == cluster
+            ]
         limit = getattr(Config, "max_tick_fanout", 0)
         if limit and len(edges) > limit:
             return edges[:limit]
