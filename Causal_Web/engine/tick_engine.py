@@ -37,6 +37,10 @@ _sip_failure_count = 0
 _csp_success_count = 0
 _csp_failure_count = 0
 
+# --- Adaptive constraint tracking ---
+_recent_node_counts: list[int] = []
+_dynamic_coherence_offset: float = 0.0
+
 # --- Phase 8 parameters ---
 SIP_COHERENCE_DURATION = 3
 SIP_DECOHERENCE_THRESHOLD = 0.5
@@ -59,6 +63,23 @@ def apply_global_forcing(tick: int) -> None:
                 ramp * wave["amplitude"] * math.sin(2 * math.pi * tick / wave["period"])
             )
             node.current_threshold = max(0.1, node.current_threshold - mod)
+
+
+def update_coherence_constraints() -> None:
+    """Adjust node thresholds based on network size and growth."""
+    global _recent_node_counts, _dynamic_coherence_offset
+    count = len(graph.nodes)
+    _recent_node_counts.append(count)
+    if len(_recent_node_counts) > 5:
+        _recent_node_counts.pop(0)
+    growth = 0
+    if len(_recent_node_counts) >= 2:
+        growth = _recent_node_counts[-1] - _recent_node_counts[0]
+    offset = min(0.3, 0.01 * count + 0.02 * growth)
+    _dynamic_coherence_offset = offset
+    for node in graph.nodes.values():
+        node.dynamic_offset = offset
+        node.refractory_period = max(1.0, 2 + offset * 5)
 
 
 def clear_output_directory():
@@ -627,6 +648,7 @@ def simulation_loop():
             print(f"== Tick {global_tick} ==")
 
             apply_global_forcing(global_tick)
+            update_coherence_constraints()
 
             emit_ticks(global_tick)
             propagate_phases(global_tick)

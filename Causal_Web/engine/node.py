@@ -102,6 +102,9 @@ class Node:
         self.steady_coherence_threshold = 0.85
         self.coherence_ramp_ticks = 10
 
+        # additional offset applied from global network constraints
+        self.dynamic_offset = 0.0
+
     def compute_phase(self, tick_time):
         """Return phase value incorporating time-dependent global jitter."""
         base = 2 * math.pi * self.frequency * tick_time
@@ -121,11 +124,12 @@ class Node:
             min(self.subjective_ticks, self.coherence_ramp_ticks)
             / self.coherence_ramp_ticks
         )
-        return (
+        base = (
             self.initial_coherence_threshold
             + (self.steady_coherence_threshold - self.initial_coherence_threshold)
             * progress
         )
+        return base + self.dynamic_offset
 
     def compute_coherence_level(self, tick_time):
         phases = self.pending_superpositions.get(tick_time, [])
