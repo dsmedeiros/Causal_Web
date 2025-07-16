@@ -38,6 +38,10 @@ _sip_failure_count = 0
 _csp_success_count = 0
 _csp_failure_count = 0
 
+# child spawn tracking for bounded propagation
+_spawn_counts = {}
+_spawn_tick = -1
+
 # --- Phase 8 parameters ---
 SIP_COHERENCE_DURATION = 3
 SIP_DECOHERENCE_THRESHOLD = 0.5
@@ -241,6 +245,21 @@ def _update_growth_log(tick: int) -> None:
 
 def _spawn_sip_child(parent, tick: int):
     """Generate a new node via Stability-Induced Propagation."""
+    global _spawn_counts
+    if _spawn_counts.get(parent.id, 0) >= Config.max_children_per_node > 0:
+        with open(Config.output_path("propagation_failure_log.json"), "a") as f:
+            f.write(
+                json.dumps(
+                    {
+                        "tick": tick,
+                        "type": "SPAWN_LIMIT",
+                        "parent": parent.id,
+                        "origin_type": "SIP_BUD",
+                    }
+                )
+                + "\n"
+            )
+        return
     child_id = f"{parent.id}_S{tick}"
     if child_id in graph.nodes:
         return
@@ -270,10 +289,29 @@ def _spawn_sip_child(parent, tick: int):
     global _sip_pending, _sip_success_count
     _sip_pending.append((child_id, [parent.id], tick, "SIP_BUD"))
     _sip_success_count += 1
+    _spawn_counts[parent.id] = _spawn_counts.get(parent.id, 0) + 1
 
 
 def _spawn_sip_recomb_child(parent_a, parent_b, tick: int):
     """Generate a new node via dual-parent recombination."""
+    global _spawn_counts
+    if any(
+        _spawn_counts.get(pid, 0) >= Config.max_children_per_node > 0
+        for pid in (parent_a.id, parent_b.id)
+    ):
+        with open(Config.output_path("propagation_failure_log.json"), "a") as f:
+            f.write(
+                json.dumps(
+                    {
+                        "tick": tick,
+                        "type": "SPAWN_LIMIT",
+                        "parent": f"{parent_a.id},{parent_b.id}",
+                        "origin_type": "SIP_RECOMB",
+                    }
+                )
+                + "\n"
+            )
+        return
     child_id = f"{parent_a.id}_{parent_b.id}_R{tick}"
     if child_id in graph.nodes:
         return
@@ -308,6 +346,8 @@ def _spawn_sip_recomb_child(parent_a, parent_b, tick: int):
     global _sip_pending, _sip_success_count
     _sip_pending.append((child_id, [parent_a.id, parent_b.id], tick, "SIP_RECOMB"))
     _sip_success_count += 1
+    for pid in (parent_a.id, parent_b.id):
+        _spawn_counts[pid] = _spawn_counts.get(pid, 0) + 1
 
 
 def _check_sip_failures(tick: int) -> None:
@@ -371,6 +411,21 @@ def _process_csp_seeds(tick: int) -> None:
             continue
         coherence = np.random.rand()
         if coherence > 0.5:
+            if _spawn_counts.get(seed["parent"], 0) >= Config.max_children_per_node > 0:
+                with open(Config.output_path("propagation_failure_log.json"), "a") as f:
+                    f.write(
+                        json.dumps(
+                            {
+                                "tick": tick,
+                                "type": "SPAWN_LIMIT",
+                                "parent": seed["parent"],
+                                "origin_type": "CSP",
+                            }
+                        )
+                        + "\n"
+                    )
+                _csp_seeds.remove(seed)
+                continue
             node_id = seed["id"].replace("CSPseed", "CSP")
             graph.add_node(
                 node_id,
@@ -404,6 +459,7 @@ def _process_csp_seeds(tick: int) -> None:
                 },
             )
             _csp_success_count += 1
+            _spawn_counts[seed["parent"]] = _spawn_counts.get(seed["parent"], 0) + 1
         else:
             parent = graph.get_node(seed["parent"])
             if parent:
@@ -448,6 +504,10 @@ def _update_simulation_state(
 
 def check_propagation(tick: int) -> None:
     """Evaluate nodes for propagation triggers."""
+    global _spawn_counts, _spawn_tick
+    if _spawn_tick != tick:
+        _spawn_counts = {}
+        _spawn_tick = tick
     _check_sip_failures(tick)
     _process_csp_seeds(tick)
     for node in list(graph.nodes.values()):
