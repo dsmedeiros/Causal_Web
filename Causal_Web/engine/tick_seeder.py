@@ -4,6 +4,7 @@ from typing import Dict, List
 
 from .graph import CausalGraph
 from ..config import Config
+from .logger import log_json
 
 
 class TickSeeder:
@@ -25,8 +26,7 @@ class TickSeeder:
 
     # ------------------------------------------------------------
     def _log(self, record: Dict) -> None:
-        with open(self.log_path, "a") as f:
-            f.write(json.dumps(record) + "\n")
+        log_json(self.log_path, record)
         self.seed_count += 1
 
     # ------------------------------------------------------------
