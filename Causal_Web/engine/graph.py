@@ -16,7 +16,10 @@ class CausalGraph:
     def __init__(self):
         self.nodes = {}
         self.edges = []
+        self.edges_from = defaultdict(list)
+        self.edges_to = defaultdict(list)
         self.bridges = []
+        self.bridges_by_node = defaultdict(set)
         self.tick_sources = []
         self.meta_nodes = {}
         self.spatial_index = defaultdict(set)
@@ -59,9 +62,10 @@ class CausalGraph:
         delay=1,
         phase_shift=0.0,
     ):
-        self.edges.append(
-            Edge(source_id, target_id, attenuation, density, delay, phase_shift)
-        )
+        edge = Edge(source_id, target_id, attenuation, density, delay, phase_shift)
+        self.edges.append(edge)
+        self.edges_from[source_id].append(edge)
+        self.edges_to[target_id].append(edge)
 
     def add_bridge(
         self,
@@ -77,30 +81,31 @@ class CausalGraph:
         seeded=True,
         formed_at_tick=0,
     ):
-        self.bridges.append(
-            Bridge(
-                node_a_id,
-                node_b_id,
-                bridge_type,
-                phase_offset,
-                drift_tolerance,
-                decoherence_limit,
-                initial_strength,
-                medium_type,
-                mutable,
-                seeded,
-                formed_at_tick,
-            )
+        bridge = Bridge(
+            node_a_id,
+            node_b_id,
+            bridge_type,
+            phase_offset,
+            drift_tolerance,
+            decoherence_limit,
+            initial_strength,
+            medium_type,
+            mutable,
+            seeded,
+            formed_at_tick,
         )
+        self.bridges.append(bridge)
+        self.bridges_by_node[node_a_id].add(bridge)
+        self.bridges_by_node[node_b_id].add(bridge)
 
     def get_node(self, node_id):
         return self.nodes.get(node_id)
 
     def get_edges_from(self, node_id):
-        return [e for e in self.edges if e.source == node_id]
+        return self.edges_from.get(node_id, [])
 
     def get_edges_to(self, node_id):
-        return [e for e in self.edges if e.target == node_id]
+        return self.edges_to.get(node_id, [])
 
     def get_upstream_nodes(self, node_id):
         return [e.source for e in self.get_edges_to(node_id)]
@@ -124,15 +129,15 @@ class CausalGraph:
     # --- Bridge-aware connectivity helpers ---
     def get_bridge_neighbors(self, node_id, active_only=True):
         """Return IDs of nodes connected via bridges."""
-        neighbors = []
-        for b in self.bridges:
+        neighbors = set()
+        for b in self.bridges_by_node.get(node_id, set()):
             if active_only and not b.active:
                 continue
             if b.node_a_id == node_id:
-                neighbors.append(b.node_b_id)
-            elif b.node_b_id == node_id:
-                neighbors.append(b.node_a_id)
-        return neighbors
+                neighbors.add(b.node_b_id)
+            else:
+                neighbors.add(b.node_a_id)
+        return list(neighbors)
 
     def get_connected_nodes(self, node_id):
         """All neighbors reachable via edges or active bridges."""
@@ -145,6 +150,10 @@ class CausalGraph:
     def reset_ticks(self):
         for node in self.nodes.values():
             node.tick_history.clear()
+            node._tick_phase_lookup.clear()
+            node._phase_cache.clear()
+            node._coherence_cache.clear()
+            node._decoherence_cache.clear()
             node.incoming_phase_queue.clear()
             node.current_tick = 0
             node.subjective_ticks = 0
@@ -325,7 +334,10 @@ class CausalGraph:
 
         self.nodes.clear()
         self.edges.clear()
+        self.edges_from.clear()
+        self.edges_to.clear()
         self.bridges.clear()
+        self.bridges_by_node.clear()
         self.tick_sources = []
 
         nodes_data = data.get("nodes", [])

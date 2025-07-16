@@ -57,8 +57,12 @@ class Node:
         self.coherence = 1.0
         self.decoherence = 0.0
         self.tick_history = []  # List[Tick]
+        self._tick_phase_lookup: Dict[int, float] = {}
         self.incoming_phase_queue = defaultdict(list)  # tick_time -> [phase_i]
         self.pending_superpositions = defaultdict(list)  # for logging and analysis
+        self._phase_cache: Dict[int, float] = {}
+        self._coherence_cache: Dict[int, float] = {}
+        self._decoherence_cache: Dict[int, float] = {}
         self.current_tick = 0
         self.subjective_ticks = 0  # For relativistic tracking
         self.last_emission_tick = None
@@ -113,6 +117,8 @@ class Node:
 
     def compute_phase(self, tick_time):
         """Return phase value incorporating time-dependent global jitter."""
+        if tick_time in self._phase_cache:
+            return self._phase_cache[tick_time]
         base = 2 * math.pi * self.frequency * tick_time
         jitter = Config.phase_jitter
         if jitter["amplitude"] and jitter.get("period", 0):
@@ -122,6 +128,7 @@ class Node:
                 * jitter["amplitude"]
                 * math.sin(2 * math.pi * tick_time / jitter["period"])
             )
+        self._phase_cache[tick_time] = base
         return base
 
     def _coherence_threshold(self) -> float:
@@ -138,6 +145,8 @@ class Node:
         return base + self.dynamic_offset
 
     def compute_coherence_level(self, tick_time):
+        if tick_time in self._coherence_cache:
+            return self._coherence_cache[tick_time]
         phases = self.pending_superpositions.get(tick_time, [])
         old = self.coherence
         if len(phases) < 2:
@@ -164,9 +173,12 @@ class Node:
             from . import tick_engine as te
 
             te.mark_for_update(self.id)
+        self._coherence_cache[tick_time] = self.coherence
         return self.coherence
 
     def compute_decoherence_field(self, tick_time):
+        if tick_time in self._decoherence_cache:
+            return self._decoherence_cache[tick_time]
         phases = self.pending_superpositions.get(tick_time, [])
         old = self.decoherence
         if len(phases) < 2:
@@ -189,6 +201,7 @@ class Node:
             from . import tick_engine as te
 
             te.mark_for_update(self.id)
+        self._decoherence_cache[tick_time] = self.decoherence
         return self.decoherence
 
     # ------------------------------------------------------------------
@@ -377,6 +390,8 @@ class Node:
         self.pending_superpositions[tick_time].append(
             incoming_phase
         )  # track unresolved states
+        self._coherence_cache.pop(tick_time, None)
+        self._decoherence_cache.pop(tick_time, None)
         print(
             f"[{self.id}] Received tick at {tick_time} with phase {incoming_phase:.2f}"
         )
@@ -438,10 +453,7 @@ class Node:
         return False, None
 
     def get_phase_at(self, tick_time):
-        for tick in self.tick_history:
-            if tick.time == tick_time:
-                return tick.phase
-        return None
+        return self._tick_phase_lookup.get(tick_time)
 
     def apply_tick(self, tick_time, phase, graph, origin="self"):
         """Emit a tick and propagate resulting phases to neighbours."""
@@ -496,6 +508,7 @@ class Node:
             trace_id=trace_id,
         )
         self.tick_history.append(tick_obj)
+        self._tick_phase_lookup[tick_time] = phase
         from .tick_router import TickRouter
 
         TickRouter.route_tick(self, tick_obj)
@@ -617,6 +630,8 @@ class Node:
             del self.incoming_phase_queue[global_tick]
             if global_tick in self.pending_superpositions:
                 del self.pending_superpositions[global_tick]
+            self._coherence_cache.pop(global_tick, None)
+            self._decoherence_cache.pop(global_tick, None)
             self._update_memory(global_tick)
             self._adapt_behavior()
             self.update_node_type()
@@ -637,6 +652,7 @@ class Node:
                 trace_id=str(uuid.uuid4()),
             )
         )
+        self._tick_phase_lookup[tick_time] = phase
         print(f"[{self.id}] Emitted tick at {tick_time} | Phase: {phase:.2f}")
 
 
