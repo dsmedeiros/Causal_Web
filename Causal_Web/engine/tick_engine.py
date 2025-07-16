@@ -20,6 +20,15 @@ kappa = 0.5  # curvature strength for refraction fields
 _law_wave_stability = {}
 seeder = TickSeeder(graph)
 
+# Nodes flagged for evaluation on the next tick
+nodes_to_update: set[str] = set()
+
+
+def mark_for_update(node_id: str) -> None:
+    """Add ``node_id`` to the update queue."""
+    nodes_to_update.add(node_id)
+
+
 # Phase 6 metrics
 void_absorption_events = 0
 boundary_interactions_count = 0
@@ -68,6 +77,7 @@ def apply_global_forcing(tick: int) -> None:
                 ramp * wave["amplitude"] * math.sin(2 * math.pi * tick / wave["period"])
             )
             node.current_threshold = max(0.1, node.current_threshold - mod)
+        mark_for_update(node.id)
 
 
 def update_coherence_constraints() -> None:
@@ -89,6 +99,7 @@ def update_coherence_constraints() -> None:
         progress = min(Config.current_tick, ramp) / ramp
         scale = 0.5 + 0.5 * progress
         node.refractory_period = max(0.5, base * scale)
+        mark_for_update(node.id)
 
 
 def clear_output_directory():
@@ -135,8 +146,15 @@ def propagate_phases(global_tick):
 
 
 def evaluate_nodes(global_tick):
-    for node in graph.nodes.values():
+    """Evaluate only nodes flagged in :data:`nodes_to_update`."""
+    for node_id in list(nodes_to_update):
+        node = graph.get_node(node_id)
+        if not node:
+            nodes_to_update.discard(node_id)
+            continue
         node.maybe_tick(global_tick, graph)
+        if not node.incoming_phase_queue:
+            nodes_to_update.discard(node_id)
 
 
 def log_curvature_per_tick(global_tick):
