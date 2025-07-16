@@ -77,6 +77,18 @@ class Bridge:
         self.reformable = True
         self.memory_weight = 0.5
 
+    def _fatigue_multiplier(self, tick: int) -> float:
+        """Return dynamic fatigue scaling factor during early stabilization."""
+        ramp = getattr(Config, "BRIDGE_STABILIZATION_TICKS", 50)
+        progress = min(max(tick - self.formed_at_tick, 0), ramp) / ramp
+        return 0.5 + 0.5 * progress
+
+    def _reform_threshold(self, tick: int) -> float:
+        """Return dynamic coherence threshold for bridge reformation."""
+        ramp = getattr(Config, "BRIDGE_STABILIZATION_TICKS", 50)
+        progress = min(max(tick - self.formed_at_tick, 0), ramp) / ramp
+        return 0.75 + 0.15 * progress
+
     def _log_dynamics(self, tick, event, conditions=None):
         record = {
             "bridge_id": self.bridge_id,
@@ -105,7 +117,7 @@ class Bridge:
                 if self.decoherence_exposure
                 else 0.0
             )
-            self.fatigue += avg
+            self.fatigue += avg * self._fatigue_multiplier(tick)
             if self.fatigue > 3.0:
                 self.state = BridgeState.RUPTURING
                 self.active = False
@@ -175,7 +187,8 @@ class Bridge:
             node_a.compute_coherence_level(tick_time)
             + node_b.compute_coherence_level(tick_time)
         ) / 2
-        if coherence > coherence_threshold and random() < self.memory_weight:
+        threshold = self._reform_threshold(tick_time)
+        if coherence > threshold and random() < self.memory_weight:
             self.active = True
             self.last_reform_tick = tick_time
             self.coherence_at_reform = coherence
@@ -201,7 +214,8 @@ class Bridge:
             node_a.compute_coherence_level(tick_time)
             + node_b.compute_coherence_level(tick_time)
         ) / 2
-        if not self.active and coherence > coherence_threshold:
+        threshold = self._reform_threshold(tick_time)
+        if not self.active and coherence > threshold:
             self.active = True
             self.last_reform_tick = tick_time
             self.coherence_at_reform = coherence
