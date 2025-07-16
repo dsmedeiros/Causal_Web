@@ -139,11 +139,17 @@ class Node:
 
     def compute_coherence_level(self, tick_time):
         phases = self.pending_superpositions.get(tick_time, [])
+        old = self.coherence
         if len(phases) < 2:
             self.coherence = 1.0
             self._update_law_wave()
             self.coherence_credit += 0.1
             self.decoherence_debt = max(0.0, self.decoherence_debt - 0.1)
+            new = self.coherence
+            if abs(new - old) > 0.05:
+                from . import tick_engine as te
+
+                te.mark_for_update(self.id)
             return self.coherence
         complex_vecs = [cmath.rect(1.0, p % (2 * math.pi)) for p in phases]
         vector_sum = sum(complex_vecs)
@@ -154,13 +160,22 @@ class Node:
         else:
             self.decoherence_debt += 0.1
         self._update_law_wave()
+        if abs(self.coherence - old) > 0.05:
+            from . import tick_engine as te
+
+            te.mark_for_update(self.id)
         return self.coherence
 
     def compute_decoherence_field(self, tick_time):
         phases = self.pending_superpositions.get(tick_time, [])
+        old = self.decoherence
         if len(phases) < 2:
             self.decoherence = 0.0
             self.decoherence_debt = max(0.0, self.decoherence_debt - 0.1)
+            if abs(self.decoherence - old) > 0.05:
+                from . import tick_engine as te
+
+                te.mark_for_update(self.id)
             return self.decoherence
         normalized = [(p % (2 * math.pi)) for p in phases]
         mean_phase = sum(normalized) / len(normalized)
@@ -170,6 +185,10 @@ class Node:
             self.decoherence_debt += self.decoherence - 0.4
         else:
             self.coherence_credit += 0.05
+        if abs(self.decoherence - old) > 0.05:
+            from . import tick_engine as te
+
+            te.mark_for_update(self.id)
         return self.decoherence
 
     # ------------------------------------------------------------------
@@ -198,6 +217,7 @@ class Node:
             self.sip_streak = 0
 
     def _adapt_behavior(self) -> None:
+        old_thresh = self.current_threshold
         if self.memory["coherence"]:
             avg_coh = sum(self.memory["coherence"]) / len(self.memory["coherence"])
         else:
@@ -218,6 +238,10 @@ class Node:
             error = goal - avg_coh
             self.goal_error["coherence"] = error
             self.current_threshold -= error * 0.05
+        if abs(self.current_threshold - old_thresh) > 0.01:
+            from . import tick_engine as te
+
+            te.mark_for_update(self.id)
 
     def _phase_drift_tolerance(self, tick_time: int) -> float:
         """Return allowable phase drift during early formation."""
@@ -356,6 +380,9 @@ class Node:
         print(
             f"[{self.id}] Received tick at {tick_time} with phase {incoming_phase:.2f}"
         )
+        from . import tick_engine as te
+
+        te.mark_for_update(self.id)
 
     def should_tick(self, tick_time):
         in_refractory = tick_time - self.last_tick_time < self.refractory_period
