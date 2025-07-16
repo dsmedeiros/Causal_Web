@@ -167,11 +167,24 @@ def snapshot_graph(global_tick):
     return None
 
 
+def _bridge_thresholds(global_tick: int) -> tuple[float, float]:
+    """Return coherence and drift thresholds for bridge formation."""
+    if global_tick < 20:
+        return 0.6, 0.5
+    if global_tick < 50:
+        progress = (global_tick - 20) / 30
+        coh = 0.6 + progress * (0.9 - 0.6)
+        drift = 0.5 - progress * (0.5 - 0.1)
+        return coh, drift
+    return 0.9, 0.1
+
+
 def dynamic_bridge_management(global_tick):
     """Form new bridges between coherent nodes on the fly."""
     ids = list(graph.nodes.keys())
     existing = {(b.node_a_id, b.node_b_id) for b in graph.bridges}
     existing |= {(b.node_b_id, b.node_a_id) for b in graph.bridges}
+    coherence_thresh, drift_thresh = _bridge_thresholds(global_tick)
     for i in range(len(ids)):
         for j in range(i + 1, len(ids)):
             a = graph.get_node(ids[i])
@@ -179,7 +192,11 @@ def dynamic_bridge_management(global_tick):
             if (a.id, b.id) in existing:
                 continue
             drift = abs((a.phase - b.phase + math.pi) % (2 * math.pi) - math.pi)
-            if drift < 0.1 and a.coherence > 0.9 and b.coherence > 0.9:
+            if (
+                drift < drift_thresh
+                and a.coherence > coherence_thresh
+                and b.coherence > coherence_thresh
+            ):
                 graph.add_bridge(
                     a.id,
                     b.id,
