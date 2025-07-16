@@ -29,6 +29,8 @@ class Config:
     # Global rhythmic forcing parameters
     phase_jitter = {"amplitude": 0.0, "period": 20}  # radians  # ticks
     coherence_wave = {"amplitude": 0.0, "period": 30}  # threshold modulation
+    # ticks over which to ramp up global forcing effects
+    forcing_ramp_ticks = 20
     # interval for saving runtime snapshots of the graph
     snapshot_interval = 10
 

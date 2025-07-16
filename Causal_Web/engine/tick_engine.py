@@ -43,16 +43,21 @@ SIP_DECOHERENCE_THRESHOLD = 0.5
 
 
 def apply_global_forcing(tick: int) -> None:
-    """Apply rhythmic modulation to all nodes."""
+    """Apply rhythmic modulation to all nodes with a startup ramp."""
     jitter = Config.phase_jitter
     wave = Config.coherence_wave
+    ramp = min(tick / max(1, Config.forcing_ramp_ticks), 1.0)
     for node in graph.nodes.values():
         if jitter["amplitude"] and jitter.get("period", 0):
-            node.phase += jitter["amplitude"] * math.sin(
-                2 * math.pi * tick / jitter["period"]
+            node.phase += (
+                ramp
+                * jitter["amplitude"]
+                * math.sin(2 * math.pi * tick / jitter["period"])
             )
         if wave["amplitude"] and wave.get("period", 0):
-            mod = wave["amplitude"] * math.sin(2 * math.pi * tick / wave["period"])
+            mod = (
+                ramp * wave["amplitude"] * math.sin(2 * math.pi * tick / wave["period"])
+            )
             node.current_threshold = max(0.1, node.current_threshold - mod)
 
 
