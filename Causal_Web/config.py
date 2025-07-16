@@ -1,6 +1,7 @@
 # config.py
 
 import os
+import threading
 
 
 class Config:
@@ -18,6 +19,9 @@ class Config:
     def output_path(*parts: str) -> str:
         """Return absolute path under the ``output`` directory."""
         return os.path.join(Config.output_dir, *parts)
+
+    # Synchronization lock for cross-thread state access
+    state_lock = threading.Lock()
 
     tick_rate = 1.0  # Seconds between ticks (adjustable via GUI)
     is_running = False  # Whether the simulation loop is active
