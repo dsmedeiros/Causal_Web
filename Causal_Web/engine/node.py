@@ -285,6 +285,15 @@ class Node:
         if reason is not None:
             record["reason"] = reason
         log_json(Config.output_path("tick_evaluation_log.json"), record)
+        if not fired:
+            fail_rec = {
+                "tick": tick_time,
+                "node": self.id,
+                "threshold": round(threshold, 4),
+                "coherence": round(coherence, 4),
+                "reason": reason or ("refractory" if refractory else "below_threshold"),
+            }
+            log_json(Config.output_path("propagation_failure_log.json"), fail_rec)
 
     def _log_tick_drop(self, tick_time: int, reason: str) -> None:
         record = {
@@ -295,6 +304,14 @@ class Node:
             "node_type": self.node_type.value,
         }
         log_json(Config.output_path("tick_drop_log.json"), record)
+        fail_rec = {
+            "tick": tick_time,
+            "node": self.id,
+            "threshold": round(self.current_threshold, 4),
+            "coherence": round(getattr(self, "coherence", 0.0), 4),
+            "reason": reason,
+        }
+        log_json(Config.output_path("propagation_failure_log.json"), fail_rec)
 
     def schedule_tick(self, tick_time, incoming_phase):
         self.incoming_phase_queue[tick_time].append(incoming_phase)
