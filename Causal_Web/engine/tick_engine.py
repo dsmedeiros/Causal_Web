@@ -243,6 +243,8 @@ def dynamic_bridge_management(global_tick):
                 continue
             if (a.id, b.id) in existing:
                 continue
+            if a.cluster_ids.get(0) != b.cluster_ids.get(0):
+                continue
             drift = abs((a.phase - b.phase + math.pi) % (2 * math.pi) - math.pi)
             if (
                 drift < drift_thresh
@@ -659,8 +661,8 @@ def log_metrics_per_tick(global_tick):
         debt_log[node_id] = round(debt, 3)
         type_log[node_id] = ntype
 
-    clusters = graph.detect_clusters()
-    graph.create_meta_nodes(clusters)
+    clusters = graph.hierarchical_clusters()
+    graph.create_meta_nodes(clusters.get(0, []))
 
     log_json(Config.output_path("cluster_log.json"), {str(global_tick): clusters})
 

@@ -227,10 +227,11 @@ class CausalGraph:
     def detect_clusters(
         self, coherence_threshold: float = 0.8, freq_tolerance: float = 0.1
     ):
-        """Detect sets of phase-aligned nodes."""
+        """Detect sets of phase-aligned nodes and assign cluster IDs."""
         clusters = []
         visited = set()
         node_list = list(self.nodes.values())
+        cid = 0
         for node in node_list:
             if node.id in visited or node.law_wave_frequency == 0.0:
                 continue
@@ -244,12 +245,62 @@ class CausalGraph:
                     <= freq_tolerance
                     and node.coherence > coherence_threshold
                     and other.coherence > coherence_threshold
+                    and abs(node.grid_x - other.grid_x) <= 1
+                    and abs(node.grid_y - other.grid_y) <= 1
                 ):
                     cluster.append(other.id)
                     visited.add(other.id)
+            for nid in cluster:
+                self.nodes[nid].cluster_ids[0] = cid
+            cid += 1
             if len(cluster) > 1:
                 clusters.append(cluster)
+        for nid, node in self.nodes.items():
+            if 0 not in node.cluster_ids:
+                node.cluster_ids[0] = cid
+                cid += 1
         return clusters
+
+    def hierarchical_clusters(self) -> dict:
+        """Compute hierarchical clustering assignments."""
+        self.detect_clusters()
+        visited = set()
+        components = []
+        cid = 0
+
+        def neighbors(nid: str) -> list[str]:
+            edge_n = [e.target for e in self.get_edges_from(nid)]
+            edge_n += [e.source for e in self.get_edges_to(nid)]
+            edge_n += self.get_bridge_neighbors(nid, active_only=True)
+            return edge_n
+
+        for nid in self.nodes:
+            if nid in visited:
+                continue
+            queue = [nid]
+            comp = []
+            visited.add(nid)
+            while queue:
+                cur = queue.pop(0)
+                comp.append(cur)
+                for nb in neighbors(cur):
+                    if nb not in visited:
+                        visited.add(nb)
+                        queue.append(nb)
+            for member in comp:
+                self.nodes[member].cluster_ids[1] = cid
+            components.append(comp)
+            cid += 1
+        return {0: [c for c in self._clusters_by_level(0)], 1: components}
+
+    def _clusters_by_level(self, level: int) -> list:
+        buckets: dict[int, list[str]] = {}
+        for nid, node in self.nodes.items():
+            cid = node.cluster_ids.get(level)
+            if cid is None:
+                continue
+            buckets.setdefault(cid, []).append(nid)
+        return list(buckets.values())
 
     def create_meta_nodes(self, clusters):
         """Instantiate MetaNode objects for given clusters."""
