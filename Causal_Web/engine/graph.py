@@ -158,6 +158,7 @@ class CausalGraph:
             node.current_tick = 0
             node.subjective_ticks = 0
             node.last_emission_tick = None
+            node.last_tick_time = -math.inf
             node.coherence = 1.0
             node.decoherence = 0.0
 
