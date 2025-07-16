@@ -6,6 +6,7 @@ from .node import Node, Edge, NodeType
 from .meta_node import MetaNode
 from ..config import Config
 import json
+from .logger import log_json
 
 
 class CausalGraph:
@@ -434,10 +435,7 @@ class CausalGraph:
                     visited.add(edge.target)
                     frontier.append((edge.target, dist + 1))
         if affected:
-            with open(Config.output_path("law_wave_log.json"), "a") as f:
-                f.write(
-                    json.dumps(
-                        {"tick": tick, "origin": origin_id, "affected": affected}
-                    )
-                    + "\n"
-                )
+            log_json(
+                Config.output_path("law_wave_log.json"),
+                {"tick": tick, "origin": origin_id, "affected": affected},
+            )

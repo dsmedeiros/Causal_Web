@@ -8,6 +8,7 @@ import numpy as np
 import json
 import uuid
 from ..config import Config
+from .logger import log_json
 
 
 class NodeType(Enum):
@@ -238,8 +239,7 @@ class Node:
             self.is_classical = True
             if tick_time is not None:
                 record = {"tick": tick_time, "node": self.id, "event": "collapse_start"}
-                with open(Config.output_path("collapse_front_log.json"), "a") as f:
-                    f.write(json.dumps(record) + "\n")
+                log_json(Config.output_path("collapse_front_log.json"), record)
                 if graph is not None:
                     graph.emit_law_wave(self.id, tick_time)
             self.update_node_type()
@@ -257,9 +257,8 @@ class Node:
             self.node_type = NodeType.NORMAL
 
         if old != self.node_type:
-            with open(Config.output_path("node_state_map.json"), "a") as f:
-                rec = {"node": self.id, "from": old.value, "to": self.node_type.value}
-                f.write(json.dumps(rec) + "\n")
+            rec = {"node": self.id, "from": old.value, "to": self.node_type.value}
+            log_json(Config.output_path("node_state_map.json"), rec)
         self.prev_node_type = old
 
     def _log_tick_evaluation(
@@ -281,8 +280,7 @@ class Node:
         }
         if reason is not None:
             record["reason"] = reason
-        with open(Config.output_path("tick_evaluation_log.json"), "a") as f:
-            f.write(json.dumps(record) + "\n")
+        log_json(Config.output_path("tick_evaluation_log.json"), record)
 
     def _log_tick_drop(self, tick_time: int, reason: str) -> None:
         record = {
@@ -292,8 +290,7 @@ class Node:
             "coherence": round(getattr(self, "coherence", 0.0), 4),
             "node_type": self.node_type.value,
         }
-        with open(Config.output_path("tick_drop_log.json"), "a") as f:
-            f.write(json.dumps(record) + "\n")
+        log_json(Config.output_path("tick_drop_log.json"), record)
 
     def schedule_tick(self, tick_time, incoming_phase):
         self.incoming_phase_queue[tick_time].append(incoming_phase)
@@ -356,11 +353,10 @@ class Node:
 
         # Boundary and state checks -------------------------------------------------
         if self.node_type == NodeType.NULL:
-            with open(Config.output_path("boundary_interaction_log.json"), "a") as f:
-                f.write(
-                    json.dumps({"tick": tick_time, "void": self.id, "origin": origin})
-                    + "\n"
-                )
+            log_json(
+                Config.output_path("boundary_interaction_log.json"),
+                {"tick": tick_time, "void": self.id, "origin": origin},
+            )
             from . import tick_engine as te
 
             te.void_absorption_events += 1
@@ -375,11 +371,10 @@ class Node:
 
         # Log any interactions with boundary nodes
         if getattr(self, "boundary", False):
-            with open(Config.output_path("boundary_interaction_log.json"), "a") as f:
-                f.write(
-                    json.dumps({"tick": tick_time, "node": self.id, "origin": origin})
-                    + "\n"
-                )
+            log_json(
+                Config.output_path("boundary_interaction_log.json"),
+                {"tick": tick_time, "node": self.id, "origin": origin},
+            )
             from . import tick_engine as te
 
             te.boundary_interactions_count += 1
@@ -422,13 +417,10 @@ class Node:
         if origin != "self" and any(
             e.target == origin for e in graph.get_edges_from(self.id)
         ):
-            with open(Config.output_path("refraction_log.json"), "a") as f:
-                f.write(
-                    json.dumps(
-                        {"tick": tick_time, "recursion_from": origin, "node": self.id}
-                    )
-                    + "\n"
-                )
+            log_json(
+                Config.output_path("refraction_log.json"),
+                {"tick": tick_time, "recursion_from": origin, "node": self.id},
+            )
 
         # Recursive phase propagation with refraction
         for edge in graph.get_edges_from(self.id):
@@ -454,18 +446,15 @@ class Node:
                     )
                     alt_tgt.schedule_tick(tick_time + delay + alt_delay, shifted)
                     target.node_type = NodeType.REFRACTIVE
-                    with open(Config.output_path("refraction_log.json"), "a") as f:
-                        f.write(
-                            json.dumps(
-                                {
-                                    "tick": tick_time,
-                                    "from": self.id,
-                                    "via": target.id,
-                                    "to": alt_tgt.id,
-                                }
-                            )
-                            + "\n"
-                        )
+                    log_json(
+                        Config.output_path("refraction_log.json"),
+                        {
+                            "tick": tick_time,
+                            "from": self.id,
+                            "via": target.id,
+                            "to": alt_tgt.id,
+                        },
+                    )
                     continue
 
             target.schedule_tick(tick_time + delay, shifted)
@@ -501,8 +490,7 @@ class Node:
                 )
         if chain:
             record = {"tick": tick_time, "source": self.id, "chain": chain}
-            with open(Config.output_path("collapse_front_log.json"), "a") as f:
-                f.write(json.dumps(record) + "\n")
+            log_json(Config.output_path("collapse_front_log.json"), record)
         return chain
 
     def _log_collapse_chain(self, tick_time, collapsed):
@@ -514,8 +502,7 @@ class Node:
             "collapsed_entity": self.id,
             "children_spawned": [c.get("node") for c in collapsed],
         }
-        with open(Config.output_path("collapse_chain_log.json"), "a") as f:
-            f.write(json.dumps(record) + "\n")
+        log_json(Config.output_path("collapse_chain_log.json"), record)
 
     def maybe_tick(self, global_tick, graph):
         """Evaluate queued phases and emit a tick if conditions are met."""

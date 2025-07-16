@@ -4,6 +4,7 @@ from random import random
 from typing import Optional
 import json
 from ..config import Config
+from .logger import log_json
 
 from enum import Enum
 
@@ -100,8 +101,7 @@ class Bridge:
         }
         if conditions is not None:
             record["conditions"] = conditions
-        with open(Config.output_path("bridge_dynamics_log.json"), "a") as f:
-            f.write(json.dumps(record) + "\n")
+        log_json(Config.output_path("bridge_dynamics_log.json"), record)
 
     def update_state(self, tick: int) -> None:
         old = self.state
@@ -146,8 +146,7 @@ class Bridge:
             target=self.node_b_id,
             coherence_at_event=value,
         )
-        with open(Config.output_path("event_log.json"), "a") as f:
-            f.write(json.dumps(event.__dict__) + "\n")
+        log_json(Config.output_path("event_log.json"), event.__dict__)
 
     def _log_rupture(self, tick, reason, coherence):
         record = {
@@ -159,8 +158,7 @@ class Bridge:
             "coherence": round(coherence, 4) if coherence is not None else None,
             "fatigue": round(self.fatigue, 3),
         }
-        with open(Config.output_path("bridge_rupture_log.json"), "a") as f:
-            f.write(json.dumps(record) + "\n")
+        log_json(Config.output_path("bridge_rupture_log.json"), record)
 
     def probabilistic_bridge_failure(
         self, decoherence_strength, rupture_threshold=0.3, rupture_prob=0.9
@@ -183,18 +181,15 @@ class Bridge:
         ):
             self.current_strength = max(0.0, self.current_strength - 0.1)
             duration = tick_time - self.last_active_tick
-            with open(Config.output_path("bridge_decay_log.json"), "a") as f:
-                f.write(
-                    json.dumps(
-                        {
-                            "tick": tick_time,
-                            "bridge": self.bridge_id,
-                            "strength": self.current_strength,
-                            "duration": duration,
-                        }
-                    )
-                    + "\n"
-                )
+            log_json(
+                Config.output_path("bridge_decay_log.json"),
+                {
+                    "tick": tick_time,
+                    "bridge": self.bridge_id,
+                    "strength": self.current_strength,
+                    "duration": duration,
+                },
+            )
             if self.current_strength == 0.0:
                 self.active = False
                 from . import tick_engine as te
@@ -214,17 +209,14 @@ class Bridge:
             self.active = True
             self.last_reform_tick = tick_time
             self.coherence_at_reform = coherence
-            with open(Config.output_path("bridge_reformation_log.json"), "a") as f:
-                f.write(
-                    json.dumps(
-                        {
-                            "tick": tick_time,
-                            "bridge": self.bridge_id,
-                            "coherence": coherence,
-                        }
-                    )
-                    + "\n"
-                )
+            log_json(
+                Config.output_path("bridge_reformation_log.json"),
+                {
+                    "tick": tick_time,
+                    "bridge": self.bridge_id,
+                    "coherence": coherence,
+                },
+            )
             from . import tick_engine as te
 
             te.bridges_reformed_count += 1
