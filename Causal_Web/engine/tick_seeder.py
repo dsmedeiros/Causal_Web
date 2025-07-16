@@ -71,6 +71,7 @@ class TickSeeder:
                         "phase": final_phase,
                         "strategy": "static",
                         "coherence": round(coherence, 4),
+                        "threshold": round(threshold, 4),
                         "success": success,
                         "failure_reason": reason,
                     }
@@ -101,6 +102,7 @@ class TickSeeder:
                         "phase": phase,
                         "strategy": "probabilistic",
                         "coherence": round(coherence, 4),
+                        "threshold": round(threshold, 4),
                         "success": success,
                         "failure_reason": reason,
                     }

@@ -262,6 +262,39 @@ class Node:
                 f.write(json.dumps(rec) + "\n")
         self.prev_node_type = old
 
+    def _log_tick_evaluation(
+        self,
+        tick_time: int,
+        coherence: float,
+        threshold: float,
+        refractory: bool,
+        fired: bool,
+        reason: str | None = None,
+    ) -> None:
+        record = {
+            "tick": tick_time,
+            "node": self.id,
+            "coherence": round(coherence, 4),
+            "threshold": round(threshold, 4),
+            "refractory": refractory,
+            "fired": fired,
+        }
+        if reason is not None:
+            record["reason"] = reason
+        with open(Config.output_path("tick_evaluation_log.json"), "a") as f:
+            f.write(json.dumps(record) + "\n")
+
+    def _log_tick_drop(self, tick_time: int, reason: str) -> None:
+        record = {
+            "tick": tick_time,
+            "node": self.id,
+            "reason": reason,
+            "coherence": round(getattr(self, "coherence", 0.0), 4),
+            "node_type": self.node_type.value,
+        }
+        with open(Config.output_path("tick_drop_log.json"), "a") as f:
+            f.write(json.dumps(record) + "\n")
+
     def schedule_tick(self, tick_time, incoming_phase):
         self.incoming_phase_queue[tick_time].append(incoming_phase)
         self.pending_superpositions[tick_time].append(
@@ -272,19 +305,44 @@ class Node:
         )
 
     def should_tick(self, tick_time):
-        if tick_time - self.last_tick_time < self.refractory_period:
-            print(f"[{self.id}] Suppressed by refractory period at {tick_time}")
-            return False, None
-
+        in_refractory = tick_time - self.last_tick_time < self.refractory_period
         raw_phases = self.incoming_phase_queue[tick_time]
         complex_phases = [cmath.rect(1.0, p % (2 * math.pi)) for p in raw_phases]
         vector_sum = sum(complex_phases)
         magnitude = abs(vector_sum)
+        coherence = magnitude / len(raw_phases) if raw_phases else 1.0
+
+        if in_refractory:
+            self._log_tick_evaluation(
+                tick_time,
+                coherence,
+                self.current_threshold,
+                True,
+                False,
+                "refractory",
+            )
+            print(f"[{self.id}] Suppressed by refractory period at {tick_time}")
+            return False, None
 
         if magnitude >= self.current_threshold:
             resultant_phase = cmath.phase(vector_sum)
+            self._log_tick_evaluation(
+                tick_time,
+                coherence,
+                self.current_threshold,
+                False,
+                True,
+            )
             return True, resultant_phase
 
+        self._log_tick_evaluation(
+            tick_time,
+            coherence,
+            self.current_threshold,
+            False,
+            False,
+            "below_threshold",
+        )
         return False, None
 
     def get_phase_at(self, tick_time):
@@ -306,11 +364,13 @@ class Node:
             from . import tick_engine as te
 
             te.void_absorption_events += 1
+            self._log_tick_drop(tick_time, "void_node")
             return
 
         if self.is_classical:
             # Collapsed nodes do not emit further ticks
             print(f"[{self.id}] Classical node cannot emit ticks")
+            self._log_tick_drop(tick_time, "classical")
             return
 
         # Log any interactions with boundary nodes
@@ -326,6 +386,7 @@ class Node:
 
         # Avoid duplicate ticks at the same moment
         if any(tick.time == tick_time for tick in self.tick_history):
+            self._log_tick_drop(tick_time, "duplicate")
             return
 
         # Register the emission
@@ -468,6 +529,8 @@ class Node:
             if should_fire and not self.is_classical:
                 self.apply_tick(global_tick, phase, graph)
             else:
+                reason = "classical" if self.is_classical else "interference"
+                self._log_tick_drop(global_tick, reason)
                 print(f"[{self.id}] Interference at {global_tick} cancelled tick")
             del self.incoming_phase_queue[global_tick]
             if global_tick in self.pending_superpositions:
