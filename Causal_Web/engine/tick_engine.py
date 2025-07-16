@@ -42,7 +42,7 @@ _csp_failure_count = 0
 _recent_node_counts: list[int] = []
 _dynamic_coherence_offset: float = 0.0
 
-  _spawn_counts = {}
+_spawn_counts = {}
 _spawn_tick = -1
 
 
