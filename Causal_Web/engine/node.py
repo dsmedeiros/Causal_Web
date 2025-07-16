@@ -412,6 +412,14 @@ class Node:
         te.mark_for_update(self.id)
 
     def should_tick(self, tick_time):
+        """Determine if the node should emit a tick at ``tick_time``.
+
+        Returns a tuple ``(fire, phase, reason)`` where ``fire`` indicates
+        whether a tick should be emitted, ``phase`` is the resultant phase if a
+        tick is fired, and ``reason`` provides context for logging when ``fire``
+        is ``False``.
+        """
+
         in_refractory = tick_time - self.last_tick_time < self.refractory_period
         raw_phases = self.incoming_phase_queue[tick_time]
         complex_phases = [cmath.rect(1.0, p % (2 * math.pi)) for p in raw_phases]
@@ -429,7 +437,7 @@ class Node:
                 "refractory",
             )
             print(f"[{self.id}] Suppressed by refractory period at {tick_time}")
-            return False, None
+            return False, None, "refractory"
 
         if magnitude >= self.current_threshold:
             resultant_phase = cmath.phase(vector_sum)
@@ -440,7 +448,7 @@ class Node:
                 False,
                 True,
             )
-            return True, resultant_phase
+            return True, resultant_phase, "threshold"
 
         merged, phase = self._resolve_interference(tick_time, raw_phases, vector_sum)
         if merged:
@@ -452,7 +460,7 @@ class Node:
                 True,
                 "merged",
             )
-            return True, phase
+            return True, phase, "merged"
 
         self._log_tick_evaluation(
             tick_time,
@@ -462,7 +470,7 @@ class Node:
             False,
             "below_threshold",
         )
-        return False, None
+        return False, None, "below_threshold"
 
     def get_phase_at(self, tick_time):
         return self._tick_phase_lookup.get(tick_time)
@@ -632,13 +640,13 @@ class Node:
             TickRouter.route_tick(self, self.tick_history[-1])
 
         if global_tick in self.incoming_phase_queue:
-            should_fire, phase = self.should_tick(global_tick)
+            should_fire, phase, reason = self.should_tick(global_tick)
             if should_fire and not self.is_classical:
                 self.apply_tick(global_tick, phase, graph)
             else:
-                reason = "classical" if self.is_classical else "interference"
-                self._log_tick_drop(global_tick, reason)
-                print(f"[{self.id}] Interference at {global_tick} cancelled tick")
+                drop_reason = "classical" if self.is_classical else reason
+                self._log_tick_drop(global_tick, drop_reason)
+                print(f"[{self.id}] {drop_reason} at {global_tick} cancelled tick")
             del self.incoming_phase_queue[global_tick]
             if global_tick in self.pending_superpositions:
                 del self.pending_superpositions[global_tick]
