@@ -623,6 +623,7 @@ def simulation_loop():
         global_tick = 0
         _update_simulation_state(False, False, global_tick, None)
         while Config.is_running:
+            Config.current_tick = global_tick
             print(f"== Tick {global_tick} ==")
 
             apply_global_forcing(global_tick)
@@ -675,8 +676,6 @@ def simulation_loop():
 
             for bridge in graph.bridges:
                 bridge.apply(global_tick, graph)
-
-            Config.current_tick = global_tick
 
             limit = (
                 Config.tick_limit if Config.allow_tick_override else Config.max_ticks
