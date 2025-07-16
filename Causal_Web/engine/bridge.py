@@ -127,6 +127,15 @@ class Bridge:
                 self.state = BridgeState.STABLE
         if old != self.state:
             self._log_dynamics(tick, self.state.value, {"from": old.value})
+            if self.state in {BridgeState.RUPTURING, BridgeState.RUPTURED}:
+                avg_decoh = (
+                    sum(self.decoherence_exposure[-5:])
+                    / len(self.decoherence_exposure[-5:])
+                    if self.decoherence_exposure
+                    else 0.0
+                )
+                avg_coh = 1 - avg_decoh
+                self._log_rupture(tick, "fatigue", avg_coh)
 
     def _log_event(self, tick, event_type, value):
         event = BridgeEvent(
@@ -139,6 +148,19 @@ class Bridge:
         )
         with open(Config.output_path("event_log.json"), "a") as f:
             f.write(json.dumps(event.__dict__) + "\n")
+
+    def _log_rupture(self, tick, reason, coherence):
+        record = {
+            "tick": tick,
+            "bridge": self.bridge_id,
+            "source": self.node_a_id,
+            "target": self.node_b_id,
+            "reason": reason,
+            "coherence": round(coherence, 4) if coherence is not None else None,
+            "fatigue": round(self.fatigue, 3),
+        }
+        with open(Config.output_path("bridge_rupture_log.json"), "a") as f:
+            f.write(json.dumps(record) + "\n")
 
     def probabilistic_bridge_failure(
         self, decoherence_strength, rupture_threshold=0.3, rupture_prob=0.9
@@ -272,6 +294,11 @@ class Bridge:
         if self.probabilistic_bridge_failure(rupture_chance):
             self.last_rupture_tick = tick_time
             self._log_event(tick_time, "bridge_ruptured", avg_decoherence)
+            avg_coh = (
+                node_a.compute_coherence_level(tick_time)
+                + node_b.compute_coherence_level(tick_time)
+            ) / 2
+            self._log_rupture(tick_time, "decoherence", avg_coh)
             self._log_dynamics(tick_time, "ruptured", {"decoherence": avg_decoherence})
             self.rupture_history.append((tick_time, avg_decoherence))
             self.trust_score = max(0.0, self.trust_score - 0.1)
@@ -288,6 +315,11 @@ class Bridge:
                 self.active = False
                 self.last_rupture_tick = tick_time
                 self._log_event(tick_time, "bridge_ruptured", avg_decoherence)
+                avg_coh = (
+                    node_a.compute_coherence_level(tick_time)
+                    + node_b.compute_coherence_level(tick_time)
+                ) / 2
+                self._log_rupture(tick_time, "decoherence_limit", avg_coh)
                 self._log_dynamics(
                     tick_time, "ruptured", {"decoherence": avg_decoherence}
                 )
