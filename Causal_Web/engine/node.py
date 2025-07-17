@@ -450,6 +450,10 @@ class Node:
                 False,
                 True,
             )
+            log_json(
+                Config.output_path("should_tick_log.json"),
+                {"tick": tick_time, "node": self.id, "reason": "threshold"},
+            )
             return True, resultant_phase, "threshold"
 
         merged, phase = self._resolve_interference(tick_time, raw_phases, vector_sum)
@@ -461,6 +465,10 @@ class Node:
                 False,
                 True,
                 "merged",
+            )
+            log_json(
+                Config.output_path("should_tick_log.json"),
+                {"tick": tick_time, "node": self.id, "reason": "merged"},
             )
             return True, phase, "merged"
 
@@ -508,8 +516,11 @@ class Node:
 
             te.boundary_interactions_count += 1
 
-        # Avoid duplicate ticks at the same moment
-        if any(tick.time == tick_time for tick in self.tick_history):
+        # Avoid duplicate ticks from the same origin at the same moment
+        if any(
+            tick.time == tick_time and tick.origin == origin
+            for tick in self.tick_history
+        ):
             self._log_tick_drop(tick_time, "duplicate")
             return
 
