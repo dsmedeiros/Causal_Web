@@ -2,6 +2,7 @@ import math
 from Causal_Web.engine.graph import CausalGraph
 from Causal_Web.engine.node import Node
 from Causal_Web.engine.node import Edge
+import json
 
 
 def test_interference_type_constructive():
@@ -50,3 +51,16 @@ def test_remove_node_cleans_references():
 
     # should not raise when computing clusters
     g.hierarchical_clusters()
+
+
+def test_load_from_file_edges_dict(tmp_path):
+    path = tmp_path / "g.json"
+    data = {"nodes": {"A": {}, "B": {}}, "edges": {"A": ["B"]}}
+    path.write_text(json.dumps(data))
+
+    g = CausalGraph()
+    g.load_from_file(str(path))
+
+    edges = g.get_edges_from("A")
+    assert len(edges) == 1
+    assert edges[0].target == "B"
