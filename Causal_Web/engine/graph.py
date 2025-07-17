@@ -110,6 +110,44 @@ class CausalGraph:
         self.bridges_by_node[node_a_id].add(bridge)
         self.bridges_by_node[node_b_id].add(bridge)
 
+    def remove_node(self, node_id: str) -> None:
+        """Remove a node and all references to it from the graph."""
+        node = self.nodes.pop(node_id, None)
+        if not node:
+            return
+
+        # Remove edges referencing this node
+        self.edges = [
+            e for e in self.edges if e.source != node_id and e.target != node_id
+        ]
+        self.edges_from.pop(node_id, None)
+        self.edges_to.pop(node_id, None)
+
+        for src, edges in list(self.edges_from.items()):
+            self.edges_from[src] = [e for e in edges if e.target != node_id]
+            if not self.edges_from[src]:
+                self.edges_from.pop(src)
+
+        for tgt, edges in list(self.edges_to.items()):
+            self.edges_to[tgt] = [e for e in edges if e.source != node_id]
+            if not self.edges_to[tgt]:
+                self.edges_to.pop(tgt)
+
+        # Remove bridges connected to this node
+        for bridge in list(self.bridges):
+            if node_id in (bridge.node_a_id, bridge.node_b_id):
+                self.bridges.remove(bridge)
+                self.bridges_by_node[bridge.node_a_id].discard(bridge)
+                self.bridges_by_node[bridge.node_b_id].discard(bridge)
+        self.bridges_by_node.pop(node_id, None)
+
+        # Remove spatial index entry
+        cell = (node.grid_x, node.grid_y)
+        if cell in self.spatial_index:
+            self.spatial_index[cell].discard(node_id)
+            if not self.spatial_index[cell]:
+                del self.spatial_index[cell]
+
     def get_node(self, node_id):
         return self.nodes.get(node_id)
 
