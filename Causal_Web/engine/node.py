@@ -57,6 +57,9 @@ class Node:
         self.coherence = 1.0
         self.decoherence = 0.0
         self.tick_history = []  # List[Tick]
+        # Separate tracking for self-emitted vs externally sourced ticks
+        self.emitted_tick_times: Set[float] = set()
+        self.received_tick_times: Set[float] = set()
         self._tick_phase_lookup: Dict[int, float] = {}
         self.incoming_phase_queue = defaultdict(list)  # tick_time -> [phase_i]
         self.pending_superpositions = defaultdict(list)  # for logging and analysis
@@ -423,6 +426,8 @@ class Node:
         in_refractory = False
         if self.current_tick > 0 and self.last_tick_time is not None:
             in_refractory = tick_time - self.last_tick_time < self.refractory_period
+        if self.current_tick == 0:
+            in_refractory = False
         raw_phases = self.incoming_phase_queue[tick_time]
         complex_phases = [cmath.rect(1.0, p % (2 * math.pi)) for p in raw_phases]
         vector_sum = sum(complex_phases)
@@ -441,7 +446,7 @@ class Node:
             print(f"[{self.id}] Suppressed by refractory period at {tick_time}")
             return False, None, "refractory"
 
-        if magnitude >= self.current_threshold:
+        if coherence >= self.current_threshold:
             resultant_phase = cmath.phase(vector_sum)
             self._log_tick_evaluation(
                 tick_time,
@@ -480,6 +485,16 @@ class Node:
             False,
             "below_threshold",
         )
+        log_json(
+            Config.output_path("magnitude_failure_log.json"),
+            {
+                "tick": tick_time,
+                "node": self.id,
+                "magnitude": round(magnitude, 4),
+                "threshold": round(self.current_threshold, 4),
+                "phases": len(raw_phases),
+            },
+        )
         return False, None, "below_threshold"
 
     def get_phase_at(self, tick_time):
@@ -516,11 +531,8 @@ class Node:
 
             te.boundary_interactions_count += 1
 
-        # Avoid duplicate ticks from the same origin at the same moment
-        if any(
-            tick.time == tick_time and tick.origin == origin
-            for tick in self.tick_history
-        ):
+        # Avoid duplicate self-emissions, but allow external ticks separately
+        if origin == "self" and tick_time in self.emitted_tick_times:
             self._log_tick_drop(tick_time, "duplicate")
             return
 
@@ -541,6 +553,10 @@ class Node:
             trace_id=trace_id,
         )
         self.tick_history.append(tick_obj)
+        if origin == "self":
+            self.emitted_tick_times.add(tick_time)
+        else:
+            self.received_tick_times.add(tick_time)
         self._tick_phase_lookup[tick_time] = phase
         from .tick_router import TickRouter
 

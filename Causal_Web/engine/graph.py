@@ -150,6 +150,8 @@ class CausalGraph:
     def reset_ticks(self):
         for node in self.nodes.values():
             node.tick_history.clear()
+            node.emitted_tick_times.clear()
+            node.received_tick_times.clear()
             node._tick_phase_lookup.clear()
             node._phase_cache.clear()
             node._coherence_cache.clear()
