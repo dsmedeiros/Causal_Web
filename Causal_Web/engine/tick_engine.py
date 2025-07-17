@@ -399,12 +399,7 @@ def _check_sip_failures(tick: int) -> None:
         success = node and len(node.tick_history) > 0 and node.coherence > 0.5
         if not success:
             if node:
-                graph.edges = [
-                    e
-                    for e in graph.edges
-                    if e.source != child_id and e.target != child_id
-                ]
-                del graph.nodes[child_id]
+                graph.remove_node(child_id)
             for pid in parents:
                 p = graph.get_node(pid)
                 if p:

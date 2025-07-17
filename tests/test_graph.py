@@ -18,7 +18,7 @@ def test_interference_type_destructive():
 
 def test_detect_clusters():
     g = CausalGraph()
-    for nid, freq in {"A":1.0, "B":1.02, "C":1.5}.items():
+    for nid, freq in {"A": 1.0, "B": 1.02, "C": 1.5}.items():
         g.nodes[nid] = Node(nid)
         g.nodes[nid].law_wave_frequency = freq
         g.nodes[nid].coherence = 0.95
@@ -33,3 +33,20 @@ def test_edge_adjusted_delay():
     # with frequency difference effect
     delay = edge.adjusted_delay(1.0, 1.5, kappa=1.0)
     assert delay >= 1
+
+
+def test_remove_node_cleans_references():
+    g = CausalGraph()
+    g.add_node("A")
+    g.add_node("B")
+    g.add_edge("A", "B")
+
+    g.remove_node("B")
+
+    assert "B" not in g.nodes
+    assert "B" not in g.edges_from
+    assert "B" not in g.edges_to
+    assert all("B" not in (e.source, e.target) for e in g.edges)
+
+    # should not raise when computing clusters
+    g.hierarchical_clusters()
