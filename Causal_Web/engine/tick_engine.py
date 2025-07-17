@@ -194,11 +194,13 @@ def log_bridge_states(global_tick):
 def log_meta_node_ticks(global_tick):
     events = {}
     for meta_id, meta in graph.meta_nodes.items():
-        member_ticks = [
-            nid
-            for nid in meta.member_ids
-            if any(t.time == global_tick for t in graph.get_node(nid).tick_history)
-        ]
+        member_ticks = []
+        for nid in meta.member_ids:
+            node = graph.get_node(nid)
+            if node is None:
+                continue
+            if any(t.time == global_tick for t in node.tick_history):
+                member_ticks.append(nid)
         if member_ticks:
             events[meta_id] = member_ticks
         if events:
