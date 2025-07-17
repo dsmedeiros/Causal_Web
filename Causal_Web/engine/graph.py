@@ -4,6 +4,7 @@ from collections import defaultdict
 
 from .bridge import Bridge
 from .node import Node, Edge, NodeType
+from .tick import GLOBAL_TICK_POOL
 from .meta_node import MetaNode
 from ..config import Config
 import json
@@ -199,6 +200,8 @@ class CausalGraph:
 
     def reset_ticks(self):
         for node in self.nodes.values():
+            for t in node.tick_history:
+                GLOBAL_TICK_POOL.release(t)
             node.tick_history.clear()
             node.emitted_tick_times.clear()
             node.received_tick_times.clear()

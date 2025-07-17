@@ -29,6 +29,8 @@ class Config:
     tick_limit = 10000
     allow_tick_override = True
     current_tick = 0  # Counter to display progress
+    # Preallocated ticks for object pool
+    TICK_POOL_SIZE = 10000
 
     # Global rhythmic forcing parameters
     phase_jitter = {"amplitude": 0.0, "period": 20}  # radians  # ticks

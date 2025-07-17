@@ -1,7 +1,6 @@
 import math
 import cmath
 from collections import defaultdict, deque
-from dataclasses import dataclass
 from enum import Enum
 from typing import Set, List, Dict, Optional
 import numpy as np
@@ -9,6 +8,7 @@ import json
 import uuid
 from ..config import Config
 from .logger import log_json
+from .tick import Tick, GLOBAL_TICK_POOL
 
 
 class NodeType(Enum):
@@ -18,18 +18,6 @@ class NodeType(Enum):
     ENTANGLED = "entangled"
     REFRACTIVE = "refractive"
     NULL = "null"
-
-
-@dataclass
-class Tick:
-    """Discrete causal pulse with layer metadata."""
-
-    origin: str
-    time: float
-    amplitude: float
-    phase: float
-    layer: str = "tick"
-    trace_id: str = ""
 
 
 class Node:
@@ -571,14 +559,13 @@ class Node:
         self.current_threshold = min(self.current_threshold + 0.05, 1.0)
         self.phase = phase
         trace_id = str(uuid.uuid4())
-        tick_obj = Tick(
-            origin=origin,
-            time=tick_time,
-            amplitude=1.0,
-            phase=phase,
-            layer="tick",
-            trace_id=trace_id,
-        )
+        tick_obj = GLOBAL_TICK_POOL.acquire()
+        tick_obj.origin = origin
+        tick_obj.time = tick_time
+        tick_obj.amplitude = 1.0
+        tick_obj.phase = phase
+        tick_obj.layer = "tick"
+        tick_obj.trace_id = trace_id
         self.tick_history.append(tick_obj)
         log_json(
             Config.output_path("tick_emission_log.json"),
@@ -741,16 +728,14 @@ class Node:
 
     def _emit(self, tick_time):
         phase = self.compute_phase(tick_time)
-        self.tick_history.append(
-            Tick(
-                origin="self",
-                time=tick_time,
-                amplitude=1.0,
-                phase=phase,
-                layer="tick",
-                trace_id=str(uuid.uuid4()),
-            )
-        )
+        tick_obj = GLOBAL_TICK_POOL.acquire()
+        tick_obj.origin = "self"
+        tick_obj.time = tick_time
+        tick_obj.amplitude = 1.0
+        tick_obj.phase = phase
+        tick_obj.layer = "tick"
+        tick_obj.trace_id = str(uuid.uuid4())
+        self.tick_history.append(tick_obj)
         self._tick_phase_lookup[tick_time] = phase
         print(f"[{self.id}] Emitted tick at {tick_time} | Phase: {phase:.2f}")
 
