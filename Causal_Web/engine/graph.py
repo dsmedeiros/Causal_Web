@@ -38,6 +38,7 @@ class CausalGraph:
         generation_tick=0,
         parent_ids=None,
     ):
+        x, y = self._non_overlapping_position(x, y)
         self.nodes[node_id] = Node(
             node_id,
             x,
@@ -52,6 +53,17 @@ class CausalGraph:
         )
         node = self.nodes[node_id]
         self.spatial_index[(node.grid_x, node.grid_y)].add(node_id)
+
+    def _non_overlapping_position(
+        self, x: float, y: float, gap: int = 50
+    ) -> tuple[float, float]:
+        """Return coordinates shifted so no node is within ``gap`` units on both axes."""
+        while any(
+            abs(n.x - x) < gap and abs(n.y - y) < gap for n in self.nodes.values()
+        ):
+            x += gap
+            y += gap
+        return x, y
 
     def add_edge(
         self,
