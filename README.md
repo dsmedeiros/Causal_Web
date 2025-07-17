@@ -168,6 +168,234 @@ The simulation writes many JSON files to `output/`.
 - `causal_chains.json` and `causal_timeline.json` – ordered causal events.
 - `cwt_console.txt` – copy of console output.
 
+### Log file fields
+The following lists describe the JSON keys recorded in each output file.
+
+#### `boundary_interaction_log.json`
+- `tick` – simulation tick of the event.
+- `origin` – node that emitted the triggering tick.
+- `node`/`void` – identifier of the boundary or void node affected.
+
+#### `bridge_decay_log.json`
+- `tick` – tick when decay occurred.
+- `bridge` – bridge identifier.
+- `strength` – remaining strength after decay.
+- `duration` – ticks since the bridge was last active.
+
+#### `bridge_dynamics_log.json`
+- `bridge_id` – unique bridge id.
+- `source` – source node id.
+- `target` – target node id.
+- `event` – state change name.
+- `tick` – tick of the event.
+- `seeded` – whether created by the initial graph.
+- `conditions` – optional context such as phase difference.
+
+#### `bridge_reformation_log.json`
+- `tick` – tick when the bridge reformed.
+- `bridge` – id of the bridge.
+- `coherence` – average coherence at reformation.
+
+#### `bridge_rupture_log.json`
+- `tick` – tick of the rupture.
+- `bridge` – bridge id.
+- `source` – originating node id.
+- `target` – target node id.
+- `reason` – rupture cause.
+- `coherence` – coherence value at failure.
+- `fatigue` – accumulated fatigue level.
+
+#### `bridge_state_log.json`
+- keyed by tick with nested bridge entries:
+  - `active` – whether the bridge is enabled.
+  - `last_activation` – most recent activation tick.
+  - `last_rupture_tick` – tick of the last rupture or `null`.
+  - `last_reform_tick` – tick of the last recovery or `null`.
+  - `coherence_at_reform` – coherence when last reformed.
+  - `trust_score` – current trust value.
+  - `reinforcement` – reinforcement streak count.
+
+#### `classicalization_map.json`
+- keyed by tick with `{node: bool}` indicating if a node is classicalised.
+
+#### `cluster_influence_matrix.json`
+- `{ "regionA->regionB": count }` mapping between regions based on edges.
+
+#### `cluster_log.json`
+- keyed by tick with hierarchical cluster assignments per level.
+
+#### `coherence_log.json`
+- keyed by tick with `{node: coherence}` values.
+
+#### `coherence_velocity_log.json`
+- keyed by tick with `{node: delta}` change since the previous tick.
+
+#### `collapse_chain_log.json`
+- `tick` – tick when propagation occurred.
+- `source` – collapsing node.
+- `collapsed` – list of nodes with depth information.
+- `collapsed_entity` – id of the initiating node.
+- `children_spawned` – ids of any spawned nodes.
+
+#### `collapse_front_log.json`
+- either `{tick, node, event}` for collapse start events or
+  `{tick, source, chain}` describing propagation depth.
+
+#### `connectivity_log.json`
+- `{node: {edges_out, edges_in, bridges, total}}` summary at load time.
+
+#### `curvature_log.json`
+- keyed by tick with per-edge delay adjustments:
+  - `delta_f` – frequency difference.
+  - `curved_delay` – resulting delay value.
+
+#### `curvature_map.json`
+- list of `{tick, edges:[{source, target, delay}]}` for visualisation.
+
+#### `decoherence_log.json`
+- keyed by tick with `{node: decoherence}` values.
+
+#### `event_log.json`
+- records bridge events with fields:
+  - `tick`, `event_type`, `bridge_id`, `source`, `target`,
+    `coherence_at_event`.
+
+#### `global_diagnostics.json`
+- run-level metrics:
+  - `coherence_stability_score`, `entropy_delta`,
+    `collapse_resilience_index`, `network_adaptivity_index`.
+
+#### `inspection_log.json`
+- list of superposition inspections with keys:
+  - `tick`, `node`, `contributors`, `interference_result`,
+    `collapsed`, `bridge_status`.
+
+#### `interference_log.json`
+- keyed by tick with `{node: superposition_count}`.
+
+#### `law_drift_log.json`
+- `tick`, `node` and the updated `new_refractory_period`.
+
+#### `law_wave_log.json`
+- entries either keyed by tick with `{node: frequency}` or
+  `{tick, origin, affected}` when a law wave is emitted.
+
+#### `stable_frequency_log.json`
+- keyed by tick mapping nodes to stabilised law-wave frequencies.
+
+#### `layer_transition_log.json`
+- `tick`, `node`, source `from` layer, destination `to` layer and `trace_id`.
+
+#### `layer_transition_events.json`
+- counts of layer transitions summarised as
+  `{node: {layer: count}}`.
+
+#### `magnitude_failure_log.json`
+- `tick`, `node`, `magnitude`, `threshold` and number of `phases` when a tick fails.
+
+#### `meta_node_tick_log.json`
+- keyed by tick with `{meta_id: [member_nodes]}` entries.
+
+#### `node_emergence_log.json`
+- new node details including `id`, `tick`, `parents`,
+  `origin_type`, `generation_tick`, `sigma_phi` and `phase_confidence_index`.
+
+#### `node_state_log.json`
+- keyed by tick containing:
+  - `type` – node type per id.
+  - `credit` – coherence credit values.
+  - `debt` – decoherence debt values.
+
+#### `node_state_map.json`
+- records transitions with `node`, `from` and `to` state identifiers.
+
+#### `observer_disagreement_log.json`
+- `tick`, `observer` and `diff` between observation and reality.
+
+#### `observer_perceived_field.json`
+- `tick`, `observer` and the inferred `state` per node.
+
+#### `propagation_failure_log.json`
+- heterogeneous records describing why propagation failed. Common
+  fields include `tick`, `node` or `parent`, failure `type` and `reason`.
+
+#### `refraction_log.json`
+- rerouting information containing `tick` and either
+  `recursion_from` or `from`/`via`/`to` paths.
+
+#### `regional_pressure_map.json`
+- mapping of regions to averaged decoherence pressure.
+
+#### `should_tick_log.json`
+- decisions from `should_tick` with `tick`, `node` and `reason`.
+
+#### `simulation_state.json`
+- `paused`, `stopped`, `current_tick` and optional `graph_snapshot` path.
+
+#### `structural_growth_log.json`
+- per tick record of node counts and SIP/CSP success/failure totals.
+
+#### `tick_delivery_log.json`
+- `source`, `node_id`, `tick_time` and `stored_phase` for incoming ticks.
+
+#### `tick_density_map.json`
+- keyed by tick mirroring `interference_log` densities.
+
+#### `tick_drop_log.json`
+- dropped tick info: `tick`, `node`, `reason`, `coherence`, `node_type`.
+
+#### `tick_emission_log.json`
+- emitted ticks with `node_id`, `tick_time` and `phase`.
+
+#### `tick_evaluation_log.json`
+- evaluation outcome fields:
+  `tick`, `node`, `coherence`, `threshold`, `refractory`, `fired`, `reason`.
+
+#### `tick_propagation_log.json`
+- `source`, `target`, `tick_time`, `arrival_time` and propagated `phase`.
+
+#### `tick_seed_log.json`
+- seeder actions recording `tick`, `node`, `phase`, `strategy`,
+  `coherence`, `threshold`, `success` and optional `failure_reason`.
+
+#### `tick_trace.json`
+- complete graph snapshot including nodes, edges, bridges and tick history.
+
+#### `void_node_map.json`
+- list of node ids with no connections.
+
+#### `manifest.json`
+- summary produced by `bundle_run.py` containing run metadata such as
+  `run_id`, `timestamp`, tick counts, collapse statistics and diagnostics.
+
+#### `interpretation_log.json`
+- aggregated metrics produced by the interpreter. Keys may include
+  `curvature`, `collapse`, `coherence`, `law_wave`, `decoherence`,
+  `layer_transitions`, `rerouting`, `node_state_transitions`, `clusters`,
+  `bridges`, `law_drift`, `meta_nodes`, `tick_counts`, `layer_summary`,
+  `inspection_events` and `console`.
+
+#### `causal_explanations.json`
+- explanation events with `tick_range`, `affected_nodes`,
+  `origin` rule and textual `explanation`.
+
+#### `causal_summary.txt`
+- human readable narrative of the explanation events.
+
+#### `explanation_graph.json`
+- DAG describing causal chains with nodes (`id`, `tick`, `type`, `node`, `description`)
+  and edges (`source`, `target`, `label`).
+
+#### `causal_chains.json`
+- list of causal chains each containing `root_event`, `chain` steps
+  and overall `confidence`.
+
+#### `causal_timeline.json`
+- ordered list of `{tick, events}` where each event notes a `type` and involved nodes.
+
+#### `cwt_console.txt`
+- captured console output from the run.
+
 The raw logs (`tick_trace.json`, `coherence_log.json`, `event_log.json`, etc.) remain in `output/` for detailed inspection. For convenience, running `bundle_run.py` packages the important files with a manifest describing the run.
 
 ## Testing
