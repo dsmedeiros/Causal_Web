@@ -603,6 +603,7 @@ def log_metrics_per_tick(global_tick):
     classical_state = {}
     coherence_velocity = {}
     law_wave_log = {}
+    stable_frequency_log = {}
     interference_log = {}
     credit_log = {}
     debt_log = {}
@@ -648,6 +649,9 @@ def log_metrics_per_tick(global_tick):
             )
             record["stable"] = 0
 
+        if record["stable"] >= 5:
+            stable_frequency_log[node_id] = round(np.mean(record["freqs"]), 4)
+
         decoherence_log[node_id] = round(decoherence, 4)
         coherence_log[node_id] = round(coherence, 4)
         classical_state[node_id] = getattr(node, "is_classical", False)
@@ -664,6 +668,11 @@ def log_metrics_per_tick(global_tick):
     log_json(Config.output_path("cluster_log.json"), {str(global_tick): clusters})
 
     log_json(Config.output_path("law_wave_log.json"), {str(global_tick): law_wave_log})
+    if stable_frequency_log:
+        log_json(
+            Config.output_path("stable_frequency_log.json"),
+            {str(global_tick): stable_frequency_log},
+        )
 
     log_json(
         Config.output_path("decoherence_log.json"), {str(global_tick): decoherence_log}
