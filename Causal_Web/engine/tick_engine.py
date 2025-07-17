@@ -267,11 +267,16 @@ def dynamic_bridge_management(global_tick):
 
 
 def _update_growth_log(tick: int) -> None:
-    """Record structural growth per tick."""
+    """Record structural growth per tick.
+
+    This includes counts for nodes, edges (including bridges) and
+    the number of successful or failed propagation attempts.
+    """
     global _sip_success_count, _sip_failure_count, _csp_success_count, _csp_failure_count
     record = {
         "tick": tick,
         "node_count": len(graph.nodes),
+        "edge_count": len(graph.edges) + len(graph.bridges),
         "sip_success": _sip_success_count,
         "sip_failures": _sip_failure_count,
         "csp_success": _csp_success_count,
