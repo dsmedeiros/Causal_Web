@@ -400,16 +400,36 @@ class Node:
         }
         log_json(Config.output_path("propagation_failure_log.json"), fail_rec)
 
-    def schedule_tick(self, tick_time, incoming_phase):
+    def schedule_tick(self, tick_time, incoming_phase, origin=None):
+        """Store an incoming phase for future evaluation.
+
+        Parameters
+        ----------
+        tick_time : float
+            Global tick time at which the phase should be evaluated.
+        incoming_phase : float
+            Phase value being delivered.
+        origin : str, optional
+            ID of the node that emitted the phase.
+        """
+
         self.incoming_phase_queue[tick_time].append(incoming_phase)
-        self.pending_superpositions[tick_time].append(
-            incoming_phase
-        )  # track unresolved states
+        self.pending_superpositions[tick_time].append(incoming_phase)
         self._coherence_cache.pop(tick_time, None)
         self._decoherence_cache.pop(tick_time, None)
         print(
             f"[{self.id}] Received tick at {tick_time} with phase {incoming_phase:.2f}"
         )
+        if origin is not None:
+            log_json(
+                Config.output_path("tick_delivery_log.json"),
+                {
+                    "source": origin,
+                    "node_id": self.id,
+                    "tick_time": tick_time,
+                    "stored_phase": incoming_phase,
+                },
+            )
         from . import tick_engine as te
 
         te.mark_for_update(self.id)
@@ -553,6 +573,10 @@ class Node:
             trace_id=trace_id,
         )
         self.tick_history.append(tick_obj)
+        log_json(
+            Config.output_path("tick_emission_log.json"),
+            {"node_id": self.id, "tick_time": tick_time, "phase": phase},
+        )
         if origin == "self":
             self.emitted_tick_times.add(tick_time)
         else:
@@ -592,6 +616,17 @@ class Node:
             attenuated = phase * edge.attenuation
             shifted = attenuated + edge.phase_shift
 
+            log_json(
+                Config.output_path("tick_propagation_log.json"),
+                {
+                    "source": self.id,
+                    "target": target.id,
+                    "tick_time": tick_time,
+                    "arrival_time": tick_time + delay,
+                    "phase": shifted,
+                },
+            )
+
             if target.node_type == NodeType.DECOHERENT:
                 # Redirect through alternative path when hitting a decoherent node
                 alts = graph.get_edges_from(target.id)
@@ -601,7 +636,9 @@ class Node:
                     alt_delay = alt.adjusted_delay(
                         target.law_wave_frequency, alt_tgt.law_wave_frequency, kappa
                     )
-                    alt_tgt.schedule_tick(tick_time + delay + alt_delay, shifted)
+                    alt_tgt.schedule_tick(
+                        tick_time + delay + alt_delay, shifted, origin=self.id
+                    )
                     target.node_type = NodeType.REFRACTIVE
                     log_json(
                         Config.output_path("refraction_log.json"),
@@ -614,7 +651,7 @@ class Node:
                     )
                     continue
 
-            target.schedule_tick(tick_time + delay, shifted)
+            target.schedule_tick(tick_time + delay, shifted, origin=self.id)
 
         if origin == "self":
             collapsed = self.propagate_collapse(tick_time, graph)
@@ -761,4 +798,4 @@ class Edge:
             ),
             target_node.law_wave_frequency,
         )
-        target_node.schedule_tick(scheduled_tick, attenuated_phase)
+        target_node.schedule_tick(scheduled_tick, attenuated_phase, origin=self.source)
