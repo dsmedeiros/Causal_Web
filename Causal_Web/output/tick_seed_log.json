@@ -1,202 +1,114 @@
-{"tick": 0, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 0, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 1, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 1, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 2, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 2, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 3, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 3, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 4, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 4, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 5, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 5, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 6, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 6, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 7, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 7, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 8, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 8, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 9, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 9, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 10, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 10, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 11, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 11, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 12, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 12, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 13, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 13, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 14, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 14, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 15, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 15, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 16, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 16, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 17, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 17, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 18, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 18, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 19, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 19, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 20, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 20, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 21, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 21, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 22, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 22, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 23, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 23, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 24, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 24, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 25, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 25, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 26, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 26, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 27, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 27, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 28, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 28, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 29, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 29, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 30, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 30, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 31, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 31, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 32, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 32, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 33, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 33, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 34, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 34, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 35, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 35, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 36, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 36, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 37, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 37, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 38, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 38, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 39, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 39, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 40, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 40, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 41, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 41, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 42, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 42, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 43, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 43, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 44, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 44, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 45, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 45, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 46, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 46, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 47, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 47, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 48, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 48, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 49, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 49, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 50, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 50, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 51, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 51, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 52, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 52, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 53, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 53, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 54, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 54, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 55, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 55, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 56, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 56, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 57, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 57, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 58, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 58, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 59, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 59, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 60, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 60, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 61, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 61, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 62, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 62, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 63, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 63, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 64, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 64, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 65, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 65, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 66, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 66, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 67, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 67, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 68, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 68, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 69, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 69, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 70, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 70, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 71, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 71, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 72, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 72, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 73, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 73, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 74, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 74, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 75, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 75, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 76, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 76, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 77, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 77, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 78, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 78, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 79, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 79, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 80, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 80, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 81, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 81, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 82, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 82, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 83, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 83, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 84, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 84, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 85, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 85, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 86, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 86, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 87, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 87, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 88, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 88, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 89, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 89, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 90, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 90, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 91, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 91, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 92, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 92, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 93, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 93, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 94, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 94, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 95, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 95, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 96, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 96, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 97, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 97, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 98, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 98, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 99, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 99, "node": "F", "phase": 0.0, "strategy": "static"}
-{"tick": 100, "node": "A", "phase": 0.0, "strategy": "static"}
-{"tick": 100, "node": "F", "phase": 0.0, "strategy": "static"}
+{"tick": 0, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.645, "success": true, "failure_reason": null}
+{"tick": 2, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.67, "success": true, "failure_reason": null}
+{"tick": 4, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.695, "success": true, "failure_reason": null}
+{"tick": 6, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.75, "success": true, "failure_reason": null}
+{"tick": 8, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.8, "success": true, "failure_reason": null}
+{"tick": 10, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 12, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.945, "success": true, "failure_reason": null}
+{"tick": 14, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 16, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.88, "success": true, "failure_reason": null}
+{"tick": 18, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.93, "success": true, "failure_reason": null}
+{"tick": 20, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 22, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.88, "success": true, "failure_reason": null}
+{"tick": 24, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.87, "success": true, "failure_reason": null}
+{"tick": 26, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.93, "success": true, "failure_reason": null}
+{"tick": 28, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.92, "success": true, "failure_reason": null}
+{"tick": 30, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.88, "success": true, "failure_reason": null}
+{"tick": 32, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.87, "success": true, "failure_reason": null}
+{"tick": 34, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 36, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 38, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 40, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 42, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 44, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 46, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 48, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 50, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 52, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 54, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 56, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 58, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 60, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 62, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 64, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 66, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 68, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 70, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 72, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 74, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 76, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 78, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 80, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 82, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 84, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 86, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 88, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 90, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 92, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 94, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 96, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 98, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 100, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 102, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 104, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 106, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 108, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 110, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 112, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 114, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 116, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 118, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 120, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 122, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 124, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 126, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 128, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 130, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 132, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 134, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 136, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 138, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 140, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 142, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 144, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 146, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 148, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 150, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 152, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 154, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 156, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 158, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 160, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 162, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 164, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 166, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 168, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 170, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 172, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 174, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 176, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 178, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 180, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 182, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 184, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 186, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 188, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 190, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 192, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 194, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 196, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 198, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 200, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 202, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 204, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 206, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 208, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 210, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 212, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 214, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 216, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 218, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 220, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 222, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}
+{"tick": 224, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.89, "success": true, "failure_reason": null}
+{"tick": 226, "node": "A", "phase": 0.0, "strategy": "static", "coherence": 1.0, "threshold": 0.9, "success": true, "failure_reason": null}

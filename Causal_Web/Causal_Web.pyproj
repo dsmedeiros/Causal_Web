@@ -25,6 +25,7 @@
     <Compile Include="engine\bridge.py" />
     <Compile Include="engine\causal_analyst.py" />
     <Compile Include="engine\graph.py" />
+    <Compile Include="engine\logger.py" />
     <Compile Include="engine\meta_node.py" />
     <Compile Include="engine\node.py" />
     <Compile Include="engine\observer.py" />

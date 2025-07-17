@@ -1,172 +1,45 @@
 {
-  "nodes": [
-    {
-      "id": "A",
+  "nodes": {
+    "A": {
       "x": 100,
-      "y": 100
+      "y": 100,
+      "frequency": 1.0,
+      "refractory_period": 0.5,
+      "base_threshold": 0.1,
+      "phase": 0.0,
+      "origin_type": "seed",
+      "generation_tick": 0,
+      "parent_ids": [],
+      "goals": {}
     },
-    {
-      "id": "B",
+    "B": {
       "x": 100,
-      "y": 200
-    },
-    {
-      "id": "C",
-      "x": 100,
-      "y": 300
-    },
-    {
-      "id": "D",
-      "x": 200,
-      "y": 100
-    },
-    {
-      "id": "E",
-      "x": 200,
-      "y": 200
-    },
-    {
-      "id": "F",
-      "x": 200,
-      "y": 300
-    },
-    {
-      "id": "G",
-      "x": 300,
-      "y": 100
-    },
-    {
-      "id": "H",
-      "x": 300,
-      "y": 200
-    },
-    {
-      "id": "I",
-      "x": 300,
-      "y": 300
-    },
-    {
-      "id": "J",
-      "x": 400,
-      "y": 100
-    },
-    {
-      "id": "Z",
-      "x": 400,
       "y": 200,
-      "void": true
-    },
-    {
-      "id": "OBS",
-      "x": 2.5,
-      "y": -1,
-      "type": "observer"
+      "frequency": 1.0,
+      "refractory_period": 0.5,
+      "base_threshold": 0.1,
+      "phase": 0.0,
+      "origin_type": "derived",
+      "generation_tick": 0,
+      "parent_ids": [ "A" ]
     }
-  ],
+  },
   "edges": [
     {
       "from": "A",
-      "to": "B"
-    },
-    {
-      "from": "B",
-      "to": "C"
-    },
-    {
-      "from": "C",
-      "to": "E"
-    },
-    {
-      "from": "E",
-      "to": "F"
-    },
-    {
-      "from": "F",
-      "to": "G"
-    },
-    {
-      "from": "D",
-      "to": "H"
-    },
-    {
-      "from": "H",
-      "to": "I"
-    },
-    {
-      "from": "I",
-      "to": "J"
+      "to": "B",
+      "attenuation": 1.0,
+      "density": 0.0,
+      "delay": 1,
+      "phase_shift": 0.0
     }
   ],
-  "bridges": [
+  "bridges": [],
+  "tick_sources": [
     {
-      "from": "A",
-      "to": "B",
-      "initial_strength": 1.0,
-      "medium_type": "standard",
-      "mutable": true
-    },
-    {
-      "from": "B",
-      "to": "C",
-      "initial_strength": 0.8,
-      "medium_type": "standard",
-      "mutable": true
-    },
-    {
-      "from": "C",
-      "to": "D",
-      "initial_strength": 0.6,
-      "medium_type": "standard",
-      "mutable": true
-    },
-    {
-      "from": "D",
-      "to": "A",
-      "initial_strength": 0.5,
-      "medium_type": "standard",
-      "mutable": true
-    },
-    {
-      "from": "C",
-      "to": "E",
-      "initial_strength": 0.3,
-      "medium_type": "dense",
-      "mutable": true
-    },
-    {
-      "from": "E",
-      "to": "F",
-      "initial_strength": 0.9,
-      "medium_type": "phase-sensitive",
-      "mutable": true
-    },
-    {
-      "from": "F",
-      "to": "G",
-      "initial_strength": 0.9,
-      "medium_type": "standard",
-      "mutable": true
-    },
-    {
-      "from": "D",
-      "to": "H",
-      "initial_strength": 0.2,
-      "medium_type": "fragile",
-      "mutable": true
-    },
-    {
-      "from": "H",
-      "to": "I",
-      "initial_strength": 0.2,
-      "medium_type": "fragile",
-      "mutable": true
-    },
-    {
-      "from": "I",
-      "to": "J",
-      "initial_strength": 0.2,
-      "medium_type": "fragile",
-      "mutable": true
+      "node_id": "A",
+      "tick_interval": 2,
+      "phase": 0.0
     }
   ],
   "observers": [
@@ -175,6 +48,5 @@
       "monitors": [ "collapse", "law_wave", "region" ],
       "frequency": 1
     }
-  ],
-  "tick_sources": [ "A", "F" ]
+  ]
 }

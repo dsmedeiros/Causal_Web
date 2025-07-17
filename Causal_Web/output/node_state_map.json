@@ -1,10 +1,2 @@
 {"node": "A", "from": "normal", "to": "entangled"}
-{"node": "F", "from": "normal", "to": "entangled"}
-{"node": "B", "from": "normal", "to": "entangled"}
-{"node": "C", "from": "normal", "to": "entangled"}
-{"node": "E", "from": "normal", "to": "entangled"}
-{"node": "G", "from": "normal", "to": "entangled"}
-{"node": "H", "from": "normal", "to": "entangled"}
-{"node": "I", "from": "normal", "to": "entangled"}
-{"node": "J", "from": "normal", "to": "entangled"}
-{"node": "D", "from": "normal", "to": "entangled"}
+{"node": "A_S4", "from": "normal", "to": "entangled"}
