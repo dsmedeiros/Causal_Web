@@ -29,6 +29,7 @@ DEFAULT_KEEP_FILES = [
     "interference_log.json",
     "tick_density_map.json",
     "tick_seed_log.json",
+    "tick_delivery_log.json",
     "refraction_log.json",
     "collapse_front_log.json",
     "collapse_chain_log.json",
