@@ -1,6 +1,6 @@
 import cmath
 import math
-from collections import defaultdict
+from collections import defaultdict, deque
 
 from .bridge import Bridge
 from .node import Node, Edge, NodeType
@@ -342,11 +342,11 @@ class CausalGraph:
         for nid in self.nodes:
             if nid in visited:
                 continue
-            queue = [nid]
+            queue = deque([nid])
             comp = []
             visited.add(nid)
             while queue:
-                cur = queue.pop(0)
+                cur = queue.popleft()
                 comp.append(cur)
                 for nb in neighbors(cur):
                     if nb not in visited:
@@ -593,10 +593,10 @@ class CausalGraph:
     def emit_law_wave(self, origin_id: str, tick: int, radius: int = 2) -> None:
         """Propagate a law wave from origin node and log affected nodes."""
         visited = {origin_id}
-        frontier = [(origin_id, 0)]
+        frontier = deque([(origin_id, 0)])
         affected = []
         while frontier:
-            nid, dist = frontier.pop(0)
+            nid, dist = frontier.popleft()
             if dist > radius:
                 continue
             node = self.get_node(nid)
