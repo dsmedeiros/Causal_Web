@@ -442,6 +442,14 @@ class CausalGraph:
             json.dump(self.to_dict(), f, indent=2)
 
     def load_from_file(self, path):
+        """Populate the graph from a JSON file.
+
+        The ``nodes`` section may be either a list of node objects or a
+        dictionary mapping IDs to attribute dictionaries.  Likewise, ``edges``
+        can be provided as a list of edge objects or as an adjacency mapping of
+        ``{source: [target, ...]}`` or ``{source: {target: {params}}}``.
+        """
+
         with open(path, "r") as f:
             data = json.load(f)
 
@@ -478,7 +486,28 @@ class CausalGraph:
             goals = node_data.get("goals")
             if goals is not None:
                 self.nodes[node_id].goals = goals
-        for edge in data.get("edges", []):
+        edges_data = data.get("edges", [])
+        if isinstance(edges_data, dict):
+            edges_iter = []
+            for src, targets in edges_data.items():
+                if isinstance(targets, dict):
+                    for tgt, params in targets.items():
+                        rec = {"from": src, "to": tgt}
+                        if isinstance(params, dict):
+                            rec.update(params)
+                        edges_iter.append(rec)
+                else:
+                    for tgt in targets:
+                        if isinstance(tgt, str):
+                            edges_iter.append({"from": src, "to": tgt})
+                        elif isinstance(tgt, dict):
+                            rec = {"from": src}
+                            rec.update(tgt)
+                            edges_iter.append(rec)
+        else:
+            edges_iter = edges_data
+
+        for edge in edges_iter:
             src = edge.get("from")
             tgt = edge.get("to")
             if src is None or tgt is None:
