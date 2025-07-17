@@ -275,11 +275,18 @@ class Node:
         # limit propagation to nodes within the same primary cluster
         cluster = self.cluster_ids.get(0)
         if cluster is not None:
-            edges = [
-                e
-                for e in edges
-                if graph.get_node(e.target).cluster_ids.get(0) == cluster
-            ]
+            # only enforce cluster restriction when the cluster contains
+            # multiple nodes. During early formation each node may be in its
+            # own cluster, which would otherwise block all outbound edges.
+            cluster_size = sum(
+                1 for n in graph.nodes.values() if n.cluster_ids.get(0) == cluster
+            )
+            if cluster_size > 1:
+                edges = [
+                    e
+                    for e in edges
+                    if graph.get_node(e.target).cluster_ids.get(0) == cluster
+                ]
         limit = getattr(Config, "max_tick_fanout", 0)
         if limit and len(edges) > limit:
             return edges[:limit]
