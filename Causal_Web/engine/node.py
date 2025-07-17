@@ -67,7 +67,7 @@ class Node:
         self.subjective_ticks = 0  # For relativistic tracking
         self.last_emission_tick = None
         self.refractory_period = refractory_period
-        self.last_tick_time = -math.inf
+        self.last_tick_time: Optional[float] = None
         self.base_threshold = base_threshold
         self.current_threshold = self.base_threshold
         self.collapse_origin = {}  # tick_time -> "self" or "bridge"
@@ -420,7 +420,9 @@ class Node:
         is ``False``.
         """
 
-        in_refractory = tick_time - self.last_tick_time < self.refractory_period
+        in_refractory = False
+        if self.current_tick > 0 and self.last_tick_time is not None:
+            in_refractory = tick_time - self.last_tick_time < self.refractory_period
         raw_phases = self.incoming_phase_queue[tick_time]
         complex_phases = [cmath.rect(1.0, p % (2 * math.pi)) for p in raw_phases]
         vector_sum = sum(complex_phases)
@@ -639,20 +641,26 @@ class Node:
 
             TickRouter.route_tick(self, self.tick_history[-1])
 
-        if global_tick in self.incoming_phase_queue:
-            should_fire, phase, reason = self.should_tick(global_tick)
+        tick_key = global_tick
+        if tick_key not in self.incoming_phase_queue:
+            for k in list(self.incoming_phase_queue.keys()):
+                if math.isclose(k, global_tick, abs_tol=1e-6):
+                    tick_key = k
+                    break
+        if tick_key in self.incoming_phase_queue:
+            should_fire, phase, reason = self.should_tick(tick_key)
             if should_fire and not self.is_classical:
-                self.apply_tick(global_tick, phase, graph)
+                self.apply_tick(tick_key, phase, graph)
             else:
                 drop_reason = "classical" if self.is_classical else reason
-                self._log_tick_drop(global_tick, drop_reason)
-                print(f"[{self.id}] {drop_reason} at {global_tick} cancelled tick")
-            del self.incoming_phase_queue[global_tick]
-            if global_tick in self.pending_superpositions:
-                del self.pending_superpositions[global_tick]
-            self._coherence_cache.pop(global_tick, None)
-            self._decoherence_cache.pop(global_tick, None)
-            self._update_memory(global_tick)
+                self._log_tick_drop(tick_key, drop_reason)
+                print(f"[{self.id}] {drop_reason} at {tick_key} cancelled tick")
+            del self.incoming_phase_queue[tick_key]
+            if tick_key in self.pending_superpositions:
+                del self.pending_superpositions[tick_key]
+            self._coherence_cache.pop(tick_key, None)
+            self._decoherence_cache.pop(tick_key, None)
+            self._update_memory(tick_key)
             self._adapt_behavior()
             self.update_node_type()
         else:
