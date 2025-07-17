@@ -136,6 +136,7 @@ The simulation writes many JSON files to `output/`.
 - `interference_log.json` – interference classification per node.
 - `law_drift_log.json` – refractory period adjustments.
 - `law_wave_log.json` – node law-wave frequencies.
+- `stable_frequency_log.json` – nodes with converged law-wave frequency values.
 - `layer_transition_log.json` – tick transitions between LCCM layers.
 - `layer_transition_events.json` – counts of layer transitions per node.
 - `magnitude_failure_log.json` – ticks rejected for low magnitude.
