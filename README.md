@@ -19,7 +19,7 @@ Key modules include:
 - **`engine/meta_node.py`** – groups clusters of nodes into collapsed meta nodes.
 - **`engine/node_manager.py`** – NumPy-backed container for bulk node updates.
 - **`engine/observer.py`** – observers that infer hidden state from tick history.
-- **`engine/logger.py`** – asynchronous writer used by many modules.
+- **`engine/logger.py`** – centralized buffer that batches log writes to disk.
 - **`engine/tick.py`** – defines :class:`Tick` and the reusable object pool.
 - **`gui/dashboard.py`** – Dear PyGui dashboard for interactive runs.
 - **`main.py`** – simple entry point that launches the dashboard.
@@ -172,6 +172,8 @@ This command loads the logs and generates several summary files:
 The simulation writes many JSON files to `output/`. Logging for each file can be
 enabled or disabled individually using the **Logging** window in the GUI or via
 the `log_files` section of `input/config.json`.
+All log entries are buffered in memory and flushed periodically to minimize
+disk writes.
 
 - `boundary_interaction_log.json` – interactions with void or boundary nodes.
 - `bridge_decay_log.json` – gradual weakening of inactive bridges.

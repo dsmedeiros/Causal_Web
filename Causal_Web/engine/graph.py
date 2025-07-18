@@ -608,11 +608,9 @@ class CausalGraph:
                 if other and other.node_type == NodeType.NULL:
                     print(f"[WARNING] Bridge {nid}<->{b} connected to NULL node")
         if self.void_nodes:
-            with open(Config.output_path("void_node_map.json"), "w") as f:
-                json.dump(self.void_nodes, f, indent=2)
+            log_json(Config.output_path("void_node_map.json"), self.void_nodes)
         if Config.is_log_enabled("connectivity_log.json"):
-            with open(Config.output_path("connectivity_log.json"), "w") as f:
-                json.dump(connectivity_log, f, indent=2)
+            log_json(Config.output_path("connectivity_log.json"), connectivity_log)
 
     # ------------------------------------------------------------
     def emit_law_wave(self, origin_id: str, tick: int, radius: int = 2) -> None:
