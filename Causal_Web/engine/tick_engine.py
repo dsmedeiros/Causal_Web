@@ -54,6 +54,38 @@ _dynamic_coherence_offset: float = 0.0
 _spawn_counts = {}
 _spawn_tick = -1
 
+# --- Firing limit tracking ---
+_current_firing_count = 0
+_cluster_firing_counts: dict[int, int] = {}
+
+
+def reset_firing_limits() -> None:
+    """Reset per-tick firing counters."""
+
+    global _current_firing_count, _cluster_firing_counts
+    _current_firing_count = 0
+    _cluster_firing_counts = {}
+
+
+def register_firing(node) -> bool:
+    """Register a node firing and enforce concurrency limits."""
+
+    global _current_firing_count, _cluster_firing_counts
+    total_limit = getattr(Config, "total_max_concurrent_firings", 0)
+    cluster_limit = getattr(Config, "max_concurrent_firings_per_cluster", 0)
+
+    cluster = node.cluster_ids.get(0)
+    if total_limit and _current_firing_count >= total_limit:
+        return False
+    if cluster_limit and cluster is not None:
+        if _cluster_firing_counts.get(cluster, 0) >= cluster_limit:
+            return False
+
+    _current_firing_count += 1
+    if cluster is not None:
+        _cluster_firing_counts[cluster] = _cluster_firing_counts.get(cluster, 0) + 1
+    return True
+
 
 # --- Phase 8 parameters ---
 SIP_COHERENCE_DURATION = 3
@@ -147,6 +179,8 @@ def propagate_phases(global_tick):
 
 def evaluate_nodes(global_tick):
     """Evaluate only nodes flagged in :data:`nodes_to_update`."""
+    graph.detect_clusters()
+    reset_firing_limits()
     for node_id in list(nodes_to_update):
         node = graph.get_node(node_id)
         if not node:

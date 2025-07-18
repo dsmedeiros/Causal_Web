@@ -593,13 +593,13 @@ class Node:
         """Emit a tick and propagate resulting phases to neighbours."""
 
         # Boundary and state checks -------------------------------------------------
+        from . import tick_engine as te
+
         if self.node_type == NodeType.NULL:
             log_json(
                 Config.output_path("boundary_interaction_log.json"),
                 {"tick": tick_time, "void": self.id, "origin": origin},
             )
-            from . import tick_engine as te
-
             te.void_absorption_events += 1
             self._log_tick_drop(tick_time, "void_node")
             return
@@ -616,9 +616,11 @@ class Node:
                 Config.output_path("boundary_interaction_log.json"),
                 {"tick": tick_time, "node": self.id, "origin": origin},
             )
-            from . import tick_engine as te
-
             te.boundary_interactions_count += 1
+
+        if not te.register_firing(self):
+            self._log_tick_drop(tick_time, "bandwidth_limit")
+            return
 
         # Avoid duplicate self-emissions, but allow external ticks separately
         if origin == "self" and tick_time in self.emitted_tick_times:

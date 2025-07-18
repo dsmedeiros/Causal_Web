@@ -68,6 +68,12 @@ Edges can optionally vary their propagation strength using the
 range when the graph loads. The weight scales the delay returned by
 `Edge.adjusted_delay` and inversely affects attenuation, allowing the network to
 model non-uniform distances or resistance.
+
+To model limited causal bandwidth you can restrict how many nodes may fire on a
+single tick. Set `total_max_concurrent_firings` for a global limit or
+`max_concurrent_firings_per_cluster` to cap activity within each detected
+cluster. A value of `0` disables these limits. Both parameters are configurable
+via CLI flags or the Parameters window in the GUI.
 ## Graph format
 
 Graphs are defined by a JSON file with `nodes`, `edges`, optional `bridges`, `tick_sources` and `observers`. Each node defines its position, frequency and thresholds. Edges specify delays and attenuation. Tick sources seed periodic activity and observers describe which metrics to record.

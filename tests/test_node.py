@@ -4,6 +4,7 @@ import tempfile
 from Causal_Web.engine.node import Node
 from Causal_Web.engine.graph import CausalGraph
 from Causal_Web.config import Config
+from Causal_Web.engine import tick_engine
 
 
 def test_coherence_and_decoherence_calculation():
@@ -69,3 +70,39 @@ def test_tick_decay_factor_affects_firing():
     assert reason == "count_threshold"
     Config.tick_decay_factor = old_decay
     Config.tick_threshold = old_thresh
+
+
+def test_global_firing_limit_blocks_nodes():
+    old_limit = getattr(Config, "total_max_concurrent_firings", 0)
+    Config.total_max_concurrent_firings = 1
+    g = CausalGraph()
+    g.add_node("A")
+    g.add_node("B")
+    g.nodes["A"].schedule_tick(1, 0.0)
+    g.nodes["B"].schedule_tick(1, 0.0)
+    tick_engine.reset_firing_limits()
+    Config.current_tick = 1
+    g.nodes["A"].maybe_tick(1, g)
+    g.nodes["B"].maybe_tick(1, g)
+    fired = sum(len(n.tick_history) for n in g.nodes.values())
+    assert fired == 1
+    Config.total_max_concurrent_firings = old_limit
+
+
+def test_cluster_firing_limit_blocks_nodes():
+    old_limit = getattr(Config, "max_concurrent_firings_per_cluster", 0)
+    Config.max_concurrent_firings_per_cluster = 1
+    g = CausalGraph()
+    g.add_node("A")
+    g.add_node("B")
+    for n in g.nodes.values():
+        n.cluster_ids[0] = 0
+    g.nodes["A"].schedule_tick(1, 0.0)
+    g.nodes["B"].schedule_tick(1, 0.0)
+    tick_engine.reset_firing_limits()
+    Config.current_tick = 1
+    g.nodes["A"].maybe_tick(1, g)
+    g.nodes["B"].maybe_tick(1, g)
+    fired = sum(len(n.tick_history) for n in g.nodes.values())
+    assert fired == 1
+    Config.max_concurrent_firings_per_cluster = old_limit
