@@ -133,6 +133,10 @@ class Config:
     # Decay factor for stored tick energy per tick
     tick_decay_factor = 1.0
 
+    # Concurrency limits
+    total_max_concurrent_firings = 0  # 0 disables global limit
+    max_concurrent_firings_per_cluster = 0  # 0 disables per-cluster limit
+
     # Early formation tuning
     DRIFT_TOLERANCE_RAMP = 10
     FORMATION_REFRACTORY_RAMP = 20
