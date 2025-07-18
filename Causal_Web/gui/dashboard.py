@@ -234,13 +234,18 @@ def dashboard():
             for node_id, (x, y) in node_positions.items():
                 color = node_colors[node_id]
                 node_tag = dpg.draw_circle(
-                    center=(x, y), radius=30, color=color, fill=color
+                    center=(x, y),
+                    radius=30,
+                    color=color,
+                    fill=color,
+                    parent="graph_drawlist",
                 )
                 label_tag = dpg.draw_text(
                     (x - 25, y - 10),
                     f"{node_id}\\nTicks: 0",
                     size=15,
                     tag=f"{node_id}_label",
+                    parent="graph_drawlist",
                 )
                 node_tags[node_id] = node_tag
                 tick_counters[node_id] = label_tag
@@ -251,12 +256,14 @@ def dashboard():
                 p2=node_positions["C"],
                 color=(150, 150, 150),
                 thickness=2,
+                parent="graph_drawlist",
             )
             dpg.draw_arrow(
                 p1=node_positions["A2"],
                 p2=node_positions["C"],
                 color=(150, 150, 150),
                 thickness=2,
+                parent="graph_drawlist",
             )
 
     with dpg.window(label="Legend", width=180, height=120, pos=(610, 260)):

@@ -103,6 +103,8 @@ Example:
 ## Running the simulation
 
 1. Install the dependencies (`dearpygui` is required for the GUI).
+   An X11-compatible display is needed to create the window. If running on a
+   headless server consider using a virtual frame buffer such as Xvfb.
 2. Launch the dashboard:
 
 ```bash
