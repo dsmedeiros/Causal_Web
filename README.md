@@ -30,10 +30,18 @@ Graphs are stored in `input/graph.json` inside the package. Paths are resolved r
 
 Runtime parameters such as tick rate or seeding strategy can be overridden by
 providing a JSON configuration file. Invoke the module with the `--config`
-argument:
+argument and optionally override individual keys via CLI flags:
 
 ```bash
 python -m Causal_Web.main --config Causal_Web/input/config.json
+```
+
+Flags take the form `--<key>` where `<key>` matches an entry in the
+configuration file (nested keys use dot notation). For example to run the
+simulation headless for 20 ticks you can use:
+
+```bash
+python -m Causal_Web.main --no-gui --max_ticks 20
 ```
 
 Only keys matching attributes on `Causal_Web.config.Config` are applied. Nested
@@ -105,10 +113,11 @@ Example:
 1. Install the dependencies (`dearpygui` is required for the GUI).
    An X11-compatible display is needed to create the window. If running on a
    headless server consider using a virtual frame buffer such as Xvfb.
-2. Launch the dashboard:
+2. Launch the dashboard or run headless:
 
 ```bash
-python -m Causal_Web.main
+python -m Causal_Web.main            # with GUI
+python -m Causal_Web.main --no-gui   # headless run
 ```
 
 Use the on-screen controls to start or pause the simulation and adjust the tick rate. Windows can be freely resized and the graph view will scroll if its contents exceed the available space. As the simulation runs, a number of JSON log files are produced inside `Causal_Web/output`.
