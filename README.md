@@ -17,7 +17,8 @@ Key modules include:
 - **`engine/log_interpreter.py`** – parses the generated logs and aggregates statistics.
 - **`engine/causal_analyst.py`** – infers causal chains and produces explanation files.
 - **`engine/meta_node.py`** – groups clusters of nodes into collapsed meta nodes.
-- **`engine/node_manager.py`** – NumPy-backed container for bulk node updates.
+- **`engine/node_manager.py`** – NumPy-backed container for bulk node updates
+  using dynamically resized pre-allocated arrays.
 - **`engine/observer.py`** – observers that infer hidden state from tick history.
 - **`engine/logger.py`** – centralized buffer that batches log writes to disk.
 - **`engine/tick.py`** – defines :class:`Tick` and the reusable object pool.
