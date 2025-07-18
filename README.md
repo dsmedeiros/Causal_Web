@@ -21,6 +21,19 @@ Key modules include:
 - **`main.py`** – simple entry point that launches the dashboard.
 
 Graphs are stored in `input/graph.json` inside the package. Paths are resolved relative to the package so the module can be run from any working directory. All output is written next to the code in the `output` directory.
+
+## Configuration
+
+Runtime parameters such as tick rate or seeding strategy can be overridden by
+providing a JSON configuration file. Invoke the module with the `--config`
+argument:
+
+```bash
+python -m Causal_Web.main --config Causal_Web/input/config.json
+```
+
+Only keys matching attributes on `Causal_Web.config.Config` are applied. Nested
+dictionaries merge with the existing values.
 ## Graph format
 
 Graphs are defined by a JSON file with `nodes`, `edges`, optional `bridges`, `tick_sources` and `observers`. Each node defines its position, frequency and thresholds. Edges specify delays and attenuation. Tick sources seed periodic activity and observers describe which metrics to record.
