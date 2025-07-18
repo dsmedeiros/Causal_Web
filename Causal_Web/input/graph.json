@@ -1,52 +1,194 @@
 {
   "nodes": {
-    "A": {
-      "x": 100,
-      "y": 100,
-      "frequency": 1.0,
-      "refractory_period": 0.5,
-      "base_threshold": 0.1,
+    "N1_HUB": {
+      "x": 200,
+      "y": 200,
+      "frequency": 0.1,
+      "refractory_period": 2,
+      "base_threshold": 0.8,
       "phase": 0.0,
       "origin_type": "seed",
       "generation_tick": 0,
       "parent_ids": [],
       "goals": {}
     },
-    "B": {
-      "x": 100,
-      "y": 200,
-      "frequency": 1.0,
-      "refractory_period": 0.5,
-      "base_threshold": 0.1,
+    "N2_HUB": {
+      "x": 250,
+      "y": 180,
+      "frequency": 0.1,
+      "refractory_period": 2,
+      "base_threshold": 0.7,
+      "phase": 0.5,
+      "origin_type": "derived",
+      "generation_tick": 0,
+      "parent_ids": [ "N1_HUB" ],
+      "goals": {}
+    },
+    "N3_HUB": {
+      "x": 180,
+      "y": 250,
+      "frequency": 0.1,
+      "refractory_period": 2,
+      "base_threshold": 0.7,
+      "phase": 1.0,
+      "origin_type": "derived",
+      "generation_tick": 0,
+      "parent_ids": [ "N1_HUB" ],
+      "goals": {}
+    },
+    "P1_CHAIN": {
+      "x": 400,
+      "y": 400,
+      "frequency": 0.02,
+      "refractory_period": 5,
+      "base_threshold": 0.5,
+      "phase": 0.0,
+      "origin_type": "seed",
+      "generation_tick": 0,
+      "parent_ids": [],
+      "goals": {}
+    },
+    "P2_CHAIN": {
+      "x": 450,
+      "y": 420,
+      "frequency": 0.02,
+      "refractory_period": 5,
+      "base_threshold": 0.5,
       "phase": 0.0,
       "origin_type": "derived",
       "generation_tick": 0,
-      "parent_ids": [ "A" ]
+      "parent_ids": [ "P1_CHAIN" ],
+      "goals": {}
+    },
+    "P3_CHAIN": {
+      "x": 500,
+      "y": 440,
+      "frequency": 0.02,
+      "refractory_period": 5,
+      "base_threshold": 0.5,
+      "phase": 0.0,
+      "origin_type": "derived",
+      "generation_tick": 0,
+      "parent_ids": [ "P2_CHAIN" ],
+      "goals": {}
+    },
+    "B1_BRIDGE": {
+      "x": 300,
+      "y": 300,
+      "frequency": 0.05,
+      "refractory_period": 3,
+      "base_threshold": 0.6,
+      "phase": 0.0,
+      "origin_type": "derived",
+      "generation_tick": 0,
+      "parent_ids": [ "N1_HUB" ],
+      "goals": {}
     }
   },
   "edges": [
     {
-      "from": "A",
-      "to": "B",
+      "from": "N1_HUB",
+      "to": "N2_HUB",
+      "delay": 2,
+      "phase_shift": 0.1,
       "attenuation": 1.0,
-      "density": 0.0,
-      "delay": 1,
-      "phase_shift": 0.0
+      "density": 0.0
+    },
+    {
+      "from": "N2_HUB",
+      "to": "N1_HUB",
+      "delay": 2,
+      "phase_shift": -0.1,
+      "attenuation": 1.0,
+      "density": 0.0
+    },
+    {
+      "from": "N1_HUB",
+      "to": "N3_HUB",
+      "delay": 2,
+      "phase_shift": 0.15,
+      "attenuation": 1.0,
+      "density": 0.0
+    },
+    {
+      "from": "N3_HUB",
+      "to": "N1_HUB",
+      "delay": 2,
+      "phase_shift": -0.15,
+      "attenuation": 1.0,
+      "density": 0.0
+    },
+    {
+      "from": "P1_CHAIN",
+      "to": "P2_CHAIN",
+      "delay": 5,
+      "phase_shift": 0.0,
+      "attenuation": 0.9,
+      "density": 0.1
+    },
+    {
+      "from": "P2_CHAIN",
+      "to": "P3_CHAIN",
+      "delay": 5,
+      "phase_shift": 0.0,
+      "attenuation": 0.9,
+      "density": 0.1
+    },
+    {
+      "from": "N2_HUB",
+      "to": "B1_BRIDGE",
+      "delay": 4,
+      "phase_shift": 0.0,
+      "attenuation": 1.0,
+      "density": 0.0
+    },
+    {
+      "from": "B1_BRIDGE",
+      "to": "P1_CHAIN",
+      "delay": 4,
+      "phase_shift": 0.0,
+      "attenuation": 1.0,
+      "density": 0.0
+    },
+    {
+      "from": "P3_CHAIN",
+      "to": "P3_CHAIN",
+      "delay": 10,
+      "phase_shift": 0.5,
+      "attenuation": 0.8,
+      "density": 0.0
     }
   ],
-  "bridges": [],
+  "bridges": [
+    {
+      "nodes": [ "N3_HUB", "P3_CHAIN" ],
+      "status": "potential",
+      "strength": 0.5
+    }
+  ],
   "tick_sources": [
     {
-      "node_id": "A",
-      "tick_interval": 2,
+      "node_id": "N1_HUB",
+      "tick_interval": 5,
       "phase": 0.0
+    },
+    {
+      "node_id": "P1_CHAIN",
+      "tick_interval": 10,
+      "phase": 1.57
     }
   ],
   "observers": [
     {
-      "id": "OBS",
-      "monitors": [ "collapse", "law_wave", "region" ],
+      "id": "GLOBAL_OBS",
+      "monitors": [ "collapse", "law_wave", "emergence" ],
       "frequency": 1
+    },
+    {
+      "id": "HUB_OBS",
+      "monitors": [ "coherence", "phase" ],
+      "target_nodes": [ "N1_HUB", "N2_HUB", "N3_HUB" ],
+      "frequency": 2
     }
   ]
 }
