@@ -32,6 +32,53 @@ class Config:
     # Preallocated ticks for object pool
     TICK_POOL_SIZE = 10000
 
+    # Per-log enable flags. Keys correspond to log file names under
+    # ``output`` and values determine whether the file should be written.
+    log_files = {
+        "boundary_interaction_log.json": True,
+        "bridge_decay_log.json": True,
+        "bridge_dynamics_log.json": True,
+        "bridge_reformation_log.json": True,
+        "bridge_rupture_log.json": True,
+        "bridge_state_log.json": True,
+        "cluster_log.json": True,
+        "coherence_log.json": True,
+        "coherence_velocity_log.json": True,
+        "collapse_chain_log.json": True,
+        "collapse_front_log.json": True,
+        "connectivity_log.json": True,
+        "curvature_log.json": True,
+        "decoherence_log.json": True,
+        "event_log.json": True,
+        "inspection_log.json": True,
+        "interference_log.json": True,
+        "interpretation_log.json": True,
+        "law_drift_log.json": True,
+        "law_wave_log.json": True,
+        "layer_transition_log.json": True,
+        "magnitude_failure_log.json": True,
+        "meta_node_tick_log.json": True,
+        "node_emergence_log.json": True,
+        "node_state_log.json": True,
+        "observer_disagreement_log.json": True,
+        "propagation_failure_log.json": True,
+        "refraction_log.json": True,
+        "should_tick_log.json": True,
+        "stable_frequency_log.json": True,
+        "structural_growth_log.json": True,
+        "tick_delivery_log.json": True,
+        "tick_drop_log.json": True,
+        "tick_emission_log.json": True,
+        "tick_evaluation_log.json": True,
+        "tick_propagation_log.json": True,
+        "tick_seed_log.json": True,
+    }
+
+    @classmethod
+    def is_log_enabled(cls, name: str) -> bool:
+        """Return ``True`` if the given log file should be written."""
+        return cls.log_files.get(name, True)
+
     # Global rhythmic forcing parameters
     phase_jitter = {"amplitude": 0.0, "period": 20}  # radians  # ticks
     coherence_wave = {"amplitude": 0.0, "period": 30}  # threshold modulation

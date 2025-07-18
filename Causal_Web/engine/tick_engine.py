@@ -293,18 +293,19 @@ def _spawn_sip_child(parent, tick: int):
     """Generate a new node via Stability-Induced Propagation."""
     global _spawn_counts
     if _spawn_counts.get(parent.id, 0) >= Config.max_children_per_node > 0:
-        with open(Config.output_path("propagation_failure_log.json"), "a") as f:
-            f.write(
-                json.dumps(
-                    {
-                        "tick": tick,
-                        "type": "SPAWN_LIMIT",
-                        "parent": parent.id,
-                        "origin_type": "SIP_BUD",
-                    }
+        if Config.is_log_enabled("propagation_failure_log.json"):
+            with open(Config.output_path("propagation_failure_log.json"), "a") as f:
+                f.write(
+                    json.dumps(
+                        {
+                            "tick": tick,
+                            "type": "SPAWN_LIMIT",
+                            "parent": parent.id,
+                            "origin_type": "SIP_BUD",
+                        }
+                    )
+                    + "\n"
                 )
-                + "\n"
-            )
         return
     child_id = f"{parent.id}_S{tick}"
     if child_id in graph.nodes:
@@ -345,18 +346,19 @@ def _spawn_sip_recomb_child(parent_a, parent_b, tick: int):
         _spawn_counts.get(pid, 0) >= Config.max_children_per_node > 0
         for pid in (parent_a.id, parent_b.id)
     ):
-        with open(Config.output_path("propagation_failure_log.json"), "a") as f:
-            f.write(
-                json.dumps(
-                    {
-                        "tick": tick,
-                        "type": "SPAWN_LIMIT",
-                        "parent": f"{parent_a.id},{parent_b.id}",
-                        "origin_type": "SIP_RECOMB",
-                    }
+        if Config.is_log_enabled("propagation_failure_log.json"):
+            with open(Config.output_path("propagation_failure_log.json"), "a") as f:
+                f.write(
+                    json.dumps(
+                        {
+                            "tick": tick,
+                            "type": "SPAWN_LIMIT",
+                            "parent": f"{parent_a.id},{parent_b.id}",
+                            "origin_type": "SIP_RECOMB",
+                        }
+                    )
+                    + "\n"
                 )
-                + "\n"
-            )
         return
     child_id = f"{parent_a.id}_{parent_b.id}_R{tick}"
     if child_id in graph.nodes:
@@ -453,18 +455,21 @@ def _process_csp_seeds(tick: int) -> None:
         coherence = np.random.rand()
         if coherence > 0.5:
             if _spawn_counts.get(seed["parent"], 0) >= Config.max_children_per_node > 0:
-                with open(Config.output_path("propagation_failure_log.json"), "a") as f:
-                    f.write(
-                        json.dumps(
-                            {
-                                "tick": tick,
-                                "type": "SPAWN_LIMIT",
-                                "parent": seed["parent"],
-                                "origin_type": "CSP",
-                            }
+                if Config.is_log_enabled("propagation_failure_log.json"):
+                    with open(
+                        Config.output_path("propagation_failure_log.json"), "a"
+                    ) as f:
+                        f.write(
+                            json.dumps(
+                                {
+                                    "tick": tick,
+                                    "type": "SPAWN_LIMIT",
+                                    "parent": seed["parent"],
+                                    "origin_type": "CSP",
+                                }
+                            )
+                            + "\n"
                         )
-                        + "\n"
-                    )
                 _csp_seeds.remove(seed)
                 continue
             node_id = seed["id"].replace("CSPseed", "CSP")
@@ -810,11 +815,12 @@ def write_output():
     print(f"✅ Tick trace saved to {Config.output_path('tick_trace.json')}")
 
     inspection = graph.inspect_superpositions()
-    with open(Config.output_path("inspection_log.json"), "w") as f:
-        json.dump(inspection, f, indent=2)
-    print(
-        f"✅ Superposition inspection saved to {Config.output_path('inspection_log.json')}"
-    )
+    if Config.is_log_enabled("inspection_log.json"):
+        with open(Config.output_path("inspection_log.json"), "w") as f:
+            json.dump(inspection, f, indent=2)
+        print(
+            f"✅ Superposition inspection saved to {Config.output_path('inspection_log.json')}"
+        )
 
     export_curvature_map()
     export_regional_maps()
