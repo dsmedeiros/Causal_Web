@@ -109,7 +109,7 @@ Example:
 python -m Causal_Web.main
 ```
 
-Use the on-screen controls to start or pause the simulation and adjust the tick rate. As it runs, a number of JSON log files are produced inside `Causal_Web/output`.
+Use the on-screen controls to start or pause the simulation and adjust the tick rate. Windows can be freely resized and the graph view will scroll if its contents exceed the available space. As the simulation runs, a number of JSON log files are produced inside `Causal_Web/output`.
 
 ### Analysing the output
 
