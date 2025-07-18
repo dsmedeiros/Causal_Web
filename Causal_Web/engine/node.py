@@ -29,7 +29,7 @@ class Node:
         x=0.0,
         y=0.0,
         frequency=1.0,
-        refractory_period=2,
+        refractory_period: float | None = None,
         base_threshold=0.5,
         phase=0.0,
         *,
@@ -59,6 +59,8 @@ class Node:
         self.current_tick = 0
         self.subjective_ticks = 0  # For relativistic tracking
         self.last_emission_tick = None
+        if refractory_period is None:
+            refractory_period = getattr(Config, "refractory_period", 2.0)
         self.refractory_period = refractory_period
         self.last_tick_time: Optional[float] = None
         self.base_threshold = base_threshold

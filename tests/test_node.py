@@ -2,6 +2,7 @@ import math
 import os
 import tempfile
 from Causal_Web.engine.node import Node
+from Causal_Web.engine.graph import CausalGraph
 from Causal_Web.config import Config
 
 
@@ -41,3 +42,14 @@ def test_tick_threshold(tmp_path):
     assert reason in {"threshold", "merged"}
     Config.tick_threshold = old_thresh
     Config.output_dir = old_dir
+
+
+def test_configurable_refractory_period():
+    old_period = getattr(Config, "refractory_period", 2)
+    Config.refractory_period = 3
+    g = CausalGraph()
+    g.add_node("A")
+    assert g.get_node("A").refractory_period == 3
+    node = Node("B")
+    assert node.refractory_period == 3
+    Config.refractory_period = old_period

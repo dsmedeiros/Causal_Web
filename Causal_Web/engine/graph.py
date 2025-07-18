@@ -31,7 +31,7 @@ class CausalGraph:
         x=0.0,
         y=0.0,
         frequency=1.0,
-        refractory_period=2,
+        refractory_period: float | None = None,
         base_threshold=0.5,
         phase=0.0,
         *,
@@ -40,6 +40,8 @@ class CausalGraph:
         parent_ids=None,
     ):
         x, y = self._non_overlapping_position(x, y)
+        if refractory_period is None:
+            refractory_period = getattr(Config, "refractory_period", 2.0)
         self.nodes[node_id] = Node(
             node_id,
             x,
@@ -479,7 +481,9 @@ class CausalGraph:
                 x=node_data.get("x", 0.0),
                 y=node_data.get("y", 0.0),
                 frequency=node_data.get("frequency", 1.0),
-                refractory_period=node_data.get("refractory_period", 2.0),
+                refractory_period=node_data.get(
+                    "refractory_period", getattr(Config, "refractory_period", 2.0)
+                ),
                 base_threshold=node_data.get("base_threshold", 0.5),
                 phase=node_data.get("phase", 0.0),
                 origin_type=node_data.get("origin_type", "seed"),
