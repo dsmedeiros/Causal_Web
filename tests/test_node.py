@@ -53,3 +53,19 @@ def test_configurable_refractory_period():
     node = Node("B")
     assert node.refractory_period == 3
     Config.refractory_period = old_period
+
+
+def test_tick_decay_factor_affects_firing():
+    old_decay = getattr(Config, "tick_decay_factor", 1.0)
+    old_thresh = getattr(Config, "tick_threshold", 1)
+    Config.tick_decay_factor = 0.5
+    Config.tick_threshold = 1
+    node = Node("A")
+    Config.current_tick = 0
+    node.schedule_tick(1, 0.0)
+    Config.current_tick = 1
+    fire, _, reason = node.should_tick(1)
+    assert not fire
+    assert reason == "count_threshold"
+    Config.tick_decay_factor = old_decay
+    Config.tick_threshold = old_thresh

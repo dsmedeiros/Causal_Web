@@ -130,6 +130,9 @@ class Config:
     # Tick fan-out
     max_tick_fanout = 0  # limit edges a tick propagates across (0 = unlimited)
 
+    # Decay factor for stored tick energy per tick
+    tick_decay_factor = 1.0
+
     # Early formation tuning
     DRIFT_TOLERANCE_RAMP = 10
     FORMATION_REFRACTORY_RAMP = 20

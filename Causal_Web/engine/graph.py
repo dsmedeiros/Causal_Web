@@ -247,14 +247,17 @@ class CausalGraph:
         for node in self.nodes.values():
             for tick, raw_phases in node.pending_superpositions.items():
                 if len(raw_phases) > 1:
+                    phases_only = [
+                        p[0] if isinstance(p, (tuple, list)) else p for p in raw_phases
+                    ]
                     # normalize each float to complex unit vector
                     complex_phase = [
-                        cmath.rect(1.0, p % (2 * math.pi)) for p in raw_phases
+                        cmath.rect(1.0, p % (2 * math.pi)) for p in phases_only
                     ]
                     vector_sum = sum(complex_phase)
                     contributors = [
                         {"phase": round(p % (2 * math.pi), 4), "magnitude": 1.0}
-                        for p in raw_phases
+                        for p in phases_only
                     ]
                     result = {
                         "tick": int(tick),
