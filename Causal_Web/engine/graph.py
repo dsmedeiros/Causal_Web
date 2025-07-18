@@ -1,5 +1,6 @@
 import cmath
 import math
+import random
 from collections import defaultdict, deque
 
 from .bridge import Bridge
@@ -76,8 +77,20 @@ class CausalGraph:
         density=0.0,
         delay=1,
         phase_shift=0.0,
+        weight=None,
     ):
-        edge = Edge(source_id, target_id, attenuation, density, delay, phase_shift)
+        if weight is None:
+            low, high = getattr(Config, "edge_weight_range", [1.0, 1.0])
+            weight = random.uniform(low, high)
+        edge = Edge(
+            source_id,
+            target_id,
+            attenuation,
+            density,
+            delay,
+            phase_shift,
+            weight,
+        )
         self.edges.append(edge)
         self.edges_from[source_id].append(edge)
         self.edges_to[target_id].append(edge)
@@ -536,6 +549,7 @@ class CausalGraph:
                 density=edge.get("density", 0.0),
                 delay=edge.get("delay", 1),
                 phase_shift=edge.get("phase_shift", 0.0),
+                weight=edge.get("weight"),
             )
 
         for bridge in data.get("bridges", []):

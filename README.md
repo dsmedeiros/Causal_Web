@@ -57,6 +57,12 @@ Nodes also observe a **refractory period** after firing.  The global
 may emit again, preventing rapid oscillation.  This value is applied when nodes
 are created unless a specific period is provided in the graph file and can be
 adjusted through the CLI or GUI.
+
+Edges can optionally vary their propagation strength using the
+`edge_weight_range` setting. Each edge is assigned a random weight within this
+range when the graph loads. The weight scales the delay returned by
+`Edge.adjusted_delay` and inversely affects attenuation, allowing the network to
+model non-uniform distances or resistance.
 ## Graph format
 
 Graphs are defined by a JSON file with `nodes`, `edges`, optional `bridges`, `tick_sources` and `observers`. Each node defines its position, frequency and thresholds. Edges specify delays and attenuation. Tick sources seed periodic activity and observers describe which metrics to record.

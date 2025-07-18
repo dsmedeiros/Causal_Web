@@ -140,6 +140,9 @@ class Config:
     # Spatial partitioning
     SPATIAL_GRID_SIZE = 50
 
+    # Range for per-edge weights influencing delay/attenuation
+    edge_weight_range = [1.0, 1.0]
+
     @classmethod
     def load_from_file(cls, path: str) -> None:
         """Load configuration values from a JSON file.
