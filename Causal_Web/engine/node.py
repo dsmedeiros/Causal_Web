@@ -770,13 +770,23 @@ class Node:
 class Edge:
     """Directional connection carrying phase between nodes."""
 
-    def __init__(self, source, target, attenuation, density, delay=1, phase_shift=0.0):
+    def __init__(
+        self,
+        source,
+        target,
+        attenuation,
+        density,
+        delay=1,
+        phase_shift=0.0,
+        weight=1.0,
+    ):
         self.source = source
         self.target = target
         self.attenuation = attenuation  # Multiplier for phase amplitude
         self.density = density  # Can affect delay dynamically
         self.delay = delay
         self.phase_shift = phase_shift
+        self.weight = weight
 
     def adjusted_delay(
         self, source_freq: float = 0.0, target_freq: float = 0.0, kappa: float = 1.0
@@ -785,7 +795,7 @@ class Edge:
         base = self.delay + int(self.density)
         delta_f = abs(source_freq - target_freq)
         modifier = kappa * math.sin(2 * math.pi * delta_f) * self.density
-        adjusted = base + modifier
+        adjusted = (base + modifier) * self.weight
         # ensure delay remains positive to avoid scheduling errors
         return max(1, int(round(adjusted)))
 
@@ -808,7 +818,7 @@ class Edge:
             drift_phase = self.phase_shift  # static phase shift
 
         shifted_phase = phase + drift_phase
-        attenuated_phase = shifted_phase * self.attenuation
+        attenuated_phase = shifted_phase * self.attenuation / self.weight
         scheduled_tick = global_tick + self.adjusted_delay(
             (
                 graph.get_node(self.source).law_wave_frequency
