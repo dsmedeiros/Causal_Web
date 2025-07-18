@@ -95,6 +95,8 @@ class Config:
     initial_coherence_threshold = 0.6
     steady_coherence_threshold = 0.85
     coherence_ramp_ticks = 10
+    # minimum number of incoming ticks required for activation
+    tick_threshold = 1
 
     # tick seeding configuration
     seeding = {

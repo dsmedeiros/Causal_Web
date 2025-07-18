@@ -50,6 +50,8 @@ class Node:
         self.received_tick_times: Set[float] = set()
         self._tick_phase_lookup: Dict[int, float] = {}
         self.incoming_phase_queue = defaultdict(list)  # tick_time -> [phase_i]
+        # count of incoming ticks per tick time
+        self.incoming_tick_counts = defaultdict(int)
         self.pending_superpositions = defaultdict(list)  # for logging and analysis
         self._phase_cache: Dict[int, float] = {}
         self._coherence_cache: Dict[int, float] = {}
@@ -413,6 +415,7 @@ class Node:
         """
 
         self.incoming_phase_queue[tick_time].append(incoming_phase)
+        self.incoming_tick_counts[tick_time] += 1
         self.pending_superpositions[tick_time].append(incoming_phase)
         self._coherence_cache.pop(tick_time, None)
         self._decoherence_cache.pop(tick_time, None)
@@ -448,10 +451,26 @@ class Node:
         if self.current_tick == 0:
             in_refractory = False
         raw_phases = self.incoming_phase_queue[tick_time]
+        tick_count = self.incoming_tick_counts[tick_time]
         complex_phases = [cmath.rect(1.0, p % (2 * math.pi)) for p in raw_phases]
         vector_sum = sum(complex_phases)
         magnitude = abs(vector_sum)
         coherence = magnitude / len(raw_phases) if raw_phases else 1.0
+
+        if tick_count < getattr(Config, "tick_threshold", 1):
+            self._log_tick_evaluation(
+                tick_time,
+                coherence,
+                self.current_threshold,
+                False,
+                False,
+                "below_count",
+            )
+            log_json(
+                Config.output_path("should_tick_log.json"),
+                {"tick": tick_time, "node": self.id, "reason": "below_count"},
+            )
+            return False, None, "count_threshold"
 
         if in_refractory:
             self._log_tick_evaluation(
@@ -718,6 +737,8 @@ class Node:
                 self._log_tick_drop(tick_key, drop_reason)
                 print(f"[{self.id}] {drop_reason} at {tick_key} cancelled tick")
             del self.incoming_phase_queue[tick_key]
+            if tick_key in self.incoming_tick_counts:
+                del self.incoming_tick_counts[tick_key]
             if tick_key in self.pending_superpositions:
                 del self.pending_superpositions[tick_key]
             self._coherence_cache.pop(tick_key, None)

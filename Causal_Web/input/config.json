@@ -13,6 +13,7 @@
   "initial_coherence_threshold": 0.6,
   "steady_coherence_threshold": 0.85,
   "coherence_ramp_ticks": 10,
+  "tick_threshold": 1,
   "log_files": {
     "boundary_interaction_log.json": true,
     "bridge_decay_log.json": true,
