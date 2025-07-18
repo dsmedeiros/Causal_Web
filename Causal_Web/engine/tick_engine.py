@@ -328,18 +328,15 @@ def _spawn_sip_child(parent, tick: int):
     global _spawn_counts
     if _spawn_counts.get(parent.id, 0) >= Config.max_children_per_node > 0:
         if Config.is_log_enabled("propagation_failure_log.json"):
-            with open(Config.output_path("propagation_failure_log.json"), "a") as f:
-                f.write(
-                    json.dumps(
-                        {
-                            "tick": tick,
-                            "type": "SPAWN_LIMIT",
-                            "parent": parent.id,
-                            "origin_type": "SIP_BUD",
-                        }
-                    )
-                    + "\n"
-                )
+            log_json(
+                Config.output_path("propagation_failure_log.json"),
+                {
+                    "tick": tick,
+                    "type": "SPAWN_LIMIT",
+                    "parent": parent.id,
+                    "origin_type": "SIP_BUD",
+                },
+            )
         return
     child_id = f"{parent.id}_S{tick}"
     if child_id in graph.nodes:
@@ -381,18 +378,15 @@ def _spawn_sip_recomb_child(parent_a, parent_b, tick: int):
         for pid in (parent_a.id, parent_b.id)
     ):
         if Config.is_log_enabled("propagation_failure_log.json"):
-            with open(Config.output_path("propagation_failure_log.json"), "a") as f:
-                f.write(
-                    json.dumps(
-                        {
-                            "tick": tick,
-                            "type": "SPAWN_LIMIT",
-                            "parent": f"{parent_a.id},{parent_b.id}",
-                            "origin_type": "SIP_RECOMB",
-                        }
-                    )
-                    + "\n"
-                )
+            log_json(
+                Config.output_path("propagation_failure_log.json"),
+                {
+                    "tick": tick,
+                    "type": "SPAWN_LIMIT",
+                    "parent": f"{parent_a.id},{parent_b.id}",
+                    "origin_type": "SIP_RECOMB",
+                },
+            )
         return
     child_id = f"{parent_a.id}_{parent_b.id}_R{tick}"
     if child_id in graph.nodes:
@@ -490,20 +484,15 @@ def _process_csp_seeds(tick: int) -> None:
         if coherence > 0.5:
             if _spawn_counts.get(seed["parent"], 0) >= Config.max_children_per_node > 0:
                 if Config.is_log_enabled("propagation_failure_log.json"):
-                    with open(
-                        Config.output_path("propagation_failure_log.json"), "a"
-                    ) as f:
-                        f.write(
-                            json.dumps(
-                                {
-                                    "tick": tick,
-                                    "type": "SPAWN_LIMIT",
-                                    "parent": seed["parent"],
-                                    "origin_type": "CSP",
-                                }
-                            )
-                            + "\n"
-                        )
+                    log_json(
+                        Config.output_path("propagation_failure_log.json"),
+                        {
+                            "tick": tick,
+                            "type": "SPAWN_LIMIT",
+                            "parent": seed["parent"],
+                            "origin_type": "CSP",
+                        },
+                    )
                 _csp_seeds.remove(seed)
                 continue
             node_id = seed["id"].replace("CSPseed", "CSP")
@@ -797,15 +786,10 @@ def simulation_loop():
             for obs in observers:
                 obs.observe(graph, global_tick)
                 inferred = obs.infer_field_state()
-                with open(
-                    Config.output_path("observer_perceived_field.json"), "a"
-                ) as f:
-                    f.write(
-                        json.dumps(
-                            {"tick": global_tick, "observer": obs.id, "state": inferred}
-                        )
-                        + "\n"
-                    )
+                log_json(
+                    Config.output_path("observer_perceived_field.json"),
+                    {"tick": global_tick, "observer": obs.id, "state": inferred},
+                )
 
                 actual = {n.id: len(n.tick_history) for n in graph.nodes.values()}
                 diff = {
@@ -817,15 +801,10 @@ def simulation_loop():
                     if actual.get(nid, 0) != inferred.get(nid, 0)
                 }
                 if diff:
-                    with open(
-                        Config.output_path("observer_disagreement_log.json"), "a"
-                    ) as f:
-                        f.write(
-                            json.dumps(
-                                {"tick": global_tick, "observer": obs.id, "diff": diff}
-                            )
-                            + "\n"
-                        )
+                    log_json(
+                        Config.output_path("observer_disagreement_log.json"),
+                        {"tick": global_tick, "observer": obs.id, "diff": diff},
+                    )
 
             for bridge in graph.bridges:
                 bridge.apply(global_tick, graph)
