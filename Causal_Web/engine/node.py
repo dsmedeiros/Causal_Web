@@ -49,10 +49,13 @@ class Node:
         self.emitted_tick_times: Set[float] = set()
         self.received_tick_times: Set[float] = set()
         self._tick_phase_lookup: Dict[int, float] = {}
-        self.incoming_phase_queue = defaultdict(list)  # tick_time -> [phase_i]
+        self.incoming_phase_queue = defaultdict(
+            list
+        )  # tick_time -> [(phase, created_tick)]
         # count of incoming ticks per tick time
         self.incoming_tick_counts = defaultdict(int)
-        self.pending_superpositions = defaultdict(list)  # for logging and analysis
+        # track scheduled phases for coherence/decoherence metrics
+        self.pending_superpositions = defaultdict(list)
         self._phase_cache: Dict[int, float] = {}
         self._coherence_cache: Dict[int, float] = {}
         self._decoherence_cache: Dict[int, float] = {}
@@ -163,9 +166,22 @@ class Node:
 
                 te.mark_for_update(self.id)
             return self.coherence
-        complex_vecs = [cmath.rect(1.0, p % (2 * math.pi)) for p in phases]
+        weights = []
+        complex_vecs = []
+        for item in phases:
+            if isinstance(item, (tuple, list)) and len(item) == 2:
+                ph, created = item
+                decay = getattr(Config, "tick_decay_factor", 1.0) ** (
+                    max(0, Config.current_tick - created)
+                )
+            else:
+                ph = item
+                decay = 1.0
+            complex_vecs.append(decay * cmath.rect(1.0, ph % (2 * math.pi)))
+            weights.append(decay)
         vector_sum = sum(complex_vecs)
-        self.coherence = abs(vector_sum) / len(phases)
+        total_weight = sum(weights) if weights else 1.0
+        self.coherence = abs(vector_sum) / total_weight
         threshold = self._coherence_threshold()
         if self.coherence > threshold:
             self.coherence_credit += self.coherence - threshold
@@ -192,9 +208,24 @@ class Node:
 
                 te.mark_for_update(self.id)
             return self.decoherence
-        normalized = [(p % (2 * math.pi)) for p in phases]
-        mean_phase = sum(normalized) / len(normalized)
-        variance = sum((p - mean_phase) ** 2 for p in normalized) / len(normalized)
+        norm = []
+        weights = []
+        for item in phases:
+            if isinstance(item, (tuple, list)) and len(item) == 2:
+                ph, created = item
+                decay = getattr(Config, "tick_decay_factor", 1.0) ** (
+                    max(0, Config.current_tick - created)
+                )
+            else:
+                ph = item
+                decay = 1.0
+            norm.append(ph % (2 * math.pi))
+            weights.append(decay)
+        total_weight = sum(weights) if weights else 1.0
+        mean_phase = sum(w * p for w, p in zip(weights, norm)) / total_weight
+        variance = (
+            sum(w * (p - mean_phase) ** 2 for w, p in zip(weights, norm)) / total_weight
+        )
         self.decoherence = variance
         if self.decoherence > 0.4:
             self.decoherence_debt += self.decoherence - 0.4
@@ -293,10 +324,11 @@ class Node:
     ):
         """Attempt to merge near-aligned phases into a single tick."""
         tol = self._phase_drift_tolerance(tick_time)
+        phases_only = [p[0] if isinstance(p, (tuple, list)) else p for p in raw_phases]
         diffs = [
             abs((p1 - p2 + math.pi) % (2 * math.pi) - math.pi)
-            for i, p1 in enumerate(raw_phases)
-            for p2 in raw_phases[i + 1 :]
+            for i, p1 in enumerate(phases_only)
+            for p2 in phases_only[i + 1 :]
         ]
         if diffs and max(diffs) < tol:
             return True, cmath.phase(vector_sum)
@@ -403,7 +435,7 @@ class Node:
         }
         log_json(Config.output_path("propagation_failure_log.json"), fail_rec)
 
-    def schedule_tick(self, tick_time, incoming_phase, origin=None):
+    def schedule_tick(self, tick_time, incoming_phase, origin=None, created_tick=None):
         """Store an incoming phase for future evaluation.
 
         Parameters
@@ -416,9 +448,13 @@ class Node:
             ID of the node that emitted the phase.
         """
 
-        self.incoming_phase_queue[tick_time].append(incoming_phase)
+        if created_tick is None:
+            created_tick = Config.current_tick
+
+        record = (incoming_phase, created_tick)
+        self.incoming_phase_queue[tick_time].append(record)
         self.incoming_tick_counts[tick_time] += 1
-        self.pending_superpositions[tick_time].append(incoming_phase)
+        self.pending_superpositions[tick_time].append(record)
         self._coherence_cache.pop(tick_time, None)
         self._decoherence_cache.pop(tick_time, None)
         print(
@@ -452,14 +488,27 @@ class Node:
             in_refractory = tick_time - self.last_tick_time < self.refractory_period
         if self.current_tick == 0:
             in_refractory = False
-        raw_phases = self.incoming_phase_queue[tick_time]
-        tick_count = self.incoming_tick_counts[tick_time]
-        complex_phases = [cmath.rect(1.0, p % (2 * math.pi)) for p in raw_phases]
+        raw_items = self.incoming_phase_queue[tick_time]
+        complex_phases = []
+        weights = []
+        for item in raw_items:
+            if isinstance(item, (tuple, list)) and len(item) == 2:
+                ph, created = item
+                decay = getattr(Config, "tick_decay_factor", 1.0) ** (
+                    max(0, Config.current_tick - created)
+                )
+            else:
+                ph = item
+                decay = 1.0
+            complex_phases.append(decay * cmath.rect(1.0, ph % (2 * math.pi)))
+            weights.append(decay)
         vector_sum = sum(complex_phases)
         magnitude = abs(vector_sum)
-        coherence = magnitude / len(raw_phases) if raw_phases else 1.0
+        total_weight = sum(weights) if weights else 0.0
+        coherence = magnitude / total_weight if total_weight else 1.0
+        tick_energy = total_weight
 
-        if tick_count < getattr(Config, "tick_threshold", 1):
+        if tick_energy < getattr(Config, "tick_threshold", 1):
             self._log_tick_evaluation(
                 tick_time,
                 coherence,
@@ -501,7 +550,7 @@ class Node:
             )
             return True, resultant_phase, "threshold"
 
-        merged, phase = self._resolve_interference(tick_time, raw_phases, vector_sum)
+        merged, phase = self._resolve_interference(tick_time, raw_items, vector_sum)
         if merged:
             self._log_tick_evaluation(
                 tick_time,
@@ -532,7 +581,7 @@ class Node:
                 "node": self.id,
                 "magnitude": round(magnitude, 4),
                 "threshold": round(self.current_threshold, 4),
-                "phases": len(raw_phases),
+                "phases": len(raw_items),
             },
         )
         return False, None, "below_threshold"
@@ -656,7 +705,10 @@ class Node:
                         target.law_wave_frequency, alt_tgt.law_wave_frequency, kappa
                     )
                     alt_tgt.schedule_tick(
-                        tick_time + delay + alt_delay, shifted, origin=self.id
+                        tick_time + delay + alt_delay,
+                        shifted,
+                        origin=self.id,
+                        created_tick=tick_time,
                     )
                     target.node_type = NodeType.REFRACTIVE
                     log_json(
@@ -670,7 +722,9 @@ class Node:
                     )
                     continue
 
-            target.schedule_tick(tick_time + delay, shifted, origin=self.id)
+            target.schedule_tick(
+                tick_time + delay, shifted, origin=self.id, created_tick=tick_time
+            )
 
         if origin == "self":
             collapsed = self.propagate_collapse(tick_time, graph)
@@ -827,4 +881,9 @@ class Edge:
             ),
             target_node.law_wave_frequency,
         )
-        target_node.schedule_tick(scheduled_tick, attenuated_phase, origin=self.source)
+        target_node.schedule_tick(
+            scheduled_tick,
+            attenuated_phase,
+            origin=self.source,
+            created_tick=global_tick,
+        )

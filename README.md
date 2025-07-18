@@ -52,6 +52,11 @@ ticks a node must receive in a single timestep before it can fire. This value
 defaults to `1` and can be overridden via CLI or the Parameters window in the
 GUI.
 
+Tick energy can dissipate between scheduling and evaluation. The
+`tick_decay_factor` parameter specifies how much stored tick energy decays per
+tick. A value of `1.0` disables decay while values below `1.0` gradually reduce
+the influence of older ticks. This setting is available via CLI and the GUI.
+
 Nodes also observe a **refractory period** after firing.  The global
 `refractory_period` setting determines how many ticks a node must wait before it
 may emit again, preventing rapid oscillation.  This value is applied when nodes
