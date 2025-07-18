@@ -54,6 +54,11 @@ def max_children_changed(sender, app_data):
         Config.max_children_per_node = app_data
 
 
+def toggle_log(sender, app_data, user_data):
+    """Enable or disable writing of a specific log file."""
+    Config.log_files[user_data] = app_data
+
+
 def start_sim_callback():
     with Config.state_lock:
         if Config.is_running:
@@ -227,6 +232,15 @@ def dashboard():
             label="Start Simulation", callback=start_sim_callback, tag="start_button"
         )
         dpg.add_text("Tick: 0", tag="tick_counter")
+
+    with dpg.window(label="Logging", width=250, height=300):
+        for name in sorted(Config.log_files):
+            dpg.add_checkbox(
+                label=name,
+                default_value=Config.log_files[name],
+                callback=toggle_log,
+                user_data=name,
+            )
 
     with dpg.window(label="Causal Graph", width=800, height=460, tag="graph_window"):
         with dpg.child_window(tag="graph_child", horizontal_scrollbar=True):

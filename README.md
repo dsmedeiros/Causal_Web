@@ -130,7 +130,9 @@ This command loads the logs and generates several summary files:
 - **`causal_timeline.json`** – ordered timeline of notable events.
 
 ## Output logs
-The simulation writes many JSON files to `output/`.
+The simulation writes many JSON files to `output/`. Logging for each file can be
+enabled or disabled individually using the **Logging** window in the GUI or via
+the `log_files` section of `input/config.json`.
 
 - `boundary_interaction_log.json` – interactions with void or boundary nodes.
 - `bridge_decay_log.json` – gradual weakening of inactive bridges.
