@@ -53,4 +53,7 @@ logger = LogBuffer(flush_interval=_interval)
 
 def log_json(path: str, data: Any) -> None:
     """Buffer a JSON serialisable object as a newline delimited record."""
+    name = os.path.basename(path)
+    if not Config.is_log_enabled(name):
+        return
     logger.log(path, json.dumps(data) + "\n")

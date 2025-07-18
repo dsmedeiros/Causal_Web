@@ -586,8 +586,9 @@ class CausalGraph:
         if self.void_nodes:
             with open(Config.output_path("void_node_map.json"), "w") as f:
                 json.dump(self.void_nodes, f, indent=2)
-        with open(Config.output_path("connectivity_log.json"), "w") as f:
-            json.dump(connectivity_log, f, indent=2)
+        if Config.is_log_enabled("connectivity_log.json"):
+            with open(Config.output_path("connectivity_log.json"), "w") as f:
+                json.dump(connectivity_log, f, indent=2)
 
     # ------------------------------------------------------------
     def emit_law_wave(self, origin_id: str, tick: int, radius: int = 2) -> None:
