@@ -618,7 +618,7 @@ def log_metrics_per_tick(global_tick):
     if not hasattr(log_metrics_per_tick, "_last_coherence"):
         log_metrics_per_tick._last_coherence = {}
 
-    with ThreadPoolExecutor() as ex:
+    with ThreadPoolExecutor(max_workers=getattr(Config, "thread_count", None)) as ex:
         results = list(
             ex.map(lambda n: _compute_metrics(n, global_tick), graph.nodes.values())
         )
@@ -718,6 +718,11 @@ def simulation_loop():
 
     def run():
         global_tick = 0
+        if getattr(Config, "random_seed", None) is not None:
+            import random
+
+            random.seed(Config.random_seed)
+            np.random.seed(Config.random_seed)
         _update_simulation_state(False, False, global_tick, None)
         while True:
             with Config.state_lock:
