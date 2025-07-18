@@ -79,3 +79,32 @@ class Config:
 
     # Spatial partitioning
     SPATIAL_GRID_SIZE = 50
+
+    @classmethod
+    def load_from_file(cls, path: str) -> None:
+        """Load configuration values from a JSON file.
+
+        Only keys that already exist as attributes on ``Config`` will be
+        assigned. Nested dictionaries are merged recursively when the existing
+        attribute is also a ``dict``.
+
+        Parameters
+        ----------
+        path:
+            Path to the JSON configuration file.
+        """
+        import json
+
+        if not os.path.exists(path):
+            raise FileNotFoundError(path)
+        with open(path) as f:
+            data = json.load(f)
+
+        for key, value in data.items():
+            if not hasattr(cls, key):
+                continue
+            current = getattr(cls, key)
+            if isinstance(current, dict) and isinstance(value, dict):
+                current.update(value)
+            else:
+                setattr(cls, key, value)
