@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="assets\fonts\consola.ttf" />
+    <Content Include="input\config.json" />
     <Content Include="input\destructive_interference_test.json" />
     <Content Include="input\dilation_baseline_test_case.json" />
     <Content Include="input\graph.json" />
