@@ -241,6 +241,12 @@ def graph_resize_callback(sender, app_data, user_data):
 
 
 def dashboard():
+    """Launch the simulation dashboard GUI.
+
+    Configuration values are loaded from ``config.json``. The ``log_files``
+    section is displayed in the dedicated Logging window so it is removed
+    from the Parameters window.
+    """
     build_graph()
     dpg.create_context()
 
@@ -248,6 +254,9 @@ def dashboard():
 
     with open(Config.input_path("config.json")) as f:
         config_data = json.load(f)
+
+    # remove log file settings from parameter controls
+    config_data.pop("log_files", None)
 
     with dpg.font_registry():
         font_path = os.path.join(
