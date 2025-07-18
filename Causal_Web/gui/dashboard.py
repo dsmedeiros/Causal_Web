@@ -354,6 +354,7 @@ def dashboard():
 
     dpg.setup_dearpygui()
     dpg.show_viewport()
+    dpg.set_primary_window("graph_window", True)
     graph_resize_callback(None, None, None)
     dpg.set_frame_callback(1, gui_update_callback)
     dpg.start_dearpygui()
