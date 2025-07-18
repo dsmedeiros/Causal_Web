@@ -86,7 +86,7 @@ class Node:
         self.sip_streak = 0
 
         # ---- Phase 4 additions ----
-        self.memory_window = 20
+        self.memory_window = getattr(Config, "memory_window", 20)
         self.memory: Dict[str, deque] = {
             "origins": deque(maxlen=self.memory_window),
             "coherence": deque(maxlen=self.memory_window),
@@ -98,9 +98,13 @@ class Node:
         self.goal_error: Dict[str, float] = {}
 
         # ---- Coherence threshold ramp parameters ----
-        self.initial_coherence_threshold = 0.6
-        self.steady_coherence_threshold = 0.85
-        self.coherence_ramp_ticks = 10
+        self.initial_coherence_threshold = getattr(
+            Config, "initial_coherence_threshold", 0.6
+        )
+        self.steady_coherence_threshold = getattr(
+            Config, "steady_coherence_threshold", 0.85
+        )
+        self.coherence_ramp_ticks = getattr(Config, "coherence_ramp_ticks", 10)
 
         # additional offset applied from global network constraints
         self.dynamic_offset = 0.0

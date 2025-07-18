@@ -39,6 +39,15 @@ class Config:
     forcing_ramp_ticks = 20
     # interval for saving runtime snapshots of the graph
     snapshot_interval = 10
+    random_seed: int | None = None
+    thread_count = 1
+    log_verbosity = "info"
+
+    # Node defaults
+    memory_window = 20
+    initial_coherence_threshold = 0.6
+    steady_coherence_threshold = 0.85
+    coherence_ramp_ticks = 10
 
     # tick seeding configuration
     seeding = {

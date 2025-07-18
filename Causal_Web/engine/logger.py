@@ -5,6 +5,8 @@ import time
 from collections import defaultdict
 from typing import Any, DefaultDict, List
 
+from ..config import Config
+
 
 class LogBuffer:
     """Buffer log lines and flush them asynchronously."""
@@ -45,7 +47,8 @@ class LogBuffer:
         self.flush()
 
 
-logger = LogBuffer()
+_interval = 0.1 if getattr(Config, "log_verbosity", "info") == "debug" else 1.0
+logger = LogBuffer(flush_interval=_interval)
 
 
 def log_json(path: str, data: Any) -> None:
