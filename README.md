@@ -141,6 +141,8 @@ Example:
 1. Install the dependencies (`dearpygui` is required for the GUI).
    An X11-compatible display is needed to create the window. If running on a
    headless server consider using a virtual frame buffer such as Xvfb.
+   The dashboard automatically designates the *Causal Graph* window as the
+   primary viewport so all windows remain interactive.
 2. Launch the dashboard or run headless:
 
 ```bash
