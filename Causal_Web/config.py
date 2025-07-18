@@ -97,6 +97,8 @@ class Config:
     coherence_ramp_ticks = 10
     # minimum number of incoming ticks required for activation
     tick_threshold = 1
+    # ticks a node must wait after firing before it can fire again
+    refractory_period = 2.0
 
     # tick seeding configuration
     seeding = {

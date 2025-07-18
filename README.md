@@ -51,6 +51,12 @@ The configuration now includes a `tick_threshold` option controlling how many
 ticks a node must receive in a single timestep before it can fire. This value
 defaults to `1` and can be overridden via CLI or the Parameters window in the
 GUI.
+
+Nodes also observe a **refractory period** after firing.  The global
+`refractory_period` setting determines how many ticks a node must wait before it
+may emit again, preventing rapid oscillation.  This value is applied when nodes
+are created unless a specific period is provided in the graph file and can be
+adjusted through the CLI or GUI.
 ## Graph format
 
 Graphs are defined by a JSON file with `nodes`, `edges`, optional `bridges`, `tick_sources` and `observers`. Each node defines its position, frequency and thresholds. Edges specify delays and attenuation. Tick sources seed periodic activity and observers describe which metrics to record.
