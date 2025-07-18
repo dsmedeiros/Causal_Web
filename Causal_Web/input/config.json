@@ -1,0 +1,8 @@
+{
+  "tick_rate": 0.5,
+  "max_ticks": 50,
+  "seeding": {
+    "strategy": "probabilistic",
+    "probability": 0.2
+  }
+}
