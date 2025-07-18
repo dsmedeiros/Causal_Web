@@ -46,6 +46,11 @@ python -m Causal_Web.main --no-gui --max_ticks 20
 
 Only keys matching attributes on `Causal_Web.config.Config` are applied. Nested
 dictionaries merge with the existing values.
+
+The configuration now includes a `tick_threshold` option controlling how many
+ticks a node must receive in a single timestep before it can fire. This value
+defaults to `1` and can be overridden via CLI or the Parameters window in the
+GUI.
 ## Graph format
 
 Graphs are defined by a JSON file with `nodes`, `edges`, optional `bridges`, `tick_sources` and `observers`. Each node defines its position, frequency and thresholds. Edges specify delays and attenuation. Tick sources seed periodic activity and observers describe which metrics to record.

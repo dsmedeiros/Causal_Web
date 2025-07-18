@@ -18,6 +18,26 @@ def test_update_classical_state(tmp_path):
     old_dir = Config.output_dir
     Config.output_dir = tmp_path
     node = Node("A")
-    node.update_classical_state(0.5, tick_time=1, graph=None, threshold=0.4, streak_required=1)
+    node.update_classical_state(
+        0.5, tick_time=1, graph=None, threshold=0.4, streak_required=1
+    )
     assert node.is_classical
+    Config.output_dir = old_dir
+
+
+def test_tick_threshold(tmp_path):
+    old_dir = Config.output_dir
+    old_thresh = getattr(Config, "tick_threshold", 1)
+    Config.output_dir = tmp_path
+    Config.tick_threshold = 2
+    node = Node("A")
+    node.schedule_tick(1, 0.0)
+    fire, _, reason = node.should_tick(1)
+    assert not fire
+    assert reason == "count_threshold"
+    node.schedule_tick(1, math.pi / 2)
+    fire, phase, reason = node.should_tick(1)
+    assert fire
+    assert reason in {"threshold", "merged"}
+    Config.tick_threshold = old_thresh
     Config.output_dir = old_dir
