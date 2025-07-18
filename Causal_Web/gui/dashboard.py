@@ -255,8 +255,10 @@ def dashboard():
     with open(Config.input_path("config.json")) as f:
         config_data = json.load(f)
 
-    # remove log file settings from parameter controls
+    # remove settings duplicated elsewhere in the GUI
     config_data.pop("log_files", None)
+    config_data.pop("tick_rate", None)
+    config_data.pop("max_ticks", None)
 
     with dpg.font_registry():
         font_path = os.path.join(
