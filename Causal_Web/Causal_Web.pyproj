@@ -29,7 +29,6 @@
     <Compile Include="engine\meta_node.py" />
     <Compile Include="engine\node.py" />
     <Compile Include="engine\observer.py" />
-    <Compile Include="engine\simulation.py" />
     <Compile Include="engine\tick_engine.py" />
     <Compile Include="engine\log_interpreter.py" />
     <Compile Include="engine\tick_router.py" />
