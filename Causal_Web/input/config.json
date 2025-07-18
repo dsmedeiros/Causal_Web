@@ -4,5 +4,13 @@
   "seeding": {
     "strategy": "probabilistic",
     "probability": 0.2
-  }
+  },
+  "snapshot_interval": 5,
+  "random_seed": 42,
+  "thread_count": 4,
+  "log_verbosity": "info",
+  "memory_window": 20,
+  "initial_coherence_threshold": 0.6,
+  "steady_coherence_threshold": 0.85,
+  "coherence_ramp_ticks": 10
 }
