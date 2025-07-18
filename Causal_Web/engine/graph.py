@@ -437,7 +437,10 @@ class CausalGraph:
             "nodes": node_list,
             "superpositions": {
                 nid: {
-                    str(t): [round(float(p), 4) for p in node.pending_superpositions[t]]
+                    str(t): [
+                        round(float(p[0] if isinstance(p, (tuple, list)) else p), 4)
+                        for p in node.pending_superpositions[t]
+                    ]
                     for t in node.pending_superpositions
                 }
                 for nid, node in self.nodes.items()
