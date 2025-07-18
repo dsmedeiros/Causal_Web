@@ -95,6 +95,10 @@ class Config:
     initial_coherence_threshold = 0.6
     steady_coherence_threshold = 0.85
     coherence_ramp_ticks = 10
+    # minimum number of incoming ticks required for activation
+    tick_threshold = 1
+    # ticks a node must wait after firing before it can fire again
+    refractory_period = 2.0
 
     # tick seeding configuration
     seeding = {
@@ -126,6 +130,9 @@ class Config:
     # Tick fan-out
     max_tick_fanout = 0  # limit edges a tick propagates across (0 = unlimited)
 
+    # Decay factor for stored tick energy per tick
+    tick_decay_factor = 1.0
+
     # Early formation tuning
     DRIFT_TOLERANCE_RAMP = 10
     FORMATION_REFRACTORY_RAMP = 20
@@ -135,6 +142,9 @@ class Config:
 
     # Spatial partitioning
     SPATIAL_GRID_SIZE = 50
+
+    # Range for per-edge weights influencing delay/attenuation
+    edge_weight_range = [1.0, 1.0]
 
     @classmethod
     def load_from_file(cls, path: str) -> None:

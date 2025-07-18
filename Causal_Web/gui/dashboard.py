@@ -59,6 +59,57 @@ def toggle_log(sender, app_data, user_data):
     Config.log_files[user_data] = app_data
 
 
+def _param_changed(sender, app_data, user_data):
+    """Update :class:`Config` attributes when GUI inputs change."""
+    parts = user_data.split(".")
+    target = Config
+    for part in parts[:-1]:
+        target = getattr(target, part)
+    if isinstance(target, dict):
+        target[parts[-1]] = app_data
+    else:
+        setattr(target, parts[-1], app_data)
+
+
+def _add_param_controls(data: dict, prefix: str = "") -> None:
+    """Recursively generate input widgets for config parameters."""
+    for key, value in data.items():
+        full = f"{prefix}{key}"
+        if isinstance(value, dict):
+            dpg.add_text(full)
+            with dpg.group():
+                _add_param_controls(value, prefix=f"{full}.")
+            continue
+        if isinstance(value, bool):
+            dpg.add_checkbox(
+                label=full,
+                default_value=value,
+                callback=_param_changed,
+                user_data=full,
+            )
+        elif isinstance(value, int):
+            dpg.add_input_int(
+                label=full,
+                default_value=value,
+                callback=_param_changed,
+                user_data=full,
+            )
+        elif isinstance(value, float):
+            dpg.add_input_float(
+                label=full,
+                default_value=value,
+                callback=_param_changed,
+                user_data=full,
+            )
+        else:
+            dpg.add_input_text(
+                label=full,
+                default_value=str(value),
+                callback=_param_changed,
+                user_data=full,
+            )
+
+
 def start_sim_callback():
     with Config.state_lock:
         if Config.is_running:
@@ -193,6 +244,11 @@ def dashboard():
     build_graph()
     dpg.create_context()
 
+    import json
+
+    with open(Config.input_path("config.json")) as f:
+        config_data = json.load(f)
+
     with dpg.font_registry():
         font_path = os.path.join(
             os.path.dirname(__file__), "..", "assets", "fonts", "consola.ttf"
@@ -241,6 +297,9 @@ def dashboard():
                 callback=toggle_log,
                 user_data=name,
             )
+
+    with dpg.window(label="Parameters", width=250, height=400):
+        _add_param_controls(config_data)
 
     with dpg.window(label="Causal Graph", width=800, height=460, tag="graph_window"):
         with dpg.child_window(tag="graph_child", horizontal_scrollbar=True):

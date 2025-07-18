@@ -1,5 +1,6 @@
 import cmath
 import math
+import random
 from collections import defaultdict, deque
 
 from .bridge import Bridge
@@ -31,7 +32,7 @@ class CausalGraph:
         x=0.0,
         y=0.0,
         frequency=1.0,
-        refractory_period=2,
+        refractory_period: float | None = None,
         base_threshold=0.5,
         phase=0.0,
         *,
@@ -40,6 +41,8 @@ class CausalGraph:
         parent_ids=None,
     ):
         x, y = self._non_overlapping_position(x, y)
+        if refractory_period is None:
+            refractory_period = getattr(Config, "refractory_period", 2.0)
         self.nodes[node_id] = Node(
             node_id,
             x,
@@ -74,8 +77,20 @@ class CausalGraph:
         density=0.0,
         delay=1,
         phase_shift=0.0,
+        weight=None,
     ):
-        edge = Edge(source_id, target_id, attenuation, density, delay, phase_shift)
+        if weight is None:
+            low, high = getattr(Config, "edge_weight_range", [1.0, 1.0])
+            weight = random.uniform(low, high)
+        edge = Edge(
+            source_id,
+            target_id,
+            attenuation,
+            density,
+            delay,
+            phase_shift,
+            weight,
+        )
         self.edges.append(edge)
         self.edges_from[source_id].append(edge)
         self.edges_to[target_id].append(edge)
@@ -232,14 +247,17 @@ class CausalGraph:
         for node in self.nodes.values():
             for tick, raw_phases in node.pending_superpositions.items():
                 if len(raw_phases) > 1:
+                    phases_only = [
+                        p[0] if isinstance(p, (tuple, list)) else p for p in raw_phases
+                    ]
                     # normalize each float to complex unit vector
                     complex_phase = [
-                        cmath.rect(1.0, p % (2 * math.pi)) for p in raw_phases
+                        cmath.rect(1.0, p % (2 * math.pi)) for p in phases_only
                     ]
                     vector_sum = sum(complex_phase)
                     contributors = [
                         {"phase": round(p % (2 * math.pi), 4), "magnitude": 1.0}
-                        for p in raw_phases
+                        for p in phases_only
                     ]
                     result = {
                         "tick": int(tick),
@@ -479,7 +497,9 @@ class CausalGraph:
                 x=node_data.get("x", 0.0),
                 y=node_data.get("y", 0.0),
                 frequency=node_data.get("frequency", 1.0),
-                refractory_period=node_data.get("refractory_period", 2.0),
+                refractory_period=node_data.get(
+                    "refractory_period", getattr(Config, "refractory_period", 2.0)
+                ),
                 base_threshold=node_data.get("base_threshold", 0.5),
                 phase=node_data.get("phase", 0.0),
                 origin_type=node_data.get("origin_type", "seed"),
@@ -532,6 +552,7 @@ class CausalGraph:
                 density=edge.get("density", 0.0),
                 delay=edge.get("delay", 1),
                 phase_shift=edge.get("phase_shift", 0.0),
+                weight=edge.get("weight"),
             )
 
         for bridge in data.get("bridges", []):

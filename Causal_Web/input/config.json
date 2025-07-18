@@ -13,6 +13,10 @@
   "initial_coherence_threshold": 0.6,
   "steady_coherence_threshold": 0.85,
   "coherence_ramp_ticks": 10,
+  "tick_threshold": 1,
+  "refractory_period": 2.0,
+  "tick_decay_factor": 1.0,
+  "edge_weight_range": [1.0, 1.0],
   "log_files": {
     "boundary_interaction_log.json": true,
     "bridge_decay_log.json": true,
