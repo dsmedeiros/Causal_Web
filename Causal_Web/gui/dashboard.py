@@ -176,6 +176,14 @@ def gui_update_callback():
     dpg.set_frame_callback(next_frame, gui_update_callback)
 
 
+def graph_resize_callback(sender, app_data, user_data):
+    """Resize graph canvas to match its window."""
+    width = dpg.get_item_width("graph_window") - 10
+    height = dpg.get_item_height("graph_window") - 40
+    dpg.configure_item("graph_child", width=width, height=height)
+    dpg.configure_item("graph_drawlist", width=width, height=height)
+
+
 def dashboard():
     build_graph()
     dpg.create_context()
@@ -187,7 +195,9 @@ def dashboard():
         default_font = dpg.add_font(font_path, 20)
 
     dpg.bind_font(default_font)
-    dpg.create_viewport(title="CWT Simulation Dashboard", width=800, height=800)
+    dpg.create_viewport(
+        title="CWT Simulation Dashboard", width=800, height=800, resizable=True
+    )
 
     with dpg.window(label="Control Panel", width=800, height=200):
         dpg.add_slider_float(
@@ -218,8 +228,9 @@ def dashboard():
         )
         dpg.add_text("Tick: 0", tag="tick_counter")
 
-    with dpg.window(label="Causal Graph", width=800, height=460):
-        with dpg.drawlist(width=600, height=400, tag="graph_drawlist"):
+    with dpg.window(label="Causal Graph", width=800, height=460, tag="graph_window"):
+        with dpg.child_window(tag="graph_child", horizontal_scrollbar=True):
+            dpg.add_drawlist(width=1, height=1, tag="graph_drawlist")
             for node_id, (x, y) in node_positions.items():
                 color = node_colors[node_id]
                 node_tag = dpg.draw_circle(
@@ -257,8 +268,13 @@ def dashboard():
         )
         dpg.add_text("\u2b1b CSP — Collapse-seeded", color=ORIGIN_COLORS["CSP"])
 
+    with dpg.item_handler_registry(tag="graph_handlers"):
+        dpg.add_item_resize_handler(callback=graph_resize_callback)
+    dpg.bind_item_handler_registry("graph_window", "graph_handlers")
+
     dpg.setup_dearpygui()
     dpg.show_viewport()
+    graph_resize_callback(None, None, None)
     dpg.set_frame_callback(1, gui_update_callback)
     dpg.start_dearpygui()
     dpg.destroy_context()

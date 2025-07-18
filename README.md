@@ -17,6 +17,10 @@ Key modules include:
 - **`engine/log_interpreter.py`** – parses the generated logs and aggregates statistics.
 - **`engine/causal_analyst.py`** – infers causal chains and produces explanation files.
 - **`engine/meta_node.py`** – groups clusters of nodes into collapsed meta nodes.
+- **`engine/node_manager.py`** – NumPy-backed container for bulk node updates.
+- **`engine/observer.py`** – observers that infer hidden state from tick history.
+- **`engine/logger.py`** – asynchronous writer used by many modules.
+- **`engine/tick.py`** – defines :class:`Tick` and the reusable object pool.
 - **`gui/dashboard.py`** – Dear PyGui dashboard for interactive runs.
 - **`main.py`** – simple entry point that launches the dashboard.
 
@@ -105,7 +109,7 @@ Example:
 python -m Causal_Web.main
 ```
 
-Use the on-screen controls to start or pause the simulation and adjust the tick rate. As it runs, a number of JSON log files are produced inside `Causal_Web/output`.
+Use the on-screen controls to start or pause the simulation and adjust the tick rate. Windows can be freely resized and the graph view will scroll if its contents exceed the available space. As the simulation runs, a number of JSON log files are produced inside `Causal_Web/output`.
 
 ### Analysing the output
 
