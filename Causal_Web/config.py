@@ -150,6 +150,16 @@ class Config:
     # Range for per-edge weights influencing delay/attenuation
     edge_weight_range = [1.0, 1.0]
 
+    # Database connection details
+    database = {
+        "type": "postgres",
+        "host": "localhost",
+        "port": 5432,
+        "user": "sim_user",
+        "password": "secret_password",
+        "dbname": "cwt_simulation",
+    }
+
     @classmethod
     def load_from_file(cls, path: str) -> None:
         """Load configuration values from a JSON file.
@@ -178,3 +188,14 @@ class Config:
                 current.update(value)
             else:
                 setattr(cls, key, value)
+
+
+def load_config(path: str | None = None) -> dict:
+    """Load configuration from ``path`` and return the data."""
+    if path is None:
+        path = Config.input_path("config.json")
+    Config.load_from_file(path)
+    import json
+
+    with open(path) as f:
+        return json.load(f)
