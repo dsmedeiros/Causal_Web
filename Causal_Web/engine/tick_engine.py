@@ -750,10 +750,13 @@ def simulation_loop():
                 running = Config.is_running
                 Config.current_tick = global_tick
                 rate = Config.tick_rate
+                # ``allow_tick_override`` enables the ``max_ticks`` setting to
+                # control runtime duration. When disabled a fixed ``tick_limit``
+                # acts as the ceiling.
                 limit = (
-                    Config.tick_limit
+                    Config.max_ticks
                     if Config.allow_tick_override
-                    else Config.max_ticks
+                    else Config.tick_limit
                 )
             if not running:
                 time.sleep(0.1)

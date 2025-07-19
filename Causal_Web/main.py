@@ -99,7 +99,10 @@ def main() -> None:
         with Config.state_lock:
             Config.is_running = True
         tick_engine.simulation_loop()
-        limit = Config.tick_limit if Config.allow_tick_override else Config.max_ticks
+        # ``allow_tick_override`` lets command line flags override the default
+        # ``max_ticks`` setting. When disabled we fall back to ``tick_limit`` as
+        # a hard upper bound.
+        limit = Config.max_ticks if Config.allow_tick_override else Config.tick_limit
         try:
             while True:
                 with Config.state_lock:
