@@ -5,7 +5,13 @@ from .graph import CausalGraph
 from .observer import Observer
 from .log_interpreter import run_interpreter
 from .tick_seeder import TickSeeder
-from .logger import log_json, logger
+from .logger import log_json, logger, log_manager
+from .logging_models import (
+    NodeEmergenceLog,
+    NodeEmergencePayload,
+    StructuralGrowthLog,
+    StructuralGrowthPayload,
+)
 import json
 import numpy as np
 import os
@@ -307,16 +313,20 @@ def _update_growth_log(tick: int) -> None:
     the number of successful or failed propagation attempts.
     """
     global _sip_success_count, _sip_failure_count, _csp_success_count, _csp_failure_count
-    record = {
-        "tick": tick,
-        "node_count": len(graph.nodes),
-        "edge_count": len(graph.edges) + len(graph.bridges),
-        "sip_success": _sip_success_count,
-        "sip_failures": _sip_failure_count,
-        "csp_success": _csp_success_count,
-        "csp_failures": _csp_failure_count,
-    }
-    log_json(Config.output_path("structural_growth_log.json"), record)
+    avg_coh = (
+        sum(n.coherence for n in graph.nodes.values()) / len(graph.nodes)
+        if graph.nodes
+        else 0.0
+    )
+    payload = StructuralGrowthPayload(
+        node_count=len(graph.nodes),
+        edge_count=len(graph.edges) + len(graph.bridges),
+        sip_success_total=_sip_success_count,
+        csp_success_total=_csp_success_count,
+        avg_coherence=round(avg_coh, 4),
+    )
+    entry = StructuralGrowthLog(tick=tick, payload=payload)
+    log_manager.log(Config.output_path("structural_growth_log.json"), entry)
     _sip_success_count = 0
     _sip_failure_count = 0
     _csp_success_count = 0
@@ -351,18 +361,13 @@ def _spawn_sip_child(parent, tick: int):
         parent_ids=[parent.id],
     )
     graph.add_edge(parent.id, child_id)
-    log_json(
-        Config.output_path("node_emergence_log.json"),
-        {
-            "id": child_id,
-            "tick": tick,
-            "parents": [parent.id],
-            "origin_type": "SIP_BUD",
-            "generation_tick": tick,
-            "sigma_phi": parent.law_wave_frequency,
-            "phase_confidence_index": graph.get_node(child_id).phase_confidence_index,
-        },
+    payload = NodeEmergencePayload(
+        node_id=child_id,
+        origin_type="SIP_BUD",
+        parents=[parent.id],
     )
+    entry = NodeEmergenceLog(tick=tick, payload=payload)
+    log_manager.log(Config.output_path("node_emergence_log.json"), entry)
     _update_growth_log(tick)
     global _sip_pending, _sip_success_count
     _sip_pending.append((child_id, [parent.id], tick, "SIP_BUD"))
@@ -407,18 +412,13 @@ def _spawn_sip_recomb_child(parent_a, parent_b, tick: int):
     )
     graph.add_edge(parent_a.id, child_id)
     graph.add_edge(parent_b.id, child_id)
-    log_json(
-        Config.output_path("node_emergence_log.json"),
-        {
-            "id": child_id,
-            "tick": tick,
-            "parents": [parent_a.id, parent_b.id],
-            "origin_type": "SIP_RECOMB",
-            "generation_tick": tick,
-            "sigma_phi": freq,
-            "phase_confidence_index": graph.get_node(child_id).phase_confidence_index,
-        },
+    payload = NodeEmergencePayload(
+        node_id=child_id,
+        origin_type="SIP_RECOMB",
+        parents=[parent_a.id, parent_b.id],
     )
+    entry = NodeEmergenceLog(tick=tick, payload=payload)
+    log_manager.log(Config.output_path("node_emergence_log.json"), entry)
     global _sip_pending, _sip_success_count
     _sip_pending.append((child_id, [parent_a.id, parent_b.id], tick, "SIP_RECOMB"))
     _sip_success_count += 1
@@ -512,20 +512,13 @@ def _process_csp_seeds(tick: int) -> None:
                         graph.add_edge(pid, node_id)
             else:
                 graph.add_edge(parent_id, node_id)
-            log_json(
-                Config.output_path("node_emergence_log.json"),
-                {
-                    "id": node_id,
-                    "tick": tick,
-                    "parents": [seed["parent"]],
-                    "origin_type": "CSP",
-                    "generation_tick": tick,
-                    "sigma_phi": graph.get_node(node_id).law_wave_frequency,
-                    "phase_confidence_index": graph.get_node(
-                        node_id
-                    ).phase_confidence_index,
-                },
+            payload = NodeEmergencePayload(
+                node_id=node_id,
+                origin_type="CSP",
+                parents=[seed["parent"]],
             )
+            entry = NodeEmergenceLog(tick=tick, payload=payload)
+            log_manager.log(Config.output_path("node_emergence_log.json"), entry)
             log_json(
                 Config.output_path("collapse_chain_log.json"),
                 {

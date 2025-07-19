@@ -175,6 +175,9 @@ enabled or disabled individually using the **Logging** window in the GUI or via
 the `log_files` section of `input/config.json`.
 All log entries are buffered in memory and flushed periodically to minimize
 disk writes.
+Each record now conforms to Pydantic models defined in
+`engine/logging_models.py`, ensuring consistent structure across files and
+simplifying downstream analysis.
 
 - `boundary_interaction_log.json` – interactions with void or boundary nodes.
 - `bridge_decay_log.json` – gradual weakening of inactive bridges.
