@@ -17,15 +17,37 @@ from ..config import Config
 
 MANIFEST_NAME = "ingestion_manifest.json"
 
-# Simplistic mapping of log files to tables
 LOG_TABLE_MAP = {
+    # --- Events Table ---
     "event_log.jsonl": "events",
-    "tick_emission_log.jsonl": "tick_events",
-    "node_state_log.jsonl": "node_state_history",
-    "bridge_state_log.jsonl": "bridge_state_history",
-    "system_state_log.jsonl": "system_state_history",
-}
+    "node_emergence_log.jsonl": "events",
+    "collapse_chain_log.jsonl": "events",
+    "bridge_rupture_log.jsonl": "events",
+    "bridge_reformation_log.jsonl": "events",
+    "law_drift_log.jsonl": "events",
 
+    # --- Tick Events Table ---
+    "tick_emission_log.jsonl": "tick_events",
+    "tick_propagation_log.jsonl": "tick_events",
+    "tick_delivery_log.jsonl": "tick_events",
+    "tick_drop_log.jsonl": "tick_events",
+    "propagation_failure_log.jsonl": "tick_events",
+
+    # --- Node State History Table ---
+    "node_state_log.jsonl": "node_state_history",
+    "coherence_log.jsonl": "node_state_history",
+    "decoherence_log.jsonl": "node_state_history",
+    "law_wave_log.jsonl": "node_state_history",
+    "classicalization_map.jsonl": "node_state_history",
+
+    # --- Bridge State History Table ---
+    "bridge_state_log.jsonl": "bridge_state_history",
+    "bridge_decay_log.jsonl": "bridge_state_history",
+
+    # --- System State History Table ---
+    # Assuming "system_state_log.jsonl" is the new name for "structural_growth_log.jsonl"
+    "system_state_log.jsonl": "system_state_history", 
+}
 
 def _iter_json(path: str) -> Iterable[dict]:
     """Yield JSON objects from ``path`` supporting optional ``.zst`` compression."""
