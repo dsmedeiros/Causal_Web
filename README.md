@@ -48,6 +48,10 @@ python -m Causal_Web.main --no-gui --max_ticks 20
 Only keys matching attributes on `Causal_Web.config.Config` are applied. Nested
 dictionaries merge with the existing values.
 
+To set up a PostgreSQL database using the credentials in the configuration file,
+invoke the module with the `--init-db` flag. The application will create the
+required tables and then exit without starting the simulation.
+
 The configuration now includes a `tick_threshold` option controlling how many
 ticks a node must receive in a single timestep before it can fire. This value
 defaults to `1` and can be overridden via CLI or the Parameters window in the

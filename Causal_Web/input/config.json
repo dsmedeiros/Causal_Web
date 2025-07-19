@@ -19,6 +19,14 @@
   "total_max_concurrent_firings": 0,
   "max_concurrent_firings_per_cluster": 0,
   "edge_weight_range": [1.0, 1.0],
+  "database": {
+    "type": "postgres",
+    "host": "localhost",
+    "port": 5432,
+    "user": "sim_user",
+    "password": "secret_password",
+    "dbname": "cwt_simulation"
+  },
   "log_files": {
     "boundary_interaction_log.json": true,
     "bridge_decay_log.json": true,

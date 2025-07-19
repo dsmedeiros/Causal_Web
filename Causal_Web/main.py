@@ -10,7 +10,7 @@ import os
 import time
 from typing import Any
 
-from .config import Config
+from .config import Config, load_config
 
 
 def _add_config_args(
@@ -64,6 +64,11 @@ def main() -> None:
         action="store_true",
         help="Run simulation without launching the GUI",
     )
+    initial.add_argument(
+        "--init-db",
+        action="store_true",
+        help="Initialize PostgreSQL schema and exit.",
+    )
     known, remaining = initial.parse_known_args()
 
     config_data: dict[str, Any] = {}
@@ -79,6 +84,13 @@ def main() -> None:
     args = parser.parse_args()
 
     _apply_overrides(args, config_data)
+
+    if args.init_db:
+        from .database import initialize_database
+
+        load_config(args.config)
+        initialize_database(Config.database)
+        return
 
     if args.no_gui:
         from .engine import tick_engine
