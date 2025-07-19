@@ -5,10 +5,17 @@ import threading
 
 
 class Config:
+    """Global configuration loaded from ``input/config.json``."""
+
     # Base directories for package resources
     base_dir = os.path.abspath(os.path.dirname(__file__))
     input_dir = os.path.join(base_dir, "input")
-    output_dir = os.path.join(base_dir, "output")
+    output_root = os.path.join(base_dir, "output")
+    runs_dir = os.path.join(output_root, "runs")
+    archive_dir = os.path.join(output_root, "archive")
+    analysis_dir = os.path.join(output_root, "analysis")
+    ingest_dir = os.path.join(output_root, "ingest")
+    output_dir = output_root
 
     @staticmethod
     def input_path(*parts: str) -> str:
@@ -17,7 +24,7 @@ class Config:
 
     @staticmethod
     def output_path(*parts: str) -> str:
-        """Return absolute path under the ``output`` directory."""
+        """Return absolute path under the current run directory."""
         return os.path.join(Config.output_dir, *parts)
 
     # Synchronization lock for cross-thread state access
@@ -160,6 +167,28 @@ class Config:
     }
 
     @classmethod
+    def new_run(cls, slug: str = "run") -> str:
+        """Create and activate a new run directory.
+
+        Parameters
+        ----------
+        slug:
+            Human friendly slug appended to the timestamp.
+
+        Returns
+        -------
+        str
+            Absolute path to the newly created directory.
+        """
+        from datetime import datetime
+
+        ts = datetime.utcnow().strftime("%Y-%m-%d_%H-%M-%S")
+        run_dir = os.path.join(cls.runs_dir, f"{ts}__{slug}")
+        os.makedirs(run_dir, exist_ok=True)
+        cls.output_dir = run_dir
+        return run_dir
+
+    @classmethod
     def load_from_file(cls, path: str) -> None:
         """Load configuration values from a JSON file.
 
@@ -178,6 +207,12 @@ class Config:
             raise FileNotFoundError(path)
         with open(path) as f:
             data = json.load(f)
+
+        paths = data.get("paths")
+        if isinstance(paths, dict):
+            for key, value in paths.items():
+                if hasattr(cls, key):
+                    setattr(cls, key, os.path.abspath(value))
 
         for key, value in data.items():
             if not hasattr(cls, key):

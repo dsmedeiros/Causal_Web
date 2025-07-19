@@ -177,9 +177,14 @@ This command loads the logs and generates several summary files:
 - **`causal_timeline.json`** – ordered timeline of notable events.
 
 ## Output logs
-The simulation writes many JSON files to `output/`. Logging for each file can be
-enabled or disabled individually using the **Logging** window in the GUI or via
-the `log_files` section of `input/config.json`.
+Simulation results are organised under `output/` which now contains separate
+directories for each run. A new run directory is created via
+`Config.new_run()` and has the form `runs/<timestamp>__<slug>`. The location of
+`runs/` and other output folders can be customised using the `paths` section in
+`input/config.json`.
+Logging for each file can be enabled or disabled individually using the
+**Logging** window in the GUI or via the `log_files` section of the
+configuration file.
 All log entries are buffered in memory and flushed periodically to minimize
 disk writes.
 Each record now conforms to Pydantic models defined in
