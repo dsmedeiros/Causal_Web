@@ -1,4 +1,11 @@
 {
+  "paths": {
+    "output_root": "./Causal_Web/output",
+    "runs_dir": "./Causal_Web/output/runs",
+    "archive_dir": "./Causal_Web/output/archive",
+    "analysis_dir": "./Causal_Web/output/analysis",
+    "ingest_dir": "./Causal_Web/output/ingest"
+  },
   "tick_rate": 0.5,
   "max_ticks": 50,
   "seeding": {
