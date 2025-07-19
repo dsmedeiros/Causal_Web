@@ -152,7 +152,6 @@ class Config:
 
     # Database connection details
     database = {
-        "type": "postgres",
         "host": "localhost",
         "port": 5432,
         "user": "sim_user",

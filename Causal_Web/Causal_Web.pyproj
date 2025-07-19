@@ -22,10 +22,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="config.py" />
+    <Compile Include="database\db_setup.py" />
+    <Compile Include="database\__init__.py" />
     <Compile Include="engine\bridge.py" />
     <Compile Include="engine\causal_analyst.py" />
     <Compile Include="engine\graph.py" />
     <Compile Include="engine\logger.py" />
+    <Compile Include="engine\logging_models.py" />
     <Compile Include="engine\meta_node.py" />
     <Compile Include="engine\node.py" />
     <Compile Include="engine\node_manager.py" />
@@ -44,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="assets\fonts\" />
+    <Folder Include="database\" />
     <Folder Include="engine\" />
     <Folder Include="gui\" />
     <Folder Include="assets\" />
