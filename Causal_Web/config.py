@@ -6,7 +6,14 @@ import threading
 
 
 class Config:
-    """Global configuration loaded from ``input/config.json``."""
+    """Global configuration loaded from ``input/config.json``.
+
+    Attributes
+    ----------
+    propagation_control:
+        Dictionary containing ``enable_sip`` and ``enable_csp`` flags used to
+        toggle the two propagation mechanisms.
+    """
 
     # Base directories for package resources
     base_dir = os.path.abspath(os.path.dirname(__file__))
@@ -158,6 +165,9 @@ class Config:
 
     # Range for per-edge weights influencing delay/attenuation
     edge_weight_range = [1.0, 1.0]
+
+    # Toggle propagation mechanisms
+    propagation_control = {"enable_sip": True, "enable_csp": True}
 
     # Database connection details
     database = {

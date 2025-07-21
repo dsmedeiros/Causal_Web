@@ -335,6 +335,8 @@ def _update_growth_log(tick: int) -> None:
 
 def _spawn_sip_child(parent, tick: int):
     """Generate a new node via Stability-Induced Propagation."""
+    if not Config.propagation_control.get("enable_sip", True):
+        return
     global _spawn_counts
     if _spawn_counts.get(parent.id, 0) >= Config.max_children_per_node > 0:
         if Config.is_log_enabled("propagation_failure_log.json"):
@@ -377,6 +379,8 @@ def _spawn_sip_child(parent, tick: int):
 
 def _spawn_sip_recomb_child(parent_a, parent_b, tick: int):
     """Generate a new node via dual-parent recombination."""
+    if not Config.propagation_control.get("enable_sip", True):
+        return
     global _spawn_counts
     if any(
         _spawn_counts.get(pid, 0) >= Config.max_children_per_node > 0
@@ -460,6 +464,8 @@ def _check_sip_failures(tick: int) -> None:
 
 def trigger_csp(parent_id: str, x: float, y: float, tick: int) -> None:
     """Initiate collapse-seeded propagation from the given location."""
+    if not Config.propagation_control.get("enable_csp", True):
+        return
     for i in range(Config.CSP_MAX_NODES):
         seed_id = f"{parent_id}_CSPseed{i}_{tick}"
         dx = np.random.uniform(-Config.CSP_RADIUS, Config.CSP_RADIUS)
@@ -477,6 +483,9 @@ def trigger_csp(parent_id: str, x: float, y: float, tick: int) -> None:
 
 def _process_csp_seeds(tick: int) -> None:
     global _csp_seeds, _csp_success_count, _csp_failure_count
+    if not Config.propagation_control.get("enable_csp", True):
+        _csp_seeds.clear()
+        return
     for seed in list(_csp_seeds):
         if tick - seed["tick"] < Config.CSP_STABILIZATION_WINDOW:
             continue
@@ -579,33 +588,35 @@ def check_propagation(tick: int) -> None:
         _spawn_tick = tick
     _check_sip_failures(tick)
     _process_csp_seeds(tick)
-    for node in list(graph.nodes.values()):
-        if (
-            node.sip_streak >= SIP_COHERENCE_DURATION
-            and node.decoherence_debt < SIP_DECOHERENCE_THRESHOLD
-        ):
-            _spawn_sip_child(node, tick)
-            node.sip_streak = 0
+    if Config.propagation_control.get("enable_sip", True):
+        for node in list(graph.nodes.values()):
+            if (
+                node.sip_streak >= SIP_COHERENCE_DURATION
+                and node.decoherence_debt < SIP_DECOHERENCE_THRESHOLD
+            ):
+                _spawn_sip_child(node, tick)
+                node.sip_streak = 0
 
     # recombination across stable, trusted bridges
-    for bridge in graph.bridges:
-        if not bridge.active or bridge.state.name != "STABLE":
-            continue
-        if bridge.trust_score < Config.SIP_RECOMB_MIN_TRUST:
-            continue
-        a = graph.get_node(bridge.node_a_id)
-        b = graph.get_node(bridge.node_b_id)
-        if not a or not b:
-            continue
-        if (
-            a.sip_streak >= SIP_COHERENCE_DURATION
-            and b.sip_streak >= SIP_COHERENCE_DURATION
-            and a.decoherence_debt < SIP_DECOHERENCE_THRESHOLD
-            and b.decoherence_debt < SIP_DECOHERENCE_THRESHOLD
-        ):
-            _spawn_sip_recomb_child(a, b, tick)
-            a.sip_streak = 0
-            b.sip_streak = 0
+    if Config.propagation_control.get("enable_sip", True):
+        for bridge in graph.bridges:
+            if not bridge.active or bridge.state.name != "STABLE":
+                continue
+            if bridge.trust_score < Config.SIP_RECOMB_MIN_TRUST:
+                continue
+            a = graph.get_node(bridge.node_a_id)
+            b = graph.get_node(bridge.node_b_id)
+            if not a or not b:
+                continue
+            if (
+                a.sip_streak >= SIP_COHERENCE_DURATION
+                and b.sip_streak >= SIP_COHERENCE_DURATION
+                and a.decoherence_debt < SIP_DECOHERENCE_THRESHOLD
+                and b.decoherence_debt < SIP_DECOHERENCE_THRESHOLD
+            ):
+                _spawn_sip_recomb_child(a, b, tick)
+                a.sip_streak = 0
+                b.sip_streak = 0
 
 
 def _compute_metrics(node, tick_time):

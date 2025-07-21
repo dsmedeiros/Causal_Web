@@ -82,6 +82,11 @@ single tick. Set `total_max_concurrent_firings` for a global limit or
 `max_concurrent_firings_per_cluster` to cap activity within each detected
 cluster. A value of `0` disables these limits. Both parameters are configurable
 via CLI flags or the Parameters window in the GUI.
+
+The `propagation_control` section toggles node growth mechanisms. Set
+`enable_sip` or `enable_csp` to `false` to disable Stability-Induced or
+Collapse-Seeded Propagation. These options are also exposed as CLI flags and can
+be modified in the Parameters window.
 ## Graph format
 
 Graphs are defined by a JSON file with `nodes`, `edges`, optional `bridges`, `tick_sources` and `observers`. Each node defines its position, frequency and thresholds. Edges specify delays and attenuation. Tick sources seed periodic activity and observers describe which metrics to record.
