@@ -44,6 +44,7 @@
     <Compile Include="graph\model.py" />
     <Compile Include="graph\__init__.py" />
     <Compile Include="gui\canvas.py" />
+    <Compile Include="gui\command_stack.py" />
     <Compile Include="gui\connection_tool.py" />
     <Compile Include="gui\dashboard.py" />
     <Compile Include="gui\graph_panel.py" />
