@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, Tuple, Optional
 
 import dearpygui.dearpygui as dpg
@@ -23,6 +23,7 @@ class GraphCanvas:
 
     drawlist_tag: str = "graph_canvas_drawlist"
     window_tag: str = "graph_canvas_window"
+    dragging_node: Optional[str] = field(default=None, init=False)
 
     def __post_init__(self) -> None:
         """Create the Dear PyGui widgets backing the canvas."""
@@ -40,6 +41,7 @@ class GraphCanvas:
         """Clear and redraw the entire graph."""
         if not dpg.does_item_exist(self.drawlist_tag):
             return
+        self._update_drag()
         dpg.delete_item(self.drawlist_tag, children_only=True)
         graph = get_graph()
         self.node_items.clear()
@@ -100,5 +102,20 @@ class GraphCanvas:
                 if connection_tool.handle_node_click(node_id):
                     return
                 set_selected_node(node_id)
+                self.dragging_node = node_id
                 return
         set_selected_node(None)
+
+    def _update_drag(self) -> None:
+        """Move the selected node when the mouse is dragged."""
+        if self.dragging_node is None:
+            return
+        if dpg.is_mouse_button_down(dpg.mvMouseButton_Left):
+            graph = get_graph()
+            x, y = dpg.get_mouse_pos(local=False)
+            node = graph.nodes.get(self.dragging_node)
+            if node is not None:
+                node["x"] = x
+                node["y"] = y
+        else:
+            self.dragging_node = None
