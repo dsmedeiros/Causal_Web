@@ -23,6 +23,7 @@ def set_graph(graph: GraphModel) -> None:
 
 _active_file: str | None = None
 _selected_node: str | None = None
+_selected_connection: tuple[str, int] | None = None
 
 
 def get_active_file() -> str | None:
@@ -45,3 +46,14 @@ def set_selected_node(node_id: str | None) -> None:
     """Update the currently selected node id."""
     global _selected_node
     _selected_node = node_id
+
+
+def get_selected_connection() -> tuple[str, int] | None:
+    """Return (type, index) of the selected connection if any."""
+    return _selected_connection
+
+
+def set_selected_connection(conn: tuple[str, int] | None) -> None:
+    """Update the selected connection reference."""
+    global _selected_connection
+    _selected_connection = conn
