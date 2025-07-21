@@ -36,7 +36,7 @@ class GraphCanvas:
         """Create the Dear PyGui widgets backing the canvas."""
         if not dpg.does_item_exist(self.window_tag):
             with dpg.window(label="Graph View", tag=self.window_tag):
-                dpg.add_drawlist(tag=self.drawlist_tag, width=600, height=400)
+                dpg.add_drawlist(tag=self.drawlist_tag, width=1, height=1)
                 dpg.add_text("", tag="graph_status_bar")
         self.node_items: Dict[str, int] = {}
         self.edge_items: list[int] = []
@@ -56,6 +56,21 @@ class GraphCanvas:
                 parent=h,
             )
         self.handler_registry = h
+        # resize drawlist when the window size changes
+        with dpg.item_handler_registry(tag=f"{self.window_tag}_handlers") as wh:
+            dpg.add_item_resize_handler(callback=self._resize_drawlist)
+        dpg.bind_item_handler_registry(self.window_tag, f"{self.window_tag}_handlers")
+        self._resize_drawlist(None, None)
+
+    def _resize_drawlist(self, sender, app_data) -> None:
+        """Adjust drawlist dimensions to match the window size."""
+        width = dpg.get_item_width(self.window_tag)
+        height = dpg.get_item_height(self.window_tag) - 25
+        if width <= 0:
+            width = 600
+        if height <= 0:
+            height = 400
+        dpg.configure_item(self.drawlist_tag, width=width, height=height)
 
     def redraw(self) -> None:
         """Clear and redraw the entire graph."""
