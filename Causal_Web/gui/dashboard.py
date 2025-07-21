@@ -267,7 +267,7 @@ def gui_update_callback():
         file = get_active_file() or "<unsaved>"
         selected = get_selected_node() or "none"
         dpg.set_value("graph_status_bar", f"File: {file}  Selected: {selected}")
-    next_frame = dpg.get_frame_count() + 1
+    next_frame = dpg.get_frame_count()
     dpg.set_frame_callback(next_frame, gui_update_callback)
 
 
@@ -275,8 +275,11 @@ def graph_resize_callback(sender, app_data, user_data):
     """Resize graph canvas to match its window."""
     width = dpg.get_item_width("graph_window") - 10
     height = dpg.get_item_height("graph_window") - 40
-    dpg.configure_item("graph_child", width=width, height=height)
-    dpg.configure_item("graph_drawlist", width=width, height=height)
+    child_width = dpg.get_item_width("graph_child")
+    child_height = dpg.get_item_height("graph_child")
+    if width != child_width or height != child_height:
+        dpg.configure_item("graph_child", width=width, height=height)
+        dpg.configure_item("graph_drawlist", width=width, height=height)
 
 
 def dashboard():
