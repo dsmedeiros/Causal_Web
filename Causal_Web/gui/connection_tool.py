@@ -96,7 +96,7 @@ def save_connection(sender, app_data, user_data):
         )
         idx = len(graph.edges) - 1 if type_key == "edge" else len(graph.bridges) - 1
         set_selected_connection((type_key, idx))
-    dpg.hide_item("connection_properties")
+    dpg.configure_item("connection_properties", show=False)
 
 
 def delete_connection(sender, app_data, user_data):
@@ -106,4 +106,4 @@ def delete_connection(sender, app_data, user_data):
     etype, idx = _edit
     graph.remove_connection(idx, etype)
     set_selected_connection(None)
-    dpg.hide_item("connection_properties")
+    dpg.configure_item("connection_properties", show=False)
