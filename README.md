@@ -181,7 +181,7 @@ Node interaction now correctly accounts for the window position so clicks and
 drags work as expected. Dragging begins on mouse press, making node movement
 smooth even when the button is held down before moving.
 A startup crash caused by invalid handler parents has been fixed by registering
-mouse events through an item handler registry.
+mouse events through a global handler registry.
 For troubleshooting, the canvas now prints debug messages to the console whenever
 nodes are clicked or dragged.
 
