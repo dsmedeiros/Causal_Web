@@ -19,3 +19,29 @@ def set_graph(graph: GraphModel) -> None:
     """Replace the active graph."""
     global _active_graph
     _active_graph = graph
+
+
+_active_file: str | None = None
+_selected_node: str | None = None
+
+
+def get_active_file() -> str | None:
+    """Return the path of the currently loaded graph file."""
+    return _active_file
+
+
+def set_active_file(path: str | None) -> None:
+    """Record the path of the loaded graph file."""
+    global _active_file
+    _active_file = path
+
+
+def get_selected_node() -> str | None:
+    """Return the currently selected node id, if any."""
+    return _selected_node
+
+
+def set_selected_node(node_id: str | None) -> None:
+    """Update the currently selected node id."""
+    global _selected_node
+    _selected_node = node_id

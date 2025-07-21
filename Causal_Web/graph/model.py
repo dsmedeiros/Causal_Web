@@ -53,3 +53,14 @@ class GraphModel:
                 "parent_ids": [],
             }
         return model
+
+    def node_position(self, node_id: str) -> tuple[float, float] | None:
+        """Return the ``(x, y)`` position for ``node_id`` if present."""
+        node = self.nodes.get(node_id)
+        if node is None:
+            return None
+        return node.get("x", 0.0), node.get("y", 0.0)
+
+    def get_edges(self) -> List[Dict[str, Any]]:
+        """Return a list of edges in the graph."""
+        return self.edges
