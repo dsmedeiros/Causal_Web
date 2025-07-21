@@ -40,6 +40,9 @@
     <Compile Include="engine\tick_router.py" />
     <Compile Include="engine\tick_seeder.py" />
     <Compile Include="engine\__init__.py" />
+    <Compile Include="graph\io.py" />
+    <Compile Include="graph\model.py" />
+    <Compile Include="graph\__init__.py" />
     <Compile Include="gui\canvas.py" />
     <Compile Include="gui\connection_tool.py" />
     <Compile Include="gui\dashboard.py" />
@@ -57,6 +60,8 @@
     <Folder Include="assets\fonts\" />
     <Folder Include="database\" />
     <Folder Include="engine\" />
+    <Folder Include="graph\" />
+    <Folder Include="graph\__pycache__\" />
     <Folder Include="gui\" />
     <Folder Include="assets\" />
     <Folder Include="ingest\" />
@@ -65,6 +70,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="assets\fonts\consola.ttf" />
+    <Content Include="graph\__pycache__\io.cpython-310.pyc" />
+    <Content Include="graph\__pycache__\model.cpython-310.pyc" />
+    <Content Include="graph\__pycache__\__init__.cpython-310.pyc" />
     <Content Include="input\config.json" />
     <Content Include="input\destructive_interference_test.json" />
     <Content Include="input\dilation_baseline_test_case.json" />
