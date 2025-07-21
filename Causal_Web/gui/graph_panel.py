@@ -128,8 +128,13 @@ def gui_loop():
 
 
 def start_sim():
+    """Launch the simulation thread if it is not already running."""
+
     with Config.state_lock:
         if Config.is_running:
             return
         Config.is_running = True
+
+    build_graph()
+    Config.new_run()
     simulation_loop()
