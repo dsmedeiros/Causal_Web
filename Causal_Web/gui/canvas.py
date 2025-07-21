@@ -97,10 +97,11 @@ class GraphCanvas:
     def _handle_click(self, sender, app_data):
         """Select a node if the click occurred over one."""
         mouse = dpg.get_mouse_pos(local=False)
+        origin = dpg.get_item_rect_min(self.drawlist_tag)
         for node_id, item in self.node_items.items():
             center = dpg.get_item_configuration(item)["center"]
-            dx = mouse[0] - center[0]
-            dy = mouse[1] - center[1]
+            dx = mouse[0] - (origin[0] + center[0])
+            dy = mouse[1] - (origin[1] + center[1])
             if dx * dx + dy * dy <= 20 * 20:
                 if connection_tool.handle_node_click(node_id):
                     return
@@ -115,7 +116,10 @@ class GraphCanvas:
             return
         if dpg.is_mouse_button_down(dpg.mvMouseButton_Left):
             graph = get_graph()
-            x, y = dpg.get_mouse_pos(local=False)
+            mouse = dpg.get_mouse_pos(local=False)
+            origin = dpg.get_item_rect_min(self.drawlist_tag)
+            x = mouse[0] - origin[0]
+            y = mouse[1] - origin[1]
             node = graph.nodes.get(self.dragging_node)
             if node is not None:
                 node["x"] = x
