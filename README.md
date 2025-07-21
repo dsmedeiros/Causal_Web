@@ -187,6 +187,7 @@ Node dragging now remains responsive after resizing the window thanks to using
 For troubleshooting, the canvas now prints debug messages to the console whenever
 nodes are clicked or dragged.
 The Graph View window now resizes correctly, keeping graph elements interactive.
+A resize handler bug that halted GUI updates after resizing has been fixed.
 
 ### Analysing the output
 
