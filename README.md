@@ -179,6 +179,8 @@ Nodes can be repositioned directly in the **Graph View** by dragging them with
 the mouse.
 Node interaction now correctly accounts for the window position so clicks and
 drags work as expected.
+For troubleshooting, the canvas now prints debug messages to the console whenever
+nodes are clicked or dragged.
 
 ### Analysing the output
 

@@ -98,16 +98,20 @@ class GraphCanvas:
         """Select a node if the click occurred over one."""
         mouse = dpg.get_mouse_pos(local=False)
         origin = dpg.get_item_rect_min(self.drawlist_tag)
+        print(f"[GraphCanvas] Click at {mouse}")
         for node_id, item in self.node_items.items():
             center = dpg.get_item_configuration(item)["center"]
             dx = mouse[0] - (origin[0] + center[0])
             dy = mouse[1] - (origin[1] + center[1])
             if dx * dx + dy * dy <= 20 * 20:
                 if connection_tool.handle_node_click(node_id):
+                    print(f"[GraphCanvas] Connection tool handled click on {node_id}")
                     return
+                print(f"[GraphCanvas] Selected node {node_id}")
                 set_selected_node(node_id)
                 self.dragging_node = node_id
                 return
+        print("[GraphCanvas] Click not on any node")
         set_selected_node(None)
 
     def _update_drag(self) -> None:
@@ -124,7 +128,9 @@ class GraphCanvas:
             if node is not None:
                 node["x"] = x
                 node["y"] = y
+                print(f"[GraphCanvas] Dragging {self.dragging_node} to {(x, y)}")
         else:
+            print(f"[GraphCanvas] Finished dragging {self.dragging_node}")
             self.dragging_node = None
 
     def auto_layout(self) -> None:
