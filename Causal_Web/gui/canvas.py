@@ -38,7 +38,16 @@ class GraphCanvas:
         self.edge_items: list[int] = []
         self.bridge_items: list[int] = []
         dpg.set_item_user_data(self.drawlist_tag, self)
-        dpg.set_item_callback(self.drawlist_tag, self._handle_click)
+        dpg.add_mouse_down_handler(
+            parent=self.drawlist_tag,
+            button=dpg.mvMouseButton_Left,
+            callback=self._handle_mouse_down,
+        )
+        dpg.add_mouse_release_handler(
+            parent=self.drawlist_tag,
+            button=dpg.mvMouseButton_Left,
+            callback=self._handle_click,
+        )
 
     def redraw(self) -> None:
         """Clear and redraw the entire graph."""
@@ -94,8 +103,23 @@ class GraphCanvas:
             dpg.draw_text(pos=(x - 10, y - 5), text=node_id, parent=self.drawlist_tag)
             self.node_items[node_id] = item
 
+    def _handle_mouse_down(self, sender, app_data):
+        """Begin dragging the node under the cursor if any."""
+        mouse = dpg.get_mouse_pos(local=False)
+        origin = dpg.get_item_rect_min(self.drawlist_tag)
+        for node_id, item in self.node_items.items():
+            center = dpg.get_item_configuration(item)["center"]
+            dx = mouse[0] - (origin[0] + center[0])
+            dy = mouse[1] - (origin[1] + center[1])
+            if dx * dx + dy * dy <= 20 * 20:
+                print(f"[GraphCanvas] Selected node {node_id}")
+                set_selected_node(node_id)
+                self.dragging_node = node_id
+                return
+        set_selected_node(None)
+
     def _handle_click(self, sender, app_data):
-        """Select a node if the click occurred over one."""
+        """Handle mouse release events over nodes."""
         mouse = dpg.get_mouse_pos(local=False)
         origin = dpg.get_item_rect_min(self.drawlist_tag)
         print(f"[GraphCanvas] Click at {mouse}")
@@ -106,10 +130,6 @@ class GraphCanvas:
             if dx * dx + dy * dy <= 20 * 20:
                 if connection_tool.handle_node_click(node_id):
                     print(f"[GraphCanvas] Connection tool handled click on {node_id}")
-                    return
-                print(f"[GraphCanvas] Selected node {node_id}")
-                set_selected_node(node_id)
-                self.dragging_node = node_id
                 return
         print("[GraphCanvas] Click not on any node")
         set_selected_node(None)
