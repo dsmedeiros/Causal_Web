@@ -23,6 +23,7 @@
   <ItemGroup>
     <Compile Include="config.py" />
     <Compile Include="database\db_setup.py" />
+    <Compile Include="database\run_meta.py" />
     <Compile Include="database\__init__.py" />
     <Compile Include="engine\bridge.py" />
     <Compile Include="engine\causal_analyst.py" />
@@ -39,8 +40,13 @@
     <Compile Include="engine\tick_router.py" />
     <Compile Include="engine\tick_seeder.py" />
     <Compile Include="engine\__init__.py" />
+    <Compile Include="gui\canvas.py" />
+    <Compile Include="gui\connection_tool.py" />
     <Compile Include="gui\dashboard.py" />
     <Compile Include="gui\graph_panel.py" />
+    <Compile Include="gui\menu.py" />
+    <Compile Include="gui\state.py" />
+    <Compile Include="gui\toolbar.py" />
     <Compile Include="gui\__init__.py" />
     <Compile Include="ingest\service.py" />
     <Compile Include="ingest\__init__.py" />
