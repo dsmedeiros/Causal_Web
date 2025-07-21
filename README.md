@@ -177,6 +177,8 @@ basic information for the currently selected node. The **Graph Editor** window
 now includes **Add Node** and **Add Connection** tools for building the graph.
 Nodes can be repositioned directly in the **Graph View** by dragging them with
 the mouse.
+Node interaction now correctly accounts for the window position so clicks and
+drags work as expected.
 
 ### Analysing the output
 
