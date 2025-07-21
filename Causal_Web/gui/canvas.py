@@ -60,9 +60,9 @@ class GraphCanvas:
         with dpg.item_handler_registry(tag=f"{self.window_tag}_handlers") as wh:
             dpg.add_item_resize_handler(callback=self._resize_drawlist)
         dpg.bind_item_handler_registry(self.window_tag, f"{self.window_tag}_handlers")
-        self._resize_drawlist(None, None)
+        self._resize_drawlist(None, None, None)
 
-    def _resize_drawlist(self, sender, app_data) -> None:
+    def _resize_drawlist(self, sender, app_data, user_data) -> None:
         """Adjust drawlist dimensions to match the window size."""
         width = dpg.get_item_width(self.window_tag)
         height = dpg.get_item_height(self.window_tag) - 25
