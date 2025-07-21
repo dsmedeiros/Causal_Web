@@ -48,10 +48,12 @@ class GraphCanvas:
             dpg.add_mouse_down_handler(
                 button=dpg.mvMouseButton_Left,
                 callback=self._handle_mouse_down,
+                parent=h,
             )
             dpg.add_mouse_release_handler(
                 button=dpg.mvMouseButton_Left,
                 callback=self._handle_click,
+                parent=h,
             )
         dpg.bind_item_handler_registry(self.drawlist_tag, h)
 
