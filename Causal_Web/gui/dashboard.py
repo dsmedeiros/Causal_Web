@@ -303,7 +303,7 @@ def dashboard():
     dpg.bind_item_handler_registry("graph_window", "graph_handlers")
 
     global canvas
-    canvas = GraphCanvas(drawlist_tag="graph_drawlist", window_tag="graph_window")
+    canvas = GraphCanvas()
 
     with dpg.window(
         label="Connection Properties",
