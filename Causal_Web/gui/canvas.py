@@ -9,7 +9,12 @@ from typing import Dict, Tuple, Optional
 
 import dearpygui.dearpygui as dpg
 
-from .state import get_graph, set_selected_node, get_selected_node
+from .state import (
+    get_graph,
+    set_selected_node,
+    get_selected_node,
+)
+from . import connection_tool
 
 
 @dataclass
@@ -27,6 +32,7 @@ class GraphCanvas:
                 dpg.add_text("", tag="graph_status_bar")
         self.node_items: Dict[str, int] = {}
         self.edge_items: list[int] = []
+        self.bridge_items: list[int] = []
         dpg.set_item_user_data(self.drawlist_tag, self)
         dpg.set_item_callback(self.drawlist_tag, self._handle_click)
 
@@ -38,6 +44,7 @@ class GraphCanvas:
         graph = get_graph()
         self.node_items.clear()
         self.edge_items.clear()
+        self.bridge_items.clear()
 
         for edge in graph.edges:
             p1 = graph.node_position(edge.get("from"))
@@ -48,6 +55,23 @@ class GraphCanvas:
                 p1=p1, p2=p2, color=(150, 150, 150), parent=self.drawlist_tag
             )
             self.edge_items.append(item)
+
+        for bridge in graph.bridges:
+            nodes = bridge.get("nodes")
+            if not nodes or len(nodes) != 2:
+                continue
+            p1 = graph.node_position(nodes[0])
+            p2 = graph.node_position(nodes[1])
+            if p1 is None or p2 is None:
+                continue
+            item = dpg.draw_line(
+                p1=p1,
+                p2=p2,
+                color=(200, 100, 100),
+                thickness=1,
+                parent=self.drawlist_tag,
+            )
+            self.bridge_items.append(item)
 
         for node_id, data in graph.nodes.items():
             pos = graph.node_position(node_id)
@@ -73,6 +97,8 @@ class GraphCanvas:
             dx = mouse[0] - center[0]
             dy = mouse[1] - center[1]
             if dx * dx + dy * dy <= 20 * 20:
+                if connection_tool.handle_node_click(node_id):
+                    return
                 set_selected_node(node_id)
                 return
         set_selected_node(None)

@@ -167,7 +167,8 @@ Use the on-screen controls to start or pause the simulation and adjust the tick 
 You can now load, save or start a new graph using the **File** menu in the dashboard.
 These actions operate on the `graph.json` format and update the shared in-memory model.
 The dashboard also includes a **Graph View** tab which renders the loaded graph and displays
-basic information for the currently selected node.
+basic information for the currently selected node. The new **Graph Editor** window
+provides an **Add Connection** tool for creating or editing directed edges or bridges.
 
 ### Analysing the output
 

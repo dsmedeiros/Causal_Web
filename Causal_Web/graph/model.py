@@ -64,3 +64,76 @@ class GraphModel:
     def get_edges(self) -> List[Dict[str, Any]]:
         """Return a list of edges in the graph."""
         return self.edges
+
+    # ---- Connection management convenience methods ----
+
+    def add_connection(
+        self,
+        source: str,
+        target: str,
+        *,
+        delay: float = 1.0,
+        attenuation: float = 1.0,
+        connection_type: str = "edge",
+    ) -> None:
+        """Add an edge or bridge to the model.
+
+        Parameters
+        ----------
+        source:
+            Identifier of the source node.
+        target:
+            Identifier of the target node.
+        delay:
+            Propagation delay for the connection.
+        attenuation:
+            Attenuation factor for the connection.
+        connection_type:
+            ``"edge"`` for a directed edge or ``"bridge"`` for an undirected
+            bridge.
+        """
+
+        if connection_type not in {"edge", "bridge"}:
+            raise ValueError("connection_type must be 'edge' or 'bridge'")
+        if source not in self.nodes or target not in self.nodes:
+            raise ValueError("source and target must exist in the graph")
+
+        if connection_type == "edge":
+            self.edges.append(
+                {
+                    "from": source,
+                    "to": target,
+                    "delay": delay,
+                    "attenuation": attenuation,
+                }
+            )
+        else:
+            self.bridges.append(
+                {
+                    "nodes": [source, target],
+                    "delay": delay,
+                    "attenuation": attenuation,
+                    "status": "active",
+                }
+            )
+
+    def update_connection(
+        self,
+        index: int,
+        connection_type: str = "edge",
+        **kwargs: Any,
+    ) -> None:
+        """Update properties of an existing connection."""
+
+        target_list = self.edges if connection_type == "edge" else self.bridges
+        if index < 0 or index >= len(target_list):
+            raise IndexError("connection index out of range")
+        target_list[index].update(kwargs)
+
+    def remove_connection(self, index: int, connection_type: str = "edge") -> None:
+        """Delete an edge or bridge from the model."""
+
+        target_list = self.edges if connection_type == "edge" else self.bridges
+        if index < 0 or index >= len(target_list):
+            raise IndexError("connection index out of range")
+        del target_list[index]

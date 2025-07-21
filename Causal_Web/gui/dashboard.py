@@ -2,6 +2,7 @@ import os
 import dearpygui.dearpygui as dpg
 from .canvas import GraphCanvas
 from .state import get_active_file, get_selected_node
+from . import connection_tool
 from ..config import Config
 from ..engine.tick_engine import (
     simulation_loop,
@@ -321,6 +322,12 @@ def dashboard():
     with dpg.window(label="Parameters", width=250, height=400):
         _add_param_controls(config_data)
 
+    with dpg.window(label="Graph Editor", width=200, height=150, pos=(610, 120)):
+        dpg.add_button(
+            label="Add Connection",
+            callback=connection_tool.start_add_connection,
+        )
+
     with dpg.window(label="Causal Graph", width=800, height=460, tag="graph_window"):
         with dpg.child_window(tag="graph_child", horizontal_scrollbar=True):
             dpg.add_drawlist(width=1, height=1, tag="graph_drawlist")
@@ -374,6 +381,30 @@ def dashboard():
 
     global canvas
     canvas = GraphCanvas()
+
+    with dpg.window(
+        label="Connection Properties",
+        modal=True,
+        show=False,
+        tag="connection_properties",
+        no_close=True,
+    ):
+        dpg.add_input_text(label="From", tag="from_field")
+        dpg.add_input_text(label="To", tag="to_field")
+        dpg.add_input_float(label="Delay", default_value=1.0, tag="delay_input")
+        dpg.add_input_float(label="Attenuation", default_value=1.0, tag="atten_input")
+        dpg.add_combo(
+            ["Directed Edge", "Bridge"],
+            default_value="Directed Edge",
+            tag="conn_type",
+        )
+        dpg.add_button(label="Save", callback=connection_tool.save_connection)
+        dpg.add_button(
+            label="Delete",
+            callback=connection_tool.delete_connection,
+            tag="delete_conn_button",
+            show=False,
+        )
 
     dpg.setup_dearpygui()
     dpg.show_viewport()
