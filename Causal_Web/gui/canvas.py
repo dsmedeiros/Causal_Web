@@ -113,7 +113,7 @@ class GraphCanvas:
 
     def _handle_mouse_down(self, sender, app_data):
         """Begin dragging the node under the cursor if any."""
-        mouse = dpg.get_drawing_mouse_pos(drawing=self.drawlist_tag)
+        mouse = dpg.get_drawing_mouse_pos()
         for node_id, item in self.node_items.items():
             center = dpg.get_item_configuration(item)["center"]
             dx = mouse[0] - center[0]
@@ -127,7 +127,7 @@ class GraphCanvas:
 
     def _handle_click(self, sender, app_data):
         """Handle mouse release events over nodes."""
-        mouse = dpg.get_drawing_mouse_pos(drawing=self.drawlist_tag)
+        mouse = dpg.get_drawing_mouse_pos()
         print(f"[GraphCanvas] Click at {mouse}")
         for node_id, item in self.node_items.items():
             center = dpg.get_item_configuration(item)["center"]
@@ -146,7 +146,7 @@ class GraphCanvas:
             return
         if dpg.is_mouse_button_down(dpg.mvMouseButton_Left):
             graph = get_graph()
-            mouse = dpg.get_drawing_mouse_pos(drawing=self.drawlist_tag)
+            mouse = dpg.get_drawing_mouse_pos()
             x = mouse[0]
             y = mouse[1]
             node = graph.nodes.get(self.dragging_node)
