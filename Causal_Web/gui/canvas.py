@@ -1,6 +1,13 @@
 # canvas.py
 
-"""Interactive canvas for displaying :class:`GraphModel` structures."""
+"""Interactive canvas for displaying :class:`GraphModel` structures.
+
+The :class:`GraphCanvas` acts purely as a controller.  The containing
+application is responsible for creating the window and drawlist widgets and
+passing their tags when instantiating the canvas.  Mouse event handlers are
+bound directly to that drawlist so interactions only fire when the cursor is
+over the graph area.
+"""
 
 from __future__ import annotations
 
@@ -22,10 +29,11 @@ _commands = CommandStack()
 
 @dataclass
 class GraphCanvas:
-    """Widget for drawing graphs using Dear PyGui.
+    """Controller for drawing graphs using Dear PyGui.
 
-    The canvas creates its own handler registry to manage mouse events which
-    allows nodes to be dragged and selected without errors on startup.
+    The canvas manages mouse interactions for a drawlist created elsewhere.
+    It exposes helpers for rendering and manipulating the active
+    :class:`~Causal_Web.graph.model.GraphModel`.
     """
 
     drawlist_tag: str = "graph_canvas_drawlist"
@@ -33,50 +41,28 @@ class GraphCanvas:
     dragging_node: Optional[str] = field(default=None, init=False)
 
     def __post_init__(self) -> None:
-        """Create the Dear PyGui widgets backing the canvas."""
-        if not dpg.does_item_exist(self.window_tag):
-            with dpg.window(label="Graph View", tag=self.window_tag):
-                dpg.add_drawlist(tag=self.drawlist_tag, width=1, height=1)
-                dpg.add_text("", tag="graph_status_bar")
+        """Bind event handlers to the provided drawlist."""
         self.node_items: Dict[str, int] = {}
         self.label_items: Dict[str, int] = {}
         self.edge_items: Dict[int, int] = {}
         self.bridge_items: Dict[int, int] = {}
+
         dpg.set_item_user_data(self.drawlist_tag, self)
-        # attach global handlers since per-item handlers cause startup errors
-        # with some Dear PyGui versions
-        with dpg.handler_registry(tag=f"{self.drawlist_tag}_handlers") as h:
+
+        # attach handlers that only fire when the mouse is over the canvas
+        with dpg.item_handler_registry(tag=f"{self.drawlist_tag}_handlers") as h:
             dpg.add_mouse_down_handler(
-                button=dpg.mvMouseButton_Left,
-                callback=self._handle_mouse_down,
-                parent=h,
+                button=dpg.mvMouseButton_Left, callback=self._handle_mouse_down
             )
-            dpg.add_mouse_release_handler(
-                button=dpg.mvMouseButton_Left,
-                callback=self._handle_click,
-                parent=h,
+            dpg.add_mouse_click_handler(
+                button=dpg.mvMouseButton_Left, callback=self._handle_click
             )
             dpg.add_mouse_drag_handler(
-                button=dpg.mvMouseButton_Left,
-                callback=self._update_drag,
-                parent=h,
+                button=dpg.mvMouseButton_Left, callback=self._update_drag
             )
-        self.handler_registry = h
-        # resize drawlist when the window size changes
-        with dpg.item_handler_registry(tag=f"{self.window_tag}_handlers") as wh:
-            dpg.add_item_resize_handler(callback=self._resize_drawlist)
-        dpg.bind_item_handler_registry(self.window_tag, f"{self.window_tag}_handlers")
-        self._resize_drawlist(None, None, None)
 
-    def _resize_drawlist(self, sender, app_data, user_data) -> None:
-        """Adjust drawlist dimensions to match the window size."""
-        width = dpg.get_item_width(self.window_tag)
-        height = dpg.get_item_height(self.window_tag) - 25
-        if width <= 0:
-            width = 600
-        if height <= 0:
-            height = 400
-        dpg.configure_item(self.drawlist_tag, width=width, height=height)
+        dpg.bind_item_handler_registry(self.drawlist_tag, h)
+        self.handler_registry = h
 
     def build_full_canvas(self) -> None:
         """Clear and redraw the entire graph."""
