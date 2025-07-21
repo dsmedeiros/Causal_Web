@@ -17,10 +17,8 @@ from ..graph.io import save_graph, load_graph
 from ..config import Config
 from ..engine.tick_engine import (
     simulation_loop,
-    graph,
     build_graph,
     _update_simulation_state,
-    recent_csp_failures,
 )
 
 # Tick stores for visual update
@@ -135,7 +133,7 @@ def add_node_callback() -> None:
     _commands.do(cmd)
     set_selected_node(f"N{idx}")
     if canvas is not None:
-        canvas.redraw()
+        canvas.build_full_canvas()
 
 
 def start_sim_callback():
@@ -152,123 +150,6 @@ def start_sim_callback():
     simulation_loop()
     dpg.configure_item("start_button", enabled=False)
     _update_simulation_state(False, False, tick, None)
-
-
-def update_display():
-    if dpg.does_item_exist("tick_counter"):
-        with Config.state_lock:
-            tick = Config.current_tick
-        dpg.set_value("tick_counter", f"Tick: {tick}")
-
-
-def update_graph_visuals():
-    # for node_id in graph.nodes:
-    #     tick_count = len(graph.get_node(node_id).tick_history)
-    #     label_tag = f"{node_id}_label"
-    #     if dpg.does_item_exist(label_tag):
-    #         dpg.set_value(label_tag, f"{node_id}\\nTicks: {tick_count}")
-    #         print(f"[GUI] {node_id} ticks: {tick_count}")
-    if not dpg.does_item_exist("graph_drawlist"):
-        return
-
-    dpg.delete_item("graph_drawlist", children_only=True)
-
-    cluster_map = {}
-    clusters = graph.detect_clusters()
-    for idx, c in enumerate(clusters, start=1):
-        for nid in c:
-            cluster_map[nid] = idx
-
-    for node_id, node in graph.nodes.items():
-        x, y = node.x, node.y
-        tick_count = len(node.tick_history)
-        vel = getattr(node, "coherence_velocity", 0.0)
-
-        color = ORIGIN_COLORS.get(getattr(node, "origin_type", ""), (100, 149, 237))
-
-        dpg.draw_circle(
-            center=(x, y), radius=30, color=color, fill=color, parent="graph_drawlist"
-        )
-
-        label = f"{node_id}\nTicks: {tick_count}\nVel:{vel:.2f}"
-        if node_id in cluster_map:
-            label += f"\nC{cluster_map[node_id]}"
-        dpg.draw_text(
-            pos=(x - 30, y - 15),
-            text=label,
-            size=15,
-            color=(255, 255, 255),
-            parent="graph_drawlist",
-        )
-
-    # Draw edges with curvature overlays
-    for edge in graph.edges:
-        from_node = graph.nodes.get(edge.source)
-        to_node = graph.nodes.get(edge.target)
-        if from_node is None or to_node is None:
-            continue
-
-        delay = edge.adjusted_delay(
-            from_node.law_wave_frequency, to_node.law_wave_frequency
-        )
-        thickness = 2 + delay * 0.2
-        intensity = min(255, int(50 + delay * 20))
-        color = (200, 200 - intensity if 200 - intensity > 0 else 0, 200)
-
-        dpg.draw_arrow(
-            p1=(from_node.x, from_node.y),
-            p2=(to_node.x, to_node.y),
-            color=color,
-            thickness=thickness,
-            parent="graph_drawlist",
-        )
-
-    # Draw ripples for recent CSP failures
-    with Config.state_lock:
-        now = Config.current_tick
-    for rip in list(recent_csp_failures):
-        age = now - rip["tick"]
-        if age > 10:
-            recent_csp_failures.remove(rip)
-            continue
-        radius = 5 + age * 5
-        alpha = max(0, 255 - age * 25)
-        dpg.draw_circle(
-            center=(rip["x"], rip["y"]),
-            radius=radius,
-            color=(255, 165, 0, alpha),
-            fill=(255, 165, 0, 50),
-            parent="graph_drawlist",
-        )
-
-
-def refresh():
-    update_graph_visuals()
-    if dpg.does_item_exist("tick_counter"):
-        with Config.state_lock:
-            tick = Config.current_tick
-        dpg.set_value("tick_counter", f"Tick: {tick}")
-    dpg.render_dearpygui_frame()
-
-
-def launch():
-    dashboard()
-
-
-def gui_update_callback():
-    update_graph_visuals()
-    if canvas is not None:
-        canvas.redraw()
-    if dpg.does_item_exist("tick_counter"):
-        with Config.state_lock:
-            tick = Config.current_tick
-        dpg.set_value("tick_counter", f"Tick: {tick}")
-    if dpg.does_item_exist("graph_status_bar"):
-        file = get_active_file() or "<unsaved>"
-        selected = get_selected_node() or "none"
-        dpg.set_value("graph_status_bar", f"File: {file}  Selected: {selected}")
-    next_frame = dpg.get_frame_count()
-    dpg.set_frame_callback(next_frame, gui_update_callback)
 
 
 def graph_resize_callback(sender, app_data, user_data):
@@ -452,6 +333,12 @@ def dashboard():
     dpg.show_viewport()
     dpg.set_primary_window("graph_window", True)
     graph_resize_callback(None, None, None)
-    dpg.set_frame_callback(1, gui_update_callback)
+    if canvas is not None:
+        canvas.build_full_canvas()
     dpg.start_dearpygui()
     dpg.destroy_context()
+
+
+def launch() -> None:
+    """Entry point for the GUI."""
+    dashboard()

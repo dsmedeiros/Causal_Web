@@ -39,8 +39,9 @@ class GraphCanvas:
                 dpg.add_drawlist(tag=self.drawlist_tag, width=1, height=1)
                 dpg.add_text("", tag="graph_status_bar")
         self.node_items: Dict[str, int] = {}
-        self.edge_items: list[int] = []
-        self.bridge_items: list[int] = []
+        self.label_items: Dict[str, int] = {}
+        self.edge_items: Dict[int, int] = {}
+        self.bridge_items: Dict[int, int] = {}
         dpg.set_item_user_data(self.drawlist_tag, self)
         # attach global handlers since per-item handlers cause startup errors
         # with some Dear PyGui versions
@@ -53,6 +54,11 @@ class GraphCanvas:
             dpg.add_mouse_release_handler(
                 button=dpg.mvMouseButton_Left,
                 callback=self._handle_click,
+                parent=h,
+            )
+            dpg.add_mouse_drag_handler(
+                button=dpg.mvMouseButton_Left,
+                callback=self._update_drag,
                 parent=h,
             )
         self.handler_registry = h
@@ -72,18 +78,18 @@ class GraphCanvas:
             height = 400
         dpg.configure_item(self.drawlist_tag, width=width, height=height)
 
-    def redraw(self) -> None:
+    def build_full_canvas(self) -> None:
         """Clear and redraw the entire graph."""
         if not dpg.does_item_exist(self.drawlist_tag):
             return
-        self._update_drag()
         dpg.delete_item(self.drawlist_tag, children_only=True)
         graph = get_graph()
         self.node_items.clear()
+        self.label_items.clear()
         self.edge_items.clear()
         self.bridge_items.clear()
 
-        for edge in graph.edges:
+        for idx, edge in enumerate(graph.edges):
             p1 = graph.node_position(edge.get("from"))
             p2 = graph.node_position(edge.get("to"))
             if p1 is None or p2 is None:
@@ -91,9 +97,9 @@ class GraphCanvas:
             item = dpg.draw_arrow(
                 p1=p1, p2=p2, color=(150, 150, 150), parent=self.drawlist_tag
             )
-            self.edge_items.append(item)
+            self.edge_items[idx] = item
 
-        for bridge in graph.bridges:
+        for idx, bridge in enumerate(graph.bridges):
             nodes = bridge.get("nodes")
             if not nodes or len(nodes) != 2:
                 continue
@@ -108,7 +114,7 @@ class GraphCanvas:
                 thickness=1,
                 parent=self.drawlist_tag,
             )
-            self.bridge_items.append(item)
+            self.bridge_items[idx] = item
 
         for node_id, data in graph.nodes.items():
             pos = graph.node_position(node_id)
@@ -123,8 +129,14 @@ class GraphCanvas:
                 parent=self.drawlist_tag,
                 tag=f"node_{node_id}",
             )
-            dpg.draw_text(pos=(x - 10, y - 5), text=node_id, parent=self.drawlist_tag)
+            label = dpg.draw_text(
+                pos=(x - 10, y - 5),
+                text=node_id,
+                parent=self.drawlist_tag,
+                tag=f"label_{node_id}",
+            )
             self.node_items[node_id] = item
+            self.label_items[node_id] = label
 
     def _handle_mouse_down(self, sender, app_data):
         """Begin dragging the node under the cursor if any."""
@@ -156,35 +168,101 @@ class GraphCanvas:
         print("[GraphCanvas] Click not on any node")
         set_selected_node(None)
 
-    def _update_drag(self) -> None:
-        """Move the selected node when the mouse is dragged."""
+    def _update_drag(self, sender=None, app_data=None) -> None:
+        """Move only the dragged node and its edges."""
         if self.dragging_node is None:
             return
-        if dpg.is_mouse_button_down(dpg.mvMouseButton_Left):
-            graph = get_graph()
-            mouse = dpg.get_drawing_mouse_pos(drawing=self.drawlist_tag)
-            x = mouse[0]
-            y = mouse[1]
-            node = graph.nodes.get(self.dragging_node)
-            if node is not None:
-                node["x"] = x
-                node["y"] = y
-                print(f"[GraphCanvas] Dragging {self.dragging_node} to {(x, y)}")
-        else:
+        if not dpg.is_mouse_button_down(dpg.mvMouseButton_Left):
             print(f"[GraphCanvas] Finished dragging {self.dragging_node}")
             self.dragging_node = None
+            return
+
+        graph = get_graph()
+        mouse = dpg.get_drawing_mouse_pos(drawing=self.drawlist_tag)
+        x, y = mouse
+        node = graph.nodes.get(self.dragging_node)
+        if node is None:
+            return
+
+        node["x"] = x
+        node["y"] = y
+
+        # update node visuals
+        circle = self.node_items.get(self.dragging_node)
+        label = self.label_items.get(self.dragging_node)
+        if circle is not None and dpg.does_item_exist(circle):
+            dpg.delete_item(circle)
+        if label is not None and dpg.does_item_exist(label):
+            dpg.delete_item(label)
+        new_circle = dpg.draw_circle(
+            center=(x, y),
+            radius=20,
+            color=(200, 200, 200),
+            fill=(60, 60, 60),
+            parent=self.drawlist_tag,
+            tag=f"node_{self.dragging_node}",
+        )
+        new_label = dpg.draw_text(
+            pos=(x - 10, y - 5),
+            text=self.dragging_node,
+            parent=self.drawlist_tag,
+            tag=f"label_{self.dragging_node}",
+        )
+        self.node_items[self.dragging_node] = new_circle
+        self.label_items[self.dragging_node] = new_label
+
+        # update connected edges
+        for idx, edge in enumerate(graph.edges):
+            if (
+                edge.get("from") == self.dragging_node
+                or edge.get("to") == self.dragging_node
+            ):
+                item = self.edge_items.get(idx)
+                if item is not None and dpg.does_item_exist(item):
+                    dpg.delete_item(item)
+                p1 = graph.node_position(edge.get("from"))
+                p2 = graph.node_position(edge.get("to"))
+                if p1 is None or p2 is None:
+                    continue
+                self.edge_items[idx] = dpg.draw_arrow(
+                    p1=p1,
+                    p2=p2,
+                    color=(150, 150, 150),
+                    parent=self.drawlist_tag,
+                )
+
+        for idx, bridge in enumerate(graph.bridges):
+            nodes = bridge.get("nodes")
+            if not nodes or self.dragging_node not in nodes:
+                continue
+            item = self.bridge_items.get(idx)
+            if item is not None and dpg.does_item_exist(item):
+                dpg.delete_item(item)
+            p1 = graph.node_position(nodes[0])
+            p2 = graph.node_position(nodes[1])
+            if p1 is None or p2 is None:
+                continue
+            self.bridge_items[idx] = dpg.draw_line(
+                p1=p1,
+                p2=p2,
+                color=(200, 100, 100),
+                thickness=1,
+                parent=self.drawlist_tag,
+            )
+
+        print(f"[GraphCanvas] Dragging {self.dragging_node} to {(x, y)}")
 
     def auto_layout(self) -> None:
         """Apply a force-directed layout to the current graph."""
 
         graph = get_graph()
         graph.apply_spring_layout()
-        self.redraw()
+        self.build_full_canvas()
 
     def undo(self) -> None:
         _commands.undo()
-        self.redraw()
+        self.build_full_canvas()
 
     def redo(self) -> None:
         _commands.redo()
-        self.redraw()
+        self.build_full_canvas()
