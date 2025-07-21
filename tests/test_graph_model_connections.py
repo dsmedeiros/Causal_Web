@@ -1,4 +1,5 @@
 from Causal_Web.graph.model import GraphModel
+import pytest
 
 
 def _sample_nodes(model: GraphModel) -> None:
@@ -13,6 +14,29 @@ def test_add_edge():
     assert model.edges[0]["from"] == "A"
     assert model.edges[0]["to"] == "B"
     assert model.edges[0]["delay"] == 2
+
+
+def test_no_self_loop():
+    model = GraphModel.blank()
+    _sample_nodes(model)
+    with pytest.raises(ValueError):
+        model.add_connection("A", "A")
+
+
+def test_duplicate_edge_disallowed():
+    model = GraphModel.blank()
+    _sample_nodes(model)
+    model.add_connection("A", "B")
+    with pytest.raises(ValueError):
+        model.add_connection("A", "B")
+
+
+def test_apply_spring_layout():
+    model = GraphModel.blank()
+    _sample_nodes(model)
+    model.add_connection("A", "B")
+    model.apply_spring_layout()
+    assert "x" in model.nodes["A"]
 
 
 def test_add_bridge_and_edit():
