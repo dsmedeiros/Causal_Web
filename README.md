@@ -189,6 +189,7 @@ For troubleshooting, the canvas now prints debug messages to the console wheneve
 nodes are clicked or dragged.
 The Graph View window now resizes correctly, keeping graph elements interactive.
 A resize handler bug that halted GUI updates after resizing has been fixed.
+Rendering is now event driven so the canvas only updates when the graph changes, greatly reducing idle CPU usage.
 
 ### Analysing the output
 
