@@ -182,6 +182,8 @@ drags work as expected. Dragging begins on mouse press, making node movement
 smooth even when the button is held down before moving.
 A startup crash caused by invalid handler parents has been fixed by registering
 mouse events through a global handler registry.
+Node dragging now remains responsive after resizing the window thanks to using
+`dpg.get_drawing_mouse_pos()` to obtain the drawing-relative mouse position.
 For troubleshooting, the canvas now prints debug messages to the console whenever
 nodes are clicked or dragged.
 
