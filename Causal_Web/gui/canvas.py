@@ -15,6 +15,9 @@ from .state import (
     get_selected_node,
 )
 from . import connection_tool
+from .command_stack import CommandStack
+
+_commands = CommandStack()
 
 
 @dataclass
@@ -119,3 +122,18 @@ class GraphCanvas:
                 node["y"] = y
         else:
             self.dragging_node = None
+
+    def auto_layout(self) -> None:
+        """Apply a force-directed layout to the current graph."""
+
+        graph = get_graph()
+        graph.apply_spring_layout()
+        self.redraw()
+
+    def undo(self) -> None:
+        _commands.undo()
+        self.redraw()
+
+    def redo(self) -> None:
+        _commands.redo()
+        self.redraw()

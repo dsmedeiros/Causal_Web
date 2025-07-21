@@ -121,8 +121,12 @@ class GraphModel:
             raise ValueError("connection_type must be 'edge' or 'bridge'")
         if source not in self.nodes or target not in self.nodes:
             raise ValueError("source and target must exist in the graph")
+        if source == target:
+            raise ValueError("self-loops are not allowed")
 
         if connection_type == "edge":
+            if any(e["from"] == source and e["to"] == target for e in self.edges):
+                raise ValueError("duplicate edge")
             self.edges.append(
                 {
                     "from": source,
@@ -132,6 +136,8 @@ class GraphModel:
                 }
             )
         else:
+            if any(set(b.get("nodes", [])) == {source, target} for b in self.bridges):
+                raise ValueError("duplicate bridge")
             self.bridges.append(
                 {
                     "nodes": [source, target],
@@ -161,3 +167,24 @@ class GraphModel:
         if index < 0 or index >= len(target_list):
             raise IndexError("connection index out of range")
         del target_list[index]
+
+    def apply_spring_layout(self) -> None:
+        """Position nodes using ``networkx.spring_layout``."""
+
+        import networkx as nx
+
+        g = nx.Graph()
+        for node_id in self.nodes:
+            g.add_node(node_id)
+        for edge in self.edges:
+            g.add_edge(edge["from"], edge["to"])
+        for bridge in self.bridges:
+            nodes = bridge.get("nodes", [])
+            if len(nodes) == 2:
+                g.add_edge(nodes[0], nodes[1])
+
+        pos = nx.spring_layout(g)
+        for nid, coords in pos.items():
+            node = self.nodes.get(nid, {})
+            node["x"], node["y"] = float(coords[0]), float(coords[1])
+            self.nodes[nid] = node

@@ -11,6 +11,8 @@ from .state import (
 )
 from . import connection_tool
 from .toolbar import add_toolbar
+from .command_stack import AddNodeCommand
+from .canvas import _commands
 from ..graph.io import save_graph, load_graph
 from ..config import Config
 from ..engine.tick_engine import (
@@ -129,7 +131,8 @@ def add_node_callback() -> None:
     idx = 1
     while f"N{idx}" in model.nodes:
         idx += 1
-    model.add_node(f"N{idx}", x=50.0 * idx, y=50.0 * idx)
+    cmd = AddNodeCommand(model, f"N{idx}", {"x": 50.0 * idx, "y": 50.0 * idx})
+    _commands.do(cmd)
     set_selected_node(f"N{idx}")
     if canvas is not None:
         canvas.redraw()
