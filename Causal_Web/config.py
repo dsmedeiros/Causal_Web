@@ -1,6 +1,7 @@
 # config.py
 
 import os
+import shutil
 import threading
 
 
@@ -10,6 +11,7 @@ class Config:
     # Base directories for package resources
     base_dir = os.path.abspath(os.path.dirname(__file__))
     input_dir = os.path.join(base_dir, "input")
+    config_file = os.path.join(input_dir, "config.json")
     output_root = os.path.join(base_dir, "output")
     runs_dir = os.path.join(output_root, "runs")
     archive_dir = os.path.join(output_root, "archive")
@@ -170,6 +172,9 @@ class Config:
     def new_run(cls, slug: str = "run") -> str:
         """Create and activate a new run directory.
 
+        The current ``graph.json`` and ``config.json`` are copied into the
+        run's ``input`` folder and summary metadata is stored in PostgreSQL.
+
         Parameters
         ----------
         slug:
@@ -185,7 +190,29 @@ class Config:
         ts = datetime.utcnow().strftime("%Y-%m-%d_%H-%M-%S")
         run_dir = os.path.join(cls.runs_dir, f"{ts}__{slug}")
         os.makedirs(run_dir, exist_ok=True)
+
+        input_dest = os.path.join(run_dir, "input")
+        os.makedirs(input_dest, exist_ok=True)
+        graph_src = cls.input_path("graph.json")
+        if os.path.exists(graph_src):
+            shutil.copy2(graph_src, os.path.join(input_dest, "graph.json"))
+        if os.path.exists(cls.config_file):
+            shutil.copy2(cls.config_file, os.path.join(input_dest, "config.json"))
+
         cls.output_dir = run_dir
+
+        try:
+            from .database import record_run
+
+            record_run(
+                os.path.basename(run_dir),
+                os.path.join(input_dest, "config.json"),
+                os.path.join(input_dest, "graph.json"),
+                run_dir,
+            )
+        except Exception:
+            pass
+
         return run_dir
 
     @classmethod
@@ -207,6 +234,7 @@ class Config:
             raise FileNotFoundError(path)
         with open(path) as f:
             data = json.load(f)
+        cls.config_file = os.path.abspath(path)
 
         paths = data.get("paths")
         if isinstance(paths, dict):
@@ -229,6 +257,7 @@ def load_config(path: str | None = None) -> dict:
     if path is None:
         path = Config.input_path("config.json")
     Config.load_from_file(path)
+    Config.config_file = os.path.abspath(path)
     import json
 
     with open(path) as f:

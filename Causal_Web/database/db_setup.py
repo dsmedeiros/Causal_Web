@@ -75,7 +75,21 @@ CREATE TABLE IF NOT EXISTS system_state_history (
 CREATE INDEX IF NOT EXISTS idx_system_state_tick ON system_state_history (tick);
 CREATE INDEX IF NOT EXISTS idx_system_state_payload ON system_state_history USING GIN (payload);
 
--- Table 6: causal_analysis_results
+-- Table 6: runs
+CREATE TABLE IF NOT EXISTS runs (
+    run_id TEXT PRIMARY KEY,
+    timestamp TEXT NOT NULL,
+    description TEXT,
+    seed INTEGER,
+    tick_limit INTEGER,
+    topology_type TEXT,
+    was_generated BOOLEAN,
+    node_count INTEGER,
+    edge_count INTEGER,
+    archive_path TEXT
+);
+
+-- Table 7: causal_analysis_results
 CREATE TABLE IF NOT EXISTS causal_analysis_results (
     log_id TEXT PRIMARY KEY,
     run_id TEXT NOT NULL,
