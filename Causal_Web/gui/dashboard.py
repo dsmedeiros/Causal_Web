@@ -1,8 +1,10 @@
 import os
 import dearpygui.dearpygui as dpg
 from .canvas import GraphCanvas
-from .state import get_active_file, get_selected_node
+from .state import get_active_file, get_selected_node, get_graph
 from . import connection_tool
+from .toolbar import add_toolbar
+from ..graph.io import save_graph
 from ..config import Config
 from ..engine.tick_engine import (
     simulation_loop,
@@ -115,6 +117,11 @@ def _add_param_controls(data: dict, prefix: str = "") -> None:
 
 
 def start_sim_callback():
+    path = get_active_file() or Config.input_path("graph.json")
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    save_graph(path, get_graph())
+    Config.new_run()
+    build_graph()
     with Config.state_lock:
         if Config.is_running:
             return
@@ -323,6 +330,7 @@ def dashboard():
         _add_param_controls(config_data)
 
     with dpg.window(label="Graph Editor", width=200, height=150, pos=(610, 120)):
+        add_toolbar()
         dpg.add_button(
             label="Add Connection",
             callback=connection_tool.start_add_connection,
