@@ -1,5 +1,6 @@
 {
   "paths": {
+    "input_dir": "./Causal_Web/input",
     "output_root": "./Causal_Web/output",
     "runs_dir": "./Causal_Web/output/runs",
     "archive_dir": "./Causal_Web/output/archive",

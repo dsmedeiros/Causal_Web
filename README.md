@@ -179,9 +179,12 @@ This command loads the logs and generates several summary files:
 ## Output logs
 Simulation results are organised under `output/` which now contains separate
 directories for each run. A new run directory is created via
-`Config.new_run()` and has the form `runs/<timestamp>__<slug>`. The location of
-`runs/` and other output folders can be customised using the `paths` section in
-`input/config.json`.
+`Config.new_run()` and has the form `runs/<timestamp>__<slug>`. The current
+`graph.json` and `config.json` files are copied into each run's `input/`
+subdirectory so every run has a frozen copy of its inputs. Basic metadata
+about the run is inserted into the PostgreSQL `runs` table automatically. The
+location of `runs/` and other output folders can be customised using the
+`paths` section in `input/config.json`.
 Logging for each file can be enabled or disabled individually using the
 **Logging** window in the GUI or via the `log_files` section of the
 configuration file.
