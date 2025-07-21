@@ -127,6 +127,7 @@ class GraphCanvas:
 
     def _handle_click(self, sender, app_data):
         """Handle mouse release events over nodes."""
+
         mouse = dpg.get_drawing_mouse_pos()
         print(f"[GraphCanvas] Click at {mouse}")
         for node_id, item in self.node_items.items():
