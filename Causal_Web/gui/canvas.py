@@ -51,9 +51,6 @@ class GraphCanvas:
 
         # attach handlers that only fire when the mouse is over the canvas
         with dpg.item_handler_registry(tag=f"{self.drawlist_tag}_handlers") as h:
-            dpg.add_mouse_down_handler(
-                button=dpg.mvMouseButton_Left, callback=self._handle_mouse_down
-            )
             dpg.add_mouse_click_handler(
                 button=dpg.mvMouseButton_Left, callback=self._handle_click
             )
@@ -124,22 +121,8 @@ class GraphCanvas:
             self.node_items[node_id] = item
             self.label_items[node_id] = label
 
-    def _handle_mouse_down(self, sender, app_data):
-        """Begin dragging the node under the cursor if any."""
-        mouse = dpg.get_drawing_mouse_pos(tag=self.drawlist_tag)
-        for node_id, item in self.node_items.items():
-            center = dpg.get_item_configuration(item)["center"]
-            dx = mouse[0] - center[0]
-            dy = mouse[1] - center[1]
-            if dx * dx + dy * dy <= 20 * 20:
-                print(f"[GraphCanvas] Selected node {node_id}")
-                set_selected_node(node_id)
-                self.dragging_node = node_id
-                return
-        set_selected_node(None)
-
     def _handle_click(self, sender, app_data):
-        """Handle mouse release events over nodes."""
+        """Handle mouse click events over nodes and begin dragging if needed."""
 
         mouse = dpg.get_drawing_mouse_pos(tag=self.drawlist_tag)
         print(f"[GraphCanvas] Click at {mouse}")
@@ -148,6 +131,9 @@ class GraphCanvas:
             dx = mouse[0] - center[0]
             dy = mouse[1] - center[1]
             if dx * dx + dy * dy <= 20 * 20:
+                print(f"[GraphCanvas] Selected node {node_id}")
+                set_selected_node(node_id)
+                self.dragging_node = node_id
                 if connection_tool.handle_node_click(node_id):
                     print(f"[GraphCanvas] Connection tool handled click on {node_id}")
                 return

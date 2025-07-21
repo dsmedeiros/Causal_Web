@@ -47,7 +47,6 @@
     <Compile Include="gui\command_stack.py" />
     <Compile Include="gui\connection_tool.py" />
     <Compile Include="gui\dashboard.py" />
-    <Compile Include="gui\graph_panel.py" />
     <Compile Include="gui\menu.py" />
     <Compile Include="gui\state.py" />
     <Compile Include="gui\toolbar.py" />
