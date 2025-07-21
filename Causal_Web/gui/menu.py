@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import os
+import os
 import dearpygui.dearpygui as dpg
 
 from ..config import Config
 from ..graph.io import load_graph, new_graph, save_graph
-from .state import get_graph, set_graph
+from .state import get_graph, set_graph, set_active_file
 
 
 _last_directory = Config.input_dir
@@ -33,6 +34,7 @@ def _on_load_dialog(sender, app_data):
         print(f"Failed to load graph: {exc}")
         return
     set_graph(graph)
+    set_active_file(path)
 
 
 def _on_save_dialog(sender, app_data):
@@ -45,10 +47,13 @@ def _on_save_dialog(sender, app_data):
         save_graph(path, get_graph())
     except Exception as exc:
         print(f"Failed to save graph: {exc}")
+        return
+    set_active_file(path)
 
 
 def _new_graph_callback():
     set_graph(new_graph(True))
+    set_active_file(None)
 
 
 def add_file_menu() -> None:

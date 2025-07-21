@@ -1,5 +1,7 @@
 import os
 import dearpygui.dearpygui as dpg
+from .canvas import GraphCanvas
+from .state import get_active_file, get_selected_node
 from ..config import Config
 from ..engine.tick_engine import (
     simulation_loop,
@@ -27,6 +29,7 @@ ripples = []  # GUI animations for failed CSP seeds
 node_positions = {"A1": (100, 200), "A2": (100, 300), "C": (400, 250)}
 node_tags = {}
 tick_counters = {}
+canvas: GraphCanvas | None = None
 
 
 def pause_resume_callback():
@@ -224,10 +227,16 @@ def launch():
 
 def gui_update_callback():
     update_graph_visuals()
+    if canvas is not None:
+        canvas.redraw()
     if dpg.does_item_exist("tick_counter"):
         with Config.state_lock:
             tick = Config.current_tick
         dpg.set_value("tick_counter", f"Tick: {tick}")
+    if dpg.does_item_exist("graph_status_bar"):
+        file = get_active_file() or "<unsaved>"
+        selected = get_selected_node() or "none"
+        dpg.set_value("graph_status_bar", f"File: {file}  Selected: {selected}")
     next_frame = dpg.get_frame_count() + 1
     dpg.set_frame_callback(next_frame, gui_update_callback)
 
@@ -362,6 +371,9 @@ def dashboard():
     with dpg.item_handler_registry(tag="graph_handlers"):
         dpg.add_item_resize_handler(callback=graph_resize_callback)
     dpg.bind_item_handler_registry("graph_window", "graph_handlers")
+
+    global canvas
+    canvas = GraphCanvas()
 
     dpg.setup_dearpygui()
     dpg.show_viewport()
