@@ -22,7 +22,11 @@ _commands = CommandStack()
 
 @dataclass
 class GraphCanvas:
-    """Widget for drawing graphs using Dear PyGui."""
+    """Widget for drawing graphs using Dear PyGui.
+
+    The canvas creates its own item handler registry to manage mouse events
+    which allows nodes to be dragged and selected without errors on startup.
+    """
 
     drawlist_tag: str = "graph_canvas_drawlist"
     window_tag: str = "graph_canvas_window"
@@ -38,16 +42,18 @@ class GraphCanvas:
         self.edge_items: list[int] = []
         self.bridge_items: list[int] = []
         dpg.set_item_user_data(self.drawlist_tag, self)
-        dpg.add_mouse_down_handler(
-            parent=self.drawlist_tag,
-            button=dpg.mvMouseButton_Left,
-            callback=self._handle_mouse_down,
-        )
-        dpg.add_mouse_release_handler(
-            parent=self.drawlist_tag,
-            button=dpg.mvMouseButton_Left,
-            callback=self._handle_click,
-        )
+        # event handlers must be attached via an item handler registry so that
+        # they remain valid across Dear PyGui versions
+        with dpg.item_handler_registry(tag=f"{self.drawlist_tag}_handlers") as h:
+            dpg.add_mouse_down_handler(
+                button=dpg.mvMouseButton_Left,
+                callback=self._handle_mouse_down,
+            )
+            dpg.add_mouse_release_handler(
+                button=dpg.mvMouseButton_Left,
+                callback=self._handle_click,
+            )
+        dpg.bind_item_handler_registry(self.drawlist_tag, h)
 
     def redraw(self) -> None:
         """Clear and redraw the entire graph."""
