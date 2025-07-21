@@ -171,8 +171,10 @@ the graph file is copied into the run's `input/` folder. This preserves the
 exact input used for each run.
 These actions operate on the `graph.json` format and update the shared in-memory model.
 The dashboard also includes a **Graph View** tab which renders the loaded graph and displays
-basic information for the currently selected node. The new **Graph Editor** window
-provides an **Add Connection** tool for creating or editing directed edges or bridges.
+basic information for the currently selected node. The **Graph Editor** window
+now includes **Add Node** and **Add Connection** tools for building the graph.
+Nodes can be repositioned directly in the **Graph View** by dragging them with
+the mouse.
 
 ### Analysing the output
 

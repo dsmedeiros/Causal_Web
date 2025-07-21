@@ -1,10 +1,17 @@
 import os
 import dearpygui.dearpygui as dpg
 from .canvas import GraphCanvas
-from .state import get_active_file, get_selected_node, get_graph
+from .state import (
+    get_active_file,
+    get_selected_node,
+    get_graph,
+    set_graph,
+    set_active_file,
+    set_selected_node,
+)
 from . import connection_tool
 from .toolbar import add_toolbar
-from ..graph.io import save_graph
+from ..graph.io import save_graph, load_graph
 from ..config import Config
 from ..engine.tick_engine import (
     simulation_loop,
@@ -114,6 +121,18 @@ def _add_param_controls(data: dict, prefix: str = "") -> None:
                 callback=_param_changed,
                 user_data=full,
             )
+
+
+def add_node_callback() -> None:
+    """Insert a new node into the editable graph."""
+    model = get_graph()
+    idx = 1
+    while f"N{idx}" in model.nodes:
+        idx += 1
+    model.add_node(f"N{idx}", x=50.0 * idx, y=50.0 * idx)
+    set_selected_node(f"N{idx}")
+    if canvas is not None:
+        canvas.redraw()
 
 
 def start_sim_callback():
@@ -272,6 +291,14 @@ def dashboard():
     with open(Config.input_path("config.json")) as f:
         config_data = json.load(f)
 
+    # populate the editable graph from disk
+    try:
+        model = load_graph(Config.input_path("graph.json"))
+        set_graph(model)
+        set_active_file(Config.input_path("graph.json"))
+    except Exception as exc:
+        print(f"Failed to load graph for editor: {exc}")
+
     # remove settings duplicated elsewhere in the GUI
     config_data.pop("log_files", None)
     config_data.pop("tick_rate", None)
@@ -331,6 +358,7 @@ def dashboard():
 
     with dpg.window(label="Graph Editor", width=200, height=150, pos=(610, 120)):
         add_toolbar()
+        dpg.add_button(label="Add Node", callback=add_node_callback)
         dpg.add_button(
             label="Add Connection",
             callback=connection_tool.start_add_connection,

@@ -61,6 +61,30 @@ class GraphModel:
             return None
         return node.get("x", 0.0), node.get("y", 0.0)
 
+    def add_node(
+        self,
+        node_id: str,
+        *,
+        x: float = 0.0,
+        y: float = 0.0,
+        frequency: float = 1.0,
+        refractory_period: float = 2.0,
+        base_threshold: float = 0.5,
+    ) -> None:
+        """Insert a new node into the model."""
+
+        self.nodes[node_id] = {
+            "x": x,
+            "y": y,
+            "frequency": frequency,
+            "refractory_period": refractory_period,
+            "base_threshold": base_threshold,
+            "phase": 0.0,
+            "origin_type": "seed",
+            "generation_tick": 0,
+            "parent_ids": [],
+        }
+
     def get_edges(self) -> List[Dict[str, Any]]:
         """Return a list of edges in the graph."""
         return self.edges
