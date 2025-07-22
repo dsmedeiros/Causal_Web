@@ -184,6 +184,8 @@ These actions operate on the `graph.json` format and update the shared in-memory
 The dashboard also includes a **Graph View** tab which renders the loaded graph and displays
 basic information for the currently selected node. The **Graph Editor** window
 now includes **Add Node** and **Add Connection** tools for building the graph.
+Selecting a node shows a docked panel where its attributes can be edited. When two nodes are
+chosen for a new connection a connection panel allows its type and parameters to be configured.
 Nodes can be repositioned directly in the **Graph View** by dragging them with
 the mouse. Interaction is handled by :class:`CanvasWidget`, a reusable
 ``QGraphicsView`` subclass that supports selection, dragging, zooming and panning.

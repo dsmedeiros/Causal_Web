@@ -12,7 +12,6 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QPushButton,
     QSlider,
-    QToolBar,
     QWidget,
 )
 
@@ -26,6 +25,8 @@ from ..gui.state import (
     set_active_file,
 )
 from .canvas_widget import CanvasWidget
+from .toolbar_builder import build_toolbar
+from ..command_stack import AddNodeCommand
 from ..engine import tick_engine
 
 
@@ -50,7 +51,7 @@ class MainWindow(QMainWindow):
         self._redo_shortcut.activated.connect(self.canvas.redo)
 
         self._create_menus()
-        self._create_toolbars()
+        build_toolbar(self)
         self._create_docks()
 
     # ---- UI setup ----
@@ -70,30 +71,6 @@ class MainWindow(QMainWindow):
         new_action = QAction("New", self)
         new_action.triggered.connect(self.new_graph)
         file_menu.addAction(new_action)
-
-        edit_menu = menubar.addMenu("Edit")
-
-        layout_action = QAction("Auto Layout", self)
-        layout_action.triggered.connect(self.canvas.auto_layout)
-        edit_menu.addAction(layout_action)
-
-        undo_action = QAction("Undo", self)
-        undo_action.triggered.connect(self.canvas.undo)
-        edit_menu.addAction(undo_action)
-
-        redo_action = QAction("Redo", self)
-        redo_action.triggered.connect(self.canvas.redo)
-        edit_menu.addAction(redo_action)
-
-    def _create_toolbars(self) -> None:
-        """Create a toolbar with graph actions."""
-
-        toolbar = QToolBar("Graph", self)
-        self.addToolBar(toolbar)
-
-        connect_action = QAction("Connect", self)
-        connect_action.triggered.connect(self.canvas.enable_connection_mode)
-        toolbar.addAction(connect_action)
 
     def _create_docks(self) -> None:
         dock = QDockWidget("Control Panel", self)
@@ -169,6 +146,20 @@ class MainWindow(QMainWindow):
         set_graph(model)
         set_active_file(None)
         self.canvas.load_model(model)
+
+    def add_node(self) -> None:
+        """Insert a new node and refresh the canvas."""
+        model = get_graph()
+        idx = 1
+        while f"N{idx}" in model.nodes:
+            idx += 1
+        cmd = AddNodeCommand(model, f"N{idx}", {"x": 50.0 * idx, "y": 50.0 * idx})
+        self.canvas.command_stack.do(cmd)
+        self.canvas.load_model(model)
+
+    def start_add_connection(self) -> None:
+        """Enable interactive connection mode."""
+        self.canvas.enable_connection_mode()
 
 
 def launch() -> None:

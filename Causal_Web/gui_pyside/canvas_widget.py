@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Dict, Optional, Tuple
 
-from PySide6.QtCore import QPointF, Qt
+from PySide6.QtCore import QPointF, Qt, Signal
 from PySide6.QtGui import (
     QBrush,
     QMouseEvent,
@@ -57,6 +57,7 @@ class NodeItem(QGraphicsEllipseItem):
     def mousePressEvent(self, event: QMouseEvent) -> None:  # type: ignore[override]
         if event.button() == Qt.LeftButton:
             set_selected_node(self.node_id)
+            self.canvas.node_selected.emit(self.node_id)
             self._drag_start = self.pos()
         super().mousePressEvent(event)
 
@@ -89,6 +90,9 @@ class EdgeItem(QGraphicsLineItem):
 
 class CanvasWidget(QGraphicsView):
     """Graphics view displaying nodes and edges with antialiasing enabled."""
+
+    node_selected = Signal(str)
+    connection_request = Signal(str, str)
 
     def __init__(self, parent: Optional[QGraphicsView] = None):
         super().__init__(parent)
@@ -175,14 +179,9 @@ class CanvasWidget(QGraphicsView):
             if self._connect_start:
                 item = self.itemAt(event.pos())
                 if isinstance(item, NodeItem) and item is not self._connect_start:
-                    try:
-                        self.model.add_connection(
-                            self._connect_start.node_id, item.node_id
-                        )
-                    except Exception as exc:
-                        print(f"Failed to add connection: {exc}")
-                    else:
-                        self.load_model(self.model)
+                    self.connection_request.emit(
+                        self._connect_start.node_id, item.node_id
+                    )
                 if self._temp_edge and self.scene():
                     self.scene().removeItem(self._temp_edge)
                 self._temp_edge = None
