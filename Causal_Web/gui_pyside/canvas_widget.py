@@ -50,7 +50,8 @@ class NodeItem(QGraphicsEllipseItem):
         self._drag_start: Optional[QPointF] = None
 
     def itemChange(self, change, value):  # type: ignore[override]
-        if change == QGraphicsItem.ItemPositionChange:
+        """Redraw connected edges whenever the node moves."""
+        if change == QGraphicsItem.ItemPositionHasChanged:
             for edge in self.edges:
                 edge.update_position()
         return super().itemChange(change, value)
