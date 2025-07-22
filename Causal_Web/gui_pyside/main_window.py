@@ -72,6 +72,20 @@ class MainWindow(QMainWindow):
         new_action.triggered.connect(self.new_graph)
         file_menu.addAction(new_action)
 
+        edit_menu = menubar.addMenu("Edit")
+
+        layout_action = QAction("Auto Layout", self)
+        layout_action.triggered.connect(self.canvas.auto_layout)
+        edit_menu.addAction(layout_action)
+
+        undo_action = QAction("Undo", self)
+        undo_action.triggered.connect(self.canvas.undo)
+        edit_menu.addAction(undo_action)
+
+        redo_action = QAction("Redo", self)
+        redo_action.triggered.connect(self.canvas.redo)
+        edit_menu.addAction(redo_action)
+
     def _create_docks(self) -> None:
         dock = QDockWidget("Control Panel", self)
         panel = QWidget()
