@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Dict, Optional
 
 from PySide6.QtCore import QPointF, Qt
-from PySide6.QtGui import QBrush, QMouseEvent, QPen, QWheelEvent
+from PySide6.QtGui import QBrush, QMouseEvent, QPen, QWheelEvent, QPainter
 from PySide6.QtWidgets import (
     QGraphicsEllipseItem,
     QGraphicsItem,
@@ -64,12 +64,12 @@ class EdgeItem(QGraphicsLineItem):
 
 
 class CanvasWidget(QGraphicsView):
-    """Graphics view displaying nodes and edges."""
+    """Graphics view displaying nodes and edges with antialiasing enabled."""
 
     def __init__(self, parent: Optional[QGraphicsView] = None):
         super().__init__(parent)
         self.setScene(QGraphicsScene(self))
-        self.setRenderHint(self.RenderHint.Antialiasing)
+        self.setRenderHint(QPainter.Antialiasing)
         self.nodes: Dict[str, NodeItem] = {}
         self._pan_start: Optional[QPointF] = None
 
