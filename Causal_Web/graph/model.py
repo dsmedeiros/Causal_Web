@@ -99,6 +99,7 @@ class GraphModel:
         delay: float = 1.0,
         attenuation: float = 1.0,
         connection_type: str = "edge",
+        **props: Any,
     ) -> None:
         """Add an edge or bridge to the model.
 
@@ -127,25 +128,25 @@ class GraphModel:
         if connection_type == "edge":
             if any(e["from"] == source and e["to"] == target for e in self.edges):
                 raise ValueError("duplicate edge")
-            self.edges.append(
-                {
-                    "from": source,
-                    "to": target,
-                    "delay": delay,
-                    "attenuation": attenuation,
-                }
-            )
+            record = {
+                "from": source,
+                "to": target,
+                "delay": delay,
+                "attenuation": attenuation,
+            }
+            record.update(props)
+            self.edges.append(record)
         else:
             if any(set(b.get("nodes", [])) == {source, target} for b in self.bridges):
                 raise ValueError("duplicate bridge")
-            self.bridges.append(
-                {
-                    "nodes": [source, target],
-                    "delay": delay,
-                    "attenuation": attenuation,
-                    "status": "active",
-                }
-            )
+            record = {
+                "nodes": [source, target],
+                "delay": delay,
+                "attenuation": attenuation,
+                "status": "active",
+            }
+            record.update(props)
+            self.bridges.append(record)
 
     def update_connection(
         self,
