@@ -121,6 +121,7 @@ class CanvasWidget(QGraphicsView):
     node_selected = Signal(str)
     connection_request = Signal(str, str)
     connection_selected = Signal(str, int)
+    node_position_changed = Signal(str, float, float)
 
     def __init__(
         self, parent: Optional[QGraphicsView] = None, *, editable: bool = True
@@ -251,6 +252,7 @@ class CanvasWidget(QGraphicsView):
             return
         cmd = MoveNodeCommand(self.model, node_id, (end.x(), end.y()))
         self.command_stack.do(cmd)
+        self.node_position_changed.emit(node_id, end.x(), end.y())
 
     def undo(self) -> None:
         if not self.editable:

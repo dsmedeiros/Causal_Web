@@ -1,0 +1,20 @@
+{
+  "frequency": "The node's natural oscillation frequency",
+  "refractory_period": "The 'cooldown' time in ticks after a node fires",
+  "base_threshold": "The coherence level required for the node to fire",
+  "phase": "The initial phase of the node",
+  "tick_interval": "The number of ticks between each emission",
+  "tick_phase": "The phase of the ticks being emitted",
+  "end_tick": "The tick at which this source should stop emitting",
+  "attenuation": "A multiplier for how much a tick's amplitude is reduced",
+  "density": "A property of the medium that can affect tick propagation",
+  "delay": "The number of ticks it takes for a tick to cross the edge",
+  "phase_shift": "The amount of phase to add or subtract from a tick",
+  "weight": "General-purpose weight for the connection",
+  "phase_offset": "A phase difference maintained by the bridge",
+  "drift_tolerance": "How much phase shift the bridge can tolerate",
+  "decoherence_limit": "The decoherence level at which the bridge might rupture",
+  "initial_strength": "The starting strength of integrity of the bridge",
+  "medium_type": "The type of medium the bridge represents",
+  "mutable": "If the simulation can modify the bridge"
+}
