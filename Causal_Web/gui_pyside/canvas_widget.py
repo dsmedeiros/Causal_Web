@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Dict, Optional, Tuple
 
-from PySide6.QtCore import QPointF, Qt, Signal
+from PySide6.QtCore import QPoint, QPointF, Qt, Signal
 from PySide6.QtGui import (
     QBrush,
     QMouseEvent,
@@ -203,9 +203,10 @@ class CanvasWidget(QGraphicsView):
                 super().mouseReleaseEvent(event)
 
     # ---- helpers ----------------------------------------------------
-    def _update_temp_edge(self, view_pos: QPointF) -> None:
+    def _update_temp_edge(self, view_pos: QPoint) -> None:
+        """Update the dashed preview edge while dragging."""
         if self._temp_edge and self._connect_start:
-            scene_pos = self.mapToScene(view_pos.toPoint())
+            scene_pos = self.mapToScene(view_pos)
             self._temp_edge.setLine(
                 self._connect_start.x(),
                 self._connect_start.y(),
