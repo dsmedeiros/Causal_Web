@@ -25,7 +25,12 @@ from PySide6.QtWidgets import (
 from ..config import Config
 from ..graph.io import load_graph, save_graph, new_graph
 from ..graph.model import GraphModel
-from ..gui.state import get_graph, set_graph, set_active_file
+from ..gui.state import (
+    get_active_file,
+    get_graph,
+    set_graph,
+    set_active_file,
+)
 from ..engine import tick_engine
 
 
