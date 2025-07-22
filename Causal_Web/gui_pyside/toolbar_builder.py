@@ -127,34 +127,15 @@ class ConnectionPanel(QDockWidget):
 
 
 def build_toolbar(main_window) -> QToolBar:
-    """Create the graph toolbar and attach property panels."""
+    """Create the graph toolbar and attach property panels.
+
+    The toolbar now only exposes graph editing tools such as adding nodes or
+    connections. File and edit actions are provided by the menus on the main
+    window.
+    """
 
     toolbar = QToolBar("Graph", main_window)
     main_window.addToolBar(toolbar)
-
-    load_action = QAction("Load", main_window)
-    load_action.triggered.connect(main_window.load_graph)
-    toolbar.addAction(load_action)
-
-    save_action = QAction("Save", main_window)
-    save_action.triggered.connect(main_window.save_graph)
-    toolbar.addAction(save_action)
-
-    new_action = QAction("New", main_window)
-    new_action.triggered.connect(main_window.new_graph)
-    toolbar.addAction(new_action)
-
-    layout_action = QAction("Auto Layout", main_window)
-    layout_action.triggered.connect(main_window.canvas.auto_layout)
-    toolbar.addAction(layout_action)
-
-    undo_action = QAction("Undo", main_window)
-    undo_action.triggered.connect(main_window.canvas.undo)
-    toolbar.addAction(undo_action)
-
-    redo_action = QAction("Redo", main_window)
-    redo_action.triggered.connect(main_window.canvas.redo)
-    toolbar.addAction(redo_action)
 
     add_node_action = QAction("Add Node", main_window)
     add_node_action.triggered.connect(main_window.add_node)
