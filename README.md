@@ -197,6 +197,8 @@ Dragging begins on mouse press for smooth movement and remains responsive after
 resizing the window. Debug messages are printed to the console whenever nodes
 are clicked or dragged.
 Edges connected to a moving node are redrawn in real time so the relationships stay visible while dragging.
+Once the drag ends the node's new ``(x, y)`` coordinates are saved back to the
+graph model automatically.
 The Graph View window now resizes correctly, keeping graph elements interactive.
 A resize handler bug that halted GUI updates after resizing has been fixed.
 Dragging connections between nodes now works again across PySide6 versions.

@@ -42,6 +42,8 @@ class NodeItem(QGraphicsEllipseItem):
         self.setPos(QPointF(x, y))
         self.setBrush(QBrush(Qt.gray))
         self.setPen(QPen(Qt.lightGray))
+        # ensure itemChange is triggered so connected edges update while moving
+        self.setFlag(QGraphicsItem.ItemSendsGeometryChanges)
         if canvas.editable:
             self.setFlag(QGraphicsItem.ItemIsMovable)
             self.setFlag(QGraphicsItem.ItemIsSelectable)
