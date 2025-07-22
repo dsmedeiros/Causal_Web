@@ -25,6 +25,7 @@ Key modules include:
 - **`engine/logger.py`** – centralized buffer that batches log writes to disk.
 - **`engine/tick.py`** – defines :class:`Tick` and the reusable object pool.
 - **`gui_pyside/main_window.py`** – PySide6 dashboard for interactive runs.
+- **`gui_pyside/canvas_widget.py`** – reusable ``QGraphicsView`` for graph rendering.
 - **`main.py`** – simple entry point that launches the dashboard.
 
 Graphs are stored in `input/graph.json` inside the package. Paths are resolved relative to the package so the module can be run from any working directory. All output is written next to the code in the `output` directory.
@@ -176,17 +177,11 @@ The dashboard also includes a **Graph View** tab which renders the loaded graph 
 basic information for the currently selected node. The **Graph Editor** window
 now includes **Add Node** and **Add Connection** tools for building the graph.
 Nodes can be repositioned directly in the **Graph View** by dragging them with
-the mouse.
-Node interaction now correctly accounts for the window position so clicks and
-drags work as expected. Dragging begins on mouse press, making node movement
-smooth even when the button is held down before moving.
-A startup crash caused by invalid handler parents has been fixed by registering
-mouse events through a global handler registry.
-Node dragging now remains responsive after resizing the window thanks to using
-`dpg.get_drawing_mouse_pos(drawing=canvas.drawlist_tag)` to obtain the
-drawing-relative mouse position.
-For troubleshooting, the canvas now prints debug messages to the console whenever
-nodes are clicked or dragged.
+the mouse. Interaction is handled by :class:`CanvasWidget`, a reusable
+``QGraphicsView`` subclass that supports selection, dragging, zooming and panning.
+Dragging begins on mouse press for smooth movement and remains responsive after
+resizing the window. Debug messages are printed to the console whenever nodes
+are clicked or dragged.
 The Graph View window now resizes correctly, keeping graph elements interactive.
 A resize handler bug that halted GUI updates after resizing has been fixed.
 Rendering is now event driven so the canvas only updates when the graph changes, greatly reducing idle CPU usage.
