@@ -222,3 +222,9 @@ class CanvasWidget(QGraphicsView):
     def redo(self) -> None:
         self.command_stack.redo()
         self.load_model(self.model)
+
+    def auto_layout(self) -> None:
+        """Apply a spring layout to ``self.model`` and refresh the scene."""
+
+        self.model.apply_spring_layout()
+        self.load_model(self.model)
