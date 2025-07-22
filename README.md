@@ -229,8 +229,8 @@ subdirectory so every run has a frozen copy of its inputs. Basic metadata
 about the run is inserted into the PostgreSQL `runs` table automatically. The
 location of `runs/` and other output folders can be customised using the
 `paths` section in `input/config.json`.
-Logging for each file can be enabled or disabled individually using the
-**Logging** window in the GUI or via the `log_files` section of the
+Logging for each file can be enabled or disabled individually using
+**Settings > Log Files...** in the GUI or via the `log_files` section of the
 configuration file.
 All log entries are buffered in memory and flushed periodically to minimize
 disk writes.

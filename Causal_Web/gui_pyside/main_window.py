@@ -104,6 +104,11 @@ class MainWindow(QMainWindow):
         redo_action.triggered.connect(self.canvas.redo)
         edit_menu.addAction(redo_action)
 
+        settings_menu = menubar.addMenu("Settings")
+        log_action = QAction("Log Files...", self)
+        log_action.triggered.connect(self._show_log_files_window)
+        settings_menu.addAction(log_action)
+
     def _create_docks(self) -> None:
         dock = QDockWidget("Control Panel", self)
         panel = QWidget()
@@ -202,6 +207,14 @@ class MainWindow(QMainWindow):
         """Display the graph editor window."""
         self.canvas.load_model(GraphModel.from_dict(get_graph().to_dict()))
         self.canvas_dock.show()
+
+    def _show_log_files_window(self) -> None:
+        """Open the Log Files settings window."""
+        if not hasattr(self, "log_files_window"):
+            from .log_files_window import LogFilesWindow
+
+            self.log_files_window = LogFilesWindow(self)
+        self.log_files_window.show()
 
     def _load_into_main(self) -> None:
         """Apply the edited graph to the main simulation view and disk."""
