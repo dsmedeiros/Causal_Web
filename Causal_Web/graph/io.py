@@ -39,3 +39,5 @@ def _validate_graph(data: dict[str, Any]) -> None:
             raise ValueError("edge entries must be objects")
         if "from" not in edge or "to" not in edge:
             raise ValueError("edge missing 'from' or 'to'")
+    if "observers" in data and not isinstance(data["observers"], list):
+        raise ValueError("'observers' must be a list")

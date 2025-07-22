@@ -174,7 +174,7 @@ Use the on-screen controls to start or pause the simulation and adjust the tick 
 Use the **File** menu to load, save or start a new graph. Editing actions
 include **Edit Graph...**, **Undo** and **Redo** in the **Edit** menu.
 The **Graph View** dock now embeds a small toolbar offering **Add Node**,
-**Add Connection**, **Auto Layout** and a **Load Graph** button for quick access.
+**Add Connection**, **Add Observer**, **Auto Layout** and a **Load Graph** button for quick access.
 The **Auto Layout** action still arranges nodes using a spring layout.
 When you press **Start Simulation** the current graph is written back to
 `input/graph.json`, a new run directory is created via `Config.new_run()` and
@@ -183,7 +183,7 @@ exact input used for each run.
 These actions operate on the `graph.json` format and update the shared in-memory model.
 The dashboard also includes a **Graph View** tab which renders the loaded graph and displays
 basic information for the currently selected node. The **Graph View** window
-now includes **Add Node**, **Add Connection**, **Auto Layout** and **Load Graph**
+now includes **Add Node**, **Add Connection**, **Add Observer**, **Auto Layout** and **Load Graph**
 tools for building and applying the graph.
 Selecting a node shows a docked panel where its attributes can be edited. The panel now includes
 the node's initial **phase** and an optional **Tick Source** section for emitting periodic ticks.

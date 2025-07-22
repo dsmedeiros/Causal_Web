@@ -14,12 +14,15 @@ from PySide6.QtWidgets import (
     QDockWidget,
     QDoubleSpinBox,
     QFormLayout,
+    QListWidget,
+    QListWidgetItem,
     QPushButton,
     QToolBar,
     QWidget,
     QCheckBox,
     QLabel,
     QLineEdit,
+    QVBoxLayout,
 )
 
 from ..gui.state import get_graph, set_selected_node
@@ -32,6 +35,15 @@ try:
         TOOLTIPS: Dict[str, str] = json.load(fh)
 except FileNotFoundError:  # pragma: no cover - tooltips optional
     TOOLTIPS = {}
+
+EVENT_TYPES = [
+    "collapse",
+    "law_wave",
+    "emergence",
+    "coherence",
+    "phase",
+    "region",
+]
 
 
 class TooltipLabel(QLabel):
@@ -96,6 +108,8 @@ class NodePanel(QDockWidget):
         ]:
             spin = QDoubleSpinBox()
             spin.setDecimals(3)
+            if field in {"x", "y"}:
+                spin.setRange(-1_000_000, 1_000_000)
             label = TooltipLabel(field, TOOLTIPS.get(field))
             layout.addRow(label, spin)
             self.inputs[field] = spin
@@ -216,8 +230,8 @@ class ConnectionPanel(QDockWidget):
         layout.addRow("Type", self.type_combo)
 
         # edge widgets
-        self.source_edit = QLineEdit()
-        self.target_edit = QLineEdit()
+        self.source_edit = QComboBox()
+        self.target_edit = QComboBox()
         self.atten_spin = QDoubleSpinBox()
         self.atten_spin.setValue(1.0)
         self.density_spin = QDoubleSpinBox()
@@ -245,8 +259,8 @@ class ConnectionPanel(QDockWidget):
             layout.addRow(lbl, w)
 
         # bridge widgets
-        self.nodea_edit = QLineEdit()
-        self.nodeb_edit = QLineEdit()
+        self.nodea_edit = QComboBox()
+        self.nodeb_edit = QComboBox()
         self.bridge_type_combo = QComboBox()
         self.bridge_type_combo.addItems(["Braided"])
         self.phase_offset_spin = QDoubleSpinBox()
@@ -302,14 +316,26 @@ class ConnectionPanel(QDockWidget):
             lbl.setVisible(not is_edge)
             w.setVisible(not is_edge)
 
+    def _populate_node_lists(self) -> None:
+        nodes = list(get_graph().nodes)
+        for combo in (
+            self.source_edit,
+            self.target_edit,
+            self.nodea_edit,
+            self.nodeb_edit,
+        ):
+            combo.clear()
+            combo.addItems(nodes)
+
     def open_for(self, source: str, target: str) -> None:
+        self._populate_node_lists()
         self.source = source
         self.target = target
         self.current_index = None
         self.current_type = "edge"
         self.type_combo.setCurrentIndex(0)
-        self.source_edit.setText(source)
-        self.target_edit.setText(target)
+        self.source_edit.setCurrentText(source)
+        self.target_edit.setCurrentText(target)
         self.atten_spin.setValue(1.0)
         self.density_spin.setValue(0.0)
         self.delay_spin.setValue(1.0)
@@ -324,12 +350,13 @@ class ConnectionPanel(QDockWidget):
         data = model.edges[index] if conn_type == "edge" else model.bridges[index]
         self.current_index = index
         self.current_type = conn_type
+        self._populate_node_lists()
         self.type_combo.setCurrentIndex(0 if conn_type == "edge" else 1)
         if conn_type == "edge":
             self.source = data.get("from")
             self.target = data.get("to")
-            self.source_edit.setText(self.source or "")
-            self.target_edit.setText(self.target or "")
+            self.source_edit.setCurrentText(self.source or "")
+            self.target_edit.setCurrentText(self.target or "")
             self.atten_spin.setValue(float(data.get("attenuation", 1.0)))
             self.density_spin.setValue(float(data.get("density", 0.0)))
             self.delay_spin.setValue(float(data.get("delay", 1.0)))
@@ -338,8 +365,8 @@ class ConnectionPanel(QDockWidget):
         else:
             nodes = data.get("nodes", ["", ""])
             self.source, self.target = nodes[0], nodes[1]
-            self.nodea_edit.setText(self.source)
-            self.nodeb_edit.setText(self.target)
+            self.nodea_edit.setCurrentText(self.source)
+            self.nodeb_edit.setCurrentText(self.target)
             self.bridge_type_combo.setCurrentText(data.get("bridge_type", "Braided"))
             self.phase_offset_spin.setValue(float(data.get("phase_offset", 0.0)))
             self.drift_tol_spin.setValue(float(data.get("drift_tolerance", 0.0)))
@@ -361,8 +388,8 @@ class ConnectionPanel(QDockWidget):
             if self.current_index is None:
                 if conn_type == "edge":
                     model.add_connection(
-                        self.source_edit.text(),
-                        self.target_edit.text(),
+                        self.source_edit.currentText(),
+                        self.target_edit.currentText(),
                         delay=float(self.delay_spin.value()),
                         attenuation=float(self.atten_spin.value()),
                         density=float(self.density_spin.value()),
@@ -372,8 +399,8 @@ class ConnectionPanel(QDockWidget):
                     )
                 else:
                     model.add_connection(
-                        self.nodea_edit.text(),
-                        self.nodeb_edit.text(),
+                        self.nodea_edit.currentText(),
+                        self.nodeb_edit.currentText(),
                         connection_type="bridge",
                         bridge_type=self.bridge_type_combo.currentText(),
                         phase_offset=float(self.phase_offset_spin.value()),
@@ -389,8 +416,8 @@ class ConnectionPanel(QDockWidget):
                     self.current_index = None
                     if conn_type == "edge":
                         model.add_connection(
-                            self.source_edit.text(),
-                            self.target_edit.text(),
+                            self.source_edit.currentText(),
+                            self.target_edit.currentText(),
                             delay=float(self.delay_spin.value()),
                             attenuation=float(self.atten_spin.value()),
                             density=float(self.density_spin.value()),
@@ -400,8 +427,8 @@ class ConnectionPanel(QDockWidget):
                         )
                     else:
                         model.add_connection(
-                            self.nodea_edit.text(),
-                            self.nodeb_edit.text(),
+                            self.nodea_edit.currentText(),
+                            self.nodeb_edit.currentText(),
                             connection_type="bridge",
                             bridge_type=self.bridge_type_combo.currentText(),
                             phase_offset=float(self.phase_offset_spin.value()),
@@ -417,8 +444,8 @@ class ConnectionPanel(QDockWidget):
                             self.current_index,
                             "edge",
                             **{
-                                "from": self.source_edit.text(),
-                                "to": self.target_edit.text(),
+                                "from": self.source_edit.currentText(),
+                                "to": self.target_edit.currentText(),
                                 "delay": float(self.delay_spin.value()),
                                 "attenuation": float(self.atten_spin.value()),
                                 "density": float(self.density_spin.value()),
@@ -430,7 +457,10 @@ class ConnectionPanel(QDockWidget):
                         model.update_connection(
                             self.current_index,
                             "bridge",
-                            nodes=[self.nodea_edit.text(), self.nodeb_edit.text()],
+                            nodes=[
+                                self.nodea_edit.currentText(),
+                                self.nodeb_edit.currentText(),
+                            ],
                             bridge_type=self.bridge_type_combo.currentText(),
                             phase_offset=float(self.phase_offset_spin.value()),
                             drift_tolerance=float(self.drift_tol_spin.value()),
@@ -446,6 +476,99 @@ class ConnectionPanel(QDockWidget):
         self.hide()
         self.source = self.target = None
         self.current_index = None
+
+
+class ObserverPanel(QDockWidget):
+    """Dock widget for editing observer definitions."""
+
+    def __init__(self, main_window):
+        super().__init__("Observer", main_window)
+        self.main_window = main_window
+        self.current_index: Optional[int] = None
+        widget = QWidget()
+        layout = QFormLayout(widget)
+
+        self.id_edit = QLineEdit()
+        layout.addRow(TooltipLabel("ID"), self.id_edit)
+
+        self.monitor_checks: Dict[str, QCheckBox] = {}
+        monitor_widget = QWidget()
+        monitor_layout = QVBoxLayout(monitor_widget)
+        for ev in EVENT_TYPES:
+            cb = QCheckBox(ev)
+            monitor_layout.addWidget(cb)
+            self.monitor_checks[ev] = cb
+        layout.addRow(TooltipLabel("Monitors", "Event types to watch"), monitor_widget)
+
+        self.freq_spin = QDoubleSpinBox()
+        self.freq_spin.setDecimals(3)
+        self.freq_spin.setValue(1.0)
+        layout.addRow(
+            TooltipLabel("Frequency", "How often (in ticks) the observer records data"),
+            self.freq_spin,
+        )
+
+        self.node_list = QListWidget()
+        self.node_list.setSelectionMode(QListWidget.MultiSelection)
+        layout.addRow(
+            TooltipLabel("Target Nodes", "A specific list of nodes to watch"),
+            self.node_list,
+        )
+
+        apply_btn = QPushButton("Apply")
+        apply_btn.clicked.connect(self.commit)
+        layout.addRow(apply_btn)
+        widget.installEventFilter(_FocusWatcher(self.commit))
+        self.setWidget(widget)
+
+    def open_for(self, index: int) -> None:
+        model = get_graph()
+        if index < 0 or index >= len(model.observers):
+            return
+        self.current_index = index
+        data = model.observers[index]
+        self.id_edit.setText(data.get("id", ""))
+        for ev, cb in self.monitor_checks.items():
+            cb.setChecked(ev in data.get("monitors", []))
+        self.freq_spin.setValue(float(data.get("frequency", 1.0)))
+        self.node_list.clear()
+        for nid in model.nodes:
+            item = QListWidgetItem(nid)
+            if nid in data.get("target_nodes", []):
+                item.setSelected(True)
+            self.node_list.addItem(item)
+        self.show()
+
+    def open_new(self, index: int) -> None:
+        self.current_index = index
+        self.id_edit.setText("")
+        for cb in self.monitor_checks.values():
+            cb.setChecked(False)
+        self.freq_spin.setValue(1.0)
+        self.node_list.clear()
+        for nid in get_graph().nodes:
+            self.node_list.addItem(QListWidgetItem(nid))
+        self.show()
+
+    def commit(self) -> None:
+        if self.current_index is None:
+            return
+        model = get_graph()
+        data = {
+            "id": self.id_edit.text(),
+            "monitors": [
+                ev for ev, cb in self.monitor_checks.items() if cb.isChecked()
+            ],
+            "frequency": float(self.freq_spin.value()),
+        }
+        targets = [item.text() for item in self.node_list.selectedItems()]
+        if targets:
+            data["target_nodes"] = targets
+        if self.current_index >= len(model.observers):
+            model.observers.append(data)
+        else:
+            model.observers[self.current_index] = data
+        self.hide()
 
 
 def build_toolbar(main_window) -> QToolBar:
@@ -468,6 +591,10 @@ def build_toolbar(main_window) -> QToolBar:
     add_conn_action.triggered.connect(main_window.start_add_connection)
     toolbar.addAction(add_conn_action)
 
+    add_obs_action = QAction("Add Observer", main_window)
+    add_obs_action.triggered.connect(main_window.add_observer)
+    toolbar.addAction(add_obs_action)
+
     layout_action = QAction("Auto Layout", main_window)
     layout_action.triggered.connect(main_window.canvas.auto_layout)
     toolbar.addAction(layout_action)
@@ -479,6 +606,10 @@ def build_toolbar(main_window) -> QToolBar:
     main_window.connection_panel = ConnectionPanel(main_window)
     main_window.addDockWidget(Qt.RightDockWidgetArea, main_window.connection_panel)
     main_window.connection_panel.hide()
+
+    main_window.observer_panel = ObserverPanel(main_window)
+    main_window.addDockWidget(Qt.RightDockWidgetArea, main_window.observer_panel)
+    main_window.observer_panel.hide()
 
     main_window.canvas.node_selected.connect(main_window.node_panel.show_node)
     main_window.canvas.connection_request.connect(main_window.connection_panel.open_for)
