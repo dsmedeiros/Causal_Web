@@ -56,6 +56,8 @@ class MainWindow(QMainWindow):
     # ---- UI setup ----
 
     def _create_menus(self) -> None:
+        """Create the File and Edit menus for graph actions."""
+
         menubar = self.menuBar()
         file_menu = menubar.addMenu("File")
 
@@ -71,35 +73,25 @@ class MainWindow(QMainWindow):
         new_action.triggered.connect(self.new_graph)
         file_menu.addAction(new_action)
 
-    def _create_toolbars(self) -> None:
-        """Create a toolbar with graph actions."""
-
-        toolbar = QToolBar("Graph", self)
-        self.addToolBar(toolbar)
-
-        load_action = QAction("Load", self)
-        load_action.triggered.connect(self.load_graph)
-        toolbar.addAction(load_action)
-
-        save_action = QAction("Save", self)
-        save_action.triggered.connect(self.save_graph)
-        toolbar.addAction(save_action)
-
-        new_action = QAction("New", self)
-        new_action.triggered.connect(self.new_graph)
-        toolbar.addAction(new_action)
+        edit_menu = menubar.addMenu("Edit")
 
         layout_action = QAction("Auto Layout", self)
         layout_action.triggered.connect(self.canvas.auto_layout)
-        toolbar.addAction(layout_action)
+        edit_menu.addAction(layout_action)
 
         undo_action = QAction("Undo", self)
         undo_action.triggered.connect(self.canvas.undo)
-        toolbar.addAction(undo_action)
+        edit_menu.addAction(undo_action)
 
         redo_action = QAction("Redo", self)
         redo_action.triggered.connect(self.canvas.redo)
-        toolbar.addAction(redo_action)
+        edit_menu.addAction(redo_action)
+
+    def _create_toolbars(self) -> None:
+        """Create the toolbar with the Connect action."""
+
+        toolbar = QToolBar("Graph", self)
+        self.addToolBar(toolbar)
 
         connect_action = QAction("Connect", self)
         connect_action.triggered.connect(self.canvas.enable_connection_mode)
