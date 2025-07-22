@@ -1,21 +1,14 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Dict
 import os
 
-from PySide6.QtCore import QPointF, Qt
-from PySide6.QtGui import QBrush, QPen, QAction
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
     QApplication,
     QDockWidget,
     QFileDialog,
     QFormLayout,
-    QGraphicsEllipseItem,
-    QGraphicsItem,
-    QGraphicsLineItem,
-    QGraphicsScene,
-    QGraphicsView,
     QMainWindow,
     QPushButton,
     QSlider,
@@ -31,71 +24,8 @@ from ..gui.state import (
     set_graph,
     set_active_file,
 )
+from .canvas_widget import CanvasWidget
 from ..engine import tick_engine
-
-
-class NodeItem(QGraphicsEllipseItem):
-    """Movable ellipse representing a graph node."""
-
-    def __init__(self, node_id: str, x: float, y: float, radius: float = 20.0):
-        super().__init__(-radius, -radius, radius * 2, radius * 2)
-        self.node_id = node_id
-        self.setPos(QPointF(x, y))
-        self.setBrush(QBrush(Qt.gray))
-        self.setPen(QPen(Qt.lightGray))
-        self.setFlag(QGraphicsItem.ItemIsMovable)
-        self.setFlag(QGraphicsItem.ItemIsSelectable)
-        self.edges: list[EdgeItem] = []
-
-    def itemChange(self, change, value):
-        if change == QGraphicsItem.ItemPositionChange:
-            for edge in self.edges:
-                edge.update_position()
-        return super().itemChange(change, value)
-
-
-class EdgeItem(QGraphicsLineItem):
-    """Line connecting two NodeItems."""
-
-    def __init__(self, source: NodeItem, target: NodeItem):
-        super().__init__()
-        self.source = source
-        self.target = target
-        pen = QPen(Qt.darkGray)
-        pen.setWidth(2)
-        self.setPen(pen)
-        self.update_position()
-        source.edges.append(self)
-        target.edges.append(self)
-
-    def update_position(self):
-        self.setLine(self.source.x(), self.source.y(), self.target.x(), self.target.y())
-
-
-@dataclass
-class GraphCanvas:
-    """Manage a QGraphicsScene for a GraphModel."""
-
-    scene: QGraphicsScene
-    nodes: Dict[str, NodeItem]
-
-    def __init__(self, scene: QGraphicsScene):
-        self.scene = scene
-        self.nodes = {}
-
-    def load_model(self, model: GraphModel) -> None:
-        self.scene.clear()
-        self.nodes.clear()
-        for node_id, data in model.nodes.items():
-            x, y = data.get("x", 0.0), data.get("y", 0.0)
-            item = NodeItem(node_id, x, y)
-            self.scene.addItem(item)
-            self.nodes[node_id] = item
-        for edge in model.edges:
-            src = self.nodes.get(edge.get("from"))
-            dst = self.nodes.get(edge.get("to"))
-            if src and dst:
-                self.scene.addItem(EdgeItem(src, dst))
 
 
 class MainWindow(QMainWindow):
@@ -106,10 +36,8 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("CWT Simulation Dashboard")
         self.resize(800, 600)
 
-        self.scene = QGraphicsScene(self)
-        self.view = QGraphicsView(self.scene)
-        self.setCentralWidget(self.view)
-        self.canvas = GraphCanvas(self.scene)
+        self.canvas = CanvasWidget(self)
+        self.setCentralWidget(self.canvas)
         self.canvas.load_model(get_graph())
 
         self._create_menus()
