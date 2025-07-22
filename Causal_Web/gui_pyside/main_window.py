@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QAction
+from PySide6.QtGui import QAction, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
     QDockWidget,
@@ -39,6 +39,11 @@ class MainWindow(QMainWindow):
         self.canvas = CanvasWidget(self)
         self.setCentralWidget(self.canvas)
         self.canvas.load_model(get_graph())
+
+        self._undo_shortcut = QShortcut(QKeySequence("Ctrl+Z"), self)
+        self._undo_shortcut.activated.connect(self.canvas.undo)
+        self._redo_shortcut = QShortcut(QKeySequence("Ctrl+Y"), self)
+        self._redo_shortcut.activated.connect(self.canvas.redo)
 
         self._create_menus()
         self._create_docks()
