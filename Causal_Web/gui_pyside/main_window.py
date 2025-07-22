@@ -39,7 +39,11 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("CWT Simulation Dashboard")
         self.resize(800, 600)
 
-        self.setCentralWidget(QWidget())
+        self.sim_canvas = CanvasWidget(self, editable=False)
+        self.setCentralWidget(self.sim_canvas)
+        self.sim_canvas.load_model(get_graph())
+
+        # graph editor dock, hidden by default
         self.canvas = CanvasWidget(self)
         toolbar = build_toolbar(self)
         container = QWidget()
@@ -48,11 +52,15 @@ class MainWindow(QMainWindow):
         layout.setSpacing(0)
         layout.addWidget(toolbar)
         layout.addWidget(self.canvas)
+        load_btn = QPushButton("Load Graph")
+        load_btn.clicked.connect(self._load_into_main)
+        layout.addWidget(load_btn)
 
         self.canvas_dock = QDockWidget("Graph View", self)
         self.canvas_dock.setWidget(container)
+        self.canvas_dock.hide()
         self.addDockWidget(Qt.LeftDockWidgetArea, self.canvas_dock)
-        self.canvas.load_model(get_graph())
+        self.canvas.load_model(GraphModel.from_dict(get_graph().to_dict()))
 
         self._undo_shortcut = QShortcut(QKeySequence("Ctrl+Z"), self)
         self._undo_shortcut.activated.connect(self.canvas.undo)
@@ -60,6 +68,7 @@ class MainWindow(QMainWindow):
         self._redo_shortcut.activated.connect(self.canvas.redo)
 
         self._create_menus()
+        self.edit_action.setEnabled(bool(get_graph().nodes))
         self._create_docks()
 
     # ---- UI setup ----
@@ -82,9 +91,10 @@ class MainWindow(QMainWindow):
 
         edit_menu = menubar.addMenu("Edit")
 
-        layout_action = QAction("Auto Layout", self)
-        layout_action.triggered.connect(self.canvas.auto_layout)
-        edit_menu.addAction(layout_action)
+        self.edit_action = QAction("Edit Graph...", self)
+        self.edit_action.triggered.connect(self._show_graph_editor)
+        self.edit_action.setEnabled(False)
+        edit_menu.addAction(self.edit_action)
 
         undo_action = QAction("Undo", self)
         undo_action.triggered.connect(self.canvas.undo)
@@ -148,7 +158,10 @@ class MainWindow(QMainWindow):
             return
         set_graph(graph)
         set_active_file(path)
-        self.canvas.load_model(graph)
+        self.sim_canvas.load_model(graph)
+        # refresh editor if it is visible
+        self.canvas.load_model(GraphModel.from_dict(graph.to_dict()))
+        self.edit_action.setEnabled(True)
 
     def save_graph(self):
         path, _ = QFileDialog.getSaveFileName(
@@ -167,7 +180,9 @@ class MainWindow(QMainWindow):
         model = new_graph(True)
         set_graph(model)
         set_active_file(None)
-        self.canvas.load_model(model)
+        self.sim_canvas.load_model(model)
+        self.canvas.load_model(GraphModel.from_dict(model.to_dict()))
+        self.edit_action.setEnabled(True)
 
     def add_node(self) -> None:
         """Insert a new node and refresh the canvas."""
@@ -182,6 +197,24 @@ class MainWindow(QMainWindow):
     def start_add_connection(self) -> None:
         """Enable interactive connection mode."""
         self.canvas.enable_connection_mode()
+
+    def _show_graph_editor(self) -> None:
+        """Display the graph editor window."""
+        self.canvas.load_model(GraphModel.from_dict(get_graph().to_dict()))
+        self.canvas_dock.show()
+
+    def _load_into_main(self) -> None:
+        """Apply the edited graph to the main simulation view and disk."""
+        model = self.canvas.model
+        set_graph(model)
+        self.sim_canvas.load_model(model)
+        path = get_active_file()
+        if path:
+            try:
+                save_graph(path, model)
+            except Exception as exc:
+                print(f"Failed to save graph: {exc}")
+        self.canvas_dock.hide()
 
 
 def launch() -> None:
