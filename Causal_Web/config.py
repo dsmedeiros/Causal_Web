@@ -95,6 +95,30 @@ class Config:
         """Return ``True`` if the given log file should be written."""
         return cls.log_files.get(name, True)
 
+    @classmethod
+    def save_log_files(cls, path: str | None = None) -> None:
+        """Persist ``log_files`` settings back to ``config.json``.
+
+        Parameters
+        ----------
+        path:
+            Optional path to write. Defaults to :attr:`config_file`.
+        """
+        import json
+        import os
+
+        if path is None:
+            path = cls.config_file
+        if os.path.exists(path):
+            with open(path) as f:
+                data = json.load(f)
+        else:
+            data = {}
+        data.setdefault("log_files", {})
+        data["log_files"].update(cls.log_files)
+        with open(path, "w") as f:
+            json.dump(data, f, indent=2)
+
     # Global rhythmic forcing parameters
     phase_jitter = {"amplitude": 0.0, "period": 20}  # radians  # ticks
     coherence_wave = {"amplitude": 0.0, "period": 30}  # threshold modulation
