@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
     QPushButton,
     QSlider,
     QWidget,
+    QVBoxLayout,
 )
 
 from ..config import Config
@@ -40,8 +41,16 @@ class MainWindow(QMainWindow):
 
         self.setCentralWidget(QWidget())
         self.canvas = CanvasWidget(self)
+        toolbar = build_toolbar(self)
+        container = QWidget()
+        layout = QVBoxLayout(container)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        layout.addWidget(toolbar)
+        layout.addWidget(self.canvas)
+
         self.canvas_dock = QDockWidget("Graph View", self)
-        self.canvas_dock.setWidget(self.canvas)
+        self.canvas_dock.setWidget(container)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.canvas_dock)
         self.canvas.load_model(get_graph())
 
@@ -51,7 +60,6 @@ class MainWindow(QMainWindow):
         self._redo_shortcut.activated.connect(self.canvas.redo)
 
         self._create_menus()
-        build_toolbar(self)
         self._create_docks()
 
     # ---- UI setup ----
