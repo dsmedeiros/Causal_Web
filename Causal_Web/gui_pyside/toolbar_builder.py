@@ -127,15 +127,16 @@ class ConnectionPanel(QDockWidget):
 
 
 def build_toolbar(main_window) -> QToolBar:
-    """Create the graph toolbar and attach property panels.
+    """Create the graph editing toolbar and property docks.
 
-    The toolbar now only exposes graph editing tools such as adding nodes or
-    connections. File and edit actions are provided by the menus on the main
+    The returned :class:`QToolBar` contains actions for adding nodes,
+    creating connections and applying automatic layout.  The caller is
+    responsible for embedding the toolbar, typically inside the Graph View
+    dock.  File and edit menu actions are handled separately by the main
     window.
     """
 
     toolbar = QToolBar("Graph", main_window)
-    main_window.addToolBar(toolbar)
 
     add_node_action = QAction("Add Node", main_window)
     add_node_action.triggered.connect(main_window.add_node)
@@ -144,6 +145,10 @@ def build_toolbar(main_window) -> QToolBar:
     add_conn_action = QAction("Add Connection", main_window)
     add_conn_action.triggered.connect(main_window.start_add_connection)
     toolbar.addAction(add_conn_action)
+
+    layout_action = QAction("Auto Layout", main_window)
+    layout_action.triggered.connect(main_window.canvas.auto_layout)
+    toolbar.addAction(layout_action)
 
     main_window.node_panel = NodePanel(main_window)
     main_window.addDockWidget(Qt.RightDockWidgetArea, main_window.node_panel)

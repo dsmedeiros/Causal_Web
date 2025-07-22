@@ -172,18 +172,19 @@ python -m Causal_Web.main --no-gui   # headless run
 
 Use the on-screen controls to start or pause the simulation and adjust the tick rate. The tick rate and maximum tick count sliders now reside in the **Control Panel** window instead of the **Parameters** panel. Windows can be freely resized and the graph view will scroll if its contents exceed the available space. Window resizing is now handled more robustly to avoid occasional freezes. As the simulation runs, a number of JSON log files are produced inside `Causal_Web/output`.
 Use the **File** menu to load, save or start a new graph. Editing actions
-including **Auto Layout**, **Undo** and **Redo** now live in a separate
-**Edit** menu next to **File**. The toolbar no longer exposes these commands and
-only provides a shortcut for enabling connection mode. The **Auto Layout**
-action still arranges nodes using a spring layout.
+including **Auto Layout**, **Undo** and **Redo** remain in the **Edit** menu.
+The **Graph View** dock now embeds a small toolbar offering **Add Node**,
+**Add Connection** and **Auto Layout** buttons for quick access.
+The **Auto Layout** action still arranges nodes using a spring layout.
 When you press **Start Simulation** the current graph is written back to
 `input/graph.json`, a new run directory is created via `Config.new_run()` and
 the graph file is copied into the run's `input/` folder. This preserves the
 exact input used for each run.
 These actions operate on the `graph.json` format and update the shared in-memory model.
 The dashboard also includes a **Graph View** tab which renders the loaded graph and displays
-basic information for the currently selected node. The **Graph Editor** window
-now includes **Add Node** and **Add Connection** tools for building the graph.
+basic information for the currently selected node. The **Graph View** window
+now includes **Add Node**, **Add Connection** and **Auto Layout** tools for
+building and arranging the graph.
 Selecting a node shows a docked panel where its attributes can be edited. When two nodes are
 chosen for a new connection a connection panel allows its type and parameters to be configured.
 Nodes can be repositioned directly in the **Graph View** by dragging them with

@@ -243,15 +243,13 @@ def dashboard():
     with dpg.window(label="Parameters", width=250, height=400):
         _add_param_controls(config_data)
 
-    with dpg.window(label="Graph Editor", width=200, height=150, pos=(610, 120)):
+    with dpg.window(label="Causal Graph", width=800, height=460, tag="graph_window"):
         add_toolbar()
         dpg.add_button(label="Add Node", callback=add_node_callback)
         dpg.add_button(
             label="Add Connection",
             callback=connection_tool.start_add_connection,
         )
-
-    with dpg.window(label="Causal Graph", width=800, height=460, tag="graph_window"):
         with dpg.child_window(tag="graph_child", horizontal_scrollbar=True):
             dpg.add_drawlist(width=1, height=1, tag="graph_drawlist")
             for node_id, (x, y) in node_positions.items():
