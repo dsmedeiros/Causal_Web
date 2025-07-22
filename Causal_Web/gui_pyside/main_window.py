@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Dict
+import os
 
 from PySide6.QtCore import QPointF, Qt
 from PySide6.QtGui import QBrush, QPen, QAction
@@ -25,6 +26,7 @@ from ..config import Config
 from ..graph.io import load_graph, save_graph, new_graph
 from ..graph.model import GraphModel
 from ..gui.state import get_graph, set_graph, set_active_file
+from ..engine import tick_engine
 
 
 class NodeItem(QGraphicsEllipseItem):
@@ -135,15 +137,37 @@ class MainWindow(QMainWindow):
         self.tick_slider.setMinimum(1)
         self.tick_slider.setMaximum(20)
         self.tick_slider.setValue(int(Config.tick_rate))
+        self.tick_slider.valueChanged.connect(self._tick_rate_changed)
         layout.addRow("Tick Rate", self.tick_slider)
 
         self.start_button = QPushButton("Start Simulation")
+        self.start_button.clicked.connect(self.start_simulation)
         layout.addRow(self.start_button)
 
         dock.setWidget(panel)
         self.addDockWidget(Qt.RightDockWidgetArea, dock)
 
     # ---- actions ----
+
+    def _tick_rate_changed(self, value: int) -> None:
+        """Update ``Config.tick_rate`` from the slider."""
+        Config.tick_rate = float(value)
+
+    def start_simulation(self) -> None:
+        """Save the graph and start the simulation loop."""
+        path = get_active_file() or Config.input_path("graph.json")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        save_graph(path, get_graph())
+        Config.new_run()
+        tick_engine.build_graph()
+        with Config.state_lock:
+            if Config.is_running:
+                return
+            Config.is_running = True
+            tick = Config.current_tick
+        tick_engine.simulation_loop()
+        self.start_button.setEnabled(False)
+        tick_engine._update_simulation_state(False, False, tick, None)
 
     def load_graph(self):
         path, _ = QFileDialog.getOpenFileName(
