@@ -153,7 +153,7 @@ Example:
 
 ## Running the simulation
 
-1. Install the dependencies (`dearpygui` is required for the GUI).
+1. Install the dependencies (`dearpygui==2.1.0` is required for the GUI).
    An X11-compatible display is needed to create the window. If running on a
    headless server consider using a virtual frame buffer such as Xvfb.
    The dashboard automatically designates the *Causal Graph* window as the
