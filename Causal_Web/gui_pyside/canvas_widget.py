@@ -42,8 +42,9 @@ class NodeItem(QGraphicsEllipseItem):
         self.setPos(QPointF(x, y))
         self.setBrush(QBrush(Qt.gray))
         self.setPen(QPen(Qt.lightGray))
-        self.setFlag(QGraphicsItem.ItemIsMovable)
-        self.setFlag(QGraphicsItem.ItemIsSelectable)
+        if canvas.editable:
+            self.setFlag(QGraphicsItem.ItemIsMovable)
+            self.setFlag(QGraphicsItem.ItemIsSelectable)
         self.setZValue(1)
         self.edges: list[EdgeItem] = []
         self._drag_start: Optional[QPointF] = None
@@ -58,11 +59,16 @@ class NodeItem(QGraphicsEllipseItem):
         if event.button() == Qt.LeftButton:
             set_selected_node(self.node_id)
             self.canvas.node_selected.emit(self.node_id)
-            self._drag_start = self.pos()
+            if self.canvas.editable:
+                self._drag_start = self.pos()
         super().mousePressEvent(event)
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:  # type: ignore[override]
-        if event.button() == Qt.LeftButton and self._drag_start is not None:
+        if (
+            event.button() == Qt.LeftButton
+            and self._drag_start is not None
+            and self.canvas.editable
+        ):
             if self.pos() != self._drag_start:
                 self.canvas.node_moved(self.node_id, self._drag_start, self.pos())
             self._drag_start = None
@@ -94,8 +100,11 @@ class CanvasWidget(QGraphicsView):
     node_selected = Signal(str)
     connection_request = Signal(str, str)
 
-    def __init__(self, parent: Optional[QGraphicsView] = None):
+    def __init__(
+        self, parent: Optional[QGraphicsView] = None, *, editable: bool = True
+    ):
         super().__init__(parent)
+        self.editable = editable
         self.setScene(QGraphicsScene(self))
         self.setRenderHint(QPainter.Antialiasing)
         self.nodes: Dict[str, NodeItem] = {}
@@ -138,6 +147,9 @@ class CanvasWidget(QGraphicsView):
             self._pan_start = event.pos()
             self.setCursor(Qt.ClosedHandCursor)
         else:
+            if not self.editable:
+                super().mousePressEvent(event)
+                return
             item = self.itemAt(event.pos())
             if (
                 self._connect_mode
@@ -166,7 +178,7 @@ class CanvasWidget(QGraphicsView):
                 self.verticalScrollBar().value() - int(delta.y())
             )
         else:
-            if self._connect_start and self._temp_edge is not None:
+            if self.editable and self._connect_start and self._temp_edge is not None:
                 self._update_temp_edge(event.pos())
             else:
                 super().mouseMoveEvent(event)
@@ -176,7 +188,7 @@ class CanvasWidget(QGraphicsView):
             self._pan_start = None
             self.setCursor(Qt.ArrowCursor)
         else:
-            if self._connect_start:
+            if self.editable and self._connect_start:
                 item = self.itemAt(event.pos())
                 if isinstance(item, NodeItem) and item is not self._connect_start:
                     self.connection_request.emit(
@@ -203,7 +215,8 @@ class CanvasWidget(QGraphicsView):
 
     def enable_connection_mode(self) -> None:
         """Begin interactive connection creation."""
-
+        if not self.editable:
+            return
         self._connect_mode = True
         self._connect_start = None
         if self._temp_edge and self.scene():
@@ -211,19 +224,26 @@ class CanvasWidget(QGraphicsView):
         self._temp_edge = None
 
     def node_moved(self, node_id: str, start: QPointF, end: QPointF) -> None:
+        if not self.editable:
+            return
         cmd = MoveNodeCommand(self.model, node_id, (end.x(), end.y()))
         self.command_stack.do(cmd)
 
     def undo(self) -> None:
+        if not self.editable:
+            return
         self.command_stack.undo()
         self.load_model(self.model)
 
     def redo(self) -> None:
+        if not self.editable:
+            return
         self.command_stack.redo()
         self.load_model(self.model)
 
     def auto_layout(self) -> None:
         """Apply a spring layout to ``self.model`` and refresh the scene."""
-
+        if not self.editable:
+            return
         self.model.apply_spring_layout()
         self.load_model(self.model)
