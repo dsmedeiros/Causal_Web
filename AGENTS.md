@@ -7,6 +7,5 @@
 - **Manual run**: The simulation GUI starts with `python -m Causal_Web.main`.
 - **Dependencies**: Install `numpy`, `networkx` and `pytest` with `pip install numpy networkx pytest` before running tests.
 - **Testing**: Execute `pytest` after installing dependencies to verify core behaviour.
-- **GUI dependency**: Install `dearpygui` via `pip install dearpygui` to run the simulation dashboard.
 - **Packaging**: Run `python bundle_run.py` after a simulation to archive the output logs.
 
