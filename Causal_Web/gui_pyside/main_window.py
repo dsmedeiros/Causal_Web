@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QPushButton,
     QSlider,
+    QToolBar,
     QWidget,
 )
 
@@ -36,8 +37,11 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("CWT Simulation Dashboard")
         self.resize(800, 600)
 
+        self.setCentralWidget(QWidget())
         self.canvas = CanvasWidget(self)
-        self.setCentralWidget(self.canvas)
+        self.canvas_dock = QDockWidget("Graph View", self)
+        self.canvas_dock.setWidget(self.canvas)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.canvas_dock)
         self.canvas.load_model(get_graph())
 
         self._undo_shortcut = QShortcut(QKeySequence("Ctrl+Z"), self)
@@ -46,6 +50,7 @@ class MainWindow(QMainWindow):
         self._redo_shortcut.activated.connect(self.canvas.redo)
 
         self._create_menus()
+        self._create_toolbars()
         self._create_docks()
 
     # ---- UI setup ----
@@ -65,6 +70,40 @@ class MainWindow(QMainWindow):
         new_action = QAction("New", self)
         new_action.triggered.connect(self.new_graph)
         file_menu.addAction(new_action)
+
+    def _create_toolbars(self) -> None:
+        """Create a toolbar with graph actions."""
+
+        toolbar = QToolBar("Graph", self)
+        self.addToolBar(toolbar)
+
+        load_action = QAction("Load", self)
+        load_action.triggered.connect(self.load_graph)
+        toolbar.addAction(load_action)
+
+        save_action = QAction("Save", self)
+        save_action.triggered.connect(self.save_graph)
+        toolbar.addAction(save_action)
+
+        new_action = QAction("New", self)
+        new_action.triggered.connect(self.new_graph)
+        toolbar.addAction(new_action)
+
+        layout_action = QAction("Auto Layout", self)
+        layout_action.triggered.connect(self.canvas.auto_layout)
+        toolbar.addAction(layout_action)
+
+        undo_action = QAction("Undo", self)
+        undo_action.triggered.connect(self.canvas.undo)
+        toolbar.addAction(undo_action)
+
+        redo_action = QAction("Redo", self)
+        redo_action.triggered.connect(self.canvas.redo)
+        toolbar.addAction(redo_action)
+
+        connect_action = QAction("Connect", self)
+        connect_action.triggered.connect(self.canvas.enable_connection_mode)
+        toolbar.addAction(connect_action)
 
     def _create_docks(self) -> None:
         dock = QDockWidget("Control Panel", self)
