@@ -114,7 +114,7 @@ def main() -> None:
         except KeyboardInterrupt:
             pass
     else:
-        from .gui.dashboard import launch
+        from .gui_pyside import launch
 
         launch()
 
