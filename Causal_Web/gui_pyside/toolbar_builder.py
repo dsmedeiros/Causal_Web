@@ -5,8 +5,8 @@ from __future__ import annotations
 from typing import Optional
 
 from PySide6.QtCore import QObject, Qt, QEvent
+from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
-    QAction,
     QComboBox,
     QDockWidget,
     QDoubleSpinBox,
