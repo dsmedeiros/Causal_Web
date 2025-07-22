@@ -41,7 +41,12 @@ class GraphCanvas:
     dragging_node: Optional[str] = field(default=None, init=False)
 
     def __post_init__(self) -> None:
-        """Bind item-specific event handlers to the provided drawlist."""
+        """Bind mouse event handlers to the provided drawlist.
+
+        The handlers are attached via an :func:`dearpygui.add_mouse_drag_handler`
+        and :func:`dearpygui.add_mouse_click_handler` within an item handler
+        registry so callbacks only fire when the cursor is over the canvas.
+        """
         self.node_items: Dict[str, int] = {}
         self.label_items: Dict[str, int] = {}
         self.edge_items: Dict[int, int] = {}
@@ -51,10 +56,10 @@ class GraphCanvas:
 
         # attach handlers that only fire when the mouse is over the canvas
         with dpg.item_handler_registry(tag=f"{self.drawlist_tag}_handlers") as h:
-            dpg.add_item_clicked_handler(
+            dpg.add_mouse_click_handler(
                 button=dpg.mvMouseButton_Left, callback=self._handle_click
             )
-            dpg.add_item_drag_handler(
+            dpg.add_mouse_drag_handler(
                 button=dpg.mvMouseButton_Left, callback=self._update_drag
             )
 
