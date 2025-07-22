@@ -1,6 +1,6 @@
 # Causal Web
 
-This project contains a small simulation engine and GUI for experimenting with causal graphs. It is written in Python and uses [Dear PyGui](https://github.com/hoffstadt/DearPyGui) for the graphical interface.
+This project contains a small simulation engine and GUI for experimenting with causal graphs. It is written in Python and uses [PySide6](https://doc.qt.io/qtforpython/) for the graphical interface.
 
 ## Overview
 
@@ -24,7 +24,7 @@ Key modules include:
 - **`engine/observer.py`** – observers that infer hidden state from tick history.
 - **`engine/logger.py`** – centralized buffer that batches log writes to disk.
 - **`engine/tick.py`** – defines :class:`Tick` and the reusable object pool.
-- **`gui/dashboard.py`** – Dear PyGui dashboard for interactive runs.
+- **`gui_pyside/main_window.py`** – PySide6 dashboard for interactive runs.
 - **`main.py`** – simple entry point that launches the dashboard.
 
 Graphs are stored in `input/graph.json` inside the package. Paths are resolved relative to the package so the module can be run from any working directory. All output is written next to the code in the `output` directory.
