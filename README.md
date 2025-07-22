@@ -6,7 +6,10 @@ This project contains a small simulation engine and GUI for experimenting with c
 
 The engine models a directed network of nodes. Each node maintains its own oscillator phase and can emit "ticks" that travel along edges with delay and attenuation. Nodes accumulate incoming phases and fire when they pass a threshold, scheduling more ticks. Bridges create additional links whose strength can change over time. Observers watch the network and attempt to infer hidden state.
 
-The graph editor supports undo/redo operations, an automatic spring layout based on ``networkx`` and validation to prevent duplicate or self-loop connections.
+The graph editor supports undo/redo operations via ``Ctrl+Z``/``Ctrl+Y``,
+allows connecting nodes by dragging between them, applies an automatic spring
+layout based on ``networkx`` and validates connections to prevent duplicates or
+self-loops.
 
 Key modules include:
 

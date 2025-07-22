@@ -11,7 +11,7 @@ from .state import (
 )
 from . import connection_tool
 from .toolbar import add_toolbar
-from .command_stack import AddNodeCommand
+from ..command_stack import AddNodeCommand
 from .canvas import _commands
 from ..graph.io import save_graph, load_graph
 from ..config import Config

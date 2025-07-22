@@ -22,7 +22,7 @@ from .state import (
     get_selected_node,
 )
 from . import connection_tool
-from .command_stack import CommandStack
+from ..command_stack import CommandStack
 
 _commands = CommandStack()
 
