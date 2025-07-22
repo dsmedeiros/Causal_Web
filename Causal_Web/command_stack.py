@@ -116,3 +116,25 @@ class MoveNodeCommand(Command):
         if node is None:
             return
         node["x"], node["y"] = self._old_pos
+
+
+@dataclass
+class AddObserverCommand(Command):
+    """Command that inserts an observer into a :class:`GraphModel`."""
+
+    model: GraphModel
+    observer: dict
+    index: int | None = None
+
+    def execute(self) -> None:
+        if self.index is None:
+            self.model.observers.append(self.observer)
+            self.index = len(self.model.observers) - 1
+        else:
+            self.model.observers.insert(self.index, self.observer)
+
+    def undo(self) -> None:
+        if self.index is None:
+            return
+        if 0 <= self.index < len(self.model.observers):
+            self.model.observers.pop(self.index)

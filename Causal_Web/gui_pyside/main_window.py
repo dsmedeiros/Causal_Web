@@ -27,7 +27,7 @@ from ..gui.state import (
 )
 from .canvas_widget import CanvasWidget
 from .toolbar_builder import build_toolbar
-from ..command_stack import AddNodeCommand
+from ..command_stack import AddNodeCommand, AddObserverCommand
 from ..engine import tick_engine
 
 
@@ -198,6 +198,18 @@ class MainWindow(QMainWindow):
         cmd = AddNodeCommand(model, f"N{idx}", {"x": 50.0 * idx, "y": 50.0 * idx})
         self.canvas.command_stack.do(cmd)
         self.canvas.load_model(model)
+
+    def add_observer(self) -> None:
+        """Create a new observer definition."""
+        model = get_graph()
+        idx = 1
+        existing = {o.get("id") for o in model.observers}
+        while f"OBS{idx}" in existing:
+            idx += 1
+        observer = {"id": f"OBS{idx}", "monitors": [], "frequency": 1.0}
+        cmd = AddObserverCommand(model, observer)
+        self.canvas.command_stack.do(cmd)
+        self.observer_panel.open_new(cmd.index)
 
     def start_add_connection(self) -> None:
         """Enable interactive connection mode."""

@@ -12,6 +12,7 @@ class GraphModel:
     edges: List[Dict[str, Any]] = field(default_factory=list)
     bridges: List[Dict[str, Any]] = field(default_factory=list)
     tick_sources: List[Dict[str, Any]] = field(default_factory=list)
+    observers: List[Dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         """Serialize the model to a plain ``dict``."""
@@ -20,6 +21,7 @@ class GraphModel:
             "edges": self.edges,
             "bridges": self.bridges,
             "tick_sources": self.tick_sources,
+            "observers": self.observers,
         }
 
     @classmethod
@@ -34,6 +36,7 @@ class GraphModel:
         model.edges = list(data.get("edges", []))
         model.bridges = list(data.get("bridges", []))
         model.tick_sources = list(data.get("tick_sources", []))
+        model.observers = list(data.get("observers", []))
         return model
 
     @classmethod
@@ -168,6 +171,27 @@ class GraphModel:
         if index < 0 or index >= len(target_list):
             raise IndexError("connection index out of range")
         del target_list[index]
+
+    # ---- Observer management -------------------------------------------------
+
+    def add_observer(
+        self,
+        obs_id: str,
+        *,
+        monitors: List[str] | None = None,
+        frequency: float = 1.0,
+        target_nodes: List[str] | None = None,
+    ) -> None:
+        """Insert a new observer definition."""
+
+        data: Dict[str, Any] = {
+            "id": obs_id,
+            "monitors": monitors or [],
+            "frequency": frequency,
+        }
+        if target_nodes:
+            data["target_nodes"] = list(target_nodes)
+        self.observers.append(data)
 
     def apply_spring_layout(self) -> None:
         """Position nodes using ``networkx.spring_layout``."""
