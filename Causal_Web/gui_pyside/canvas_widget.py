@@ -21,7 +21,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..graph.model import GraphModel
-from ..gui.state import set_selected_node
+from ..gui.state import set_selected_node, set_selected_connection
 from ..command_stack import CommandStack, MoveNodeCommand
 
 
@@ -78,17 +78,35 @@ class NodeItem(QGraphicsEllipseItem):
 class EdgeItem(QGraphicsLineItem):
     """Line connecting two NodeItems."""
 
-    def __init__(self, source: NodeItem, target: NodeItem):
+    def __init__(
+        self,
+        source: NodeItem,
+        target: NodeItem,
+        canvas: "CanvasWidget",
+        index: int,
+        connection_type: str = "edge",
+    ):
         super().__init__()
         self.source = source
         self.target = target
+        self.canvas = canvas
+        self.index = index
+        self.connection_type = connection_type
         pen = QPen(Qt.darkGray)
         pen.setWidth(2)
         self.setPen(pen)
         self.setZValue(0)
         self.update_position()
+        if canvas.editable:
+            self.setFlag(QGraphicsItem.ItemIsSelectable)
         source.edges.append(self)
         target.edges.append(self)
+
+    def mousePressEvent(self, event: QMouseEvent) -> None:  # type: ignore[override]
+        if event.button() == Qt.LeftButton:
+            set_selected_connection((self.connection_type, self.index))
+            self.canvas.connection_selected.emit(self.connection_type, self.index)
+        super().mousePressEvent(event)
 
     def update_position(self) -> None:
         self.setLine(self.source.x(), self.source.y(), self.target.x(), self.target.y())
@@ -99,6 +117,7 @@ class CanvasWidget(QGraphicsView):
 
     node_selected = Signal(str)
     connection_request = Signal(str, str)
+    connection_selected = Signal(str, int)
 
     def __init__(
         self, parent: Optional[QGraphicsView] = None, *, editable: bool = True
@@ -131,11 +150,11 @@ class CanvasWidget(QGraphicsView):
             scene.addItem(item)
             self.nodes[node_id] = item
 
-        for edge in model.edges:
+        for idx, edge in enumerate(model.edges):
             src = self.nodes.get(edge.get("from"))
             dst = self.nodes.get(edge.get("to"))
             if src and dst:
-                scene.addItem(EdgeItem(src, dst))
+                scene.addItem(EdgeItem(src, dst, self, idx, "edge"))
 
     # ---- interaction -------------------------------------------------
     def wheelEvent(self, event: QWheelEvent) -> None:

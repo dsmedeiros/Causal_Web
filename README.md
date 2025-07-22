@@ -187,6 +187,9 @@ now includes **Add Node**, **Add Connection**, **Auto Layout** and **Load Graph*
 tools for building and applying the graph.
 Selecting a node shows a docked panel where its attributes can be edited. When two nodes are
 chosen for a new connection a connection panel allows its type and parameters to be configured.
+Both panels now include an **Apply** button to commit any changes.
+Edges in the Graph View are selectable and will open the connection panel for
+editing when clicked.
 Nodes can be repositioned directly in the **Graph View** by dragging them with
 the mouse. Interaction is handled by :class:`CanvasWidget`, a reusable
 ``QGraphicsView`` subclass that supports selection, dragging, zooming and panning.

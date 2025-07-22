@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
     QDockWidget,
     QDoubleSpinBox,
     QFormLayout,
+    QPushButton,
     QToolBar,
     QWidget,
 )
@@ -46,6 +47,9 @@ class NodePanel(QDockWidget):
             spin.setDecimals(3)
             layout.addRow(field, spin)
             self.inputs[field] = spin
+        apply_btn = QPushButton("Apply")
+        apply_btn.clicked.connect(self.commit)
+        layout.addRow(apply_btn)
         widget.installEventFilter(_FocusWatcher(self.commit))
         self.setWidget(widget)
 
@@ -82,6 +86,8 @@ class ConnectionPanel(QDockWidget):
         self.main_window = main_window
         self.source: Optional[str] = None
         self.target: Optional[str] = None
+        self.current_index: Optional[int] = None
+        self.current_type: str = "edge"
         widget = QWidget()
         layout = QFormLayout(widget)
         self.type_combo = QComboBox()
@@ -93,37 +99,78 @@ class ConnectionPanel(QDockWidget):
         layout.addRow("Type", self.type_combo)
         layout.addRow("Delay", self.delay_spin)
         layout.addRow("Attenuation", self.atten_spin)
+        apply_btn = QPushButton("Apply")
+        apply_btn.clicked.connect(self.commit)
+        layout.addRow(apply_btn)
         widget.installEventFilter(_FocusWatcher(self.commit))
         self.setWidget(widget)
 
     def open_for(self, source: str, target: str) -> None:
         self.source = source
         self.target = target
+        self.current_index = None
+        self.current_type = "edge"
         self.type_combo.setCurrentIndex(0)
         self.delay_spin.setValue(1.0)
         self.atten_spin.setValue(1.0)
+        self.show()
+
+    def show_connection(self, conn_type: str, index: int) -> None:
+        """Display attributes for an existing connection."""
+
+        model = get_graph()
+        data = model.edges[index] if conn_type == "edge" else model.bridges[index]
+        if conn_type == "edge":
+            self.source = data.get("from")
+            self.target = data.get("to")
+        else:
+            nodes = data.get("nodes", [None, None])
+            self.source, self.target = nodes[0], nodes[1]
+        self.current_index = index
+        self.current_type = conn_type
+        self.type_combo.setCurrentIndex(0 if conn_type == "edge" else 1)
+        self.delay_spin.setValue(float(data.get("delay", 1.0)))
+        self.atten_spin.setValue(float(data.get("attenuation", 1.0)))
         self.show()
 
     def commit(self) -> None:
         if not self.source or not self.target:
             return
         model = get_graph()
+        conn_type = "edge" if self.type_combo.currentText() == "Edge" else "bridge"
         try:
-            model.add_connection(
-                self.source,
-                self.target,
-                delay=float(self.delay_spin.value()),
-                attenuation=float(self.atten_spin.value()),
-                connection_type=(
-                    "edge" if self.type_combo.currentText() == "Edge" else "bridge"
-                ),
-            )
+            if self.current_index is None:
+                model.add_connection(
+                    self.source,
+                    self.target,
+                    delay=float(self.delay_spin.value()),
+                    attenuation=float(self.atten_spin.value()),
+                    connection_type=conn_type,
+                )
+            else:
+                if conn_type != self.current_type:
+                    model.remove_connection(self.current_index, self.current_type)
+                    model.add_connection(
+                        self.source,
+                        self.target,
+                        delay=float(self.delay_spin.value()),
+                        attenuation=float(self.atten_spin.value()),
+                        connection_type=conn_type,
+                    )
+                else:
+                    model.update_connection(
+                        self.current_index,
+                        conn_type,
+                        delay=float(self.delay_spin.value()),
+                        attenuation=float(self.atten_spin.value()),
+                    )
         except Exception as exc:  # pragma: no cover - GUI feedback
             print(f"Failed to add connection: {exc}")
         else:
             self.main_window.canvas.load_model(model)
         self.hide()
         self.source = self.target = None
+        self.current_index = None
 
 
 def build_toolbar(main_window) -> QToolBar:
@@ -160,5 +207,8 @@ def build_toolbar(main_window) -> QToolBar:
 
     main_window.canvas.node_selected.connect(main_window.node_panel.show_node)
     main_window.canvas.connection_request.connect(main_window.connection_panel.open_for)
+    main_window.canvas.connection_selected.connect(
+        main_window.connection_panel.show_connection
+    )
 
     return toolbar
