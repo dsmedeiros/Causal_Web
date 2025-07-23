@@ -609,6 +609,10 @@ class ObserverPanel(QDockWidget):
         widget.installEventFilter(_FocusWatcher(self.commit))
         self.setWidget(widget)
 
+    def _mark_dirty(self, *args) -> None:
+        """Mark the panel state as having unsaved changes."""
+        self.dirty = True
+
     def open_for(self, index: int) -> None:
         model = get_graph()
         if index < 0 or index >= len(model.observers):
@@ -757,6 +761,10 @@ class MetaNodePanel(QDockWidget):
         layout.addRow(apply_btn)
         widget.installEventFilter(_FocusWatcher(self.commit))
         self.setWidget(widget)
+
+    def _mark_dirty(self, *args) -> None:
+        """Indicate that changes need saving."""
+        self.dirty = True
 
     def open_new(self, meta_id: str) -> None:
         self.current = meta_id
