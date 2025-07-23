@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
     QGraphicsLineItem,
     QGraphicsScene,
     QGraphicsView,
+    QMenu,
 )
 
 from ..graph.model import GraphModel
@@ -32,6 +33,13 @@ from ..command_stack import (
     MoveNodeCommand,
     MoveMetaNodeCommand,
     MoveObserverCommand,
+    AddNodeCommand,
+    AddObserverCommand,
+    AddMetaNodeCommand,
+    DeleteEdgeCommand,
+    DeleteNodeCommand,
+    DeleteObserverCommand,
+    DeleteMetaNodeCommand,
 )
 
 
@@ -483,4 +491,108 @@ class CanvasWidget(QGraphicsView):
         if not self.editable:
             return
         self.model.apply_spring_layout()
+        self.load_model(self.model)
+
+    # ---- context menu and editing helpers -----------------------------------
+
+    def contextMenuEvent(self, event) -> None:
+        if not self.editable:
+            return super().contextMenuEvent(event)
+
+        item = self.itemAt(event.pos())
+        menu = QMenu(self)
+        scene_pos = self.mapToScene(event.pos())
+
+        if isinstance(item, NodeItem):
+            delete_action = menu.addAction("Delete Node")
+            chosen = menu.exec(event.globalPos())
+            if chosen == delete_action:
+                self.delete_node(item.node_id)
+        elif isinstance(item, EdgeItem):
+            delete_action = menu.addAction("Delete Connection")
+            chosen = menu.exec(event.globalPos())
+            if chosen == delete_action:
+                self.delete_connection(item.index, item.connection_type)
+        elif isinstance(item, ObserverItem):
+            delete_action = menu.addAction("Delete Observer")
+            chosen = menu.exec(event.globalPos())
+            if chosen == delete_action:
+                self.delete_observer(item.index)
+        elif isinstance(item, MetaNodeItem):
+            delete_action = menu.addAction("Delete MetaNode")
+            chosen = menu.exec(event.globalPos())
+            if chosen == delete_action:
+                self.delete_meta_node(item.meta_id)
+        else:
+            add_node = menu.addAction("Add Node")
+            add_obs = menu.addAction("Add Observer")
+            add_meta = menu.addAction("Add MetaNode")
+            chosen = menu.exec(event.globalPos())
+            if chosen == add_node:
+                self.add_node_at(scene_pos.x(), scene_pos.y())
+            elif chosen == add_obs:
+                self.add_observer_at(scene_pos.x(), scene_pos.y())
+            elif chosen == add_meta:
+                self.add_meta_node_at(scene_pos.x(), scene_pos.y())
+
+    # -- add helpers --
+
+    def add_node_at(self, x: float, y: float) -> None:
+        model = self.model
+        idx = 1
+        while f"N{idx}" in model.nodes:
+            idx += 1
+        cmd = AddNodeCommand(model, f"N{idx}", {"x": x, "y": y})
+        self.command_stack.do(cmd)
+        self.load_model(model)
+
+    def add_observer_at(self, x: float, y: float) -> None:
+        model = self.model
+        idx = 1
+        existing = {o.get("id") for o in model.observers}
+        while f"OBS{idx}" in existing:
+            idx += 1
+        obs = {"id": f"OBS{idx}", "monitors": [], "frequency": 1.0, "x": x, "y": y}
+        cmd = AddObserverCommand(model, obs)
+        self.command_stack.do(cmd)
+        self.load_model(model)
+
+    def add_meta_node_at(self, x: float, y: float) -> None:
+        model = self.model
+        idx = 1
+        while f"MN{idx}" in model.meta_nodes:
+            idx += 1
+        meta_id = f"MN{idx}"
+        data = {
+            "members": [],
+            "constraints": {},
+            "type": "Configured",
+            "collapsed": False,
+            "x": x,
+            "y": y,
+        }
+        cmd = AddMetaNodeCommand(model, meta_id, data)
+        self.command_stack.do(cmd)
+        self.load_model(model)
+
+    # -- delete helpers --
+
+    def delete_connection(self, index: int, connection_type: str) -> None:
+        cmd = DeleteEdgeCommand(self.model, index, connection_type)
+        self.command_stack.do(cmd)
+        self.load_model(self.model)
+
+    def delete_node(self, node_id: str) -> None:
+        cmd = DeleteNodeCommand(self.model, node_id)
+        self.command_stack.do(cmd)
+        self.load_model(self.model)
+
+    def delete_observer(self, index: int) -> None:
+        cmd = DeleteObserverCommand(self.model, index)
+        self.command_stack.do(cmd)
+        self.load_model(self.model)
+
+    def delete_meta_node(self, meta_id: str) -> None:
+        cmd = DeleteMetaNodeCommand(self.model, meta_id)
+        self.command_stack.do(cmd)
         self.load_model(self.model)

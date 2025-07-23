@@ -232,6 +232,40 @@ class GraphModel:
             data["target_nodes"] = list(target_nodes)
         self.observers.append(data)
 
+    # ---- Removal helpers -----------------------------------------------------
+
+    def remove_node(self, node_id: str) -> None:
+        """Delete ``node_id`` and any references to it."""
+
+        if node_id not in self.nodes:
+            return
+        self.nodes.pop(node_id)
+
+        self.edges = [
+            e for e in self.edges if e.get("from") != node_id and e.get("to") != node_id
+        ]
+        self.bridges = [b for b in self.bridges if node_id not in b.get("nodes", [])]
+
+        for obs in self.observers:
+            obs["monitors"] = [n for n in obs.get("monitors", []) if n != node_id]
+            if "target_nodes" in obs:
+                obs["target_nodes"] = [n for n in obs["target_nodes"] if n != node_id]
+
+        for meta in self.meta_nodes.values():
+            if node_id in meta.get("members", []):
+                meta["members"] = [n for n in meta["members"] if n != node_id]
+
+    def remove_observer(self, index: int) -> None:
+        """Remove the observer at ``index`` if valid."""
+
+        if 0 <= index < len(self.observers):
+            self.observers.pop(index)
+
+    def remove_meta_node(self, meta_id: str) -> None:
+        """Remove ``meta_id`` from the model."""
+
+        self.meta_nodes.pop(meta_id, None)
+
     def apply_spring_layout(self) -> None:
         """Position nodes using ``networkx.spring_layout``."""
 
