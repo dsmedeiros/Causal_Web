@@ -200,7 +200,9 @@ The **Auto Layout** action still arranges nodes using a spring layout.
 When you press **Start Simulation** the current graph is saved and also copied
 to `input/graph.json`. A new run directory is created via `Config.new_run()` and
 the graph file is copied into the run's `input/` folder. This preserves the
-exact input used for each run.
+exact input used for each run. Any unsaved edits in the **Graph View** are
+applied automatically so the main window reflects the latest changes when the
+simulation begins.
 These actions operate on the `graph.json` format and update the shared in-memory model.
 The dashboard also includes a **Graph View** tab which renders the loaded graph and displays
 basic information for the currently selected node. The **Graph View** window

@@ -193,7 +193,15 @@ class MainWindow(QMainWindow):
         Config.tick_rate = float(value)
 
     def start_simulation(self) -> None:
-        """Persist the active graph and launch the simulation thread."""
+        """Persist the active graph and launch the simulation thread.
+
+        If the graph editor is open, any pending edits are applied to the
+        simulation view before saving. This ensures the runtime graph matches
+        the editor state when starting a new run.
+        """
+        # apply edits from the graph editor if it is currently visible
+        if self.canvas_dock.isVisible():
+            self._load_into_main()
         path = get_active_file() or Config.input_path("graph.json")
         os.makedirs(os.path.dirname(path), exist_ok=True)
         save_graph(path, get_graph())
