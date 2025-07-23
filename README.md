@@ -225,6 +225,8 @@ Edges connected to a moving node are redrawn in real time so the relationships s
 Once the drag ends the node's new ``(x, y)`` coordinates are saved back to the
 graph model automatically. Meta nodes and observers store their updated
 positions in the same way.
+Connections from observers and meta nodes now appear immediately after applying
+changes, without needing to drag the items first.
 The Graph View window now resizes correctly, keeping graph elements interactive.
 A resize handler bug that halted GUI updates after resizing has been fixed.
 Dragging connections between nodes now works again across PySide6 versions.
