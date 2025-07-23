@@ -227,12 +227,13 @@ graph model automatically. Meta nodes and observers store their updated
 positions in the same way.
 Connections from observers and meta nodes now appear immediately after applying
 changes, without needing to drag the items first.
+Observer and meta node panels correctly remember their targeted nodes when reopened.
 The Graph View window now resizes correctly, keeping graph elements interactive.
 A resize handler bug that halted GUI updates after resizing has been fixed.
 Dragging connections between nodes now works again across PySide6 versions.
 
 Rendering is now event driven so the canvas only updates when the graph changes, greatly reducing idle CPU usage.
-Graph editing panels are now docked within the Graph View window. They close automatically when the view is hidden and prompt about unapplied changes before closing. The Graph View also warns when in-memory edits have not been saved to ``graph.json``.
+Graph editing panels are now docked within the Graph View window. They close automatically when the view is hidden and prompt about unapplied changes before closing. Panels minimize when they lose focus and restore when clicked again, warning about unsaved edits if you switch to a different object. The Graph View also warns when in-memory edits have not been saved to ``graph.json``.
 
 ### Analysing the output
 
