@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QAction, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
@@ -128,6 +128,7 @@ class MainWindow(QMainWindow):
         self._create_menus()
         self.edit_action.setEnabled(bool(get_graph().nodes))
         self._create_docks()
+        self._start_refresh_timer()
 
     # ---- UI setup ----
 
@@ -185,6 +186,17 @@ class MainWindow(QMainWindow):
 
         dock.setWidget(panel)
         self.addDockWidget(Qt.RightDockWidgetArea, dock)
+
+    def _start_refresh_timer(self) -> None:
+        """Begin periodic updates of the simulation canvas."""
+        self._refresh_timer = QTimer(self)
+        self._refresh_timer.setInterval(100)
+        self._refresh_timer.timeout.connect(self._refresh_sim_canvas)
+        self._refresh_timer.start()
+
+    def _refresh_sim_canvas(self) -> None:
+        """Reload the canvas from the current engine graph."""
+        self.sim_canvas.load_model(GraphModel.from_dict(tick_engine.graph.to_dict()))
 
     # ---- actions ----
 
