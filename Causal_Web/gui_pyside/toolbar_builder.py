@@ -150,15 +150,11 @@ class NodePanel(QDockWidget):
         widget.installEventFilter(_FocusWatcher(self.commit))
         self.setWidget(widget)
 
-    def _mark_dirty(self, *args) -> None:
-        self.dirty = True
-
-    def _mark_dirty(self, *args) -> None:
-        self.dirty = True
-        # update coordinates if node moves while panel is visible
+        # keep displayed coordinates in sync with the canvas
         self.main_window.canvas.node_position_changed.connect(self.update_position)
 
     def _mark_dirty(self, *args) -> None:
+        """Indicate that edits are pending."""
         self.dirty = True
 
     def _toggle_tick_source_fields(self, checked: bool) -> None:
