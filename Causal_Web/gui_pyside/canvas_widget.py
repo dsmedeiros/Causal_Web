@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (
     QMenu,
 )
 
+
 from ..graph.model import GraphModel
 from ..gui.state import (
     set_selected_node,
@@ -41,6 +42,17 @@ from ..command_stack import (
     DeleteObserverCommand,
     DeleteMetaNodeCommand,
 )
+
+
+def make_dashed_line(x1: float, y1: float, x2: float, y2: float) -> QGraphicsLineItem:
+    """Return a dashed line item connecting ``(x1, y1)`` and ``(x2, y2)``."""
+    line = QGraphicsLineItem()
+    pen = QPen(Qt.darkGray)
+    pen.setStyle(Qt.DotLine)
+    line.setPen(pen)
+    line.setLine(x1, y1, x2, y2)
+    line.setZValue(0)
+    return line
 
 
 class NodeItem(QGraphicsEllipseItem):
@@ -181,12 +193,7 @@ class MetaNodeItem(QGraphicsEllipseItem):
         for nid in self.members:
             node = self.canvas.nodes.get(nid)
             if node:
-                line = QGraphicsLineItem()
-                pen = QPen(Qt.darkGray)
-                pen.setStyle(Qt.DotLine)
-                line.setPen(pen)
-                line.setLine(self.x(), self.y(), node.x(), node.y())
-                line.setZValue(0)
+                line = make_dashed_line(self.x(), self.y(), node.x(), node.y())
                 scene.addItem(line)
                 self.lines.append(line)
 
@@ -254,12 +261,7 @@ class ObserverItem(QGraphicsRectItem):
         for nid in targets:
             node = self.canvas.nodes.get(nid)
             if node:
-                line = QGraphicsLineItem()
-                pen = QPen(Qt.darkGray)
-                pen.setStyle(Qt.DotLine)
-                line.setPen(pen)
-                line.setLine(self.x(), self.y(), node.x(), node.y())
-                line.setZValue(0)
+                line = make_dashed_line(self.x(), self.y(), node.x(), node.y())
                 scene.addItem(line)
                 self.lines.append(line)
 
@@ -505,37 +507,37 @@ class CanvasWidget(QGraphicsView):
         menu = QMenu(self)
         scene_pos = self.mapToScene(event.pos())
 
+        actions = {}
         if isinstance(item, NodeItem):
-            delete_action = menu.addAction("Delete Node")
-            chosen = menu.exec(event.globalPos())
-            if chosen == delete_action:
-                self.delete_node(item.node_id)
+            actions[menu.addAction("Delete Node")] = lambda: self.delete_node(
+                item.node_id
+            )
         elif isinstance(item, EdgeItem):
-            delete_action = menu.addAction("Delete Connection")
-            chosen = menu.exec(event.globalPos())
-            if chosen == delete_action:
-                self.delete_connection(item.index, item.connection_type)
+            actions[menu.addAction("Delete Connection")] = (
+                lambda: self.delete_connection(item.index, item.connection_type)
+            )
         elif isinstance(item, ObserverItem):
-            delete_action = menu.addAction("Delete Observer")
-            chosen = menu.exec(event.globalPos())
-            if chosen == delete_action:
-                self.delete_observer(item.index)
+            actions[menu.addAction("Delete Observer")] = lambda: self.delete_observer(
+                item.index
+            )
         elif isinstance(item, MetaNodeItem):
-            delete_action = menu.addAction("Delete MetaNode")
-            chosen = menu.exec(event.globalPos())
-            if chosen == delete_action:
-                self.delete_meta_node(item.meta_id)
+            actions[menu.addAction("Delete MetaNode")] = lambda: self.delete_meta_node(
+                item.meta_id
+            )
         else:
-            add_node = menu.addAction("Add Node")
-            add_obs = menu.addAction("Add Observer")
-            add_meta = menu.addAction("Add MetaNode")
-            chosen = menu.exec(event.globalPos())
-            if chosen == add_node:
-                self.add_node_at(scene_pos.x(), scene_pos.y())
-            elif chosen == add_obs:
-                self.add_observer_at(scene_pos.x(), scene_pos.y())
-            elif chosen == add_meta:
-                self.add_meta_node_at(scene_pos.x(), scene_pos.y())
+            actions[menu.addAction("Add Node")] = lambda: self.add_node_at(
+                scene_pos.x(), scene_pos.y()
+            )
+            actions[menu.addAction("Add Observer")] = lambda: self.add_observer_at(
+                scene_pos.x(), scene_pos.y()
+            )
+            actions[menu.addAction("Add MetaNode")] = lambda: self.add_meta_node_at(
+                scene_pos.x(), scene_pos.y()
+            )
+
+        chosen = menu.exec(event.globalPos())
+        if chosen in actions:
+            actions[chosen]()
 
     # -- add helpers --
 
