@@ -644,12 +644,19 @@ class ObserverPanel(QDockWidget):
         if self.current_index is None:
             return
         model = get_graph()
+        existing = (
+            model.observers[self.current_index]
+            if self.current_index < len(model.observers)
+            else {}
+        )
         data = {
             "id": self.id_edit.text(),
             "monitors": [
                 ev for ev, cb in self.monitor_checks.items() if cb.isChecked()
             ],
             "frequency": float(self.freq_spin.value()),
+            "x": float(existing.get("x", 0.0)),
+            "y": float(existing.get("y", 0.0)),
         }
         targets = [item.text() for item in self.node_list.selectedItems()]
         if targets:

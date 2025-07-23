@@ -341,6 +341,7 @@ class CanvasWidget(QGraphicsView):
             members = data.get("members", [])
             item = MetaNodeItem(meta_id, x, y, members, self)
             scene.addItem(item)
+            item.update_lines()
             self.meta_nodes[meta_id] = item
 
         for idx, obs in enumerate(model.observers):
@@ -348,6 +349,7 @@ class CanvasWidget(QGraphicsView):
             targets = obs.get("target_nodes")
             item = ObserverItem(idx, x, y, targets, self)
             scene.addItem(item)
+            item.update_lines()
             self.observers[idx] = item
 
     # ---- interaction -------------------------------------------------
