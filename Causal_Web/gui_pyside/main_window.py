@@ -75,7 +75,13 @@ class GraphDockWidget(QDockWidget):
 
 
 class MainWindow(QMainWindow):
-    """Main application window with dockable widgets."""
+    """Main application window with dockable widgets.
+
+    Attributes
+    ----------
+    graph_window : QMainWindow
+        Hosts the toolbar and editing panels for the graph editor.
+    """
 
     def __init__(self):
         super().__init__()
@@ -88,7 +94,14 @@ class MainWindow(QMainWindow):
 
         # graph editor dock, hidden by default
         self.canvas = CanvasWidget(self)
+
+        # The graph editor window hosts dockable panels and the toolbar.
+        # It must exist before building the toolbar as panel builders expect
+        # ``self.graph_window`` to be available.
+        self.graph_window = QMainWindow()
+
         toolbar = build_toolbar(self)
+
         central = QWidget()
         layout = QVBoxLayout(central)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -99,7 +112,6 @@ class MainWindow(QMainWindow):
         load_btn.clicked.connect(self._load_into_main)
         layout.addWidget(load_btn)
 
-        self.graph_window = QMainWindow()
         self.graph_window.setCentralWidget(central)
 
         self.canvas_dock = GraphDockWidget("Graph View", self)
