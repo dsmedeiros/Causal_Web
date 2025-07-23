@@ -11,6 +11,9 @@ allows connecting nodes by dragging between them, applies an automatic spring
 layout based on ``networkx`` and validates connections to prevent duplicates or
 self-loops. Observers appear as draggable squares connected to each of their
 target nodes with dotted lines and open the observer panel when clicked.
+Right-clicking the canvas opens a menu to insert new nodes, observers or meta
+nodes at the clicked location. Right-clicking existing items exposes a delete
+option that removes the object and any associated links.
 
 Key modules include:
 

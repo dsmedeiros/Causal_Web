@@ -94,6 +94,68 @@ class DeleteEdgeCommand(Command):
 
 
 @dataclass
+class DeleteNodeCommand(Command):
+    """Command that removes a node and its connections."""
+
+    model: GraphModel
+    node_id: str
+    _snapshot: dict | None = None
+
+    def execute(self) -> None:
+        self._snapshot = self.model.to_dict()
+        self.model.remove_node(self.node_id)
+
+    def undo(self) -> None:
+        if self._snapshot is None:
+            return
+        restored = GraphModel.from_dict(self._snapshot)
+        self.model.nodes = restored.nodes
+        self.model.edges = restored.edges
+        self.model.bridges = restored.bridges
+        self.model.tick_sources = restored.tick_sources
+        self.model.observers = restored.observers
+        self.model.meta_nodes = restored.meta_nodes
+
+
+@dataclass
+class DeleteObserverCommand(Command):
+    """Command that removes an observer from a :class:`GraphModel`."""
+
+    model: GraphModel
+    index: int
+    _removed: dict | None = None
+
+    def execute(self) -> None:
+        if 0 <= self.index < len(self.model.observers):
+            self._removed = self.model.observers[self.index]
+            self.model.remove_observer(self.index)
+
+    def undo(self) -> None:
+        if self._removed is None:
+            return
+        self.model.observers.insert(self.index, self._removed)
+        self._removed = None
+
+
+@dataclass
+class DeleteMetaNodeCommand(Command):
+    """Command that removes a meta node from a :class:`GraphModel`."""
+
+    model: GraphModel
+    meta_id: str
+    _removed: dict | None = None
+
+    def execute(self) -> None:
+        self._removed = self.model.meta_nodes.get(self.meta_id)
+        self.model.remove_meta_node(self.meta_id)
+
+    def undo(self) -> None:
+        if self._removed is not None:
+            self.model.meta_nodes[self.meta_id] = self._removed
+            self._removed = None
+
+
+@dataclass
 class MoveNodeCommand(Command):
     """Command that changes a node's ``(x, y)`` position."""
 
