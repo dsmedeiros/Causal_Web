@@ -9,9 +9,11 @@ from PySide6.QtWidgets import (
     QDockWidget,
     QFileDialog,
     QFormLayout,
+    QLabel,
     QMainWindow,
     QPushButton,
     QSlider,
+    QSpinBox,
     QWidget,
     QVBoxLayout,
 )
@@ -170,6 +172,7 @@ class MainWindow(QMainWindow):
 
     def _create_docks(self) -> None:
         dock = QDockWidget("Control Panel", self)
+        dock.setFeatures(QDockWidget.NoDockWidgetFeatures)
         panel = QWidget()
         layout = QFormLayout(panel)
 
@@ -180,12 +183,31 @@ class MainWindow(QMainWindow):
         self.tick_slider.valueChanged.connect(self._tick_rate_changed)
         layout.addRow("Tick Rate", self.tick_slider)
 
+        self.tick_label = QLabel("0")
+        layout.addRow("Current Tick", self.tick_label)
+
+        self.limit_spin = QSpinBox()
+        self.limit_spin.setMinimum(1)
+        self.limit_spin.setMaximum(100000)
+        self.limit_spin.setValue(Config.max_ticks)
+        layout.addRow("Tick Limit", self.limit_spin)
+
         self.start_button = QPushButton("Start Simulation")
         self.start_button.clicked.connect(self.start_simulation)
         layout.addRow(self.start_button)
 
+        self.pause_button = QPushButton("Pause")
+        self.pause_button.setEnabled(False)
+        self.pause_button.clicked.connect(self.pause_or_resume)
+        layout.addRow(self.pause_button)
+
+        self.stop_button = QPushButton("Stop")
+        self.stop_button.setEnabled(False)
+        self.stop_button.clicked.connect(self.stop_simulation)
+        layout.addRow(self.stop_button)
+
         dock.setWidget(panel)
-        self.addDockWidget(Qt.RightDockWidgetArea, dock)
+        self.addDockWidget(Qt.LeftDockWidgetArea, dock)
 
     def _start_refresh_timer(self) -> None:
         """Begin periodic updates of the simulation canvas."""
@@ -195,8 +217,18 @@ class MainWindow(QMainWindow):
         self._refresh_timer.start()
 
     def _refresh_sim_canvas(self) -> None:
-        """Reload the canvas from the current engine graph."""
-        self.sim_canvas.load_model(GraphModel.from_dict(tick_engine.graph.to_dict()))
+        """Reload the canvas from the appropriate graph and update tick label."""
+        with Config.state_lock:
+            running = Config.is_running
+            tick = Config.current_tick
+        model_dict = tick_engine.graph.to_dict() if running else get_graph().to_dict()
+        self.tick_label.setText(str(tick))
+        self.sim_canvas.load_model(GraphModel.from_dict(model_dict))
+        if not running:
+            self.start_button.setEnabled(True)
+            self.pause_button.setEnabled(False)
+            self.pause_button.setText("Pause")
+            self.stop_button.setEnabled(False)
 
     # ---- actions ----
 
@@ -223,6 +255,7 @@ class MainWindow(QMainWindow):
         clear_graph_dirty()
         mark_graph_dirty()
         Config.new_run()
+        Config.max_ticks = self.limit_spin.value()
         tick_engine.build_graph()
         with Config.state_lock:
             if Config.is_running:
@@ -231,7 +264,28 @@ class MainWindow(QMainWindow):
             tick = Config.current_tick
         tick_engine.simulation_loop()
         self.start_button.setEnabled(False)
+        self.pause_button.setEnabled(True)
+        self.stop_button.setEnabled(True)
         tick_engine._update_simulation_state(False, False, tick, None)
+
+    def pause_or_resume(self) -> None:
+        """Toggle between pausing and resuming the simulation."""
+        with Config.state_lock:
+            running = Config.is_running
+        if running:
+            tick_engine.pause_simulation()
+            self.pause_button.setText("Resume")
+        else:
+            tick_engine.resume_simulation()
+            self.pause_button.setText("Pause")
+
+    def stop_simulation(self) -> None:
+        """Stop the simulation immediately."""
+        tick_engine.stop_simulation()
+        self.start_button.setEnabled(True)
+        self.pause_button.setEnabled(False)
+        self.pause_button.setText("Pause")
+        self.stop_button.setEnabled(False)
 
     def load_graph(self):
         path, _ = QFileDialog.getOpenFileName(

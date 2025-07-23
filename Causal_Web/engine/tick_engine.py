@@ -745,11 +745,36 @@ def log_metrics_per_tick(global_tick):
     )
 
 
+_stop_requested = False
+
+
+def pause_simulation() -> None:
+    """Pause the simulation loop."""
+    with Config.state_lock:
+        Config.is_running = False
+
+
+def resume_simulation() -> None:
+    """Resume the simulation loop."""
+    with Config.state_lock:
+        Config.is_running = True
+
+
+def stop_simulation() -> None:
+    """Signal the simulation thread to stop."""
+    global _stop_requested
+    with Config.state_lock:
+        Config.is_running = False
+        _stop_requested = True
+
+
 def simulation_loop():
     """Start the main simulation thread on a background worker."""
 
     def run():
         global_tick = 0
+        global _stop_requested
+        _stop_requested = False
         if getattr(Config, "random_seed", None) is not None:
             import random
 
@@ -759,6 +784,7 @@ def simulation_loop():
         while True:
             with Config.state_lock:
                 running = Config.is_running
+                stop = _stop_requested
                 Config.current_tick = global_tick
                 rate = Config.tick_rate
                 # ``allow_tick_override`` enables the ``max_ticks`` setting to
@@ -769,6 +795,11 @@ def simulation_loop():
                     if Config.allow_tick_override
                     else Config.tick_limit
                 )
+            if stop:
+                snapshot_path = snapshot_graph(global_tick)
+                _update_simulation_state(False, True, global_tick, snapshot_path)
+                write_output()
+                break
             if not running:
                 time.sleep(0.1)
                 continue
@@ -822,6 +853,7 @@ def simulation_loop():
                     Config.is_running = False
                 _update_simulation_state(False, True, global_tick, snapshot_path)
                 write_output()
+                break
 
             global_tick += 1
             time.sleep(rate)

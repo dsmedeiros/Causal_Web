@@ -191,7 +191,7 @@ python -m Causal_Web.main            # with GUI
 python -m Causal_Web.main --no-gui   # headless run
 ```
 
-Use the on-screen controls to start or pause the simulation and adjust the tick rate. The tick rate and maximum tick count sliders now reside in the **Control Panel** window instead of the **Parameters** panel. Windows can be freely resized and the graph view will scroll if its contents exceed the available space. Window resizing is now handled more robustly to avoid occasional freezes. As the simulation runs, a number of JSON log files are produced inside `Causal_Web/output`.
+Use the on-screen controls to start, pause/resume or stop the simulation and adjust the tick rate. A tick counter shows the current tick and a **Tick Limit** field determines how many ticks to run. These inputs now reside in the **Control Panel** window which is docked to the top left. Windows can be freely resized and the graph view will scroll if its contents exceed the available space. Window resizing is now handled more robustly to avoid occasional freezes. As the simulation runs, a number of JSON log files are produced inside `Causal_Web/output`.
 The main window now refreshes automatically as nodes and edges change during the run.
 Use the **File** menu to load, save or start a new graph. Editing actions
 include **Edit Graph...**, **Undo** and **Redo** in the **Edit** menu.
