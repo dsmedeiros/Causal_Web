@@ -97,7 +97,12 @@ Collapse-Seeded Propagation. These options are also exposed as CLI flags and can
 be modified in the Parameters window.
 ## Graph format
 
+
 Graphs are defined by a JSON file with `nodes`, `edges`, optional `bridges`, `tick_sources`, `observers` and `meta_nodes`. Each node defines its position, frequency and thresholds. Edges specify delays and attenuation. Tick sources seed periodic activity and observers describe which metrics to record. Meta nodes group related nodes under additional constraints.
+
+### Meta nodes
+
+Configured meta nodes are declared under the `meta_nodes` key and can enforce constraints such as `phase_lock`, `shared_tick_input` or `coherence_tie`. Emergent meta nodes are discovered at runtime when the engine observes naturally synchronized clusters. Only configured meta nodes modify behaviour; emergent ones are logged for analysis.
 
 Observers include optional `x` and `y` fields storing their location on the canvas.
 
@@ -155,8 +160,17 @@ Example:
       "frequency": 1
     }
   ],
-  "meta_nodes": {}
-}
+  "meta_nodes": {
+    "MN1": {
+      "members": ["A", "B"],
+      "constraints": {"phase_lock": {"tolerance": 0.1}},
+      "type": "Configured",
+      "collapsed": false,
+      "x": 0.0,
+      "y": 0.0
+    }
+  }
+  }
 ```
 
 

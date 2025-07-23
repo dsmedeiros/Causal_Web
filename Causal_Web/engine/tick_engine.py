@@ -780,6 +780,7 @@ def simulation_loop():
             emit_ticks(global_tick)
             propagate_phases(global_tick)
             evaluate_nodes(global_tick)
+            graph.update_meta_nodes(global_tick)
             check_propagation(global_tick)
 
             log_metrics_per_tick(global_tick)
