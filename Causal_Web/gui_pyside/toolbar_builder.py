@@ -147,11 +147,15 @@ class NodePanel(QDockWidget):
         apply_btn = QPushButton("Apply")
         apply_btn.clicked.connect(self.commit)
         layout.addRow(apply_btn)
-        widget.installEventFilter(_FocusWatcher(self.commit))
+        widget.installEventFilter(_FocusWatcher(self._minimize))
         self.setWidget(widget)
 
         # keep displayed coordinates in sync with the canvas
         self.main_window.canvas.node_position_changed.connect(self.update_position)
+
+    def _minimize(self) -> None:
+        """Hide the panel when it loses focus."""
+        self.hide()
 
     def _mark_dirty(self, *args) -> None:
         """Indicate that edits are pending."""
@@ -163,6 +167,23 @@ class NodePanel(QDockWidget):
             spin.setVisible(checked)
 
     def show_node(self, node_id: str) -> None:
+        if self.current == node_id:
+            self.show()
+            return
+
+        if self.current and self.dirty:
+            from PySide6.QtWidgets import QMessageBox
+
+            resp = QMessageBox.question(
+                self,
+                "Unapplied Node Changes",
+                "Apply changes to this node before switching?",
+            )
+            if resp == QMessageBox.Yes:
+                self.commit()
+            else:
+                self.dirty = False
+
         model = get_graph()
         data = model.nodes.get(node_id)
         if data is None:
@@ -351,7 +372,7 @@ class ConnectionPanel(QDockWidget):
         apply_btn = QPushButton("Apply")
         apply_btn.clicked.connect(self.commit)
         layout.addRow(apply_btn)
-        widget.installEventFilter(_FocusWatcher(self.commit))
+        widget.installEventFilter(_FocusWatcher(self._minimize))
         self.setWidget(widget)
         self.type_combo.currentIndexChanged.connect(self._update_fields)
         self.type_combo.currentIndexChanged.connect(self._mark_dirty)
@@ -369,6 +390,10 @@ class ConnectionPanel(QDockWidget):
             lbl.setVisible(not is_edge)
             w.setVisible(not is_edge)
 
+    def _minimize(self) -> None:
+        """Hide the connection panel when focus is lost."""
+        self.hide()
+
     def _populate_node_lists(self) -> None:
         nodes = list(get_graph().nodes)
         for combo in (
@@ -381,6 +406,19 @@ class ConnectionPanel(QDockWidget):
             combo.addItems(nodes)
 
     def open_for(self, source: str, target: str) -> None:
+        if self.current_index is not None and self.dirty:
+            from PySide6.QtWidgets import QMessageBox
+
+            resp = QMessageBox.question(
+                self,
+                "Unapplied Connection Changes",
+                "Apply changes to this connection before switching?",
+            )
+            if resp == QMessageBox.Yes:
+                self.commit()
+            else:
+                self.dirty = False
+
         self._populate_node_lists()
         self.source = source
         self.target = target
@@ -399,6 +437,22 @@ class ConnectionPanel(QDockWidget):
 
     def show_connection(self, conn_type: str, index: int) -> None:
         """Display attributes for an existing connection."""
+        if self.current_index == index and self.current_type == conn_type:
+            self.show()
+            return
+
+        if self.current_index is not None and self.dirty:
+            from PySide6.QtWidgets import QMessageBox
+
+            resp = QMessageBox.question(
+                self,
+                "Unapplied Connection Changes",
+                "Apply changes to this connection before switching?",
+            )
+            if resp == QMessageBox.Yes:
+                self.commit()
+            else:
+                self.dirty = False
 
         model = get_graph()
         data = model.edges[index] if conn_type == "edge" else model.bridges[index]
@@ -602,14 +656,35 @@ class ObserverPanel(QDockWidget):
         apply_btn = QPushButton("Apply")
         apply_btn.clicked.connect(self.commit)
         layout.addRow(apply_btn)
-        widget.installEventFilter(_FocusWatcher(self.commit))
+        widget.installEventFilter(_FocusWatcher(self._minimize))
         self.setWidget(widget)
+
+    def _minimize(self) -> None:
+        """Hide the observer panel when focus is lost."""
+        self.hide()
 
     def _mark_dirty(self, *args) -> None:
         """Mark the panel state as having unsaved changes."""
         self.dirty = True
 
     def open_for(self, index: int) -> None:
+        if self.current_index == index:
+            self.show()
+            return
+
+        if self.current_index is not None and self.dirty:
+            from PySide6.QtWidgets import QMessageBox
+
+            resp = QMessageBox.question(
+                self,
+                "Unapplied Observer Changes",
+                "Apply changes to this observer before switching?",
+            )
+            if resp == QMessageBox.Yes:
+                self.commit()
+            else:
+                self.dirty = False
+
         model = get_graph()
         if index < 0 or index >= len(model.observers):
             return
@@ -629,6 +704,19 @@ class ObserverPanel(QDockWidget):
         self.show()
 
     def open_new(self, index: int) -> None:
+        if self.current_index is not None and self.dirty:
+            from PySide6.QtWidgets import QMessageBox
+
+            resp = QMessageBox.question(
+                self,
+                "Unapplied Observer Changes",
+                "Apply changes to this observer before switching?",
+            )
+            if resp == QMessageBox.Yes:
+                self.commit()
+            else:
+                self.dirty = False
+
         self.current_index = index
         self.id_edit.setText("")
         for cb in self.monitor_checks.values():
@@ -762,14 +850,31 @@ class MetaNodePanel(QDockWidget):
         apply_btn = QPushButton("Apply")
         apply_btn.clicked.connect(self.commit)
         layout.addRow(apply_btn)
-        widget.installEventFilter(_FocusWatcher(self.commit))
+        widget.installEventFilter(_FocusWatcher(self._minimize))
         self.setWidget(widget)
+
+    def _minimize(self) -> None:
+        """Hide the meta node panel when focus is lost."""
+        self.hide()
 
     def _mark_dirty(self, *args) -> None:
         """Indicate that changes need saving."""
         self.dirty = True
 
     def open_new(self, meta_id: str) -> None:
+        if self.current and self.dirty:
+            from PySide6.QtWidgets import QMessageBox
+
+            resp = QMessageBox.question(
+                self,
+                "Unapplied MetaNode Changes",
+                "Apply changes to this meta node before switching?",
+            )
+            if resp == QMessageBox.Yes:
+                self.commit()
+            else:
+                self.dirty = False
+
         self.current = meta_id
         self.id_label.setText(meta_id)
         self.phase_tol.setValue(0.0)
@@ -785,6 +890,23 @@ class MetaNodePanel(QDockWidget):
         self.show()
 
     def show_meta_node(self, meta_id: str) -> None:
+        if self.current == meta_id:
+            self.show()
+            return
+
+        if self.current and self.dirty:
+            from PySide6.QtWidgets import QMessageBox
+
+            resp = QMessageBox.question(
+                self,
+                "Unapplied MetaNode Changes",
+                "Apply changes to this meta node before switching?",
+            )
+            if resp == QMessageBox.Yes:
+                self.commit()
+            else:
+                self.dirty = False
+
         model = get_graph()
         data = model.meta_nodes.get(meta_id)
         if data is None:
