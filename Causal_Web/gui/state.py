@@ -24,6 +24,7 @@ def set_graph(graph: GraphModel) -> None:
 _active_file: str | None = None
 _selected_node: str | None = None
 _selected_connection: tuple[str, int] | None = None
+_selected_observer: int | None = None
 
 
 def get_active_file() -> str | None:
@@ -57,3 +58,14 @@ def set_selected_connection(conn: tuple[str, int] | None) -> None:
     """Update the selected connection reference."""
     global _selected_connection
     _selected_connection = conn
+
+
+def get_selected_observer() -> int | None:
+    """Return the index of the selected observer, if any."""
+    return _selected_observer
+
+
+def set_selected_observer(index: int | None) -> None:
+    """Update the currently selected observer index."""
+    global _selected_observer
+    _selected_observer = index

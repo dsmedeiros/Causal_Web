@@ -209,6 +209,7 @@ class MainWindow(QMainWindow):
         observer = {"id": f"OBS{idx}", "monitors": [], "frequency": 1.0}
         cmd = AddObserverCommand(model, observer)
         self.canvas.command_stack.do(cmd)
+        self.canvas.load_model(model)
         self.observer_panel.open_new(cmd.index)
 
     def add_meta_node(self) -> None:

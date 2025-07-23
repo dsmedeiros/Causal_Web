@@ -141,6 +141,29 @@ class AddObserverCommand(Command):
 
 
 @dataclass
+class MoveObserverCommand(Command):
+    """Command that changes an observer's ``(x, y)`` position."""
+
+    model: GraphModel
+    index: int
+    new_pos: Tuple[float, float]
+    _old_pos: Tuple[float, float] | None = None
+
+    def execute(self) -> None:
+        if 0 <= self.index < len(self.model.observers):
+            obs = self.model.observers[self.index]
+            self._old_pos = (obs.get("x", 0.0), obs.get("y", 0.0))
+            obs["x"], obs["y"] = self.new_pos
+
+    def undo(self) -> None:
+        if self._old_pos is None:
+            return
+        if 0 <= self.index < len(self.model.observers):
+            obs = self.model.observers[self.index]
+            obs["x"], obs["y"] = self._old_pos
+
+
+@dataclass
 class AddMetaNodeCommand(Command):
     """Command that inserts a meta node into a :class:`GraphModel`."""
 
