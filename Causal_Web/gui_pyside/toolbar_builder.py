@@ -29,6 +29,7 @@ from ..gui.state import (
     get_graph,
     set_selected_node,
     set_selected_observer,
+    mark_graph_dirty,
 )
 
 # ---------------------------------------------------------------------------
@@ -94,10 +95,12 @@ class _FocusWatcher(QObject):
 class NodePanel(QDockWidget):
     """Dock widget for editing node attributes."""
 
-    def __init__(self, main_window):
-        super().__init__("Node", main_window)
+    def __init__(self, main_window, parent=None):
+        super().__init__("Node", parent)
         self.main_window = main_window
         self.current: Optional[str] = None
+        self.dirty = False
+        self._force_close = False
         widget = QWidget()
         layout = QFormLayout(widget)
 
@@ -117,10 +120,12 @@ class NodePanel(QDockWidget):
             label = TooltipLabel(field, TOOLTIPS.get(field))
             layout.addRow(label, spin)
             self.inputs[field] = spin
+            spin.valueChanged.connect(self._mark_dirty)
 
         # tick source controls
         self.tick_source_cb = QCheckBox()
         layout.addRow(TooltipLabel("Tick Source"), self.tick_source_cb)
+        self.tick_source_cb.toggled.connect(self._mark_dirty)
 
         self.ts_fields: Dict[str, tuple[TooltipLabel, QDoubleSpinBox]] = {}
         for field, label_text in [
@@ -135,6 +140,7 @@ class NodePanel(QDockWidget):
             label.hide()
             spin.hide()
             self.ts_fields[field] = (label, spin)
+            spin.valueChanged.connect(self._mark_dirty)
 
         self.tick_source_cb.toggled.connect(self._toggle_tick_source_fields)
 
@@ -143,8 +149,17 @@ class NodePanel(QDockWidget):
         layout.addRow(apply_btn)
         widget.installEventFilter(_FocusWatcher(self.commit))
         self.setWidget(widget)
+
+    def _mark_dirty(self, *args) -> None:
+        self.dirty = True
+
+    def _mark_dirty(self, *args) -> None:
+        self.dirty = True
         # update coordinates if node moves while panel is visible
         self.main_window.canvas.node_position_changed.connect(self.update_position)
+
+    def _mark_dirty(self, *args) -> None:
+        self.dirty = True
 
     def _toggle_tick_source_fields(self, checked: bool) -> None:
         for label, spin in self.ts_fields.values():
@@ -157,6 +172,7 @@ class NodePanel(QDockWidget):
         if data is None:
             return
         self.current = node_id
+        self.dirty = False
         for key, spin in self.inputs.items():
             spin.setValue(float(data.get(key, 0.0)))
 
@@ -208,21 +224,46 @@ class NodePanel(QDockWidget):
 
         self.main_window.canvas.load_model(model)
         set_selected_node(self.current)
+        mark_graph_dirty()
         self.hide()
         self.current = None
+        self.dirty = False
 
     def update_position(self, node_id: str, x: float, y: float) -> None:
         if self.current == node_id:
             self.inputs["x"].setValue(x)
             self.inputs["y"].setValue(y)
 
+    def closeEvent(self, event) -> None:  # type: ignore[override]
+        if self._force_close or not self.dirty:
+            self._force_close = False
+            return super().closeEvent(event)
+        from PySide6.QtWidgets import QMessageBox
+
+        resp = QMessageBox.question(
+            self,
+            "Unapplied Node Changes",
+            "Discard changes to this node?",
+        )
+        if resp == QMessageBox.Yes:
+            self.dirty = False
+            super().closeEvent(event)
+        else:
+            event.ignore()
+
+    def force_close(self) -> None:
+        self._force_close = True
+        self.close()
+
 
 class ConnectionPanel(QDockWidget):
     """Dock widget for adding a connection between two nodes."""
 
-    def __init__(self, main_window):
-        super().__init__("Connection", main_window)
+    def __init__(self, main_window, parent=None):
+        super().__init__("Connection", parent)
         self.main_window = main_window
+        self.dirty = False
+        self._force_close = False
         self.source: Optional[str] = None
         self.target: Optional[str] = None
         self.current_index: Optional[int] = None
@@ -261,6 +302,10 @@ class ConnectionPanel(QDockWidget):
         ]
         for lbl, w in self.edge_widgets:
             layout.addRow(lbl, w)
+            if hasattr(w, "valueChanged"):
+                w.valueChanged.connect(self._mark_dirty)
+            elif hasattr(w, "currentTextChanged"):
+                w.currentTextChanged.connect(self._mark_dirty)
 
         # bridge widgets
         self.nodea_edit = QComboBox()
@@ -302,6 +347,10 @@ class ConnectionPanel(QDockWidget):
         ]
         for lbl, w in self.bridge_widgets:
             layout.addRow(lbl, w)
+            if hasattr(w, "valueChanged"):
+                w.valueChanged.connect(self._mark_dirty)
+            elif hasattr(w, "currentTextChanged"):
+                w.currentTextChanged.connect(self._mark_dirty)
 
         apply_btn = QPushButton("Apply")
         apply_btn.clicked.connect(self.commit)
@@ -309,7 +358,11 @@ class ConnectionPanel(QDockWidget):
         widget.installEventFilter(_FocusWatcher(self.commit))
         self.setWidget(widget)
         self.type_combo.currentIndexChanged.connect(self._update_fields)
+        self.type_combo.currentIndexChanged.connect(self._mark_dirty)
         self._update_fields()
+
+    def _mark_dirty(self, *args) -> None:
+        self.dirty = True
 
     def _update_fields(self) -> None:
         is_edge = self.type_combo.currentText() == "Edge"
@@ -345,6 +398,7 @@ class ConnectionPanel(QDockWidget):
         self.delay_spin.setValue(1.0)
         self.phase_shift_spin.setValue(0.0)
         self.weight_spin.setValue(0.0)
+        self.dirty = False
         self.show()
 
     def show_connection(self, conn_type: str, index: int) -> None:
@@ -381,6 +435,7 @@ class ConnectionPanel(QDockWidget):
             self.medium_type_edit.setText(data.get("medium_type", ""))
             self.mutable_check.setChecked(bool(data.get("mutable", False)))
         self._update_fields()
+        self.dirty = False
         self.show()
 
     def commit(self) -> None:
@@ -477,23 +532,49 @@ class ConnectionPanel(QDockWidget):
             print(f"Failed to add connection: {exc}")
         else:
             self.main_window.canvas.load_model(model)
+        mark_graph_dirty()
         self.hide()
         self.source = self.target = None
         self.current_index = None
+        self.dirty = False
+
+    def closeEvent(self, event) -> None:  # type: ignore[override]
+        if self._force_close or not self.dirty:
+            self._force_close = False
+            return super().closeEvent(event)
+        from PySide6.QtWidgets import QMessageBox
+
+        resp = QMessageBox.question(
+            self,
+            "Unapplied Connection Changes",
+            "Discard changes to this connection?",
+        )
+        if resp == QMessageBox.Yes:
+            self.dirty = False
+            super().closeEvent(event)
+        else:
+            event.ignore()
+
+    def force_close(self) -> None:
+        self._force_close = True
+        self.close()
 
 
 class ObserverPanel(QDockWidget):
     """Dock widget for editing observer definitions."""
 
-    def __init__(self, main_window):
-        super().__init__("Observer", main_window)
+    def __init__(self, main_window, parent=None):
+        super().__init__("Observer", parent)
         self.main_window = main_window
         self.current_index: Optional[int] = None
+        self.dirty = False
+        self._force_close = False
         widget = QWidget()
         layout = QFormLayout(widget)
 
         self.id_edit = QLineEdit()
         layout.addRow(TooltipLabel("ID"), self.id_edit)
+        self.id_edit.textChanged.connect(self._mark_dirty)
 
         self.monitor_checks: Dict[str, QCheckBox] = {}
         monitor_widget = QWidget()
@@ -502,11 +583,13 @@ class ObserverPanel(QDockWidget):
             cb = QCheckBox(ev)
             monitor_layout.addWidget(cb)
             self.monitor_checks[ev] = cb
+            cb.toggled.connect(self._mark_dirty)
         layout.addRow(TooltipLabel("Monitors", "Event types to watch"), monitor_widget)
 
         self.freq_spin = QDoubleSpinBox()
         self.freq_spin.setDecimals(3)
         self.freq_spin.setValue(1.0)
+        self.freq_spin.valueChanged.connect(self._mark_dirty)
         layout.addRow(
             TooltipLabel("Frequency", "How often (in ticks) the observer records data"),
             self.freq_spin,
@@ -518,6 +601,7 @@ class ObserverPanel(QDockWidget):
             TooltipLabel("Target Nodes", "A specific list of nodes to watch"),
             self.node_list,
         )
+        self.node_list.itemSelectionChanged.connect(self._mark_dirty)
 
         apply_btn = QPushButton("Apply")
         apply_btn.clicked.connect(self.commit)
@@ -541,6 +625,7 @@ class ObserverPanel(QDockWidget):
             if nid in data.get("target_nodes", []):
                 item.setSelected(True)
             self.node_list.addItem(item)
+        self.dirty = False
         self.show()
 
     def open_new(self, index: int) -> None:
@@ -552,6 +637,7 @@ class ObserverPanel(QDockWidget):
         self.node_list.clear()
         for nid in get_graph().nodes:
             self.node_list.addItem(QListWidgetItem(nid))
+        self.dirty = False
         self.show()
 
     def commit(self) -> None:
@@ -574,16 +660,41 @@ class ObserverPanel(QDockWidget):
             model.observers[self.current_index] = data
         self.main_window.canvas.load_model(model)
         set_selected_observer(self.current_index)
+        mark_graph_dirty()
         self.hide()
+        self.dirty = False
+
+    def closeEvent(self, event) -> None:  # type: ignore[override]
+        if self._force_close or not self.dirty:
+            self._force_close = False
+            return super().closeEvent(event)
+        from PySide6.QtWidgets import QMessageBox
+
+        resp = QMessageBox.question(
+            self,
+            "Unapplied Observer Changes",
+            "Discard changes to this observer?",
+        )
+        if resp == QMessageBox.Yes:
+            self.dirty = False
+            super().closeEvent(event)
+        else:
+            event.ignore()
+
+    def force_close(self) -> None:
+        self._force_close = True
+        self.close()
 
 
 class MetaNodePanel(QDockWidget):
     """Dock widget for editing meta node definitions."""
 
-    def __init__(self, main_window):
-        super().__init__("MetaNode", main_window)
+    def __init__(self, main_window, parent=None):
+        super().__init__("MetaNode", parent)
         self.main_window = main_window
         self.current: Optional[str] = None
+        self.dirty = False
+        self._force_close = False
         widget = QWidget()
         layout = QFormLayout(widget)
 
@@ -595,12 +706,14 @@ class MetaNodePanel(QDockWidget):
         layout.addRow(
             TooltipLabel("Members", TOOLTIPS.get("members")), self.member_list
         )
+        self.member_list.itemSelectionChanged.connect(self._mark_dirty)
 
         self.phase_tol = QDoubleSpinBox()
         self.phase_tol.setDecimals(3)
         layout.addRow(
             TooltipLabel("Tolerance", TOOLTIPS.get("tolerance")), self.phase_tol
         )
+        self.phase_tol.valueChanged.connect(self._mark_dirty)
 
         self.min_coherence = QDoubleSpinBox()
         self.min_coherence.setDecimals(3)
@@ -608,23 +721,27 @@ class MetaNodePanel(QDockWidget):
             TooltipLabel("Min Coherence", TOOLTIPS.get("min_coherence")),
             self.min_coherence,
         )
+        self.min_coherence.valueChanged.connect(self._mark_dirty)
 
         self.shared_tick = QCheckBox()
         layout.addRow(
             TooltipLabel("Shared Tick Input", TOOLTIPS.get("shared_tick_input")),
             self.shared_tick,
         )
+        self.shared_tick.toggled.connect(self._mark_dirty)
 
         self.sync_topology = QCheckBox()
         layout.addRow(
             TooltipLabel("Sync Topology", TOOLTIPS.get("sync_topology")),
             self.sync_topology,
         )
+        self.sync_topology.toggled.connect(self._mark_dirty)
 
         self.role_lock = QLineEdit()
         layout.addRow(
             TooltipLabel("Role Lock", TOOLTIPS.get("role_lock")), self.role_lock
         )
+        self.role_lock.textChanged.connect(self._mark_dirty)
 
         self.type_label = QLabel("Configured")
         layout.addRow(TooltipLabel("Type", TOOLTIPS.get("type")), self.type_label)
@@ -633,6 +750,7 @@ class MetaNodePanel(QDockWidget):
         layout.addRow(
             TooltipLabel("Collapsed", TOOLTIPS.get("collapsed")), self.collapsed_check
         )
+        self.collapsed_check.toggled.connect(self._mark_dirty)
 
         apply_btn = QPushButton("Apply")
         apply_btn.clicked.connect(self.commit)
@@ -652,6 +770,7 @@ class MetaNodePanel(QDockWidget):
         self.member_list.clear()
         for nid in get_graph().nodes:
             self.member_list.addItem(QListWidgetItem(nid))
+        self.dirty = False
         self.show()
 
     def show_meta_node(self, meta_id: str) -> None:
@@ -682,6 +801,7 @@ class MetaNodePanel(QDockWidget):
         else:
             self.role_lock.setText("")
         self.collapsed_check.setChecked(bool(data.get("collapsed", False)))
+        self.dirty = False
         self.show()
 
     def commit(self) -> None:
@@ -718,7 +838,30 @@ class MetaNodePanel(QDockWidget):
             meta["y"] = 0.0
         model.meta_nodes[self.current] = meta
         self.main_window.canvas.load_model(model)
+        mark_graph_dirty()
         self.hide()
+        self.dirty = False
+
+    def closeEvent(self, event) -> None:  # type: ignore[override]
+        if self._force_close or not self.dirty:
+            self._force_close = False
+            return super().closeEvent(event)
+        from PySide6.QtWidgets import QMessageBox
+
+        resp = QMessageBox.question(
+            self,
+            "Unapplied MetaNode Changes",
+            "Discard changes to this meta node?",
+        )
+        if resp == QMessageBox.Yes:
+            self.dirty = False
+            super().closeEvent(event)
+        else:
+            event.ignore()
+
+    def force_close(self) -> None:
+        self._force_close = True
+        self.close()
 
 
 def build_toolbar(main_window) -> QToolBar:
@@ -753,20 +896,30 @@ def build_toolbar(main_window) -> QToolBar:
     layout_action.triggered.connect(main_window.canvas.auto_layout)
     toolbar.addAction(layout_action)
 
-    main_window.node_panel = NodePanel(main_window)
-    main_window.addDockWidget(Qt.RightDockWidgetArea, main_window.node_panel)
+    main_window.node_panel = NodePanel(main_window, main_window.graph_window)
+    main_window.graph_window.addDockWidget(
+        Qt.RightDockWidgetArea, main_window.node_panel
+    )
     main_window.node_panel.hide()
 
-    main_window.connection_panel = ConnectionPanel(main_window)
-    main_window.addDockWidget(Qt.RightDockWidgetArea, main_window.connection_panel)
+    main_window.connection_panel = ConnectionPanel(
+        main_window, main_window.graph_window
+    )
+    main_window.graph_window.addDockWidget(
+        Qt.RightDockWidgetArea, main_window.connection_panel
+    )
     main_window.connection_panel.hide()
 
-    main_window.observer_panel = ObserverPanel(main_window)
-    main_window.addDockWidget(Qt.RightDockWidgetArea, main_window.observer_panel)
+    main_window.observer_panel = ObserverPanel(main_window, main_window.graph_window)
+    main_window.graph_window.addDockWidget(
+        Qt.RightDockWidgetArea, main_window.observer_panel
+    )
     main_window.observer_panel.hide()
 
-    main_window.meta_node_panel = MetaNodePanel(main_window)
-    main_window.addDockWidget(Qt.RightDockWidgetArea, main_window.meta_node_panel)
+    main_window.meta_node_panel = MetaNodePanel(main_window, main_window.graph_window)
+    main_window.graph_window.addDockWidget(
+        Qt.RightDockWidgetArea, main_window.meta_node_panel
+    )
     main_window.meta_node_panel.hide()
 
     main_window.canvas.node_selected.connect(main_window.node_panel.show_node)

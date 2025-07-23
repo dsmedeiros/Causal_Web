@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from typing import List, Tuple
 
 from .graph.model import GraphModel
+from .gui.state import mark_graph_dirty
 
 
 class Command:
@@ -31,6 +32,7 @@ class CommandStack:
         command.execute()
         self.undo_stack.append(command)
         self.redo_stack.clear()
+        mark_graph_dirty()
 
     def undo(self) -> None:
         """Undo the most recent command if any."""
@@ -40,6 +42,7 @@ class CommandStack:
         cmd = self.undo_stack.pop()
         cmd.undo()
         self.redo_stack.append(cmd)
+        mark_graph_dirty()
 
     def redo(self) -> None:
         """Redo the most recently undone command if any."""
@@ -49,6 +52,7 @@ class CommandStack:
         cmd = self.redo_stack.pop()
         cmd.execute()
         self.undo_stack.append(cmd)
+        mark_graph_dirty()
 
 
 @dataclass

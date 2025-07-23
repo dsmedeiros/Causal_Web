@@ -25,6 +25,7 @@ _active_file: str | None = None
 _selected_node: str | None = None
 _selected_connection: tuple[str, int] | None = None
 _selected_observer: int | None = None
+_graph_dirty: bool = False
 
 
 def get_active_file() -> str | None:
@@ -36,6 +37,7 @@ def set_active_file(path: str | None) -> None:
     """Record the path of the loaded graph file."""
     global _active_file
     _active_file = path
+    clear_graph_dirty()
 
 
 def get_selected_node() -> str | None:
@@ -69,3 +71,20 @@ def set_selected_observer(index: int | None) -> None:
     """Update the currently selected observer index."""
     global _selected_observer
     _selected_observer = index
+
+
+def mark_graph_dirty() -> None:
+    """Flag the active graph as modified since the last load/save."""
+    global _graph_dirty
+    _graph_dirty = True
+
+
+def clear_graph_dirty() -> None:
+    """Reset the dirty flag for the active graph."""
+    global _graph_dirty
+    _graph_dirty = False
+
+
+def is_graph_dirty() -> bool:
+    """Return ``True`` if the active graph has unapplied changes."""
+    return _graph_dirty

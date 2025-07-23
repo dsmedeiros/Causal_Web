@@ -227,7 +227,9 @@ graph model automatically.
 The Graph View window now resizes correctly, keeping graph elements interactive.
 A resize handler bug that halted GUI updates after resizing has been fixed.
 Dragging connections between nodes now works again across PySide6 versions.
+
 Rendering is now event driven so the canvas only updates when the graph changes, greatly reducing idle CPU usage.
+Graph editing panels are now docked within the Graph View window. They close automatically when the view is hidden and prompt about unapplied changes before closing. The Graph View also warns when in-memory edits have not been saved to ``graph.json``.
 
 ### Analysing the output
 

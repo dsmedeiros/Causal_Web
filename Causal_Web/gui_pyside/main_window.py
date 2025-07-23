@@ -24,11 +24,54 @@ from ..gui.state import (
     get_graph,
     set_graph,
     set_active_file,
+    clear_graph_dirty,
+    is_graph_dirty,
+    mark_graph_dirty,
 )
 from .canvas_widget import CanvasWidget
 from .toolbar_builder import build_toolbar
 from ..command_stack import AddNodeCommand, AddObserverCommand
 from ..engine import tick_engine
+
+
+class GraphDockWidget(QDockWidget):
+    """Dock widget that prompts about unsaved graph changes when closed."""
+
+    def closeEvent(self, event) -> None:  # type: ignore[override]
+        from PySide6.QtWidgets import QMessageBox
+
+        mw = self.parent()
+        panels = []
+        if hasattr(mw, "node_panel"):
+            panels = [
+                mw.node_panel,
+                mw.connection_panel,
+                mw.observer_panel,
+                mw.meta_node_panel,
+            ]
+        dirty_panels = [p for p in panels if getattr(p, "dirty", False)]
+
+        if is_graph_dirty():
+            resp = QMessageBox.question(
+                self,
+                "Unapplied Changes",
+                "There are unloaded changes to the Graph View. Close anyway?",
+            )
+            if resp != QMessageBox.Yes:
+                event.ignore()
+                return
+        elif dirty_panels:
+            resp = QMessageBox.question(
+                self,
+                "Unapplied Changes",
+                "Discard changes to open panels?",
+            )
+            if resp != QMessageBox.Yes:
+                event.ignore()
+                return
+        for p in panels:
+            p.force_close()
+        super().closeEvent(event)
 
 
 class MainWindow(QMainWindow):
@@ -46,8 +89,8 @@ class MainWindow(QMainWindow):
         # graph editor dock, hidden by default
         self.canvas = CanvasWidget(self)
         toolbar = build_toolbar(self)
-        container = QWidget()
-        layout = QVBoxLayout(container)
+        central = QWidget()
+        layout = QVBoxLayout(central)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         layout.addWidget(toolbar)
@@ -56,8 +99,11 @@ class MainWindow(QMainWindow):
         load_btn.clicked.connect(self._load_into_main)
         layout.addWidget(load_btn)
 
-        self.canvas_dock = QDockWidget("Graph View", self)
-        self.canvas_dock.setWidget(container)
+        self.graph_window = QMainWindow()
+        self.graph_window.setCentralWidget(central)
+
+        self.canvas_dock = GraphDockWidget("Graph View", self)
+        self.canvas_dock.setWidget(self.graph_window)
         self.canvas_dock.hide()
         self.addDockWidget(Qt.LeftDockWidgetArea, self.canvas_dock)
         self.canvas.load_model(GraphModel.from_dict(get_graph().to_dict()))
@@ -139,6 +185,8 @@ class MainWindow(QMainWindow):
         path = get_active_file() or Config.input_path("graph.json")
         os.makedirs(os.path.dirname(path), exist_ok=True)
         save_graph(path, get_graph())
+        clear_graph_dirty()
+        mark_graph_dirty()
         Config.new_run()
         tick_engine.build_graph()
         with Config.state_lock:
@@ -163,6 +211,7 @@ class MainWindow(QMainWindow):
             return
         set_graph(graph)
         set_active_file(path)
+        clear_graph_dirty()
         self.sim_canvas.load_model(graph)
         # refresh editor if it is visible
         self.canvas.load_model(GraphModel.from_dict(graph.to_dict()))
@@ -180,11 +229,13 @@ class MainWindow(QMainWindow):
             print(f"Failed to save graph: {exc}")
             return
         set_active_file(path)
+        clear_graph_dirty()
 
     def new_graph(self):
         model = new_graph(True)
         set_graph(model)
         set_active_file(None)
+        clear_graph_dirty()
         self.sim_canvas.load_model(model)
         self.canvas.load_model(GraphModel.from_dict(model.to_dict()))
         self.edit_action.setEnabled(True)
@@ -261,6 +312,8 @@ class MainWindow(QMainWindow):
                 save_graph(path, model)
             except Exception as exc:
                 print(f"Failed to save graph: {exc}")
+            else:
+                clear_graph_dirty()
         self.canvas_dock.hide()
 
 
