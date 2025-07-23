@@ -222,6 +222,7 @@ Dragging begins on mouse press for smooth movement and remains responsive after
 resizing the window. Debug messages are printed to the console whenever nodes
 are clicked or dragged.
 Edges connected to a moving node are redrawn in real time so the relationships stay visible while dragging.
+Lines from meta nodes and observers are now drawn using a shared helper for consistent dashed styling. The context menu uses a dispatch map for clearer action handling.
 Once the drag ends the node's new ``(x, y)`` coordinates are saved back to the
 graph model automatically. Meta nodes and observers store their updated
 positions in the same way.
