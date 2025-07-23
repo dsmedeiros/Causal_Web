@@ -41,3 +41,5 @@ def _validate_graph(data: dict[str, Any]) -> None:
             raise ValueError("edge missing 'from' or 'to'")
     if "observers" in data and not isinstance(data["observers"], list):
         raise ValueError("'observers' must be a list")
+    if "meta_nodes" in data and not isinstance(data["meta_nodes"], dict):
+        raise ValueError("'meta_nodes' must be a dict")

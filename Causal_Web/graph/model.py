@@ -13,6 +13,7 @@ class GraphModel:
     bridges: List[Dict[str, Any]] = field(default_factory=list)
     tick_sources: List[Dict[str, Any]] = field(default_factory=list)
     observers: List[Dict[str, Any]] = field(default_factory=list)
+    meta_nodes: Dict[str, Dict[str, Any]] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         """Serialize the model to a plain ``dict``."""
@@ -22,6 +23,7 @@ class GraphModel:
             "bridges": self.bridges,
             "tick_sources": self.tick_sources,
             "observers": self.observers,
+            "meta_nodes": self.meta_nodes,
         }
 
     @classmethod
@@ -37,6 +39,7 @@ class GraphModel:
         model.bridges = list(data.get("bridges", []))
         model.tick_sources = list(data.get("tick_sources", []))
         model.observers = list(data.get("observers", []))
+        model.meta_nodes = dict(data.get("meta_nodes", {}))
         return model
 
     @classmethod
@@ -55,6 +58,7 @@ class GraphModel:
                 "generation_tick": 0,
                 "parent_ids": [],
             }
+        model.meta_nodes = {}
         return model
 
     def node_position(self, node_id: str) -> tuple[float, float] | None:
@@ -171,6 +175,34 @@ class GraphModel:
         if index < 0 or index >= len(target_list):
             raise IndexError("connection index out of range")
         del target_list[index]
+
+    # ---- Meta node management -------------------------------------------------
+
+    def add_meta_node(
+        self,
+        meta_id: str,
+        *,
+        members: List[str] | None = None,
+        constraints: Dict[str, Any] | None = None,
+        type: str = "Configured",
+        origin: str | None = None,
+        collapsed: bool = False,
+        x: float = 0.0,
+        y: float = 0.0,
+    ) -> None:
+        """Insert a new meta node definition."""
+
+        data: Dict[str, Any] = {
+            "members": list(members or []),
+            "constraints": constraints or {},
+            "type": type,
+            "collapsed": collapsed,
+            "x": x,
+            "y": y,
+        }
+        if origin is not None:
+            data["origin"] = origin
+        self.meta_nodes[meta_id] = data
 
     # ---- Observer management -------------------------------------------------
 
