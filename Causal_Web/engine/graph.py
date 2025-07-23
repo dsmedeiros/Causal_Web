@@ -23,7 +23,7 @@ class CausalGraph:
         self.bridges = []
         self.bridges_by_node = defaultdict(set)
         self.tick_sources = []
-        self.meta_nodes = {}
+        self.meta_nodes: dict[str, MetaNode] = {}
         self.spatial_index = defaultdict(set)
 
     def add_node(
@@ -388,8 +388,13 @@ class CausalGraph:
     def create_meta_nodes(self, clusters):
         """Instantiate MetaNode objects for given clusters."""
         for cluster in clusters:
-            meta = MetaNode(cluster, self)
+            meta = MetaNode(cluster, self, meta_type="Emergent")
             self.meta_nodes[meta.id] = meta
+
+    def update_meta_nodes(self, tick_time: int) -> None:
+        """Update existing meta nodes and enforce their constraints."""
+        for meta in list(self.meta_nodes.values()):
+            meta.update_internal_state(tick_time)
 
     def to_dict(self):
         node_list = [
@@ -459,6 +464,18 @@ class CausalGraph:
             ],
             "bridges": [b.to_dict() for b in self.bridges],
             "tick_sources": self.tick_sources,
+            "meta_nodes": {
+                mid: {
+                    "members": meta.member_ids,
+                    "constraints": meta.constraints,
+                    "type": meta.meta_type,
+                    "origin": meta.origin,
+                    "collapsed": meta.collapsed,
+                    "x": meta.x,
+                    "y": meta.y,
+                }
+                for mid, meta in self.meta_nodes.items()
+            },
         }
 
     def save_to_file(self, path):
@@ -578,6 +595,27 @@ class CausalGraph:
             )
 
         self.tick_sources.extend(data.get("tick_sources", []))
+
+        # Load configured meta nodes ---------------------------------
+        for mid, meta in data.get("meta_nodes", {}).items():
+            members = list(meta.get("members", []))
+            constraints = dict(meta.get("constraints", {}))
+            mtype = meta.get("type", "Configured")
+            origin = meta.get("origin")
+            collapsed = bool(meta.get("collapsed", False))
+            x = float(meta.get("x", 0.0))
+            y = float(meta.get("y", 0.0))
+            self.meta_nodes[mid] = MetaNode(
+                members,
+                self,
+                meta_type=mtype,
+                constraints=constraints,
+                origin=origin,
+                collapsed=collapsed,
+                x=x,
+                y=y,
+                id=mid,
+            )
 
         self.identify_boundaries()
 
