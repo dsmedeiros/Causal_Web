@@ -193,10 +193,13 @@ class MainWindow(QMainWindow):
         Config.tick_rate = float(value)
 
     def start_simulation(self) -> None:
-        """Save the graph and start the simulation loop."""
+        """Persist the active graph and launch the simulation thread."""
         path = get_active_file() or Config.input_path("graph.json")
         os.makedirs(os.path.dirname(path), exist_ok=True)
         save_graph(path, get_graph())
+        # always write the runtime graph to the package input directory so the
+        # engine uses the latest edits regardless of the loaded file location
+        save_graph(Config.input_path("graph.json"), get_graph())
         clear_graph_dirty()
         mark_graph_dirty()
         Config.new_run()
