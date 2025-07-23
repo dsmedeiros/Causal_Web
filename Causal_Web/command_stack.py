@@ -138,3 +138,43 @@ class AddObserverCommand(Command):
             return
         if 0 <= self.index < len(self.model.observers):
             self.model.observers.pop(self.index)
+
+
+@dataclass
+class AddMetaNodeCommand(Command):
+    """Command that inserts a meta node into a :class:`GraphModel`."""
+
+    model: GraphModel
+    meta_id: str
+    data: dict
+
+    def execute(self) -> None:
+        self.model.meta_nodes[self.meta_id] = dict(self.data)
+
+    def undo(self) -> None:
+        self.model.meta_nodes.pop(self.meta_id, None)
+
+
+@dataclass
+class MoveMetaNodeCommand(Command):
+    """Command that updates a meta node's position."""
+
+    model: GraphModel
+    meta_id: str
+    new_pos: Tuple[float, float]
+    _old_pos: Tuple[float, float] | None = None
+
+    def execute(self) -> None:
+        data = self.model.meta_nodes.get(self.meta_id)
+        if data is None:
+            return
+        self._old_pos = (data.get("x", 0.0), data.get("y", 0.0))
+        data["x"], data["y"] = self.new_pos
+
+    def undo(self) -> None:
+        if self._old_pos is None:
+            return
+        data = self.model.meta_nodes.get(self.meta_id)
+        if data is None:
+            return
+        data["x"], data["y"] = self._old_pos

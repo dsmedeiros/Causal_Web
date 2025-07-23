@@ -571,6 +571,150 @@ class ObserverPanel(QDockWidget):
         self.hide()
 
 
+class MetaNodePanel(QDockWidget):
+    """Dock widget for editing meta node definitions."""
+
+    def __init__(self, main_window):
+        super().__init__("MetaNode", main_window)
+        self.main_window = main_window
+        self.current: Optional[str] = None
+        widget = QWidget()
+        layout = QFormLayout(widget)
+
+        self.id_label = QLabel()
+        layout.addRow(TooltipLabel("ID"), self.id_label)
+
+        self.member_list = QListWidget()
+        self.member_list.setSelectionMode(QListWidget.MultiSelection)
+        layout.addRow(
+            TooltipLabel("Members", TOOLTIPS.get("members")), self.member_list
+        )
+
+        self.phase_tol = QDoubleSpinBox()
+        self.phase_tol.setDecimals(3)
+        layout.addRow(
+            TooltipLabel("Tolerance", TOOLTIPS.get("tolerance")), self.phase_tol
+        )
+
+        self.min_coherence = QDoubleSpinBox()
+        self.min_coherence.setDecimals(3)
+        layout.addRow(
+            TooltipLabel("Min Coherence", TOOLTIPS.get("min_coherence")),
+            self.min_coherence,
+        )
+
+        self.shared_tick = QCheckBox()
+        layout.addRow(
+            TooltipLabel("Shared Tick Input", TOOLTIPS.get("shared_tick_input")),
+            self.shared_tick,
+        )
+
+        self.sync_topology = QCheckBox()
+        layout.addRow(
+            TooltipLabel("Sync Topology", TOOLTIPS.get("sync_topology")),
+            self.sync_topology,
+        )
+
+        self.role_lock = QLineEdit()
+        layout.addRow(
+            TooltipLabel("Role Lock", TOOLTIPS.get("role_lock")), self.role_lock
+        )
+
+        self.type_label = QLabel("Configured")
+        layout.addRow(TooltipLabel("Type", TOOLTIPS.get("type")), self.type_label)
+
+        self.collapsed_check = QCheckBox()
+        layout.addRow(
+            TooltipLabel("Collapsed", TOOLTIPS.get("collapsed")), self.collapsed_check
+        )
+
+        apply_btn = QPushButton("Apply")
+        apply_btn.clicked.connect(self.commit)
+        layout.addRow(apply_btn)
+        widget.installEventFilter(_FocusWatcher(self.commit))
+        self.setWidget(widget)
+
+    def open_new(self, meta_id: str) -> None:
+        self.current = meta_id
+        self.id_label.setText(meta_id)
+        self.phase_tol.setValue(0.0)
+        self.min_coherence.setValue(0.0)
+        self.shared_tick.setChecked(False)
+        self.sync_topology.setChecked(False)
+        self.role_lock.setText("")
+        self.collapsed_check.setChecked(False)
+        self.member_list.clear()
+        for nid in get_graph().nodes:
+            self.member_list.addItem(QListWidgetItem(nid))
+        self.show()
+
+    def show_meta_node(self, meta_id: str) -> None:
+        model = get_graph()
+        data = model.meta_nodes.get(meta_id)
+        if data is None:
+            return
+        self.current = meta_id
+        self.id_label.setText(meta_id)
+        self.member_list.clear()
+        for nid in model.nodes:
+            item = QListWidgetItem(nid)
+            if nid in data.get("members", []):
+                item.setSelected(True)
+            self.member_list.addItem(item)
+        cons = data.get("constraints", {})
+        self.phase_tol.setValue(float(cons.get("phase_lock", {}).get("tolerance", 0.0)))
+        self.min_coherence.setValue(
+            float(cons.get("coherence_tie", {}).get("min_coherence", 0.0))
+        )
+        self.shared_tick.setChecked(bool(cons.get("shared_tick_input")))
+        self.sync_topology.setChecked(bool(cons.get("sync_topology")))
+        rl = cons.get("role_lock")
+        if isinstance(rl, list):
+            self.role_lock.setText(",".join(str(r) for r in rl))
+        elif rl is not None:
+            self.role_lock.setText(str(rl))
+        else:
+            self.role_lock.setText("")
+        self.collapsed_check.setChecked(bool(data.get("collapsed", False)))
+        self.show()
+
+    def commit(self) -> None:
+        if not self.current:
+            return
+        model = get_graph()
+        meta = model.meta_nodes.get(self.current, {})
+        meta["members"] = [item.text() for item in self.member_list.selectedItems()]
+        constraints: Dict[str, Any] = {}
+        tol = float(self.phase_tol.value())
+        if tol:
+            constraints["phase_lock"] = {"tolerance": tol}
+        coh = float(self.min_coherence.value())
+        if coh:
+            constraints["coherence_tie"] = {"min_coherence": coh}
+        if self.shared_tick.isChecked():
+            constraints["shared_tick_input"] = True
+        if self.sync_topology.isChecked():
+            constraints["sync_topology"] = True
+        rl_text = self.role_lock.text().strip()
+        if rl_text:
+            if rl_text.lower() in {"true", "false"}:
+                constraints["role_lock"] = rl_text.lower() == "true"
+            else:
+                constraints["role_lock"] = [
+                    s.strip() for s in rl_text.split(",") if s.strip()
+                ]
+        meta["constraints"] = constraints
+        meta["type"] = "Configured"
+        meta["collapsed"] = self.collapsed_check.isChecked()
+        if "x" not in meta:
+            meta["x"] = 0.0
+        if "y" not in meta:
+            meta["y"] = 0.0
+        model.meta_nodes[self.current] = meta
+        self.main_window.canvas.load_model(model)
+        self.hide()
+
+
 def build_toolbar(main_window) -> QToolBar:
     """Create the graph editing toolbar and property docks.
 
@@ -595,6 +739,10 @@ def build_toolbar(main_window) -> QToolBar:
     add_obs_action.triggered.connect(main_window.add_observer)
     toolbar.addAction(add_obs_action)
 
+    add_meta_action = QAction("Add MetaNode", main_window)
+    add_meta_action.triggered.connect(main_window.add_meta_node)
+    toolbar.addAction(add_meta_action)
+
     layout_action = QAction("Auto Layout", main_window)
     layout_action.triggered.connect(main_window.canvas.auto_layout)
     toolbar.addAction(layout_action)
@@ -611,10 +759,17 @@ def build_toolbar(main_window) -> QToolBar:
     main_window.addDockWidget(Qt.RightDockWidgetArea, main_window.observer_panel)
     main_window.observer_panel.hide()
 
+    main_window.meta_node_panel = MetaNodePanel(main_window)
+    main_window.addDockWidget(Qt.RightDockWidgetArea, main_window.meta_node_panel)
+    main_window.meta_node_panel.hide()
+
     main_window.canvas.node_selected.connect(main_window.node_panel.show_node)
     main_window.canvas.connection_request.connect(main_window.connection_panel.open_for)
     main_window.canvas.connection_selected.connect(
         main_window.connection_panel.show_connection
+    )
+    main_window.canvas.meta_node_selected.connect(
+        main_window.meta_node_panel.show_meta_node
     )
 
     return toolbar

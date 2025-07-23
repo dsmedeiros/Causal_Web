@@ -16,5 +16,16 @@
   "decoherence_limit": "The decoherence level at which the bridge might rupture",
   "initial_strength": "The starting strength of integrity of the bridge",
   "medium_type": "The type of medium the bridge represents",
-  "mutable": "If the simulation can modify the bridge"
-}
+  "mutable": "If the simulation can modify the bridge",
+  "members": "Nodes included in the MetaNode",
+  "phase_lock": "Enforces phase sync via tolerance",
+  "coherence_tie": "Requires minimum coherence level",
+  "shared_tick_input": "Forces nodes to tick in unison",
+  "sync_topology": "Enforces identical edge structures",
+  "role_lock": "Enforces same functional role across nodes",
+  "type": "Informational tag: Configured or Emergent",
+  "origin": "Event/tick that spawned the MetaNode (Emergent only)",
+  "collapsed": "Whether to process the MetaNode as a single unit",
+  "tolerance": "Allowable phase difference",
+  "min_coherence": "Minimum coherence across members"
+ }

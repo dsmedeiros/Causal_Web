@@ -211,6 +211,27 @@ class MainWindow(QMainWindow):
         self.canvas.command_stack.do(cmd)
         self.observer_panel.open_new(cmd.index)
 
+    def add_meta_node(self) -> None:
+        """Create a new configured meta node."""
+        model = get_graph()
+        idx = 1
+        while f"MN{idx}" in model.meta_nodes:
+            idx += 1
+        meta_id = f"MN{idx}"
+        data = {
+            "members": [],
+            "constraints": {},
+            "type": "Configured",
+            "collapsed": False,
+            "x": 0.0,
+            "y": 0.0,
+        }
+        from ..command_stack import AddMetaNodeCommand
+
+        cmd = AddMetaNodeCommand(model, meta_id, data)
+        self.canvas.command_stack.do(cmd)
+        self.meta_node_panel.open_new(meta_id)
+
     def start_add_connection(self) -> None:
         """Enable interactive connection mode."""
         self.canvas.enable_connection_mode()

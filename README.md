@@ -96,7 +96,7 @@ Collapse-Seeded Propagation. These options are also exposed as CLI flags and can
 be modified in the Parameters window.
 ## Graph format
 
-Graphs are defined by a JSON file with `nodes`, `edges`, optional `bridges`, `tick_sources` and `observers`. Each node defines its position, frequency and thresholds. Edges specify delays and attenuation. Tick sources seed periodic activity and observers describe which metrics to record.
+Graphs are defined by a JSON file with `nodes`, `edges`, optional `bridges`, `tick_sources`, `observers` and `meta_nodes`. Each node defines its position, frequency and thresholds. Edges specify delays and attenuation. Tick sources seed periodic activity and observers describe which metrics to record. Meta nodes group related nodes under additional constraints.
 
 Example:
 ```json
@@ -151,7 +151,8 @@ Example:
       "monitors": [ "collapse", "law_wave", "region" ],
       "frequency": 1
     }
-  ]
+  ],
+  "meta_nodes": {}
 }
 ```
 
