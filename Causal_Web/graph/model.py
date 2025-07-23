@@ -39,6 +39,9 @@ class GraphModel:
         model.bridges = list(data.get("bridges", []))
         model.tick_sources = list(data.get("tick_sources", []))
         model.observers = list(data.get("observers", []))
+        for obs in model.observers:
+            obs.setdefault("x", 0.0)
+            obs.setdefault("y", 0.0)
         model.meta_nodes = dict(data.get("meta_nodes", {}))
         return model
 
@@ -213,13 +216,17 @@ class GraphModel:
         monitors: List[str] | None = None,
         frequency: float = 1.0,
         target_nodes: List[str] | None = None,
+        x: float = 0.0,
+        y: float = 0.0,
     ) -> None:
-        """Insert a new observer definition."""
+        """Insert a new observer definition with optional position."""
 
         data: Dict[str, Any] = {
             "id": obs_id,
             "monitors": monitors or [],
             "frequency": frequency,
+            "x": x,
+            "y": y,
         }
         if target_nodes:
             data["target_nodes"] = list(target_nodes)

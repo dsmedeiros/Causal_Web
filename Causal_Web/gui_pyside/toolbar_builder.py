@@ -25,7 +25,11 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
-from ..gui.state import get_graph, set_selected_node
+from ..gui.state import (
+    get_graph,
+    set_selected_node,
+    set_selected_observer,
+)
 
 # ---------------------------------------------------------------------------
 # Load tooltip text for GUI fields
@@ -568,6 +572,8 @@ class ObserverPanel(QDockWidget):
             model.observers.append(data)
         else:
             model.observers[self.current_index] = data
+        self.main_window.canvas.load_model(model)
+        set_selected_observer(self.current_index)
         self.hide()
 
 
@@ -771,5 +777,6 @@ def build_toolbar(main_window) -> QToolBar:
     main_window.canvas.meta_node_selected.connect(
         main_window.meta_node_panel.show_meta_node
     )
+    main_window.canvas.observer_selected.connect(main_window.observer_panel.open_for)
 
     return toolbar

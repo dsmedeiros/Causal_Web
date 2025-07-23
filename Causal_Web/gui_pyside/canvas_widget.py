@@ -14,6 +14,7 @@ from PySide6.QtGui import (
 )
 from PySide6.QtWidgets import (
     QGraphicsEllipseItem,
+    QGraphicsRectItem,
     QGraphicsItem,
     QGraphicsLineItem,
     QGraphicsScene,
@@ -21,8 +22,17 @@ from PySide6.QtWidgets import (
 )
 
 from ..graph.model import GraphModel
-from ..gui.state import set_selected_node, set_selected_connection
-from ..command_stack import CommandStack, MoveNodeCommand, MoveMetaNodeCommand
+from ..gui.state import (
+    set_selected_node,
+    set_selected_connection,
+    set_selected_observer,
+)
+from ..command_stack import (
+    CommandStack,
+    MoveNodeCommand,
+    MoveMetaNodeCommand,
+    MoveObserverCommand,
+)
 
 
 class NodeItem(QGraphicsEllipseItem):
@@ -57,6 +67,7 @@ class NodeItem(QGraphicsEllipseItem):
             for edge in self.edges:
                 edge.update_position()
             self.canvas.update_meta_lines_for_node(self.node_id)
+            self.canvas.update_observer_lines_for_node(self.node_id)
         return super().itemChange(change, value)
 
     def mousePressEvent(self, event: QMouseEvent) -> None:  # type: ignore[override]
@@ -190,6 +201,80 @@ class MetaNodeItem(QGraphicsEllipseItem):
         super().mouseReleaseEvent(event)
 
 
+class ObserverItem(QGraphicsRectItem):
+    """Square item representing an observer with dotted target links."""
+
+    def __init__(
+        self,
+        index: int,
+        x: float,
+        y: float,
+        targets: list[str] | None,
+        canvas: "CanvasWidget",
+        size: float = 40.0,
+    ) -> None:
+        super().__init__(-size / 2, -size / 2, size, size)
+        self.index = index
+        self.canvas = canvas
+        self.targets = targets or []
+        self.setPos(QPointF(x, y))
+        pen = QPen(Qt.darkGray)
+        self.setPen(pen)
+        self.setBrush(QBrush(Qt.white))
+        self.setFlag(QGraphicsItem.ItemSendsGeometryChanges)
+        if canvas.editable:
+            self.setFlag(QGraphicsItem.ItemIsMovable)
+            self.setFlag(QGraphicsItem.ItemIsSelectable)
+        self.setZValue(1)
+        self.lines: list[QGraphicsLineItem] = []
+        self._drag_start: Optional[QPointF] = None
+        self.update_lines()
+
+    def itemChange(self, change, value):  # type: ignore[override]
+        if change == QGraphicsItem.ItemPositionHasChanged:
+            self.update_lines()
+        return super().itemChange(change, value)
+
+    def update_lines(self) -> None:
+        scene = self.scene()
+        if scene is None:
+            return
+        for line in self.lines:
+            scene.removeItem(line)
+        self.lines.clear()
+        targets = self.targets or list(self.canvas.nodes)
+        for nid in targets:
+            node = self.canvas.nodes.get(nid)
+            if node:
+                line = QGraphicsLineItem()
+                pen = QPen(Qt.darkGray)
+                pen.setStyle(Qt.DotLine)
+                line.setPen(pen)
+                line.setLine(self.x(), self.y(), node.x(), node.y())
+                line.setZValue(0)
+                scene.addItem(line)
+                self.lines.append(line)
+
+    def mousePressEvent(self, event: QMouseEvent) -> None:  # type: ignore[override]
+        if event.button() == Qt.LeftButton:
+            set_selected_observer(self.index)
+            self.canvas.observer_selected.emit(self.index)
+            if self.canvas.editable:
+                self._drag_start = self.pos()
+        super().mousePressEvent(event)
+
+    def mouseReleaseEvent(self, event: QMouseEvent) -> None:  # type: ignore[override]
+        if (
+            event.button() == Qt.LeftButton
+            and self._drag_start is not None
+            and self.canvas.editable
+        ):
+            if self.pos() != self._drag_start:
+                self.canvas.observer_moved(self.index, self._drag_start, self.pos())
+            self._drag_start = None
+        super().mouseReleaseEvent(event)
+
+
 class CanvasWidget(QGraphicsView):
     """Graphics view displaying nodes and edges with antialiasing enabled."""
 
@@ -199,6 +284,8 @@ class CanvasWidget(QGraphicsView):
     node_position_changed = Signal(str, float, float)
     meta_node_selected = Signal(str)
     meta_node_position_changed = Signal(str, float, float)
+    observer_selected = Signal(int)
+    observer_position_changed = Signal(int, float, float)
 
     def __init__(
         self, parent: Optional[QGraphicsView] = None, *, editable: bool = True
@@ -209,6 +296,7 @@ class CanvasWidget(QGraphicsView):
         self.setRenderHint(QPainter.Antialiasing)
         self.nodes: Dict[str, NodeItem] = {}
         self.meta_nodes: Dict[str, MetaNodeItem] = {}
+        self.observers: Dict[int, ObserverItem] = {}
         self.model: GraphModel = GraphModel.blank()
         self._pan_start: Optional[QPointF] = None
         self.command_stack = CommandStack()
@@ -226,6 +314,7 @@ class CanvasWidget(QGraphicsView):
         scene.clear()
         self.nodes.clear()
         self.meta_nodes.clear()
+        self.observers.clear()
 
         for node_id, data in model.nodes.items():
             x, y = data.get("x", 0.0), data.get("y", 0.0)
@@ -245,6 +334,13 @@ class CanvasWidget(QGraphicsView):
             item = MetaNodeItem(meta_id, x, y, members, self)
             scene.addItem(item)
             self.meta_nodes[meta_id] = item
+
+        for idx, obs in enumerate(model.observers):
+            x, y = obs.get("x", 0.0), obs.get("y", 0.0)
+            targets = obs.get("target_nodes")
+            item = ObserverItem(idx, x, y, targets, self)
+            scene.addItem(item)
+            self.observers[idx] = item
 
     # ---- interaction -------------------------------------------------
     def wheelEvent(self, event: QWheelEvent) -> None:
@@ -347,6 +443,13 @@ class CanvasWidget(QGraphicsView):
         self.command_stack.do(cmd)
         self.meta_node_position_changed.emit(meta_id, end.x(), end.y())
 
+    def observer_moved(self, index: int, start: QPointF, end: QPointF) -> None:
+        if not self.editable:
+            return
+        cmd = MoveObserverCommand(self.model, index, (end.x(), end.y()))
+        self.command_stack.do(cmd)
+        self.observer_position_changed.emit(index, end.x(), end.y())
+
     def update_meta_lines_for_node(self, node_id: str) -> None:
         for meta in self.meta_nodes.values():
             if node_id in meta.members:
@@ -357,6 +460,11 @@ class CanvasWidget(QGraphicsView):
         if meta is None:
             return
         meta.update_lines()
+
+    def update_observer_lines_for_node(self, node_id: str) -> None:
+        for obs in self.observers.values():
+            if not obs.targets or node_id in obs.targets:
+                obs.update_lines()
 
     def undo(self) -> None:
         if not self.editable:

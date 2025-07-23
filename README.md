@@ -9,7 +9,8 @@ The engine models a directed network of nodes. Each node maintains its own oscil
 The graph editor supports undo/redo operations via ``Ctrl+Z``/``Ctrl+Y``,
 allows connecting nodes by dragging between them, applies an automatic spring
 layout based on ``networkx`` and validates connections to prevent duplicates or
-self-loops.
+self-loops. Observers appear as draggable squares connected to each of their
+target nodes with dotted lines and open the observer panel when clicked.
 
 Key modules include:
 
@@ -97,6 +98,8 @@ be modified in the Parameters window.
 ## Graph format
 
 Graphs are defined by a JSON file with `nodes`, `edges`, optional `bridges`, `tick_sources`, `observers` and `meta_nodes`. Each node defines its position, frequency and thresholds. Edges specify delays and attenuation. Tick sources seed periodic activity and observers describe which metrics to record. Meta nodes group related nodes under additional constraints.
+
+Observers include optional `x` and `y` fields storing their location on the canvas.
 
 Example:
 ```json
