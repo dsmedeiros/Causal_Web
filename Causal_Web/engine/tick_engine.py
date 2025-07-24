@@ -821,17 +821,18 @@ def simulation_loop():
 
             emit_ticks(global_tick)
             propagate_phases(global_tick)
-            evaluate_nodes(global_tick)
-            graph.update_meta_nodes(global_tick)
-            check_propagation(global_tick)
 
-            if not Config.headless:
-                log_metrics_per_tick(global_tick)
-                log_bridge_states(global_tick)
-                log_meta_node_ticks(global_tick)
-                log_curvature_per_tick(global_tick)
             if global_tick % getattr(Config, "cluster_interval", 1) == 0:
+                evaluate_nodes(global_tick)
+                graph.update_meta_nodes(global_tick)
+                if not Config.headless:
+                    log_metrics_per_tick(global_tick)
+                    log_bridge_states(global_tick)
+                    log_meta_node_ticks(global_tick)
+                    log_curvature_per_tick(global_tick)
                 dynamic_bridge_management(global_tick)
+
+            check_propagation(global_tick)
             snapshot_path = None
             if not Config.headless:
                 snapshot_path = snapshot_graph(global_tick)
