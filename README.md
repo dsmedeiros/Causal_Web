@@ -96,7 +96,8 @@ via CLI flags or the Parameters window in the GUI.
 
 Cluster detection and bridge management are computationally heavy. The
 `cluster_interval` setting controls how often these operations run (default
-every 10 ticks).
+every 10 ticks). Node evaluation, meta-node updates and metric logging also
+run on this interval to reduce overhead.
 
 The `propagation_control` section toggles node growth mechanisms. Set
 `enable_sip` or `enable_csp` to `false` to disable Stability-Induced or
