@@ -185,7 +185,8 @@ def propagate_phases(global_tick):
 
 def evaluate_nodes(global_tick):
     """Evaluate only nodes flagged in :data:`nodes_to_update`."""
-    graph.detect_clusters()
+    if global_tick % getattr(Config, "cluster_interval", 1) == 0:
+        graph.detect_clusters()
     reset_firing_limits()
     for node_id in list(nodes_to_update):
         node = graph.get_node(node_id)
@@ -699,10 +700,11 @@ def log_metrics_per_tick(global_tick):
         debt_log[node_id] = round(debt, 3)
         type_log[node_id] = ntype
 
-    clusters = graph.hierarchical_clusters()
-    graph.create_meta_nodes(clusters.get(0, []))
-
-    log_json(Config.output_path("cluster_log.json"), {str(global_tick): clusters})
+    clusters = None
+    if global_tick % getattr(Config, "cluster_interval", 1) == 0:
+        clusters = graph.hierarchical_clusters()
+        graph.create_meta_nodes(clusters.get(0, []))
+        log_json(Config.output_path("cluster_log.json"), {str(global_tick): clusters})
 
     log_json(Config.output_path("law_wave_log.json"), {str(global_tick): law_wave_log})
     if stable_frequency_log:
@@ -818,7 +820,8 @@ def simulation_loop():
             log_bridge_states(global_tick)
             log_meta_node_ticks(global_tick)
             log_curvature_per_tick(global_tick)
-            dynamic_bridge_management(global_tick)
+            if global_tick % getattr(Config, "cluster_interval", 1) == 0:
+                dynamic_bridge_management(global_tick)
             snapshot_path = snapshot_graph(global_tick)
             _update_simulation_state(False, False, global_tick, snapshot_path)
 
