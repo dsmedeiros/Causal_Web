@@ -384,7 +384,8 @@ class CausalGraph:
                         visited.add(other.id)
 
             for nid in cluster:
-                self.nodes[nid].cluster_ids[0] = cid
+                if self.nodes[nid].cluster_ids.get(0) != cid:
+                    self.nodes[nid].cluster_ids[0] = cid
             cid += 1
             if len(cluster) > 1:
                 clusters.append(cluster)
@@ -400,17 +401,25 @@ class CausalGraph:
         return clusters
 
     def hierarchical_clusters(self) -> dict:
-        """Compute hierarchical clustering assignments."""
-        self.detect_clusters()
+        """Compute hierarchical clustering assignments.
+
+        The first-level clusters must already be detected or they will be
+        computed on demand. Neighborhood edges are cached for the duration of
+        this call to avoid redundant lookups while traversing components.
+        """
+        if self._cluster_version == 0:
+            self.detect_clusters()
+
         visited = set()
         components = []
         cid = 0
 
-        def neighbors(nid: str) -> list[str]:
+        neighbor_map: dict[str, list[str]] = {}
+        for nid in self.nodes:
             edge_n = [e.target for e in self.get_edges_from(nid)]
             edge_n += [e.source for e in self.get_edges_to(nid)]
             edge_n += self.get_bridge_neighbors(nid, active_only=True)
-            return edge_n
+            neighbor_map[nid] = edge_n
 
         for nid in self.nodes:
             if nid in visited:
@@ -421,14 +430,16 @@ class CausalGraph:
             while queue:
                 cur = queue.popleft()
                 comp.append(cur)
-                for nb in neighbors(cur):
+                for nb in neighbor_map.get(cur, []):
                     if nb not in visited:
                         visited.add(nb)
                         queue.append(nb)
             for member in comp:
-                self.nodes[member].cluster_ids[1] = cid
+                if self.nodes[member].cluster_ids.get(1) != cid:
+                    self.nodes[member].cluster_ids[1] = cid
             components.append(comp)
             cid += 1
+
         self._cluster_version += 1
         self._cluster_cache.clear()
         return {0: [c for c in self._clusters_by_level(0)], 1: components}
