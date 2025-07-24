@@ -79,3 +79,18 @@ def test_edge_weights_affect_delay(monkeypatch):
     delay = edge.adjusted_delay(1.0, 1.0, kappa=1.0)
     assert delay >= 2
     Config.edge_weight_range = old_range
+
+
+def test_load_from_file_resets_spatial_index(tmp_path):
+    g = CausalGraph()
+    path1 = tmp_path / "g1.json"
+    data1 = {"nodes": {"A": {"x": 0, "y": 0}, "B": {"x": 50, "y": 0}}}
+    path1.write_text(json.dumps(data1))
+    g.load_from_file(str(path1))
+    assert {nid for ids in g.spatial_index.values() for nid in ids} == {"A", "B"}
+
+    path2 = tmp_path / "g2.json"
+    data2 = {"nodes": {"C": {"x": 0, "y": 0}}}
+    path2.write_text(json.dumps(data2))
+    g.load_from_file(str(path2))
+    assert {nid for ids in g.spatial_index.values() for nid in ids} == {"C"}
