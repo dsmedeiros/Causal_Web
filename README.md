@@ -221,6 +221,8 @@ editing when clicked.
 Nodes can be repositioned directly in the **Graph View** by dragging them with
 the mouse. Interaction is handled by :class:`CanvasWidget`, a reusable
 ``QGraphicsView`` subclass that supports selection, dragging, zooming and panning.
+You can pan the scene by dragging with the left mouse button over empty space or
+using the middle mouse button.
 Dragging begins on mouse press for smooth movement and remains responsive after
 resizing the window. Debug messages are printed to the console whenever nodes
 are clicked or dragged.

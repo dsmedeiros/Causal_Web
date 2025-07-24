@@ -18,6 +18,12 @@ def test_interference_type_destructive():
     assert g._interference_type(phases) == "destructive"
 
 
+def test_interference_type_handles_tuples():
+    g = CausalGraph()
+    phases = [(0.0, 1), (0.05, 1)]
+    assert g._interference_type(phases) == "constructive"
+
+
 def test_detect_clusters():
     g = CausalGraph()
     for nid, freq in {"A": 1.0, "B": 1.02, "C": 1.5}.items():
