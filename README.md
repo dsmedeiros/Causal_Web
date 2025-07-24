@@ -94,6 +94,10 @@ single tick. Set `total_max_concurrent_firings` for a global limit or
 cluster. A value of `0` disables these limits. Both parameters are configurable
 via CLI flags or the Parameters window in the GUI.
 
+Cluster detection and bridge management are computationally heavy. The
+`cluster_interval` setting controls how often these operations run (default
+every 10 ticks).
+
 The `propagation_control` section toggles node growth mechanisms. Set
 `enable_sip` or `enable_csp` to `false` to disable Stability-Induced or
 Collapse-Seeded Propagation. These options are also exposed as CLI flags and can

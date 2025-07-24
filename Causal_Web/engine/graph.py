@@ -25,6 +25,8 @@ class CausalGraph:
         self.tick_sources = []
         self.meta_nodes: dict[str, MetaNode] = {}
         self.spatial_index = defaultdict(set)
+        self._cluster_cache: dict[int, tuple[int, list[list[str]]]] = {}
+        self._cluster_version = 0
 
     def add_node(
         self,
@@ -326,38 +328,56 @@ class CausalGraph:
     def detect_clusters(
         self, coherence_threshold: float = 0.8, freq_tolerance: float = 0.1
     ):
-        """Detect sets of phase-aligned nodes and assign cluster IDs."""
-        clusters = []
-        visited = set()
-        node_list = list(self.nodes.values())
+        """Detect sets of phase-aligned nodes and assign cluster IDs.
+
+        Nodes are compared only with others in adjacent spatial bins to
+        reduce the number of pairwise checks.
+        """
+
+        # Ensure all nodes are present in the spatial index in case callers
+        # bypassed :meth:`add_node` and inserted directly into ``nodes``.
+        for nid, n in self.nodes.items():
+            cell = (n.grid_x, n.grid_y)
+            if nid not in self.spatial_index.get(cell, set()):
+                self.spatial_index[cell].add(nid)
+
+        clusters: list[list[str]] = []
+        visited: set[str] = set()
         cid = 0
-        for node in node_list:
+
+        for node in list(self.nodes.values()):
             if node.id in visited or node.law_wave_frequency == 0.0:
                 continue
+
             cluster = [node.id]
             visited.add(node.id)
-            for other in node_list:
-                if other.id in visited or other.law_wave_frequency == 0.0:
-                    continue
-                if (
-                    abs(node.law_wave_frequency - other.law_wave_frequency)
-                    <= freq_tolerance
-                    and node.coherence > coherence_threshold
-                    and other.coherence > coherence_threshold
-                    and abs(node.grid_x - other.grid_x) <= 1
-                    and abs(node.grid_y - other.grid_y) <= 1
-                ):
-                    cluster.append(other.id)
-                    visited.add(other.id)
+
+            if node.coherence > coherence_threshold:
+                for other in self.nearby_nodes(node):
+                    if (
+                        other.id not in visited
+                        and other.law_wave_frequency != 0.0
+                        and abs(node.law_wave_frequency - other.law_wave_frequency)
+                        <= freq_tolerance
+                        and other.coherence > coherence_threshold
+                    ):
+                        cluster.append(other.id)
+                        visited.add(other.id)
+
             for nid in cluster:
                 self.nodes[nid].cluster_ids[0] = cid
             cid += 1
             if len(cluster) > 1:
                 clusters.append(cluster)
+
         for nid, node in self.nodes.items():
             if 0 not in node.cluster_ids:
-                node.cluster_ids[0] = cid
+                self.nodes[nid].cluster_ids[0] = cid
                 cid += 1
+
+        self._cluster_version += 1
+        self._cluster_cache.clear()
+
         return clusters
 
     def hierarchical_clusters(self) -> dict:
@@ -390,16 +410,25 @@ class CausalGraph:
                 self.nodes[member].cluster_ids[1] = cid
             components.append(comp)
             cid += 1
+        self._cluster_version += 1
+        self._cluster_cache.clear()
         return {0: [c for c in self._clusters_by_level(0)], 1: components}
 
     def _clusters_by_level(self, level: int) -> list:
+        cached = self._cluster_cache.get(level)
+        if cached and cached[0] == self._cluster_version:
+            return cached[1]
+
         buckets: dict[int, list[str]] = {}
         for nid, node in self.nodes.items():
             cid = node.cluster_ids.get(level)
             if cid is None:
                 continue
             buckets.setdefault(cid, []).append(nid)
-        return list(buckets.values())
+
+        result = list(buckets.values())
+        self._cluster_cache[level] = (self._cluster_version, result)
+        return result
 
     def create_meta_nodes(self, clusters):
         """Instantiate MetaNode objects for given clusters."""
