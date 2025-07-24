@@ -186,8 +186,6 @@ def propagate_phases(global_tick):
 
 def evaluate_nodes(global_tick):
     """Evaluate only nodes flagged in :data:`nodes_to_update`."""
-    if global_tick % getattr(Config, "cluster_interval", 1) == 0:
-        graph.detect_clusters()
     reset_firing_limits()
     for node_id in list(nodes_to_update):
         node = graph.get_node(node_id)
@@ -823,6 +821,7 @@ def simulation_loop():
             propagate_phases(global_tick)
 
             if global_tick % getattr(Config, "cluster_interval", 1) == 0:
+                graph.detect_clusters()
                 evaluate_nodes(global_tick)
                 graph.update_meta_nodes(global_tick)
                 if not Config.headless:
