@@ -7,8 +7,10 @@ from PySide6.QtWidgets import (
     QCheckBox,
     QHBoxLayout,
     QMainWindow,
+    QLabel,
     QPushButton,
     QScrollArea,
+    QSpinBox,
     QVBoxLayout,
     QWidget,
 )
@@ -35,6 +37,17 @@ class LogFilesWindow(QMainWindow):
         btn_layout.addStretch()
         layout.addLayout(btn_layout)
 
+        interval_row = QHBoxLayout()
+        interval_label = QLabel("Log Interval")
+        self.interval_spin = QSpinBox()
+        self.interval_spin.setMinimum(1)
+        self.interval_spin.setMaximum(1000)
+        self.interval_spin.setValue(getattr(Config, "log_interval", 1))
+        interval_row.addWidget(interval_label)
+        interval_row.addWidget(self.interval_spin)
+        interval_row.addStretch()
+        layout.addLayout(interval_row)
+
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         container = QWidget()
@@ -55,4 +68,5 @@ class LogFilesWindow(QMainWindow):
         """Update :class:`Config.log_files` and write to ``config.json``."""
         for name, cb in self._checkboxes.items():
             Config.log_files[name] = cb.isChecked()
+        Config.log_interval = int(self.interval_spin.value())
         Config.save_log_files()

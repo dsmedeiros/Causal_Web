@@ -63,10 +63,29 @@ class CausalGraph:
     def _non_overlapping_position(
         self, x: float, y: float, gap: int = 50
     ) -> tuple[float, float]:
-        """Return coordinates shifted so no node is within ``gap`` units on both axes."""
-        while any(
-            abs(n.x - x) < gap and abs(n.y - y) < gap for n in self.nodes.values()
-        ):
+        """Return coordinates shifted so no node lies within ``gap`` units."""
+
+        cell_size = getattr(Config, "SPATIAL_GRID_SIZE", 50)
+        radius = int(math.ceil(gap / cell_size))
+
+        def _conflict(cx: int, cy: int) -> bool:
+            cells = [
+                (cx + dx, cy + dy)
+                for dx in range(-radius, radius + 1)
+                for dy in range(-radius, radius + 1)
+            ]
+            for c in cells:
+                for nid in self.spatial_index.get(c, set()):
+                    n = self.nodes.get(nid)
+                    if n and abs(n.x - x) < gap and abs(n.y - y) < gap:
+                        return True
+            return False
+
+        while True:
+            cell_x = int(x // cell_size)
+            cell_y = int(y // cell_size)
+            if not _conflict(cell_x, cell_y):
+                break
             x += gap
             y += gap
         return x, y

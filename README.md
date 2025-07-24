@@ -195,6 +195,9 @@ python -m Causal_Web.main            # with GUI
 python -m Causal_Web.main --no-gui   # headless run
 ```
 
+For automated runs the `headless` configuration flag can be enabled to suppress
+observer output and intermediate logs.
+
 Use the on-screen controls to start, pause/resume or stop the simulation and adjust the tick rate. A text box next to the tick rate slider displays the current value and allows direct entry&mdash;when focus leaves the field the slider synchronises to match. A tick counter shows the current tick and a **Tick Limit** field determines how many ticks to run. These inputs now reside in the **Control Panel** window which is docked to the top left. Windows can be freely resized and the graph view will scroll if its contents exceed the available space. Window resizing is now handled more robustly to avoid occasional freezes. As the simulation runs, a number of JSON log files are produced inside `Causal_Web/output`.
 The main window now refreshes automatically as nodes and edges change during the run.
 Use the **File** menu to load, save or start a new graph. Editing actions
@@ -273,8 +276,10 @@ location of `runs/` and other output folders can be customised using the
 Logging for each file can be enabled or disabled individually using
 **Settings > Log Files...** in the GUI or via the `log_files` section of the
 configuration file.
-All log entries are buffered in memory and flushed periodically to minimize
-disk writes.
+All log entries are buffered in memory and flushed periodically to minimise
+disk writes. The frequency of metric logging is controlled by the
+`log_interval` setting which defaults to `1` tick. This value can be adjusted
+in the **Log Files** window.
 Each record now conforms to Pydantic models defined in
 `engine/logging_models.py`, ensuring consistent structure across files and
 simplifying downstream analysis.
