@@ -190,7 +190,7 @@ class CausalGraph:
         for c in cells:
             ids.update(self.spatial_index.get(c, set()))
         ids.discard(node.id)
-        return [self.nodes[i] for i in ids]
+        return [self.nodes[i] for i in ids if i in self.nodes]
 
     # --- Bridge-aware connectivity helpers ---
     def get_bridge_neighbors(self, node_id, active_only=True):
@@ -501,6 +501,8 @@ class CausalGraph:
         self.bridges.clear()
         self.bridges_by_node.clear()
         self.tick_sources = []
+        self.spatial_index.clear()
+        self.meta_nodes.clear()
 
         nodes_data = data.get("nodes", [])
         if isinstance(nodes_data, dict):

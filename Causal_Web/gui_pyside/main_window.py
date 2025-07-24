@@ -14,6 +14,8 @@ from PySide6.QtWidgets import (
     QPushButton,
     QSlider,
     QSpinBox,
+    QLineEdit,
+    QHBoxLayout,
     QWidget,
     QVBoxLayout,
 )
@@ -181,7 +183,17 @@ class MainWindow(QMainWindow):
         self.tick_slider.setMaximum(20)
         self.tick_slider.setValue(int(Config.tick_rate))
         self.tick_slider.valueChanged.connect(self._tick_rate_changed)
-        layout.addRow("Tick Rate", self.tick_slider)
+
+        self.tick_edit = QLineEdit(str(Config.tick_rate))
+        self.tick_edit.editingFinished.connect(self._tick_rate_edited)
+
+        tick_rate_row = QWidget()
+        tick_rate_layout = QHBoxLayout(tick_rate_row)
+        tick_rate_layout.setContentsMargins(0, 0, 0, 0)
+        tick_rate_layout.addWidget(self.tick_slider)
+        tick_rate_layout.addWidget(self.tick_edit)
+
+        layout.addRow("Tick Rate", tick_rate_row)
 
         self.tick_label = QLabel("0")
         layout.addRow("Current Tick", self.tick_label)
@@ -235,6 +247,18 @@ class MainWindow(QMainWindow):
     def _tick_rate_changed(self, value: int) -> None:
         """Update ``Config.tick_rate`` from the slider."""
         Config.tick_rate = float(value)
+        self.tick_edit.setText(str(float(value)))
+
+    def _tick_rate_edited(self) -> None:
+        """Synchronize slider with manual text input."""
+        try:
+            value = float(self.tick_edit.text())
+        except ValueError:
+            # reset invalid text
+            self.tick_edit.setText(str(Config.tick_rate))
+            return
+        Config.tick_rate = value
+        self.tick_slider.setValue(int(value))
 
     def start_simulation(self) -> None:
         """Persist the active graph and launch the simulation thread.
