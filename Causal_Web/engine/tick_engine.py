@@ -1,5 +1,6 @@
 import time
 import threading
+from collections import deque
 from ..config import Config
 from .graph import CausalGraph
 from .observer import Observer
@@ -39,14 +40,14 @@ def mark_for_update(node_id: str) -> None:
 void_absorption_events = 0
 boundary_interactions_count = 0
 bridges_reformed_count = 0
-_decay_durations = []
+_decay_durations: deque[float] = deque(maxlen=500)
 
 # --- Propagation tracking ---
 _sip_pending = []  # list of (child_id, parents, spawn_tick, origin_type)
 _csp_seeds = []  # list of (seed_id, parent_id, x, y, spawn_tick)
 
 # GUI hook for failed CSP seed ripples
-recent_csp_failures = []  # list of dict(x,y,tick,intensity)
+recent_csp_failures: deque[dict] = deque(maxlen=500)  # list of dict(x,y,tick,intensity)
 
 _sip_success_count = 0
 _sip_failure_count = 0
@@ -54,7 +55,7 @@ _csp_success_count = 0
 _csp_failure_count = 0
 
 # --- Adaptive constraint tracking ---
-_recent_node_counts: list[int] = []
+_recent_node_counts: deque[int] = deque(maxlen=500)
 _dynamic_coherence_offset: float = 0.0
 
 _spawn_counts = {}
@@ -124,7 +125,7 @@ def update_coherence_constraints() -> None:
     count = len(graph.nodes)
     _recent_node_counts.append(count)
     if len(_recent_node_counts) > 5:
-        _recent_node_counts.pop(0)
+        _recent_node_counts.popleft()
     growth = 0
     if len(_recent_node_counts) >= 2:
         growth = _recent_node_counts[-1] - _recent_node_counts[0]
@@ -704,47 +705,55 @@ def log_metrics_per_tick(global_tick):
     if global_tick % getattr(Config, "cluster_interval", 1) == 0:
         clusters = graph.hierarchical_clusters()
         graph.create_meta_nodes(clusters.get(0, []))
-        log_json(Config.output_path("cluster_log.json"), {str(global_tick): clusters})
+        if global_tick % getattr(Config, "log_interval", 1) == 0:
+            log_json(
+                Config.output_path("cluster_log.json"), {str(global_tick): clusters}
+            )
 
-    log_json(Config.output_path("law_wave_log.json"), {str(global_tick): law_wave_log})
-    if stable_frequency_log:
+    if global_tick % getattr(Config, "log_interval", 1) == 0:
         log_json(
-            Config.output_path("stable_frequency_log.json"),
-            {str(global_tick): stable_frequency_log},
+            Config.output_path("law_wave_log.json"), {str(global_tick): law_wave_log}
         )
+        if stable_frequency_log:
+            log_json(
+                Config.output_path("stable_frequency_log.json"),
+                {str(global_tick): stable_frequency_log},
+            )
 
-    log_json(
-        Config.output_path("decoherence_log.json"), {str(global_tick): decoherence_log}
-    )
-    log_json(
-        Config.output_path("coherence_log.json"), {str(global_tick): coherence_log}
-    )
-    log_json(
-        Config.output_path("coherence_velocity_log.json"),
-        {str(global_tick): coherence_velocity},
-    )
-    log_json(
-        Config.output_path("classicalization_map.json"),
-        {str(global_tick): classical_state},
-    )
-    log_json(
-        Config.output_path("interference_log.json"),
-        {str(global_tick): interference_log},
-    )
-    log_json(
-        Config.output_path("tick_density_map.json"),
-        {str(global_tick): interference_log},
-    )
-    log_json(
-        Config.output_path("node_state_log.json"),
-        {
-            str(global_tick): {
-                "type": type_log,
-                "credit": credit_log,
-                "debt": debt_log,
-            }
-        },
-    )
+        log_json(
+            Config.output_path("decoherence_log.json"),
+            {str(global_tick): decoherence_log},
+        )
+        log_json(
+            Config.output_path("coherence_log.json"),
+            {str(global_tick): coherence_log},
+        )
+        log_json(
+            Config.output_path("coherence_velocity_log.json"),
+            {str(global_tick): coherence_velocity},
+        )
+        log_json(
+            Config.output_path("classicalization_map.json"),
+            {str(global_tick): classical_state},
+        )
+        log_json(
+            Config.output_path("interference_log.json"),
+            {str(global_tick): interference_log},
+        )
+        log_json(
+            Config.output_path("tick_density_map.json"),
+            {str(global_tick): interference_log},
+        )
+        log_json(
+            Config.output_path("node_state_log.json"),
+            {
+                str(global_tick): {
+                    "type": type_log,
+                    "credit": credit_log,
+                    "debt": debt_log,
+                }
+            },
+        )
 
 
 _stop_requested = False
@@ -816,37 +825,41 @@ def simulation_loop():
             graph.update_meta_nodes(global_tick)
             check_propagation(global_tick)
 
-            log_metrics_per_tick(global_tick)
-            log_bridge_states(global_tick)
-            log_meta_node_ticks(global_tick)
-            log_curvature_per_tick(global_tick)
+            if not Config.headless:
+                log_metrics_per_tick(global_tick)
+                log_bridge_states(global_tick)
+                log_meta_node_ticks(global_tick)
+                log_curvature_per_tick(global_tick)
             if global_tick % getattr(Config, "cluster_interval", 1) == 0:
                 dynamic_bridge_management(global_tick)
-            snapshot_path = snapshot_graph(global_tick)
+            snapshot_path = None
+            if not Config.headless:
+                snapshot_path = snapshot_graph(global_tick)
             _update_simulation_state(False, False, global_tick, snapshot_path)
 
-            for obs in observers:
-                obs.observe(graph, global_tick)
-                inferred = obs.infer_field_state()
-                log_json(
-                    Config.output_path("observer_perceived_field.json"),
-                    {"tick": global_tick, "observer": obs.id, "state": inferred},
-                )
-
-                actual = {n.id: len(n.tick_history) for n in graph.nodes.values()}
-                diff = {
-                    nid: {
-                        "actual": actual.get(nid, 0),
-                        "inferred": inferred.get(nid, 0),
-                    }
-                    for nid in set(actual) | set(inferred)
-                    if actual.get(nid, 0) != inferred.get(nid, 0)
-                }
-                if diff:
+            if not Config.headless:
+                for obs in observers:
+                    obs.observe(graph, global_tick)
+                    inferred = obs.infer_field_state()
                     log_json(
-                        Config.output_path("observer_disagreement_log.json"),
-                        {"tick": global_tick, "observer": obs.id, "diff": diff},
+                        Config.output_path("observer_perceived_field.json"),
+                        {"tick": global_tick, "observer": obs.id, "state": inferred},
                     )
+
+                    actual = {n.id: len(n.tick_history) for n in graph.nodes.values()}
+                    diff = {
+                        nid: {
+                            "actual": actual.get(nid, 0),
+                            "inferred": inferred.get(nid, 0),
+                        }
+                        for nid in set(actual) | set(inferred)
+                        if actual.get(nid, 0) != inferred.get(nid, 0)
+                    }
+                    if diff:
+                        log_json(
+                            Config.output_path("observer_disagreement_log.json"),
+                            {"tick": global_tick, "observer": obs.id, "diff": diff},
+                        )
 
             for bridge in graph.bridges:
                 bridge.apply(global_tick, graph)

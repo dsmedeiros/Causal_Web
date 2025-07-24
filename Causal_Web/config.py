@@ -13,6 +13,10 @@ class Config:
     propagation_control:
         Dictionary containing ``enable_sip`` and ``enable_csp`` flags used to
         toggle the two propagation mechanisms.
+    log_interval:
+        Number of ticks between metric log writes.
+    headless:
+        When ``True`` disables observers and intermediate logging.
     """
 
     # Base directories for package resources
@@ -116,6 +120,7 @@ class Config:
             data = {}
         data.setdefault("log_files", {})
         data["log_files"].update(cls.log_files)
+        data["log_interval"] = getattr(cls, "log_interval", 1)
         with open(path, "w") as f:
             json.dump(data, f, indent=2)
 
@@ -131,6 +136,10 @@ class Config:
     random_seed: int | None = None
     thread_count = 1
     log_verbosity = "info"
+    # interval between metric logs
+    log_interval = 1
+    # disable observers and intermediate logging when True
+    headless = False
 
     # Node defaults
     memory_window = 20
