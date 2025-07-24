@@ -360,7 +360,11 @@ class CanvasWidget(QGraphicsView):
         self.scale(factor, factor)
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
-        if event.button() == Qt.MiddleButton:
+        if event.button() == Qt.MiddleButton or (
+            event.button() == Qt.LeftButton
+            and self.itemAt(event.pos()) is None
+            and not self._connect_mode
+        ):
             self._pan_start = event.pos()
             self.setCursor(Qt.ClosedHandCursor)
         else:
@@ -401,7 +405,10 @@ class CanvasWidget(QGraphicsView):
                 super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
-        if event.button() == Qt.MiddleButton:
+        if (
+            event.button() in (Qt.MiddleButton, Qt.LeftButton)
+            and self._pan_start is not None
+        ):
             self._pan_start = None
             self.setCursor(Qt.ArrowCursor)
         else:

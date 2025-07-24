@@ -290,10 +290,26 @@ class CausalGraph:
         return inspection_log
 
     def _interference_type(self, phases):
-        if len(phases) < 2:
+        """Classify the interference pattern of a set of phases.
+
+        Parameters
+        ----------
+        phases : list
+            Sequence of phase values or ``(phase, tick)`` tuples.
+
+        Returns
+        -------
+        str
+            ``"constructive"`` when all phases are closely aligned,
+            ``"destructive"`` when they cancel out, ``"partial``" otherwise.
+        """
+
+        phase_vals = [p[0] if isinstance(p, (tuple, list)) else p for p in phases]
+
+        if len(phase_vals) < 2:
             return "neutral"
 
-        normalized = [p % (2 * math.pi) for p in phases]
+        normalized = [p % (2 * math.pi) for p in phase_vals]
 
         phase_diffs = [
             abs((p1 - p2 + math.pi) % (2 * math.pi) - math.pi)
