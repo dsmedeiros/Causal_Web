@@ -51,6 +51,7 @@
     <Compile Include="engine\__init__.py" />
     <Compile Include="graph\io.py" />
     <Compile Include="graph\model.py" />
+    <Compile Include="graph\types.py" />
     <Compile Include="graph\__init__.py" />
     <Compile Include="gui\state.py" />
     <Compile Include="gui\__init__.py" />
