@@ -2,7 +2,7 @@ from __future__ import annotations
 
 """Reusable :class:`QGraphicsView` for visualising :class:`GraphModel` graphs."""
 
-from typing import Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 from PySide6.QtCore import QPoint, QPointF, Qt, Signal
 from PySide6.QtGui import (
@@ -11,6 +11,7 @@ from PySide6.QtGui import (
     QPen,
     QWheelEvent,
     QPainter,
+    QContextMenuEvent,
 )
 from PySide6.QtWidgets import (
     QGraphicsEllipseItem,
@@ -81,7 +82,11 @@ class NodeItem(QGraphicsEllipseItem):
         self.edges: list[EdgeItem] = []
         self._drag_start: Optional[QPointF] = None
 
-    def itemChange(self, change, value):  # type: ignore[override]
+    def itemChange(
+        self,
+        change: QGraphicsItem.GraphicsItemChange,
+        value: Any,
+    ) -> Any:  # type: ignore[override]
         """Redraw connected edges whenever the node moves."""
         if change == QGraphicsItem.ItemPositionHasChanged:
             for edge in self.edges:
@@ -177,7 +182,11 @@ class MetaNodeItem(QGraphicsEllipseItem):
         self._drag_start: Optional[QPointF] = None
         self.update_lines()
 
-    def itemChange(self, change, value):  # type: ignore[override]
+    def itemChange(
+        self,
+        change: QGraphicsItem.GraphicsItemChange,
+        value: Any,
+    ) -> Any:  # type: ignore[override]
         if change == QGraphicsItem.ItemPositionHasChanged:
             self.update_lines()
             self.canvas.update_meta_lines_for_meta(self.meta_id)
@@ -245,7 +254,11 @@ class ObserverItem(QGraphicsRectItem):
         self._drag_start: Optional[QPointF] = None
         self.update_lines()
 
-    def itemChange(self, change, value):  # type: ignore[override]
+    def itemChange(
+        self,
+        change: QGraphicsItem.GraphicsItemChange,
+        value: Any,
+    ) -> Any:  # type: ignore[override]
         if change == QGraphicsItem.ItemPositionHasChanged:
             self.update_lines()
         return super().itemChange(change, value)
@@ -506,7 +519,7 @@ class CanvasWidget(QGraphicsView):
 
     # ---- context menu and editing helpers -----------------------------------
 
-    def contextMenuEvent(self, event) -> None:
+    def contextMenuEvent(self, event: QContextMenuEvent) -> None:
         if not self.editable:
             return super().contextMenuEvent(event)
 
