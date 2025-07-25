@@ -28,13 +28,17 @@
     <Compile Include="database\__init__.py" />
     <Compile Include="engine\bridge.py" />
     <Compile Include="engine\causal_analyst.py" />
+    <Compile Include="engine\explanation_rules.py" />
     <Compile Include="engine\graph.py" />
     <Compile Include="engine\logger.py" />
     <Compile Include="engine\logging_models.py" />
     <Compile Include="engine\meta_node.py" />
     <Compile Include="engine\node.py" />
     <Compile Include="engine\node_manager.py" />
+    <Compile Include="engine\node_services.py" />
     <Compile Include="engine\observer.py" />
+    <Compile Include="engine\serialization_service.py" />
+    <Compile Include="engine\services.py" />
     <Compile Include="engine\tick.py" />
     <Compile Include="engine\tick_engine.py" />
     <Compile Include="engine\log_interpreter.py" />
@@ -49,7 +53,9 @@
     <Compile Include="gui_pyside\canvas_widget.py" />
     <Compile Include="gui_pyside\log_files_window.py" />
     <Compile Include="gui_pyside\main_window.py" />
+    <Compile Include="gui_pyside\panel_services.py" />
     <Compile Include="gui_pyside\toolbar_builder.py" />
+    <Compile Include="gui_pyside\toolbar_services.py" />
     <Compile Include="gui_pyside\__init__.py" />
     <Compile Include="ingest\service.py" />
     <Compile Include="ingest\__init__.py" />
