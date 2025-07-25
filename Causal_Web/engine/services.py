@@ -171,6 +171,107 @@ class NodeTickService:
 
 
 @dataclass
+class NodeMetricsResultService:
+    """Process per-node metric records."""
+
+    graph: Any
+    results: list
+    tick: int
+    last_coherence: dict
+
+    def process(self) -> dict:
+        self._init_logs()
+        for rec in self.results:
+            self._handle_record(*rec)
+        return self.logs
+
+    # ------------------------------------------------------------------
+    def _init_logs(self) -> None:
+        self.logs = {
+            "decoherence_log": {},
+            "coherence_log": {},
+            "classical_state": {},
+            "coherence_velocity": {},
+            "law_wave_log": {},
+            "stable_frequency_log": {},
+            "interference_log": {},
+            "credit_log": {},
+            "debt_log": {},
+            "type_log": {},
+        }
+
+    # ------------------------------------------------------------------
+    def _handle_record(
+        self,
+        node_id: str,
+        deco: float,
+        coh: float,
+        inter: int,
+        ntype: int,
+        credit: float,
+        debt: float,
+    ) -> None:
+        node = self.graph.get_node(node_id)
+        prev = self.last_coherence.get(node_id, coh)
+        delta = coh - prev
+        self.last_coherence[node_id] = coh
+        node.coherence_velocity = delta
+        node.update_classical_state(deco, tick_time=self.tick, graph=self.graph)
+        self._update_stability(node_id, node)
+        self._record_logs(node_id, deco, coh, inter, ntype, credit, debt, delta, node)
+
+    # ------------------------------------------------------------------
+    def _update_stability(self, node_id: str, node) -> None:
+        record = te._law_wave_stability.setdefault(node_id, {"freqs": [], "stable": 0})
+        record["freqs"].append(node.law_wave_frequency)
+        if len(record["freqs"]) > 5:
+            record["freqs"].pop(0)
+        if len(record["freqs"]) == 5:
+            if np.std(record["freqs"]) < 0.01:
+                record["stable"] += 1
+            else:
+                record["stable"] = 0
+        if record["stable"] >= 10:
+            node.refractory_period = max(1.0, node.refractory_period - 0.1)
+            log_json(
+                Config.output_path("law_drift_log.json"),
+                {
+                    "tick": self.tick,
+                    "node": node_id,
+                    "new_refractory_period": node.refractory_period,
+                },
+            )
+            record["stable"] = 0
+        if record["stable"] >= 5:
+            self.logs["stable_frequency_log"][node_id] = round(
+                np.mean(record["freqs"]), 4
+            )
+
+    # ------------------------------------------------------------------
+    def _record_logs(
+        self,
+        node_id: str,
+        deco: float,
+        coh: float,
+        inter: int,
+        ntype: int,
+        credit: float,
+        debt: float,
+        delta: float,
+        node,
+    ) -> None:
+        self.logs["decoherence_log"][node_id] = round(deco, 4)
+        self.logs["coherence_log"][node_id] = round(coh, 4)
+        self.logs["classical_state"][node_id] = getattr(node, "is_classical", False)
+        self.logs["coherence_velocity"][node_id] = round(delta, 5)
+        self.logs["law_wave_log"][node_id] = round(node.law_wave_frequency, 4)
+        self.logs["interference_log"][node_id] = inter
+        self.logs["credit_log"][node_id] = round(credit, 3)
+        self.logs["debt_log"][node_id] = round(debt, 3)
+        self.logs["type_log"][node_id] = ntype
+
+
+@dataclass
 class NodeMetricsService:
     """Collect and persist per-tick node metrics."""
 
@@ -213,74 +314,12 @@ class NodeMetricsService:
 
     # ------------------------------------------------------------------
     def _process_results(self, results, tick):
-        decoherence_log = {}
-        coherence_log = {}
-        classical_state = {}
-        coherence_velocity = {}
-        law_wave_log = {}
-        stable_frequency_log = {}
-        interference_log = {}
-        credit_log = {}
-        debt_log = {}
-        type_log = {}
-
-        for node_id, deco, coh, inter, ntype, credit, debt in results:
-            node = self.graph.get_node(node_id)
-            prev = self.last_coherence.get(node_id, coh)
-            delta = coh - prev
-            self.last_coherence[node_id] = coh
-            node.coherence_velocity = delta
-
-            node.update_classical_state(deco, tick_time=tick, graph=self.graph)
-
-            record = te._law_wave_stability.setdefault(
-                node_id, {"freqs": [], "stable": 0}
-            )
-            record["freqs"].append(node.law_wave_frequency)
-            if len(record["freqs"]) > 5:
-                record["freqs"].pop(0)
-            if len(record["freqs"]) == 5:
-                if np.std(record["freqs"]) < 0.01:
-                    record["stable"] += 1
-                else:
-                    record["stable"] = 0
-            if record["stable"] >= 10:
-                node.refractory_period = max(1.0, node.refractory_period - 0.1)
-                log_json(
-                    Config.output_path("law_drift_log.json"),
-                    {
-                        "tick": tick,
-                        "node": node_id,
-                        "new_refractory_period": node.refractory_period,
-                    },
-                )
-                record["stable"] = 0
-
-            if record["stable"] >= 5:
-                stable_frequency_log[node_id] = round(np.mean(record["freqs"]), 4)
-
-            decoherence_log[node_id] = round(deco, 4)
-            coherence_log[node_id] = round(coh, 4)
-            classical_state[node_id] = getattr(node, "is_classical", False)
-            coherence_velocity[node_id] = round(delta, 5)
-            law_wave_log[node_id] = round(node.law_wave_frequency, 4)
-            interference_log[node_id] = inter
-            credit_log[node_id] = round(credit, 3)
-            debt_log[node_id] = round(debt, 3)
-            type_log[node_id] = ntype
-
-        return {
-            "decoherence_log": decoherence_log,
-            "coherence_log": coherence_log,
-            "classical_state": classical_state,
-            "coherence_velocity": coherence_velocity,
-            "law_wave_log": law_wave_log,
-            "stable_frequency_log": stable_frequency_log,
-            "interference_log": interference_log,
-            "credit_log": credit_log,
-            "debt_log": debt_log,
-            "type_log": type_log,
-        }
+        return NodeMetricsResultService(
+            graph=self.graph,
+            results=results,
+            tick=tick,
+            last_coherence=self.last_coherence,
+        ).process()
 
     # ------------------------------------------------------------------
     def _maybe_handle_clusters(self, tick: int) -> None:
