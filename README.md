@@ -586,8 +586,10 @@ Large functions have been decomposed into reusable services. The `NodeTickServic
 encapsulates the tick emission lifecycle while `GraphLoadService` handles JSON
 graph loading. Metric collection is delegated to `NodeMetricsService` which
 replaced the bulky `log_metrics_per_tick` function. The `NodeTickDecisionService`
-isolates the tick decision logic from `Node.should_tick`. All services live in
-`Causal_Web/engine/services.py`.
+isolates the tick decision logic from `Node.should_tick`. Serialization and
+narrative generation are now handled by `GraphSerializationService` and
+`NarrativeGeneratorService`. GUI setup moved to `ToolbarBuildService`. All
+services live in `Causal_Web/engine/services.py` or the GUI package.
 
 ### Identified long functions
 
@@ -605,11 +607,8 @@ isolates the tick decision logic from `Node.should_tick`. All services live in
 - `engine/node.py:should_tick` – 111 lines
 - `engine/node.py:apply_tick` – 143 lines
 - `engine/graph.py:detect_clusters` – 55 lines
-- `engine/graph.py:to_dict` – 81 lines
 - `engine/graph.py:load_from_file` – 138 lines
 - `engine/explanation_rules.py:_match_emergence_events` – 51 lines
-- `engine/log_interpreter.py:generate_narrative` – 79 lines
-- `gui_pyside/toolbar_builder.py:build_toolbar` – 69 lines
 - `gui_pyside/toolbar_builder.py:__init__` – 57 lines
 - `gui_pyside/toolbar_builder.py:__init__` – 101 lines
 - `gui_pyside/toolbar_builder.py:show_connection` – 52 lines

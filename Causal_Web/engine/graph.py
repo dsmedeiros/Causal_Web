@@ -472,86 +472,11 @@ class CausalGraph:
             meta.update_internal_state(tick_time)
 
     def to_dict(self):
-        node_list = [
-            {
-                "id": nid,
-                "x": n.x,
-                "y": n.y,
-                "ticks": [
-                    {
-                        "time": tick.time,
-                        "phase": tick.phase,
-                        "origin": tick.origin,
-                        "layer": getattr(tick, "layer", "tick"),
-                        "trace_id": getattr(tick, "trace_id", ""),
-                    }
-                    for tick in n.tick_history
-                ],
-                "phase": n.phase,
-                "coherence": n.coherence,
-                "decoherence": n.decoherence,
-                "frequency": n.frequency,
-                "refractory_period": n.refractory_period,
-                "base_threshold": n.base_threshold,
-                "collapse_origin": n.collapse_origin,
-                "is_classical": getattr(n, "is_classical", False),
-                "decoherence_streak": getattr(n, "_decoherence_streak", 0),
-                "last_tick_time": n.last_tick_time,
-                "subjective_ticks": n.subjective_ticks,
-                "law_wave_frequency": n.law_wave_frequency,
-                "trust_profile": n.trust_profile,
-                "phase_confidence": n.phase_confidence_index,
-                "goals": n.goals,
-                "origin_type": n.origin_type,
-                "generation_tick": n.generation_tick,
-                "parent_ids": n.parent_ids,
-                "node_type": n.node_type.value,
-                "coherence_credit": n.coherence_credit,
-                "decoherence_debt": n.decoherence_debt,
-                "phase_lock": n.phase_lock,
-            }
-            for nid, n in self.nodes.items()
-        ]
+        """Return a JSON serializable representation of the graph."""
 
-        return {
-            "nodes": node_list,
-            "superpositions": {
-                nid: {
-                    str(t): [
-                        round(float(p[0] if isinstance(p, (tuple, list)) else p), 4)
-                        for p in node.pending_superpositions[t]
-                    ]
-                    for t in node.pending_superpositions
-                }
-                for nid, node in self.nodes.items()
-                if node.pending_superpositions
-            },
-            "edges": [
-                {
-                    "from": e.source,
-                    "to": e.target,
-                    "delay": e.delay,
-                    "attenuation": e.attenuation,
-                    "density": e.density,
-                    "phase_shift": e.phase_shift,
-                }
-                for e in self.edges
-            ],
-            "bridges": [b.to_dict() for b in self.bridges],
-            "tick_sources": self.tick_sources,
-            "meta_nodes": {
-                mid: {
-                    "members": meta.member_ids,
-                    "constraints": meta.constraints,
-                    "type": meta.meta_type,
-                    "origin": meta.origin,
-                    "collapsed": meta.collapsed,
-                    "x": meta.x,
-                    "y": meta.y,
-                }
-                for mid, meta in self.meta_nodes.items()
-            },
-        }
+        from .serialization_service import GraphSerializationService
+
+        return GraphSerializationService(self).as_dict()
 
     def save_to_file(self, path):
         with open(path, "w") as f:
