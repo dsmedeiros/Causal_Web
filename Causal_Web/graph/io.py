@@ -5,13 +5,15 @@ from __future__ import annotations
 import json
 from typing import Any
 
+from .types import GraphDict
+
 from .model import GraphModel
 
 
 def load_graph(path: str) -> GraphModel:
     """Load a graph from ``path`` and return a :class:`GraphModel`."""
     with open(path) as f:
-        data = json.load(f)
+        data: GraphDict = json.load(f)
     _validate_graph(data)
     return GraphModel.from_dict(data)
 
@@ -27,7 +29,7 @@ def new_graph(starter_node: bool = False) -> GraphModel:
     return GraphModel.blank(starter_node)
 
 
-def _validate_graph(data: dict[str, Any]) -> None:
+def _validate_graph(data: GraphDict) -> None:
     if "nodes" not in data or "edges" not in data:
         raise ValueError("Graph file must contain 'nodes' and 'edges'")
     if not isinstance(data["nodes"], (dict, list)):
