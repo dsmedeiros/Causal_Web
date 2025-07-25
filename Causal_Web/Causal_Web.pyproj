@@ -21,6 +21,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="command_stack.py" />
     <Compile Include="config.py" />
     <Compile Include="database\db_setup.py" />
     <Compile Include="database\run_meta.py" />
@@ -46,12 +47,15 @@
     <Compile Include="gui\state.py" />
     <Compile Include="gui\__init__.py" />
     <Compile Include="gui_pyside\canvas_widget.py" />
+    <Compile Include="gui_pyside\log_files_window.py" />
     <Compile Include="gui_pyside\main_window.py" />
+    <Compile Include="gui_pyside\toolbar_builder.py" />
     <Compile Include="gui_pyside\__init__.py" />
     <Compile Include="ingest\service.py" />
     <Compile Include="ingest\__init__.py" />
     <Compile Include="main.py" />
     <Compile Include="output\__init__.py" />
+    <Compile Include="__init__.py" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="assets\fonts\" />
@@ -80,6 +84,7 @@
     <Content Include="input\dilation_baseline_test_case.json" />
     <Content Include="input\graph.json" />
     <Content Include="input\partial_interference_test.json" />
+    <Content Include="input\tooltip.json" />
     <Content Include="output\curvature_log.json" />
     <Content Include="output\curvature_map.json" />
     <Content Include="output\cwt_console_output.txt" />
