@@ -25,7 +25,9 @@ def _load_json_lines(path: str) -> Dict[str, Dict]:
 class CWTLogInterpreter:
     """Simple multilayer interpreter for CWT logs."""
 
-    def __init__(self, output_dir: str = None, graph_path: str = None):
+    def __init__(
+        self, output_dir: str | None = None, graph_path: str | None = None
+    ) -> None:
         base = os.path.join(os.path.dirname(__file__), "..")
         self.output_dir = output_dir or os.path.join(base, "output")
         self.graph_path = graph_path or os.path.join(base, "input", "graph.json")
