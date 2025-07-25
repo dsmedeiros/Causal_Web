@@ -312,7 +312,8 @@ class CanvasWidget(QGraphicsView):
 
     def __init__(
         self, parent: Optional[QGraphicsView] = None, *, editable: bool = True
-    ):
+    ) -> None:
+        """Initialize the canvas widget."""
         super().__init__(parent)
         self.editable = editable
         self.setScene(QGraphicsScene(self))

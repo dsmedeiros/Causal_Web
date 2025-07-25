@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QAction, QKeySequence, QShortcut
+from PySide6.QtGui import QAction, QKeySequence, QShortcut, QCloseEvent
 from PySide6.QtWidgets import (
     QApplication,
     QDockWidget,
@@ -41,7 +41,8 @@ from ..engine import tick_engine
 class GraphDockWidget(QDockWidget):
     """Dock widget that prompts about unsaved graph changes when closed."""
 
-    def closeEvent(self, event) -> None:  # type: ignore[override]
+    def closeEvent(self, event: QCloseEvent) -> None:  # type: ignore[override]
+        """Prompt to discard pending changes before closing."""
         from PySide6.QtWidgets import QMessageBox
 
         mw = self.parent()
@@ -87,7 +88,8 @@ class MainWindow(QMainWindow):
         Hosts the toolbar and editing panels for the graph editor.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialize the main application window."""
         super().__init__()
         self.setWindowTitle("CWT Simulation Dashboard")
         self.resize(800, 600)
@@ -311,7 +313,8 @@ class MainWindow(QMainWindow):
         self.pause_button.setText("Pause")
         self.stop_button.setEnabled(False)
 
-    def load_graph(self):
+    def load_graph(self) -> None:
+        """Load a graph from disk and display it."""
         path, _ = QFileDialog.getOpenFileName(
             self, "Load Graph", Config.input_dir, "JSON Files (*.json)"
         )
@@ -330,7 +333,8 @@ class MainWindow(QMainWindow):
         self.canvas.load_model(GraphModel.from_dict(graph.to_dict()))
         self.edit_action.setEnabled(True)
 
-    def save_graph(self):
+    def save_graph(self) -> None:
+        """Write the current graph to disk."""
         path, _ = QFileDialog.getSaveFileName(
             self, "Save Graph", Config.input_dir, "JSON Files (*.json)"
         )
@@ -344,7 +348,8 @@ class MainWindow(QMainWindow):
         set_active_file(path)
         clear_graph_dirty()
 
-    def new_graph(self):
+    def new_graph(self) -> None:
+        """Create a new blank graph."""
         model = new_graph(True)
         set_graph(model)
         set_active_file(None)
