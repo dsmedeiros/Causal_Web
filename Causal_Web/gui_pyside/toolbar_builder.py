@@ -31,6 +31,7 @@ from ..gui.state import (
     set_selected_observer,
     mark_graph_dirty,
 )
+from .panel_services import ConnectionPanelSetupService, ConnectionCommitService
 
 # ---------------------------------------------------------------------------
 # Load tooltip text for GUI fields
@@ -278,105 +279,7 @@ class ConnectionPanel(QDockWidget):
 
     def __init__(self, main_window, parent=None):
         super().__init__("Connection", parent)
-        self.main_window = main_window
-        self.dirty = False
-        self._force_close = False
-        self.source: Optional[str] = None
-        self.target: Optional[str] = None
-        self.current_index: Optional[int] = None
-        self.current_type: str = "edge"
-        widget = QWidget()
-        layout = QFormLayout(widget)
-        self.type_combo = QComboBox()
-        self.type_combo.addItems(["Edge", "Bridge"])
-        layout.addRow("Type", self.type_combo)
-
-        # edge widgets
-        self.source_edit = QComboBox()
-        self.target_edit = QComboBox()
-        self.atten_spin = QDoubleSpinBox()
-        self.atten_spin.setValue(1.0)
-        self.density_spin = QDoubleSpinBox()
-        self.density_spin.setValue(0.0)
-        self.delay_spin = QDoubleSpinBox()
-        self.delay_spin.setValue(1.0)
-        self.phase_shift_spin = QDoubleSpinBox()
-        self.phase_shift_spin.setDecimals(3)
-        self.weight_spin = QDoubleSpinBox()
-        self.weight_spin.setDecimals(3)
-
-        self.edge_widgets = [
-            (TooltipLabel("Source ID"), self.source_edit),
-            (TooltipLabel("Target ID"), self.target_edit),
-            (TooltipLabel("Attenuation", TOOLTIPS.get("attenuation")), self.atten_spin),
-            (TooltipLabel("Density", TOOLTIPS.get("density")), self.density_spin),
-            (TooltipLabel("Delay", TOOLTIPS.get("delay")), self.delay_spin),
-            (
-                TooltipLabel("Phase Shift", TOOLTIPS.get("phase_shift")),
-                self.phase_shift_spin,
-            ),
-            (TooltipLabel("Weight", TOOLTIPS.get("weight")), self.weight_spin),
-        ]
-        for lbl, w in self.edge_widgets:
-            layout.addRow(lbl, w)
-            if hasattr(w, "valueChanged"):
-                w.valueChanged.connect(self._mark_dirty)
-            elif hasattr(w, "currentTextChanged"):
-                w.currentTextChanged.connect(self._mark_dirty)
-
-        # bridge widgets
-        self.nodea_edit = QComboBox()
-        self.nodeb_edit = QComboBox()
-        self.bridge_type_combo = QComboBox()
-        self.bridge_type_combo.addItems(["Braided"])
-        self.phase_offset_spin = QDoubleSpinBox()
-        self.drift_tol_spin = QDoubleSpinBox()
-        self.decoherence_spin = QDoubleSpinBox()
-        self.initial_strength_spin = QDoubleSpinBox()
-        self.medium_type_edit = QLineEdit()
-        self.mutable_check = QCheckBox()
-
-        self.bridge_widgets = [
-            (TooltipLabel("Node A ID"), self.nodea_edit),
-            (TooltipLabel("Node B ID"), self.nodeb_edit),
-            (TooltipLabel("Bridge Type"), self.bridge_type_combo),
-            (
-                TooltipLabel("Phase Offset", TOOLTIPS.get("phase_offset")),
-                self.phase_offset_spin,
-            ),
-            (
-                TooltipLabel("Drift Tolerance", TOOLTIPS.get("drift_tolerance")),
-                self.drift_tol_spin,
-            ),
-            (
-                TooltipLabel("Decoherence Limit", TOOLTIPS.get("decoherence_limit")),
-                self.decoherence_spin,
-            ),
-            (
-                TooltipLabel("Initial Strength", TOOLTIPS.get("initial_strength")),
-                self.initial_strength_spin,
-            ),
-            (
-                TooltipLabel("Medium Type", TOOLTIPS.get("medium_type")),
-                self.medium_type_edit,
-            ),
-            (TooltipLabel("Mutable", TOOLTIPS.get("mutable")), self.mutable_check),
-        ]
-        for lbl, w in self.bridge_widgets:
-            layout.addRow(lbl, w)
-            if hasattr(w, "valueChanged"):
-                w.valueChanged.connect(self._mark_dirty)
-            elif hasattr(w, "currentTextChanged"):
-                w.currentTextChanged.connect(self._mark_dirty)
-
-        apply_btn = QPushButton("Apply")
-        apply_btn.clicked.connect(self.commit)
-        layout.addRow(apply_btn)
-        widget.installEventFilter(_FocusWatcher(self._minimize))
-        self.setWidget(widget)
-        self.type_combo.currentIndexChanged.connect(self._update_fields)
-        self.type_combo.currentIndexChanged.connect(self._mark_dirty)
-        self._update_fields()
+        ConnectionPanelSetupService(self, main_window).build()
 
     def _mark_dirty(self, *args) -> None:
         self.dirty = True
@@ -492,97 +395,7 @@ class ConnectionPanel(QDockWidget):
         if not self.source or not self.target:
             return
         model = get_graph()
-        conn_type = "edge" if self.type_combo.currentText() == "Edge" else "bridge"
-        try:
-            if self.current_index is None:
-                if conn_type == "edge":
-                    model.add_connection(
-                        self.source_edit.currentText(),
-                        self.target_edit.currentText(),
-                        delay=float(self.delay_spin.value()),
-                        attenuation=float(self.atten_spin.value()),
-                        density=float(self.density_spin.value()),
-                        phase_shift=float(self.phase_shift_spin.value()),
-                        weight=float(self.weight_spin.value()),
-                        connection_type="edge",
-                    )
-                else:
-                    model.add_connection(
-                        self.nodea_edit.currentText(),
-                        self.nodeb_edit.currentText(),
-                        connection_type="bridge",
-                        bridge_type=self.bridge_type_combo.currentText(),
-                        phase_offset=float(self.phase_offset_spin.value()),
-                        drift_tolerance=float(self.drift_tol_spin.value()),
-                        decoherence_limit=float(self.decoherence_spin.value()),
-                        initial_strength=float(self.initial_strength_spin.value()),
-                        medium_type=self.medium_type_edit.text(),
-                        mutable=self.mutable_check.isChecked(),
-                    )
-            else:
-                if conn_type != self.current_type:
-                    model.remove_connection(self.current_index, self.current_type)
-                    self.current_index = None
-                    if conn_type == "edge":
-                        model.add_connection(
-                            self.source_edit.currentText(),
-                            self.target_edit.currentText(),
-                            delay=float(self.delay_spin.value()),
-                            attenuation=float(self.atten_spin.value()),
-                            density=float(self.density_spin.value()),
-                            phase_shift=float(self.phase_shift_spin.value()),
-                            weight=float(self.weight_spin.value()),
-                            connection_type="edge",
-                        )
-                    else:
-                        model.add_connection(
-                            self.nodea_edit.currentText(),
-                            self.nodeb_edit.currentText(),
-                            connection_type="bridge",
-                            bridge_type=self.bridge_type_combo.currentText(),
-                            phase_offset=float(self.phase_offset_spin.value()),
-                            drift_tolerance=float(self.drift_tol_spin.value()),
-                            decoherence_limit=float(self.decoherence_spin.value()),
-                            initial_strength=float(self.initial_strength_spin.value()),
-                            medium_type=self.medium_type_edit.text(),
-                            mutable=self.mutable_check.isChecked(),
-                        )
-                else:
-                    if conn_type == "edge":
-                        model.update_connection(
-                            self.current_index,
-                            "edge",
-                            **{
-                                "from": self.source_edit.currentText(),
-                                "to": self.target_edit.currentText(),
-                                "delay": float(self.delay_spin.value()),
-                                "attenuation": float(self.atten_spin.value()),
-                                "density": float(self.density_spin.value()),
-                                "phase_shift": float(self.phase_shift_spin.value()),
-                                "weight": float(self.weight_spin.value()),
-                            },
-                        )
-                    else:
-                        model.update_connection(
-                            self.current_index,
-                            "bridge",
-                            nodes=[
-                                self.nodea_edit.currentText(),
-                                self.nodeb_edit.currentText(),
-                            ],
-                            bridge_type=self.bridge_type_combo.currentText(),
-                            phase_offset=float(self.phase_offset_spin.value()),
-                            drift_tolerance=float(self.drift_tol_spin.value()),
-                            decoherence_limit=float(self.decoherence_spin.value()),
-                            initial_strength=float(self.initial_strength_spin.value()),
-                            medium_type=self.medium_type_edit.text(),
-                            mutable=self.mutable_check.isChecked(),
-                        )
-        except Exception as exc:  # pragma: no cover - GUI feedback
-            print(f"Failed to add connection: {exc}")
-        else:
-            self.main_window.canvas.load_model(model)
-        mark_graph_dirty()
+        ConnectionCommitService(self, model).commit()
         self.hide()
         self.source = self.target = None
         self.current_index = None
