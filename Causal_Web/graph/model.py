@@ -3,20 +3,29 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Dict, List
 
+from .types import (
+    BridgeData,
+    EdgeData,
+    GraphDict,
+    MetaNodeData,
+    NodeData,
+    ObserverData,
+)
+
 
 @dataclass
 class GraphModel:
     """In-memory representation of a graph for the GUI."""
 
-    nodes: Dict[str, Dict[str, Any]] = field(default_factory=dict)
-    edges: List[Dict[str, Any]] = field(default_factory=list)
-    bridges: List[Dict[str, Any]] = field(default_factory=list)
+    nodes: Dict[str, NodeData] = field(default_factory=dict)
+    edges: List[EdgeData] = field(default_factory=list)
+    bridges: List[BridgeData] = field(default_factory=list)
     tick_sources: List[Dict[str, Any]] = field(default_factory=list)
-    observers: List[Dict[str, Any]] = field(default_factory=list)
-    meta_nodes: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    observers: List[ObserverData] = field(default_factory=list)
+    meta_nodes: Dict[str, MetaNodeData] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
-        """Serialize the model to a plain ``dict``."""
+    def to_dict(self) -> GraphDict:
+        """Serialize the model to a plain ``dict`` suitable for JSON."""
         return {
             "nodes": self.nodes,
             "edges": self.edges,
@@ -27,7 +36,7 @@ class GraphModel:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "GraphModel":
+    def from_dict(cls, data: GraphDict) -> "GraphModel":
         """Construct a :class:`GraphModel` from ``data``."""
         model = cls()
         nodes = data.get("nodes", {})
@@ -83,19 +92,20 @@ class GraphModel:
     ) -> None:
         """Insert a new node into the model."""
 
-        self.nodes[node_id] = {
-            "x": x,
-            "y": y,
-            "frequency": frequency,
-            "refractory_period": refractory_period,
-            "base_threshold": base_threshold,
-            "phase": 0.0,
-            "origin_type": "seed",
-            "generation_tick": 0,
-            "parent_ids": [],
-        }
+        self.nodes[node_id] = NodeData(
+            id=node_id,
+            x=x,
+            y=y,
+            frequency=frequency,
+            refractory_period=refractory_period,
+            base_threshold=base_threshold,
+            phase=0.0,
+            origin_type="seed",
+            generation_tick=0,
+            parent_ids=[],
+        )
 
-    def get_edges(self) -> List[Dict[str, Any]]:
+    def get_edges(self) -> List[EdgeData]:
         """Return a list of edges in the graph."""
         return self.edges
 
@@ -138,7 +148,7 @@ class GraphModel:
         if connection_type == "edge":
             if any(e["from"] == source and e["to"] == target for e in self.edges):
                 raise ValueError("duplicate edge")
-            record = {
+            record: EdgeData = {
                 "from": source,
                 "to": target,
                 "delay": delay,
@@ -149,7 +159,7 @@ class GraphModel:
         else:
             if any(set(b.get("nodes", [])) == {source, target} for b in self.bridges):
                 raise ValueError("duplicate bridge")
-            record = {
+            record: BridgeData = {
                 "nodes": [source, target],
                 "delay": delay,
                 "attenuation": attenuation,
@@ -195,7 +205,7 @@ class GraphModel:
     ) -> None:
         """Insert a new meta node definition."""
 
-        data: Dict[str, Any] = {
+        data: MetaNodeData = {
             "members": list(members or []),
             "constraints": constraints or {},
             "type": type,
@@ -221,7 +231,7 @@ class GraphModel:
     ) -> None:
         """Insert a new observer definition with optional position."""
 
-        data: Dict[str, Any] = {
+        data: ObserverData = {
             "id": obs_id,
             "monitors": monitors or [],
             "frequency": frequency,

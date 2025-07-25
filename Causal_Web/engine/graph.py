@@ -185,22 +185,27 @@ class CausalGraph:
             if not self.spatial_index[cell]:
                 del self.spatial_index[cell]
 
-    def get_node(self, node_id):
+    def get_node(self, node_id: str) -> Node | None:
+        """Return the :class:`Node` with ``node_id`` if present."""
         return self.nodes.get(node_id)
 
-    def get_edges_from(self, node_id):
+    def get_edges_from(self, node_id: str) -> list[Edge]:
+        """Return outbound edges from ``node_id``."""
         return self.edges_from.get(node_id, [])
 
-    def get_edges_to(self, node_id):
+    def get_edges_to(self, node_id: str) -> list[Edge]:
+        """Return inbound edges to ``node_id``."""
         return self.edges_to.get(node_id, [])
 
-    def get_upstream_nodes(self, node_id):
+    def get_upstream_nodes(self, node_id: str) -> list[str]:
+        """IDs of nodes with edges into ``node_id``."""
         return [e.source for e in self.get_edges_to(node_id)]
 
-    def get_downstream_nodes(self, node_id):
+    def get_downstream_nodes(self, node_id: str) -> list[str]:
+        """IDs of nodes reachable from ``node_id`` via edges."""
         return [e.target for e in self.get_edges_from(node_id)]
 
-    def nearby_nodes(self, node, radius=1):
+    def nearby_nodes(self, node: Node, radius: int = 1) -> list[Node]:
         """Return nodes in adjacent spatial partitions."""
         cells = [
             (node.grid_x + dx, node.grid_y + dy)
@@ -214,7 +219,7 @@ class CausalGraph:
         return [self.nodes[i] for i in ids if i in self.nodes]
 
     # --- Bridge-aware connectivity helpers ---
-    def get_bridge_neighbors(self, node_id, active_only=True):
+    def get_bridge_neighbors(self, node_id: str, active_only: bool = True) -> list[str]:
         """Return IDs of nodes connected via bridges."""
         neighbors = set()
         for b in self.bridges_by_node.get(node_id, set()):
@@ -226,7 +231,7 @@ class CausalGraph:
                 neighbors.add(b.node_a_id)
         return list(neighbors)
 
-    def get_connected_nodes(self, node_id):
+    def get_connected_nodes(self, node_id: str) -> list[str]:
         """All neighbors reachable via edges or active bridges."""
         connected = set(
             self.get_upstream_nodes(node_id) + self.get_downstream_nodes(node_id)
@@ -234,7 +239,7 @@ class CausalGraph:
         connected.update(self.get_bridge_neighbors(node_id))
         return list(connected)
 
-    def reset_ticks(self):
+    def reset_ticks(self) -> None:
         for node in self.nodes.values():
             for t in node.tick_history:
                 GLOBAL_TICK_POOL.release(t)
@@ -262,8 +267,9 @@ class CausalGraph:
         except Exception:
             pass
 
-    def inspect_superpositions(self):
-        inspection_log = []
+    def inspect_superpositions(self) -> list[dict]:
+        """Return details of multi-phase superpositions on each node."""
+        inspection_log: list[dict] = []
 
         for node in self.nodes.values():
             for tick, raw_phases in node.pending_superpositions.items():
@@ -310,7 +316,7 @@ class CausalGraph:
 
         return inspection_log
 
-    def _interference_type(self, phases):
+    def _interference_type(self, phases: list) -> str:
         """Classify the interference pattern of a set of phases.
 
         Parameters
@@ -400,7 +406,7 @@ class CausalGraph:
 
         return clusters
 
-    def hierarchical_clusters(self) -> dict:
+    def hierarchical_clusters(self) -> dict[int, list[list[str]]]:
         """Compute hierarchical clustering assignments.
 
         The first-level clusters must already be detected or they will be
@@ -444,7 +450,7 @@ class CausalGraph:
         self._cluster_cache.clear()
         return {0: [c for c in self._clusters_by_level(0)], 1: components}
 
-    def _clusters_by_level(self, level: int) -> list:
+    def _clusters_by_level(self, level: int) -> list[list[str]]:
         cached = self._cluster_cache.get(level)
         if cached and cached[0] == self._cluster_version:
             return cached[1]
@@ -460,7 +466,7 @@ class CausalGraph:
         self._cluster_cache[level] = (self._cluster_version, result)
         return result
 
-    def create_meta_nodes(self, clusters):
+    def create_meta_nodes(self, clusters: list[list[str]]) -> None:
         """Instantiate MetaNode objects for given clusters."""
         for cluster in clusters:
             meta = MetaNode(cluster, self, meta_type="Emergent")
@@ -471,18 +477,18 @@ class CausalGraph:
         for meta in list(self.meta_nodes.values()):
             meta.update_internal_state(tick_time)
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         """Return a JSON serializable representation of the graph."""
 
         from .serialization_service import GraphSerializationService
 
         return GraphSerializationService(self).as_dict()
 
-    def save_to_file(self, path):
+    def save_to_file(self, path: str) -> None:
         with open(path, "w") as f:
             json.dump(self.to_dict(), f, indent=2)
 
-    def load_from_file(self, path):
+    def load_from_file(self, path: str) -> None:
         """Populate the graph from a JSON file."""
 
         from .services import GraphLoadService

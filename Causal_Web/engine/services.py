@@ -15,6 +15,7 @@ from ..config import Config
 from .logger import log_json
 from .tick import GLOBAL_TICK_POOL
 from .node import Node, NodeType
+from .graph import CausalGraph
 from . import tick_engine as te
 
 
@@ -440,7 +441,7 @@ class NodeMetricsService:
 class GraphLoadService:
     """Populate a :class:`Graph` from a JSON file."""
 
-    def __init__(self, graph, path: str):
+    def __init__(self, graph: "CausalGraph", path: str) -> None:
         self.graph = graph
         self.path = path
 
@@ -470,7 +471,7 @@ class GraphLoadService:
         g.meta_nodes.clear()
 
     # ------------------------------------------------------------------
-    def _load_nodes(self, nodes_data):
+    def _load_nodes(self, nodes_data: list | dict) -> None:
         g = self.graph
         if isinstance(nodes_data, dict):
             nodes_iter = [dict(v, id=k) for k, v in nodes_data.items()]
@@ -500,7 +501,7 @@ class GraphLoadService:
                 g.nodes[node_id].goals = goals
 
     # ------------------------------------------------------------------
-    def _load_edges(self, edges_data):
+    def _load_edges(self, edges_data: list | dict) -> None:
         g = self.graph
         if isinstance(edges_data, dict):
             edges_iter = []
@@ -547,7 +548,7 @@ class GraphLoadService:
             )
 
     # ------------------------------------------------------------------
-    def _load_bridges(self, bridges):
+    def _load_bridges(self, bridges: list[dict]) -> None:
         g = self.graph
         for bridge in bridges:
             src = bridge.get("from")
@@ -569,7 +570,7 @@ class GraphLoadService:
             )
 
     # ------------------------------------------------------------------
-    def _load_meta_nodes(self, meta_nodes):
+    def _load_meta_nodes(self, meta_nodes: dict) -> None:
         g = self.graph
         from .meta_node import MetaNode
 
