@@ -6,7 +6,7 @@ from random import random
 from typing import Optional, TYPE_CHECKING
 import json
 from ..config import Config
-from .logger import log_json
+from .base import LoggingMixin
 
 if TYPE_CHECKING:
     from .node import Node
@@ -34,7 +34,7 @@ class BridgeEvent:
     coherence_at_event: Optional[float] = None
 
 
-class Bridge:
+class Bridge(LoggingMixin):
     def __init__(
         self,
         node_a_id: str,
@@ -110,7 +110,7 @@ class Bridge:
         }
         if conditions is not None:
             record["conditions"] = conditions
-        log_json(Config.output_path("bridge_dynamics_log.json"), record)
+        self._log("bridge_dynamics_log.json", record)
 
     def update_state(self, tick: int) -> None:
         """Update ``self.state`` based on fatigue and activation."""
@@ -156,7 +156,7 @@ class Bridge:
             target=self.node_b_id,
             coherence_at_event=value,
         )
-        log_json(Config.output_path("event_log.json"), event.__dict__)
+        self._log("event_log.json", event.__dict__)
 
     def _log_rupture(self, tick: int, reason: str, coherence: float | None) -> None:
         record = {
@@ -168,7 +168,7 @@ class Bridge:
             "coherence": round(coherence, 4) if coherence is not None else None,
             "fatigue": round(self.fatigue, 3),
         }
-        log_json(Config.output_path("bridge_rupture_log.json"), record)
+        self._log("bridge_rupture_log.json", record)
 
     def probabilistic_bridge_failure(
         self,
@@ -196,8 +196,8 @@ class Bridge:
         ):
             self.current_strength = max(0.0, self.current_strength - 0.1)
             duration = tick_time - self.last_active_tick
-            log_json(
-                Config.output_path("bridge_decay_log.json"),
+            self._log(
+                "bridge_decay_log.json",
                 {
                     "tick": tick_time,
                     "bridge": self.bridge_id,
@@ -231,8 +231,8 @@ class Bridge:
             self.active = True
             self.last_reform_tick = tick_time
             self.coherence_at_reform = coherence
-            log_json(
-                Config.output_path("bridge_reformation_log.json"),
+            self._log(
+                "bridge_reformation_log.json",
                 {
                     "tick": tick_time,
                     "bridge": self.bridge_id,

@@ -9,7 +9,7 @@ import numpy as np
 import json
 import uuid
 from ..config import Config
-from .logger import log_json
+from .base import LoggingMixin
 from .tick import Tick, GLOBAL_TICK_POOL
 from .node_services import NodeInitializationService
 
@@ -23,7 +23,7 @@ class NodeType(Enum):
     NULL = "null"
 
 
-class Node:
+class Node(LoggingMixin):
     """Represents a single oscillator in the causal graph."""
 
     def __init__(
@@ -315,7 +315,7 @@ class Node:
             self.is_classical = True
             if tick_time is not None:
                 record = {"tick": tick_time, "node": self.id, "event": "collapse_start"}
-                log_json(Config.output_path("collapse_front_log.json"), record)
+                self._log("collapse_front_log.json", record)
                 if graph is not None:
                     graph.emit_law_wave(self.id, tick_time)
             self.update_node_type()
@@ -335,7 +335,7 @@ class Node:
 
         if old != self.node_type:
             rec = {"node": self.id, "from": old.value, "to": self.node_type.value}
-            log_json(Config.output_path("node_state_map.json"), rec)
+            self._log("node_state_map.json", rec)
         self.prev_node_type = old
 
     def _log_tick_evaluation(
@@ -357,7 +357,7 @@ class Node:
         }
         if reason is not None:
             record["reason"] = reason
-        log_json(Config.output_path("tick_evaluation_log.json"), record)
+        self._log("tick_evaluation_log.json", record)
         if not fired:
             fail_rec = {
                 "tick": tick_time,
@@ -366,7 +366,7 @@ class Node:
                 "coherence": round(coherence, 4),
                 "reason": reason or ("refractory" if refractory else "below_threshold"),
             }
-            log_json(Config.output_path("propagation_failure_log.json"), fail_rec)
+            self._log("propagation_failure_log.json", fail_rec)
 
     def _log_tick_drop(self, tick_time: int, reason: str) -> None:
         record = {
@@ -376,7 +376,7 @@ class Node:
             "coherence": round(getattr(self, "coherence", 0.0), 4),
             "node_type": self.node_type.value,
         }
-        log_json(Config.output_path("tick_drop_log.json"), record)
+        self._log("tick_drop_log.json", record)
         fail_rec = {
             "tick": tick_time,
             "node": self.id,
@@ -384,7 +384,7 @@ class Node:
             "coherence": round(getattr(self, "coherence", 0.0), 4),
             "reason": reason,
         }
-        log_json(Config.output_path("propagation_failure_log.json"), fail_rec)
+        self._log("propagation_failure_log.json", fail_rec)
 
     def schedule_tick(
         self,
@@ -418,8 +418,8 @@ class Node:
             f"[{self.id}] Received tick at {tick_time} with phase {incoming_phase:.2f}"
         )
         if origin is not None:
-            log_json(
-                Config.output_path("tick_delivery_log.json"),
+            self._log(
+                "tick_delivery_log.json",
                 {
                     "source": origin,
                     "node_id": self.id,
@@ -485,7 +485,7 @@ class Node:
                 )
         if chain:
             record = {"tick": tick_time, "source": self.id, "chain": chain}
-            log_json(Config.output_path("collapse_front_log.json"), record)
+            self._log("collapse_front_log.json", record)
         return chain
 
     def _log_collapse_chain(self, tick_time: int, collapsed: list[dict]) -> None:
@@ -497,7 +497,7 @@ class Node:
             "collapsed_entity": self.id,
             "children_spawned": [c.get("node") for c in collapsed],
         }
-        log_json(Config.output_path("collapse_chain_log.json"), record)
+        self._log("collapse_chain_log.json", record)
 
     def maybe_tick(self, global_tick: int, graph: "CausalGraph") -> None:
         """Evaluate queued phases and emit a tick if conditions are met."""
