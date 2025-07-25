@@ -59,6 +59,7 @@
     <Compile Include="gui_pyside\canvas_widget.py" />
     <Compile Include="gui_pyside\log_files_window.py" />
     <Compile Include="gui_pyside\main_window.py" />
+    <Compile Include="gui_pyside\panel_mixins.py" />
     <Compile Include="gui_pyside\panel_services.py" />
     <Compile Include="gui_pyside\toolbar_builder.py" />
     <Compile Include="gui_pyside\toolbar_services.py" />
