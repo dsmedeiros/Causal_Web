@@ -592,16 +592,17 @@ narrative generation are now handled by `GraphSerializationService` and
 `NarrativeGeneratorService`. GUI setup moved to `ToolbarBuildService` and
 `NodePanelSetupService`. All
 services live in `Causal_Web/engine/services.py` or the GUI package.
+Recent refactors introduced `ConnectionDisplayService` for showing existing
+links, `GlobalDiagnosticsService` for exporting run metrics and
+`SIPRecombinationService` for recombination-based spawning.
 
 ### Identified long functions
 
 - `main.py:main` – 66 lines
 - `graph/model.py:add_connection` – 56 lines
-- `engine/tick_engine.py:_spawn_sip_recomb_child` – 51 lines
 - `engine/tick_engine.py:_process_csp_seeds` – 83 lines
 - `engine/services.py:NodeMetricsService.log_metrics` – 45 lines
 - `engine/tick_engine.py:simulation_loop` – 98 lines
-- `engine/tick_engine.py:export_global_diagnostics` – 55 lines
 - `engine/tick_engine.py:run` – 93 lines
 - `engine/causal_analyst.py:infer_causal_chains` – 53 lines
 - `engine/bridge.py:apply` – 125 lines
@@ -613,7 +614,6 @@ services live in `Causal_Web/engine/services.py` or the GUI package.
 - `engine/explanation_rules.py:_match_emergence_events` – 51 lines
 - `gui_pyside/toolbar_builder.py:__init__` – 57 lines
 - `gui_pyside/toolbar_builder.py:__init__` – 101 lines
-- `gui_pyside/toolbar_builder.py:show_connection` – 52 lines
 - `gui_pyside/toolbar_builder.py:commit` – 99 lines
 - `gui_pyside/toolbar_builder.py:__init__` – 68 lines
 

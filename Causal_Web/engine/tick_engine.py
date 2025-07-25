@@ -7,6 +7,7 @@ from .observer import Observer
 from .log_interpreter import run_interpreter
 from .tick_seeder import TickSeeder
 from .logger import log_json, logger, log_manager
+from .services import GlobalDiagnosticsService
 from .logging_models import (
     NodeEmergenceLog,
     NodeEmergencePayload,
@@ -379,55 +380,7 @@ def _spawn_sip_child(parent, tick: int):
 
 def _spawn_sip_recomb_child(parent_a, parent_b, tick: int):
     """Generate a new node via dual-parent recombination."""
-    if not Config.propagation_control.get("enable_sip", True):
-        return
-    global _spawn_counts
-    if any(
-        _spawn_counts.get(pid, 0) >= Config.max_children_per_node > 0
-        for pid in (parent_a.id, parent_b.id)
-    ):
-        if Config.is_log_enabled("propagation_failure_log.json"):
-            log_json(
-                Config.output_path("propagation_failure_log.json"),
-                {
-                    "tick": tick,
-                    "type": "SPAWN_LIMIT",
-                    "parent": f"{parent_a.id},{parent_b.id}",
-                    "origin_type": "SIP_RECOMB",
-                },
-            )
-        return
-    child_id = f"{parent_a.id}_{parent_b.id}_R{tick}"
-    if child_id in graph.nodes:
-        return
-    freq = (parent_a.frequency + parent_b.frequency) / 2 + np.random.normal(
-        0, Config.SIP_MUTATION_SCALE
-    )
-    x = (parent_a.x + parent_b.x) / 2 + np.random.uniform(-5, 5)
-    y = (parent_a.y + parent_b.y) / 2 + np.random.uniform(-5, 5)
-    graph.add_node(
-        child_id,
-        x=x,
-        y=y,
-        frequency=freq,
-        origin_type="SIP_RECOMB",
-        generation_tick=tick,
-        parent_ids=[parent_a.id, parent_b.id],
-    )
-    graph.add_edge(parent_a.id, child_id)
-    graph.add_edge(parent_b.id, child_id)
-    payload = NodeEmergencePayload(
-        node_id=child_id,
-        origin_type="SIP_RECOMB",
-        parents=[parent_a.id, parent_b.id],
-    )
-    entry = NodeEmergenceLog(tick=tick, payload=payload)
-    log_manager.log(Config.output_path("node_emergence_log.json"), entry)
-    global _sip_pending, _sip_success_count
-    _sip_pending.append((child_id, [parent_a.id, parent_b.id], tick, "SIP_RECOMB"))
-    _sip_success_count += 1
-    for pid in (parent_a.id, parent_b.id):
-        _spawn_counts[pid] = _spawn_counts.get(pid, 0) + 1
+    SIPRecombinationService(graph).spawn_child(parent_a, parent_b, tick)
 
 
 def _check_sip_failures(tick: int) -> None:
@@ -582,6 +535,85 @@ class CSPSeedService:
             }
         )
         self.failure += 1
+
+
+class SIPRecombinationService:
+    """Handle SIP recombination child spawning."""
+
+    def __init__(self, graph):
+        self.graph = graph
+
+    # ------------------------------------------------------------------
+    def spawn_child(self, parent_a, parent_b, tick: int) -> None:
+        if not Config.propagation_control.get("enable_sip", True):
+            return
+        if self._limit_reached(parent_a.id, parent_b.id):
+            self._log_limit(parent_a, parent_b, tick)
+            return
+        child_id = f"{parent_a.id}_{parent_b.id}_R{tick}"
+        if child_id in self.graph.nodes:
+            return
+        freq = (parent_a.frequency + parent_b.frequency) / 2 + np.random.normal(
+            0, Config.SIP_MUTATION_SCALE
+        )
+        x = (parent_a.x + parent_b.x) / 2 + np.random.uniform(-5, 5)
+        y = (parent_a.y + parent_b.y) / 2 + np.random.uniform(-5, 5)
+        self.graph.add_node(
+            child_id,
+            x=x,
+            y=y,
+            frequency=freq,
+            origin_type="SIP_RECOMB",
+            generation_tick=tick,
+            parent_ids=[parent_a.id, parent_b.id],
+        )
+        self.graph.add_edge(parent_a.id, child_id)
+        self.graph.add_edge(parent_b.id, child_id)
+        self._record_emergence(child_id, parent_a.id, parent_b.id, tick)
+        self._register_pending(child_id, parent_a.id, parent_b.id, tick)
+
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _limit_reached(a_id: str, b_id: str) -> bool:
+        global _spawn_counts
+        return any(
+            _spawn_counts.get(pid, 0) >= Config.max_children_per_node > 0
+            for pid in (a_id, b_id)
+        )
+
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _log_limit(parent_a, parent_b, tick: int) -> None:
+        if Config.is_log_enabled("propagation_failure_log.json"):
+            log_json(
+                Config.output_path("propagation_failure_log.json"),
+                {
+                    "tick": tick,
+                    "type": "SPAWN_LIMIT",
+                    "parent": f"{parent_a.id},{parent_b.id}",
+                    "origin_type": "SIP_RECOMB",
+                },
+            )
+
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _record_emergence(child_id: str, a_id: str, b_id: str, tick: int) -> None:
+        payload = NodeEmergencePayload(
+            node_id=child_id,
+            origin_type="SIP_RECOMB",
+            parents=[a_id, b_id],
+        )
+        entry = NodeEmergenceLog(tick=tick, payload=payload)
+        log_manager.log(Config.output_path("node_emergence_log.json"), entry)
+
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _register_pending(child_id: str, a_id: str, b_id: str, tick: int) -> None:
+        global _sip_pending, _sip_success_count, _spawn_counts
+        _sip_pending.append((child_id, [a_id, b_id], tick, "SIP_RECOMB"))
+        _sip_success_count += 1
+        for pid in (a_id, b_id):
+            _spawn_counts[pid] = _spawn_counts.get(pid, 0) + 1
 
 
 def _process_csp_seeds(tick: int) -> None:
@@ -845,59 +877,7 @@ def export_curvature_map():
 
 def export_global_diagnostics():
     """Simple run-level metrics for diagnostics."""
-    deco_lines = []
-    try:
-        with open(Config.output_path("decoherence_log.json")) as f:
-            for line in f:
-                deco_lines.append(json.loads(line))
-    except FileNotFoundError:
-        pass
-    if not deco_lines:
-        return
-    first = next(iter(deco_lines[0].values()))
-    last = next(iter(deco_lines[-1].values()))
-    entropy_first = sum(first.values())
-    entropy_last = sum(last.values())
-    entropy_delta = entropy_last - entropy_first
-
-    stability = []
-    for entry in deco_lines:
-        vals = list(entry.values())[0]
-        stability.append(sum(1 for v in vals.values() if v < 0.4) / len(vals))
-    coherence_stability_score = round(sum(stability) / len(stability), 3)
-
-    collapse_events = 0
-    try:
-        with open(Config.output_path("classicalization_map.json")) as f:
-            for line in f:
-                states = json.loads(line)
-                collapse_events += sum(
-                    1 for v in next(iter(states.values())).values() if v
-                )
-    except FileNotFoundError:
-        pass
-    resilience = 0
-    try:
-        with open(Config.output_path("law_wave_log.json")) as f:
-            resilience = sum(1 for _ in f)
-    except FileNotFoundError:
-        pass
-    collapse_resilience_index = round(resilience / (collapse_events or 1), 3)
-
-    adaptivity = 0
-    if graph.bridges:
-        active = sum(1 for b in graph.bridges if b.active)
-        adaptivity = active / len(graph.bridges)
-
-    diagnostics = {
-        "coherence_stability_score": coherence_stability_score,
-        "entropy_delta": round(entropy_delta, 3),
-        "collapse_resilience_index": collapse_resilience_index,
-        "network_adaptivity_index": round(adaptivity, 3),
-    }
-    with open(Config.output_path("global_diagnostics.json"), "w") as f:
-        json.dump(diagnostics, f, indent=2)
-    print("✅ Global diagnostics exported")
+    GlobalDiagnosticsService(graph).export()
 
 
 def export_regional_maps():
