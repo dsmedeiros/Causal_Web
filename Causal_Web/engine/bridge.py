@@ -33,18 +33,19 @@ class BridgeEvent:
 class Bridge:
     def __init__(
         self,
-        node_a_id,
-        node_b_id,
-        bridge_type="braided",
-        phase_offset=0.0,
-        drift_tolerance=None,
-        decoherence_limit=None,
-        initial_strength=1.0,
-        medium_type="standard",
-        mutable=True,
-        seeded=True,
-        formed_at_tick=0,
-    ):
+        node_a_id: str,
+        node_b_id: str,
+        bridge_type: str = "braided",
+        phase_offset: float = 0.0,
+        drift_tolerance: float | None = None,
+        decoherence_limit: float | None = None,
+        initial_strength: float = 1.0,
+        medium_type: str = "standard",
+        mutable: bool = True,
+        seeded: bool = True,
+        formed_at_tick: int = 0,
+    ) -> None:
+        """Create a new bridge between ``node_a_id`` and ``node_b_id``."""
         self.node_a_id = node_a_id
         self.node_b_id = node_b_id
         self.bridge_type = bridge_type  # "braided", "mirror", "unidirectional", etc.

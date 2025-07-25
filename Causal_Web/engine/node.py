@@ -255,7 +255,7 @@ class Node:
 
     def _resolve_interference(
         self, tick_time: int, raw_phases: list, vector_sum: complex
-    ):
+    ) -> tuple[bool, float | None]:
         """Attempt to merge near-aligned phases into a single tick."""
         tol = self._phase_drift_tolerance(tick_time)
         phases_only = [p[0] if isinstance(p, (tuple, list)) else p for p in raw_phases]
@@ -284,12 +284,28 @@ class Node:
 
     def update_classical_state(
         self,
-        decoherence_strength,
-        tick_time=None,
-        graph=None,
-        threshold=0.4,
-        streak_required=2,
-    ):
+        decoherence_strength: float,
+        tick_time: int | None = None,
+        graph: "CausalGraph" | None = None,
+        threshold: float = 0.4,
+        streak_required: int = 2,
+    ) -> None:
+        """Transition to the classical state when decoherence persists.
+
+        Parameters
+        ----------
+        decoherence_strength:
+            Current decoherence level for the node.
+        tick_time:
+            Global tick index for logging purposes.
+        graph:
+            The graph instance, used to emit law waves on collapse.
+        threshold:
+            Decoherence threshold that counts toward classicalization.
+        streak_required:
+            Number of consecutive ticks exceeding ``threshold`` required to
+            trigger classicalization.
+        """
         if decoherence_strength > threshold:
             self._decoherence_streak += 1
         else:
@@ -305,6 +321,7 @@ class Node:
             self.update_node_type()
 
     def update_node_type(self) -> None:
+        """Update :attr:`node_type` based on current state flags."""
         old = self.node_type
         if self.is_classical:
             self.node_type = NodeType.CLASSICALIZED
