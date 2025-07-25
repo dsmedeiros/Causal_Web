@@ -585,7 +585,8 @@ pytest
 Large functions have been decomposed into reusable services. The `NodeTickService`
 encapsulates the tick emission lifecycle while `GraphLoadService` handles JSON
 graph loading. Metric collection is delegated to `NodeMetricsService` which
-replaced the bulky `log_metrics_per_tick` function. All services live in
+replaced the bulky `log_metrics_per_tick` function. The `NodeTickDecisionService`
+isolates the tick decision logic from `Node.should_tick`. All services live in
 `Causal_Web/engine/services.py`.
 
 ### Identified long functions

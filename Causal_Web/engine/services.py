@@ -6,6 +6,8 @@ import json
 import uuid
 from dataclasses import dataclass, field
 from concurrent.futures import ThreadPoolExecutor
+import math
+import cmath
 import numpy as np
 
 from ..config import Config
@@ -489,3 +491,118 @@ class GraphLoadService:
                 y=y,
                 id=mid,
             )
+
+
+@dataclass
+class NodeTickDecisionService:
+    """Evaluate whether a node should emit a tick at a given time."""
+
+    node: Node
+    tick_time: int
+
+    # ------------------------------------------------------------------
+    def decide(self) -> tuple[bool, float | None, str]:
+        in_refractory = self._is_in_refractory()
+        (
+            raw_items,
+            vector_sum,
+            magnitude,
+            coherence,
+            tick_energy,
+        ) = self._phase_metrics()
+
+        if tick_energy < getattr(Config, "tick_threshold", 1):
+            self._log_eval(coherence, False, False, "below_count")
+            log_json(
+                Config.output_path("should_tick_log.json"),
+                {"tick": self.tick_time, "node": self.node.id, "reason": "below_count"},
+            )
+            return False, None, "count_threshold"
+
+        if in_refractory:
+            self._log_eval(coherence, True, False, "refractory")
+            print(
+                f"[{self.node.id}] Suppressed by refractory period at {self.tick_time}"
+            )
+            return False, None, "refractory"
+
+        if coherence >= self.node.current_threshold:
+            resultant_phase = cmath.phase(vector_sum)
+            self._log_eval(coherence, False, True)
+            log_json(
+                Config.output_path("should_tick_log.json"),
+                {"tick": self.tick_time, "node": self.node.id, "reason": "threshold"},
+            )
+            return True, resultant_phase, "threshold"
+
+        merged, phase = self.node._resolve_interference(
+            self.tick_time, raw_items, vector_sum
+        )
+        if merged:
+            self._log_eval(coherence, False, True, "merged")
+            log_json(
+                Config.output_path("should_tick_log.json"),
+                {"tick": self.tick_time, "node": self.node.id, "reason": "merged"},
+            )
+            return True, phase, "merged"
+
+        self._log_eval(coherence, False, False, "below_threshold")
+        log_json(
+            Config.output_path("magnitude_failure_log.json"),
+            {
+                "tick": self.tick_time,
+                "node": self.node.id,
+                "magnitude": round(magnitude, 4),
+                "threshold": round(self.node.current_threshold, 4),
+                "phases": len(raw_items),
+            },
+        )
+        return False, None, "below_threshold"
+
+    # ------------------------------------------------------------------
+    def _is_in_refractory(self) -> bool:
+        if self.node.current_tick > 0 and self.node.last_tick_time is not None:
+            return (
+                self.tick_time - self.node.last_tick_time < self.node.refractory_period
+            )
+        return False
+
+    # ------------------------------------------------------------------
+    def _phase_metrics(self):
+        raw_items = self.node.incoming_phase_queue[self.tick_time]
+        complex_phases = []
+        weights = []
+        for item in raw_items:
+            if isinstance(item, (tuple, list)) and len(item) == 2:
+                ph, created = item
+                decay = getattr(Config, "tick_decay_factor", 1.0) ** (
+                    max(0, Config.current_tick - created)
+                )
+            else:
+                ph = item
+                decay = 1.0
+            complex_phases.append(decay * cmath.rect(1.0, ph % (2 * math.pi)))
+            weights.append(decay)
+        vector_sum = sum(complex_phases)
+        magnitude = abs(vector_sum)
+        total_weight = sum(weights) if weights else 0.0
+        coherence = magnitude / total_weight if total_weight else 1.0
+        tick_energy = total_weight
+        return raw_items, vector_sum, magnitude, coherence, tick_energy
+
+    # ------------------------------------------------------------------
+    def _log_eval(
+        self,
+        coherence: float,
+        refractory: bool,
+        fired: bool,
+        reason: str | None = None,
+    ) -> None:
+        self.node._log_tick_evaluation(
+            self.tick_time,
+            coherence,
+            self.node.current_threshold,
+            refractory,
+            fired,
+            reason,
+        )
