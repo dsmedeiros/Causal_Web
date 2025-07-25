@@ -34,9 +34,7 @@ class NodeTickService:
         self._register_tick()
         self._propagate_edges()
         if self.origin == "self":
-            collapsed = self.node.propagate_collapse(
-                self.tick_time, self.graph
-            )
+            collapsed = self.node.propagate_collapse(self.tick_time, self.graph)
             if collapsed:
                 self.node._log_collapse_chain(self.tick_time, collapsed)
 
@@ -73,10 +71,7 @@ class NodeTickService:
         if not te.register_firing(self.node):
             self.node._log_tick_drop(self.tick_time, "bandwidth_limit")
             return False
-        if (
-            self.origin == "self"
-            and self.tick_time in self.node.emitted_tick_times
-        ):
+        if self.origin == "self" and self.tick_time in self.node.emitted_tick_times:
             self.node._log_tick_drop(self.tick_time, "duplicate")
             return False
         return True
@@ -155,8 +150,7 @@ class EdgePropagationService:
     # ------------------------------------------------------------------
     def _log_recursion(self) -> None:
         if self.origin != "self" and any(
-            e.target == self.origin
-            for e in self.graph.get_edges_from(self.node.id)
+            e.target == self.origin for e in self.graph.get_edges_from(self.node.id)
         ):
             log_json(
                 Config.output_path("refraction_log.json"),
@@ -282,19 +276,13 @@ class NodeMetricsResultService:
         delta = coh - prev
         self.last_coherence[node_id] = coh
         node.coherence_velocity = delta
-        node.update_classical_state(
-            deco, tick_time=self.tick, graph=self.graph
-        )
+        node.update_classical_state(deco, tick_time=self.tick, graph=self.graph)
         self._update_stability(node_id, node)
-        self._record_logs(
-            node_id, deco, coh, inter, ntype, credit, debt, delta, node
-        )
+        self._record_logs(node_id, deco, coh, inter, ntype, credit, debt, delta, node)
 
     # ------------------------------------------------------------------
     def _update_stability(self, node_id: str, node) -> None:
-        record = te._law_wave_stability.setdefault(
-            node_id, {"freqs": [], "stable": 0}
-        )
+        record = te._law_wave_stability.setdefault(node_id, {"freqs": [], "stable": 0})
         record["freqs"].append(node.law_wave_frequency)
         if len(record["freqs"]) > 5:
             record["freqs"].pop(0)
@@ -334,9 +322,7 @@ class NodeMetricsResultService:
     ) -> None:
         self.logs["decoherence_log"][node_id] = round(deco, 4)
         self.logs["coherence_log"][node_id] = round(coh, 4)
-        self.logs["classical_state"][node_id] = getattr(
-            node, "is_classical", False
-        )
+        self.logs["classical_state"][node_id] = getattr(node, "is_classical", False)
         self.logs["coherence_velocity"][node_id] = round(delta, 5)
         self.logs["law_wave_log"][node_id] = round(node.law_wave_frequency, 4)
         self.logs["interference_log"][node_id] = inter
@@ -367,9 +353,7 @@ class NodeMetricsService:
             max_workers=getattr(Config, "thread_count", None)
         ) as ex:
             return list(
-                ex.map(
-                    lambda n: self._compute(n, tick), self.graph.nodes.values()
-                )
+                ex.map(lambda n: self._compute(n, tick), self.graph.nodes.values())
             )
 
     # ------------------------------------------------------------------
@@ -404,9 +388,7 @@ class NodeMetricsService:
         clusters = self.graph.hierarchical_clusters()
         self.graph.create_meta_nodes(clusters.get(0, []))
         if tick % getattr(Config, "log_interval", 1) == 0:
-            log_json(
-                Config.output_path("cluster_log.json"), {str(tick): clusters}
-            )
+            log_json(Config.output_path("cluster_log.json"), {str(tick): clusters})
 
     # ------------------------------------------------------------------
     def _write_logs(self, tick: int, logs: dict) -> None:
@@ -652,8 +634,7 @@ class NodeTickDecisionService:
     def _is_in_refractory(self) -> bool:
         if self.node.current_tick > 0 and self.node.last_tick_time is not None:
             return (
-                self.tick_time - self.node.last_tick_time
-                < self.node.refractory_period
+                self.tick_time - self.node.last_tick_time < self.node.refractory_period
             )
         return False
 
@@ -713,9 +694,7 @@ class NodeTickDecisionService:
     # ------------------------------------------------------------------
     def _during_refractory(self, coherence: float) -> tuple[bool, None, str]:
         self._log_eval(coherence, True, False, "refractory")
-        print(
-            f"[{self.node.id}] Suppressed by refractory period at {self.tick_time}"
-        )
+        print(f"[{self.node.id}] Suppressed by refractory period at {self.tick_time}")
         return False, None, "refractory"
 
     # ------------------------------------------------------------------
@@ -735,9 +714,7 @@ class NodeTickDecisionService:
         return True, resultant_phase, "threshold"
 
     # ------------------------------------------------------------------
-    def _fire_by_merge(
-        self, coherence: float, phase: float
-    ) -> tuple[bool, float, str]:
+    def _fire_by_merge(self, coherence: float, phase: float) -> tuple[bool, float, str]:
         self._log_eval(coherence, False, True, "merged")
         log_json(
             Config.output_path("should_tick_log.json"),
@@ -794,12 +771,8 @@ class BridgeApplyService:
         self.node_b = self.graph.get_node(self.bridge.node_b_id)
         self.phase_a = self.node_a.get_phase_at(self.tick_time)
         self.phase_b = self.node_b.get_phase_at(self.tick_time)
-        self.a_collapsed = (
-            self.node_a.collapse_origin.get(self.tick_time) == "self"
-        )
-        self.b_collapsed = (
-            self.node_b.collapse_origin.get(self.tick_time) == "self"
-        )
+        self.a_collapsed = self.node_a.collapse_origin.get(self.tick_time) == "self"
+        self.b_collapsed = self.node_b.collapse_origin.get(self.tick_time) == "self"
 
     # ------------------------------------------------------------------
     def _validate_collapse(self) -> bool:
@@ -813,17 +786,14 @@ class BridgeApplyService:
             and self.phase_b is not None
         ):
             drift = abs(
-                (self.phase_a - self.phase_b + math.pi) % (2 * math.pi)
-                - math.pi
+                (self.phase_a - self.phase_b + math.pi) % (2 * math.pi) - math.pi
             )
             if drift > self.bridge.drift_tolerance:
                 print(
                     f"[BRIDGE] Drift too high at tick {self.tick_time}: {drift:.2f} > {self.bridge.drift_tolerance}"
                 )
                 self.bridge._log_event(self.tick_time, "bridge_drift", drift)
-                self.bridge.trust_score = max(
-                    0.0, self.bridge.trust_score - 0.05
-                )
+                self.bridge.trust_score = max(0.0, self.bridge.trust_score - 0.05)
                 self.bridge.reinforcement_streak = 0
                 return True
         return False
@@ -833,9 +803,7 @@ class BridgeApplyService:
         deco_a = self.node_a.compute_decoherence_field(self.tick_time)
         deco_b = self.node_b.compute_decoherence_field(self.tick_time)
         avg = (deco_a + deco_b) / 2
-        debt = (
-            self.node_a.decoherence_debt + self.node_b.decoherence_debt
-        ) / 6.0
+        debt = (self.node_a.decoherence_debt + self.node_b.decoherence_debt) / 6.0
         rupture_chance = avg + debt
         self.bridge.decoherence_exposure.append(avg)
         if len(self.bridge.decoherence_exposure) > 20:
@@ -843,17 +811,12 @@ class BridgeApplyService:
         if self.bridge.probabilistic_bridge_failure(rupture_chance):
             self._record_rupture(avg, "decoherence")
             return True
-        if (
-            self.bridge.decoherence_limit
-            and self.bridge.last_activation is not None
-        ):
+        if self.bridge.decoherence_limit and self.bridge.last_activation is not None:
             if (
                 self.tick_time - self.bridge.last_activation
                 > self.bridge.decoherence_limit
             ):
-                print(
-                    f"[BRIDGE] Decohered at tick {self.tick_time}, disabling bridge."
-                )
+                print(f"[BRIDGE] Decohered at tick {self.tick_time}, disabling bridge.")
                 self.bridge.active = False
                 self._record_rupture(avg, "decoherence_limit")
                 return True
@@ -862,9 +825,7 @@ class BridgeApplyService:
     # ------------------------------------------------------------------
     def _record_rupture(self, avg_decoherence: float, reason: str) -> None:
         self.bridge.last_rupture_tick = self.tick_time
-        self.bridge._log_event(
-            self.tick_time, "bridge_ruptured", avg_decoherence
-        )
+        self.bridge._log_event(self.tick_time, "bridge_ruptured", avg_decoherence)
         avg_coh = (
             self.node_a.compute_coherence_level(self.tick_time)
             + self.node_b.compute_coherence_level(self.tick_time)
@@ -924,8 +885,7 @@ class BridgeApplyService:
             self.bridge.tick_load += 1
             if self.phase_a is not None and self.phase_b is not None:
                 self.bridge.phase_drift += abs(
-                    (self.phase_a - self.phase_b + math.pi) % (2 * math.pi)
-                    - math.pi
+                    (self.phase_a - self.phase_b + math.pi) % (2 * math.pi) - math.pi
                 )
             self.bridge.coherence_flux += (
                 self.node_a.coherence + self.node_b.coherence
@@ -935,3 +895,81 @@ class BridgeApplyService:
             self.bridge.last_active_tick = self.tick_time
         self.bridge.reinforcement_streak += 1
         self.bridge.trust_score = min(1.0, self.bridge.trust_score + 0.01)
+
+
+@dataclass
+class GlobalDiagnosticsService:
+    """Compute run-level diagnostic metrics."""
+
+    graph: Any
+
+    def export(self) -> None:
+        deco_lines = self._load_log("decoherence_log.json")
+        if not deco_lines:
+            return
+        entropy_delta, stability = self._entropy_metrics(deco_lines)
+        resilience = self._resilience_index()
+        adaptivity = self._adaptivity_index()
+        diagnostics = {
+            "coherence_stability_score": stability,
+            "entropy_delta": round(entropy_delta, 3),
+            "collapse_resilience_index": resilience,
+            "network_adaptivity_index": round(adaptivity, 3),
+        }
+        with open(Config.output_path("global_diagnostics.json"), "w") as f:
+            json.dump(diagnostics, f, indent=2)
+        print("✅ Global diagnostics exported")
+
+    # ------------------------------------------------------------------
+    def _load_log(self, name: str) -> list:
+        lines = []
+        try:
+            with open(Config.output_path(name)) as f:
+                for line in f:
+                    lines.append(json.loads(line))
+        except FileNotFoundError:
+            pass
+        return lines
+
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _entropy_metrics(entries: list) -> tuple[float, float]:
+        first = next(iter(entries[0].values()))
+        last = next(iter(entries[-1].values()))
+        entropy_first = sum(first.values())
+        entropy_last = sum(last.values())
+        entropy_delta = entropy_last - entropy_first
+        stability = []
+        for entry in entries:
+            vals = list(entry.values())[0]
+            stability.append(sum(1 for v in vals.values() if v < 0.4) / len(vals))
+        coherence_stability_score = round(sum(stability) / len(stability), 3)
+        return entropy_delta, coherence_stability_score
+
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _resilience_index() -> float:
+        collapse_events = 0
+        try:
+            with open(Config.output_path("classicalization_map.json")) as f:
+                for line in f:
+                    states = json.loads(line)
+                    collapse_events += sum(
+                        1 for v in next(iter(states.values())).values() if v
+                    )
+        except FileNotFoundError:
+            pass
+        resilience = 0
+        try:
+            with open(Config.output_path("law_wave_log.json")) as f:
+                resilience = sum(1 for _ in f)
+        except FileNotFoundError:
+            pass
+        return round(resilience / (collapse_events or 1), 3)
+
+    # ------------------------------------------------------------------
+    def _adaptivity_index(self) -> float:
+        if not self.graph.bridges:
+            return 0.0
+        active = sum(1 for b in self.graph.bridges if b.active)
+        return active / len(self.graph.bridges)

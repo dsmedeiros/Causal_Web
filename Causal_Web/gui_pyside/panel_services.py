@@ -24,6 +24,7 @@ from .toolbar_builder import (
     _FocusWatcher,
     mark_graph_dirty,
 )
+from ..gui.state import get_graph
 
 
 @dataclass
@@ -202,21 +203,15 @@ class ConnectionPanelSetupService:
                 p.phase_offset_spin,
             ),
             (
-                TooltipLabel(
-                    "Drift Tolerance", TOOLTIPS.get("drift_tolerance")
-                ),
+                TooltipLabel("Drift Tolerance", TOOLTIPS.get("drift_tolerance")),
                 p.drift_tol_spin,
             ),
             (
-                TooltipLabel(
-                    "Decoherence Limit", TOOLTIPS.get("decoherence_limit")
-                ),
+                TooltipLabel("Decoherence Limit", TOOLTIPS.get("decoherence_limit")),
                 p.decoherence_spin,
             ),
             (
-                TooltipLabel(
-                    "Initial Strength", TOOLTIPS.get("initial_strength")
-                ),
+                TooltipLabel("Initial Strength", TOOLTIPS.get("initial_strength")),
                 p.initial_strength_spin,
             ),
             (
@@ -279,9 +274,7 @@ class MetaNodePanelSetupService:
 
         p.member_list = QListWidget()
         p.member_list.setSelectionMode(QListWidget.MultiSelection)
-        layout.addRow(
-            TooltipLabel("Members", TOOLTIPS.get("members")), p.member_list
-        )
+        layout.addRow(TooltipLabel("Members", TOOLTIPS.get("members")), p.member_list)
         p.member_list.itemSelectionChanged.connect(p._mark_dirty)
 
     # ------------------------------------------------------------------
@@ -289,9 +282,7 @@ class MetaNodePanelSetupService:
         p = self.panel
         p.phase_tol = QDoubleSpinBox()
         p.phase_tol.setDecimals(3)
-        layout.addRow(
-            TooltipLabel("Tolerance", TOOLTIPS.get("tolerance")), p.phase_tol
-        )
+        layout.addRow(TooltipLabel("Tolerance", TOOLTIPS.get("tolerance")), p.phase_tol)
         p.phase_tol.valueChanged.connect(p._mark_dirty)
 
         p.min_coherence = QDoubleSpinBox()
@@ -304,9 +295,7 @@ class MetaNodePanelSetupService:
 
         p.shared_tick = QCheckBox()
         layout.addRow(
-            TooltipLabel(
-                "Shared Tick Input", TOOLTIPS.get("shared_tick_input")
-            ),
+            TooltipLabel("Shared Tick Input", TOOLTIPS.get("shared_tick_input")),
             p.shared_tick,
         )
         p.shared_tick.toggled.connect(p._mark_dirty)
@@ -319,9 +308,7 @@ class MetaNodePanelSetupService:
         p.sync_topology.toggled.connect(p._mark_dirty)
 
         p.role_lock = QLineEdit()
-        layout.addRow(
-            TooltipLabel("Role Lock", TOOLTIPS.get("role_lock")), p.role_lock
-        )
+        layout.addRow(TooltipLabel("Role Lock", TOOLTIPS.get("role_lock")), p.role_lock)
         p.role_lock.textChanged.connect(p._mark_dirty)
 
         p.type_label = QLabel("Configured")
@@ -352,9 +339,7 @@ class ConnectionCommitService:
 
     def commit(self) -> Any:
         conn_type = (
-            "edge"
-            if self.panel.type_combo.currentText() == "Edge"
-            else "bridge"
+            "edge" if self.panel.type_combo.currentText() == "Edge" else "bridge"
         )
         try:
             if self.panel.current_index is None:
@@ -392,18 +377,14 @@ class ConnectionCommitService:
                 phase_offset=float(self.panel.phase_offset_spin.value()),
                 drift_tolerance=float(self.panel.drift_tol_spin.value()),
                 decoherence_limit=float(self.panel.decoherence_spin.value()),
-                initial_strength=float(
-                    self.panel.initial_strength_spin.value()
-                ),
+                initial_strength=float(self.panel.initial_strength_spin.value()),
                 medium_type=self.panel.medium_type_edit.text(),
                 mutable=self.panel.mutable_check.isChecked(),
             )
 
     # ------------------------------------------------------------------
     def _replace(self, conn_type: str) -> None:
-        self.model.remove_connection(
-            self.panel.current_index, self.panel.current_type
-        )
+        self.model.remove_connection(self.panel.current_index, self.panel.current_type)
         self.panel.current_index = None
         self._add(conn_type)
 
@@ -435,9 +416,80 @@ class ConnectionCommitService:
                 phase_offset=float(self.panel.phase_offset_spin.value()),
                 drift_tolerance=float(self.panel.drift_tol_spin.value()),
                 decoherence_limit=float(self.panel.decoherence_spin.value()),
-                initial_strength=float(
-                    self.panel.initial_strength_spin.value()
-                ),
+                initial_strength=float(self.panel.initial_strength_spin.value()),
                 medium_type=self.panel.medium_type_edit.text(),
                 mutable=self.panel.mutable_check.isChecked(),
             )
+
+
+@dataclass
+class ConnectionDisplayService:
+    """Populate the connection panel with existing data."""
+
+    panel: Any
+    conn_type: str
+    index: int
+
+    def display(self) -> None:
+        self._maybe_handle_dirty()
+        data = self._fetch()
+        self._fill_fields(data)
+        self._finish()
+
+    # ------------------------------------------------------------------
+    def _maybe_handle_dirty(self) -> None:
+        if self.panel.current_index is not None and self.panel.dirty:
+            from PySide6.QtWidgets import QMessageBox
+
+            resp = QMessageBox.question(
+                self.panel,
+                "Unapplied Connection Changes",
+                "Apply changes to this connection before switching?",
+            )
+            if resp == QMessageBox.Yes:
+                self.panel.commit()
+            else:
+                self.panel.dirty = False
+
+    # ------------------------------------------------------------------
+    def _fetch(self):
+        model = get_graph()
+        if self.conn_type == "edge":
+            return model.edges[self.index]
+        return model.bridges[self.index]
+
+    # ------------------------------------------------------------------
+    def _fill_fields(self, data) -> None:
+        p = self.panel
+        p.current_index = self.index
+        p.current_type = self.conn_type
+        p._populate_node_lists()
+        p.type_combo.setCurrentIndex(0 if self.conn_type == "edge" else 1)
+        if self.conn_type == "edge":
+            p.source = data.get("from")
+            p.target = data.get("to")
+            p.source_edit.setCurrentText(p.source or "")
+            p.target_edit.setCurrentText(p.target or "")
+            p.atten_spin.setValue(float(data.get("attenuation", 1.0)))
+            p.density_spin.setValue(float(data.get("density", 0.0)))
+            p.delay_spin.setValue(float(data.get("delay", 1.0)))
+            p.phase_shift_spin.setValue(float(data.get("phase_shift", 0.0)))
+            p.weight_spin.setValue(float(data.get("weight", 0.0)))
+        else:
+            nodes = data.get("nodes", ["", ""])
+            p.source, p.target = nodes[0], nodes[1]
+            p.nodea_edit.setCurrentText(p.source)
+            p.nodeb_edit.setCurrentText(p.target)
+            p.bridge_type_combo.setCurrentText(data.get("bridge_type", "Braided"))
+            p.phase_offset_spin.setValue(float(data.get("phase_offset", 0.0)))
+            p.drift_tol_spin.setValue(float(data.get("drift_tolerance", 0.0)))
+            p.decoherence_spin.setValue(float(data.get("decoherence_limit", 0.0)))
+            p.initial_strength_spin.setValue(float(data.get("initial_strength", 0.0)))
+            p.medium_type_edit.setText(data.get("medium_type", ""))
+            p.mutable_check.setChecked(bool(data.get("mutable", False)))
+
+    # ------------------------------------------------------------------
+    def _finish(self) -> None:
+        self.panel._update_fields()
+        self.panel.dirty = False
+        self.panel.show()

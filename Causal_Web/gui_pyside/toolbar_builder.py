@@ -35,6 +35,7 @@ from .panel_services import (
     ConnectionPanelSetupService,
     ConnectionCommitService,
     NodePanelSetupService,
+    ConnectionDisplayService,
 )
 
 # ---------------------------------------------------------------------------
@@ -155,12 +156,8 @@ class NodePanel(QDockWidget):
             self.ts_fields["tick_interval"][1].setValue(
                 float(ts_rec.get("tick_interval", 1.0))
             )
-            self.ts_fields["tick_phase"][1].setValue(
-                float(ts_rec.get("phase", 0.0))
-            )
-            self.ts_fields["end_tick"][1].setValue(
-                float(ts_rec.get("end_tick", 0.0))
-            )
+            self.ts_fields["tick_phase"][1].setValue(float(ts_rec.get("phase", 0.0)))
+            self.ts_fields["end_tick"][1].setValue(float(ts_rec.get("end_tick", 0.0)))
         else:
             for _, spin in self.ts_fields.values():
                 spin.setValue(0.0)
@@ -179,19 +176,13 @@ class NodePanel(QDockWidget):
 
         # update tick source record
         ts_rec = next(
-            (
-                s
-                for s in model.tick_sources
-                if s.get("node_id") == self.current
-            ),
+            (s for s in model.tick_sources if s.get("node_id") == self.current),
             None,
         )
         if self.tick_source_cb.isChecked():
             data = {
                 "node_id": self.current,
-                "tick_interval": float(
-                    self.ts_fields["tick_interval"][1].value()
-                ),
+                "tick_interval": float(self.ts_fields["tick_interval"][1].value()),
                 "phase": float(self.ts_fields["tick_phase"][1].value()),
                 "end_tick": float(self.ts_fields["end_tick"][1].value()),
             }
@@ -306,62 +297,7 @@ class ConnectionPanel(QDockWidget):
             self.show()
             return
 
-        if self.current_index is not None and self.dirty:
-            from PySide6.QtWidgets import QMessageBox
-
-            resp = QMessageBox.question(
-                self,
-                "Unapplied Connection Changes",
-                "Apply changes to this connection before switching?",
-            )
-            if resp == QMessageBox.Yes:
-                self.commit()
-            else:
-                self.dirty = False
-
-        model = get_graph()
-        data = (
-            model.edges[index] if conn_type == "edge" else model.bridges[index]
-        )
-        self.current_index = index
-        self.current_type = conn_type
-        self._populate_node_lists()
-        self.type_combo.setCurrentIndex(0 if conn_type == "edge" else 1)
-        if conn_type == "edge":
-            self.source = data.get("from")
-            self.target = data.get("to")
-            self.source_edit.setCurrentText(self.source or "")
-            self.target_edit.setCurrentText(self.target or "")
-            self.atten_spin.setValue(float(data.get("attenuation", 1.0)))
-            self.density_spin.setValue(float(data.get("density", 0.0)))
-            self.delay_spin.setValue(float(data.get("delay", 1.0)))
-            self.phase_shift_spin.setValue(float(data.get("phase_shift", 0.0)))
-            self.weight_spin.setValue(float(data.get("weight", 0.0)))
-        else:
-            nodes = data.get("nodes", ["", ""])
-            self.source, self.target = nodes[0], nodes[1]
-            self.nodea_edit.setCurrentText(self.source)
-            self.nodeb_edit.setCurrentText(self.target)
-            self.bridge_type_combo.setCurrentText(
-                data.get("bridge_type", "Braided")
-            )
-            self.phase_offset_spin.setValue(
-                float(data.get("phase_offset", 0.0))
-            )
-            self.drift_tol_spin.setValue(
-                float(data.get("drift_tolerance", 0.0))
-            )
-            self.decoherence_spin.setValue(
-                float(data.get("decoherence_limit", 0.0))
-            )
-            self.initial_strength_spin.setValue(
-                float(data.get("initial_strength", 0.0))
-            )
-            self.medium_type_edit.setText(data.get("medium_type", ""))
-            self.mutable_check.setChecked(bool(data.get("mutable", False)))
-        self._update_fields()
-        self.dirty = False
-        self.show()
+        ConnectionDisplayService(self, conn_type, index).display()
 
     def commit(self) -> None:
         if not self.source or not self.target:
@@ -419,18 +355,14 @@ class ObserverPanel(QDockWidget):
             monitor_layout.addWidget(cb)
             self.monitor_checks[ev] = cb
             cb.toggled.connect(self._mark_dirty)
-        layout.addRow(
-            TooltipLabel("Monitors", "Event types to watch"), monitor_widget
-        )
+        layout.addRow(TooltipLabel("Monitors", "Event types to watch"), monitor_widget)
 
         self.freq_spin = QDoubleSpinBox()
         self.freq_spin.setDecimals(3)
         self.freq_spin.setValue(1.0)
         self.freq_spin.valueChanged.connect(self._mark_dirty)
         layout.addRow(
-            TooltipLabel(
-                "Frequency", "How often (in ticks) the observer records data"
-            ),
+            TooltipLabel("Frequency", "How often (in ticks) the observer records data"),
             self.freq_spin,
         )
 
@@ -646,9 +578,7 @@ class MetaNodePanel(QDockWidget):
                 item.setSelected(True)
             self.member_list.addItem(item)
         cons = data.get("constraints", {})
-        self.phase_tol.setValue(
-            float(cons.get("phase_lock", {}).get("tolerance", 0.0))
-        )
+        self.phase_tol.setValue(float(cons.get("phase_lock", {}).get("tolerance", 0.0)))
         self.min_coherence.setValue(
             float(cons.get("coherence_tie", {}).get("min_coherence", 0.0))
         )
@@ -670,9 +600,7 @@ class MetaNodePanel(QDockWidget):
             return
         model = get_graph()
         meta = model.meta_nodes.get(self.current, {})
-        meta["members"] = [
-            item.text() for item in self.member_list.selectedItems()
-        ]
+        meta["members"] = [item.text() for item in self.member_list.selectedItems()]
         constraints: Dict[str, Any] = {}
         tol = float(self.phase_tol.value())
         if tol:
