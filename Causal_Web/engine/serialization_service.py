@@ -12,6 +12,8 @@ class GraphSerializationService:
 
     # ------------------------------------------------------------------
     def as_dict(self) -> Dict[str, Any]:
+        """Return a dictionary representation of the graph."""
+
         return {
             "nodes": self._nodes(),
             "superpositions": self._superpositions(),
@@ -123,6 +125,8 @@ class NarrativeGeneratorService:
 
     # ------------------------------------------------------------------
     def generate(self) -> str:
+        """Return a formatted narrative summarizing the simulation."""
+
         lines: List[str] = []
         lines.extend(self._tick_summary())
         lines.extend(self._collapse_summary())
