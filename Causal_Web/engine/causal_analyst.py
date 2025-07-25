@@ -57,9 +57,7 @@ class CausalAnalyst(OutputDirMixin, JsonLinesMixin):
         for key, path in paths.items():
             if key in ("event", "layer_transitions"):
                 self.logs[key] = self.load_event_log(path, int_keys=True)
-            elif path.endswith(".json") and not path.endswith(
-                "tick_trace.json"
-            ):
+            elif path.endswith(".json") and not path.endswith("tick_trace.json"):
                 self.logs[key] = self.load_json_lines(path, int_keys=True)
             elif key == "tick_trace" and os.path.exists(path):
                 with open(path) as f:
@@ -90,17 +88,13 @@ class CausalAnalyst(OutputDirMixin, JsonLinesMixin):
                 else:
                     if len(lst) >= 3:
                         start = tick - len(lst)
-                        spikes.setdefault(node, []).append(
-                            (start, tick - 1, max(lst))
-                        )
+                        spikes.setdefault(node, []).append((start, tick - 1, max(lst)))
                     streaks[node] = []
         # flush
         for node, lst in streaks.items():
             if len(lst) >= 3:
                 start = max(deco.keys()) - len(lst) + 1
-                spikes.setdefault(node, []).append(
-                    (start, max(deco.keys()), max(lst))
-                )
+                spikes.setdefault(node, []).append((start, max(deco.keys()), max(lst)))
         self.transitions = {"decoherence_spikes": spikes}
 
     # ------------------------------------------------------------
@@ -124,9 +118,7 @@ class CausalAnalyst(OutputDirMixin, JsonLinesMixin):
         event_log = self.logs.get("event", {})
         if not event_log:
             return None
-        for t in sorted(
-            [t for t in event_log if t < before_tick], reverse=True
-        ):
+        for t in sorted([t for t in event_log if t < before_tick], reverse=True):
             for ev in event_log[t]:
                 if ev.get("event_type") == "bridge_ruptured" and (
                     ev.get("source") == node_id or ev.get("target") == node_id
@@ -166,9 +158,7 @@ class CausalAnalyst(OutputDirMixin, JsonLinesMixin):
                         "value": spike[2],
                     }
                 )
-            chain_steps.append(
-                {"tick": tick, "event": "node_collapsed", "node": node}
-            )
+            chain_steps.append({"tick": tick, "event": "node_collapsed", "node": node})
 
             conf = 0.5
             if last_rupture and tick - last_rupture[0] <= window:
@@ -186,7 +176,7 @@ class CausalAnalyst(OutputDirMixin, JsonLinesMixin):
 
         self.causal_chains = chains
 
-        path = os.path.join(self.output_dir, "causal_chains.json")
+        path = self._path("causal_chains.json")
         with open(path, "w") as f:
             json.dump(chains, f, indent=2)
         return chains
@@ -210,7 +200,7 @@ class CausalAnalyst(OutputDirMixin, JsonLinesMixin):
             }
             for e in self.explanations
         ]
-        path = os.path.join(self.output_dir, "causal_explanations.json")
+        path = self._path("causal_explanations.json")
         with open(path, "w") as f:
             json.dump(data, f, indent=2)
         return data
@@ -247,7 +237,7 @@ class CausalAnalyst(OutputDirMixin, JsonLinesMixin):
                             f"    * Node {step['node']} collapsed at tick {step['tick']}."
                         )
         text = "\n".join(lines)
-        path = os.path.join(self.output_dir, "causal_summary.txt")
+        path = self._path("causal_summary.txt")
         with open(path, "w") as f:
             f.write(text)
         return text
@@ -259,9 +249,7 @@ class CausalAnalyst(OutputDirMixin, JsonLinesMixin):
         edges = []
         counter = 1
         for chain in self.causal_chains:
-            steps = sorted(
-                chain.get("chain", []), key=lambda s: s.get("tick", 0)
-            )
+            steps = sorted(chain.get("chain", []), key=lambda s: s.get("tick", 0))
             ids = []
             step_objs = []
             for step in steps:
@@ -295,7 +283,7 @@ class CausalAnalyst(OutputDirMixin, JsonLinesMixin):
                 edges.append({"source": a, "target": b, "label": label})
 
         graph = {"nodes": nodes, "edges": edges}
-        path = os.path.join(self.output_dir, "explanation_graph.json")
+        path = self._path("explanation_graph.json")
         with open(path, "w") as f:
             json.dump(graph, f, indent=2)
         return graph
@@ -310,9 +298,7 @@ class CausalAnalyst(OutputDirMixin, JsonLinesMixin):
             for ev in events:
                 entry = {
                     "type": ev.get("event_type"),
-                    "nodes": [
-                        n for n in (ev.get("source"), ev.get("target")) if n
-                    ],
+                    "nodes": [n for n in (ev.get("source"), ev.get("target")) if n],
                 }
                 timeline.setdefault(tick, []).append(entry)
 
@@ -323,9 +309,7 @@ class CausalAnalyst(OutputDirMixin, JsonLinesMixin):
             )
 
         # Detected decoherence spikes
-        for node, spikes in self.transitions.get(
-            "decoherence_spikes", {}
-        ).items():
+        for node, spikes in self.transitions.get("decoherence_spikes", {}).items():
             for start, end, val in spikes:
                 timeline.setdefault(end, []).append(
                     {
@@ -338,7 +322,7 @@ class CausalAnalyst(OutputDirMixin, JsonLinesMixin):
                 )
 
         data = [{"tick": t, "events": timeline[t]} for t in sorted(timeline)]
-        path = os.path.join(self.output_dir, "causal_timeline.json")
+        path = self._path("causal_timeline.json")
         with open(path, "w") as f:
             json.dump(data, f, indent=2)
         return data
@@ -353,7 +337,7 @@ class CausalAnalyst(OutputDirMixin, JsonLinesMixin):
                 to_layer = ev.get("to")
                 counts.setdefault(node, {}).setdefault(to_layer, 0)
                 counts[node][to_layer] += 1
-        path = os.path.join(self.output_dir, "layer_transition_events.json")
+        path = self._path("layer_transition_events.json")
         with open(path, "w") as f:
             json.dump(counts, f, indent=2)
         self.summary["layer_transition_events"] = counts

@@ -18,6 +18,14 @@ class LoggingMixin:
         log_json(Config.output_path(name), record)
 
 
+class PathLoggingMixin:
+    """Provide helper method for logging to an explicit file path."""
+
+    def _log_path(self, path: str, record: dict[str, Any]) -> None:
+        """Write ``record`` directly to ``path``."""
+        log_json(path, record)
+
+
 class OutputDirMixin:
     """Provide an ``output_dir`` attribute and path resolution helper."""
 

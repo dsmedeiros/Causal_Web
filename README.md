@@ -598,7 +598,8 @@ links, `GlobalDiagnosticsService` for exporting run metrics and
 `SIPRecombinationService` for recombination-based spawning. A lightweight
 `LoggingMixin` now centralises JSON logging for classes like `Node` and `Bridge`.
 `OutputDirMixin` adds a common `_path` helper used by the log interpreter and
-causal analyst.
+causal analyst. `PathLoggingMixin` offers direct logging to arbitrary file paths
+for utilities like the tick seeder.
 
 ### Identified long functions
 

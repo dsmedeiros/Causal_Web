@@ -5,15 +5,16 @@ import os
 from typing import Dict, List
 
 from .causal_analyst import ExplanationEvent, CausalAnalyst
+from .base import OutputDirMixin
 
 
-class ExplanationRuleMatcher:
+class ExplanationRuleMatcher(OutputDirMixin):
     """Service object to evaluate explanation rules."""
 
     def __init__(self, analyst: CausalAnalyst) -> None:
+        super().__init__(output_dir=analyst.output_dir)
         self.analyst = analyst
         self.logs = analyst.logs
-        self.output_dir = analyst.output_dir
         self.explanations: List[ExplanationEvent] = analyst.explanations
 
     # lifecycle stages
@@ -144,7 +145,7 @@ class ExplanationRuleMatcher:
                 )
 
     def _match_emergence_events(self) -> None:
-        emergence_path = os.path.join(self.output_dir, "node_emergence_log.json")
+        emergence_path = self._path("node_emergence_log.json")
         if not os.path.exists(emergence_path):
             return
         with open(emergence_path) as f:
@@ -175,9 +176,7 @@ class ExplanationRuleMatcher:
                     c = rec.get("id")
                     tick = rec.get("tick", 0)
                     collapse_id = None
-                    collapse_log_path = os.path.join(
-                        self.output_dir, "collapse_chain_log.json"
-                    )
+                    collapse_log_path = self._path("collapse_chain_log.json")
                     if os.path.exists(collapse_log_path):
                         with open(collapse_log_path) as cf:
                             for ln in cf:
@@ -196,7 +195,7 @@ class ExplanationRuleMatcher:
                     )
 
     def _match_propagation_failures(self) -> None:
-        fail_path = os.path.join(self.output_dir, "propagation_failure_log.json")
+        fail_path = self._path("propagation_failure_log.json")
         if not os.path.exists(fail_path):
             return
         with open(fail_path) as f:
