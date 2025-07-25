@@ -1,16 +1,21 @@
 """Service objects related to :class:`Node` lifecycle."""
 
+from __future__ import annotations
+
 from collections import defaultdict, deque
-from typing import Optional, List, Dict, Set
+from typing import Optional, List, Dict, Set, TYPE_CHECKING
 
 
 from ..config import Config
+
+if TYPE_CHECKING:  # pragma: no cover - for type checking only
+    from .node import Node
 
 
 class NodeInitializationService:
     """Initialize a :class:`~Causal_Web.engine.node.Node` instance."""
 
-    def __init__(self, node):
+    def __init__(self, node: Node) -> None:
         self.node = node
 
     # ------------------------------------------------------------------
