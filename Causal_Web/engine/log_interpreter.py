@@ -365,84 +365,11 @@ class CWTLogInterpreter:
 
     # ------------------------------------------------------------
     def generate_narrative(self) -> str:
-        lines: List[str] = []
-        ticks = self.summary.get("tick_counts", {})
-        if ticks:
-            total = sum(ticks.values())
-            lines.append(
-                f"The simulation recorded {total} ticks across {len(ticks)} nodes."
-            )
-            for nid, cnt in ticks.items():
-                lines.append(f"- Node {nid} emitted {cnt} ticks.")
+        """Return a textual summary of the collected metrics."""
 
-        collapse = self.summary.get("collapse")
-        if collapse:
-            parts = [f"{n} at tick {t}" for n, t in collapse.items()]
-            lines.append("Nodes collapsed to classical states: " + ", ".join(parts))
+        from .serialization_service import NarrativeGeneratorService
 
-        coh = self.summary.get("coherence")
-        if coh:
-            for nid, data in coh.items():
-                lines.append(
-                    f"- {nid} coherence ranged from {data['min']:.3f} to {data['max']:.3f}."
-                )
-
-        deco = self.summary.get("decoherence")
-        if deco:
-            for nid, data in deco.items():
-                lines.append(
-                    f"- {nid} decoherence ranged from {data['min']:.3f} to {data['max']:.3f}."
-                )
-
-        if "clusters" in self.summary:
-            c = self.summary["clusters"]
-            if c["first_detected"] is not None:
-                lines.append(
-                    f"Clusters first appeared at tick {c['first_detected']} with up to {c['max_clusters']} cluster(s)."
-                )
-
-        if "law_drift" in self.summary:
-            events = sum(self.summary["law_drift"].values())
-            lines.append(f"Law drift events recorded: {events} total.")
-
-        bridges = self.summary.get("bridges")
-        if bridges:
-            for b, data in bridges.items():
-                state = "active" if data.get("active") else "inactive"
-                lines.append(
-                    f"- Bridge {b} ended {state}; last rupture at {data.get('last_rupture_tick')}"
-                )
-
-        if "collapse_origins" in self.summary:
-            parts = [f"{n} at {t}" for n, t in self.summary["collapse_origins"].items()]
-            lines.append("Collapse origins: " + ", ".join(parts))
-
-        if "collapse_chains" in self.summary:
-            for src, length in self.summary["collapse_chains"].items():
-                lines.append(f"- Collapse from {src} affected {length} nodes")
-
-        if "layer_transitions" in self.summary:
-            total = sum(self.summary["layer_transitions"]["totals"].values())
-            lines.append(f"Layer transitions recorded: {total}")
-
-        if "rerouting" in self.summary:
-            r = self.summary["rerouting"]
-            lines.append(
-                f"Rerouting events - recursive: {r['recursive']}, alt paths: {r['alt_path']}"
-            )
-
-        if "inspection_events" in self.summary:
-            lines.append(
-                f"Recorded {self.summary['inspection_events']} superposition inspections."
-            )
-
-        if "console" in self.summary:
-            c = self.summary["console"]
-            lines.append(
-                f"Console log contains {c['lines']} lines covering {c['ticks_logged']} ticks."
-            )
-
-        return "\n".join(lines)
+        return NarrativeGeneratorService(self.summary).generate()
 
     # ------------------------------------------------------------
     def run(self) -> None:
