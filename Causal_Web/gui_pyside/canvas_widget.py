@@ -520,9 +520,9 @@ class CanvasWidget(QGraphicsView):
                 item.node_id
             )
         elif isinstance(item, EdgeItem):
-            actions[menu.addAction("Delete Connection")] = (
-                lambda: self.delete_connection(item.index, item.connection_type)
-            )
+            actions[
+                menu.addAction("Delete Connection")
+            ] = lambda: self.delete_connection(item.index, item.connection_type)
         elif isinstance(item, ObserverItem):
             actions[menu.addAction("Delete Observer")] = lambda: self.delete_observer(
                 item.index
