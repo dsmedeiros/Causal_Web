@@ -26,10 +26,12 @@ class NodeTickService:
     node: Node
     tick_time: int
     phase: float
-    graph: any
+    graph: Any
     origin: str = "self"
 
     def process(self) -> None:
+        """Execute the node tick lifecycle for ``tick_time``."""
+
         if not self._pre_check():
             return
         self._register_tick()
@@ -142,6 +144,8 @@ class EdgePropagationService:
     graph: Any
 
     def propagate(self) -> None:
+        """Propagate the tick across all outgoing edges."""
+
         self._log_recursion()
         from .tick_engine import kappa
 
@@ -241,6 +245,8 @@ class NodeMetricsResultService:
     last_coherence: dict
 
     def process(self) -> dict:
+        """Aggregate node metric results into structured logs."""
+
         self._init_logs()
         for rec in self.results:
             self._handle_record(*rec)
@@ -336,7 +342,7 @@ class NodeMetricsResultService:
 class NodeMetricsService:
     """Collect and persist per-tick node metrics."""
 
-    graph: any
+    graph: Any
     last_coherence: dict = field(default_factory=dict)
 
     # ------------------------------------------------------------------
@@ -444,11 +450,15 @@ class GraphLoadService:
     """Populate a :class:`Graph` from a JSON file."""
 
     def __init__(self, graph: "CausalGraph", path: str) -> None:
+        """Create a loader for ``graph`` using ``path`` as input."""
+
         self.graph = graph
         self.path = path
 
     # ------------------------------------------------------------------
     def load(self) -> None:
+        """Read ``path`` and populate ``graph`` with its contents."""
+
         with open(self.path, "r") as f:
             data = json.load(f)
         self._reset()
@@ -752,6 +762,8 @@ class BridgeApplyService:
     graph: Any
 
     def process(self) -> None:
+        """Run the bridge activation sequence for ``tick_time``."""
+
         self._gather_nodes()
         self.bridge.decay(self.tick_time)
         self.bridge.try_reform(self.tick_time, self.node_a, self.node_b)
@@ -907,6 +919,8 @@ class GlobalDiagnosticsService:
     graph: Any
 
     def export(self) -> None:
+        """Write overall diagnostics derived from simulation logs."""
+
         deco_lines = self._load_log("decoherence_log.json")
         if not deco_lines:
             return
