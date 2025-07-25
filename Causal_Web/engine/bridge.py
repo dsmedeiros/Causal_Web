@@ -3,10 +3,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 import math
 from random import random
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 import json
 from ..config import Config
 from .logger import log_json
+
+if TYPE_CHECKING:
+    from .node import Node
+    from .graph import CausalGraph
 
 from enum import Enum
 
@@ -33,18 +37,19 @@ class BridgeEvent:
 class Bridge:
     def __init__(
         self,
-        node_a_id,
-        node_b_id,
-        bridge_type="braided",
-        phase_offset=0.0,
-        drift_tolerance=None,
-        decoherence_limit=None,
-        initial_strength=1.0,
-        medium_type="standard",
-        mutable=True,
-        seeded=True,
-        formed_at_tick=0,
-    ):
+        node_a_id: str,
+        node_b_id: str,
+        bridge_type: str = "braided",
+        phase_offset: float = 0.0,
+        drift_tolerance: float | None = None,
+        decoherence_limit: int | None = None,
+        initial_strength: float = 1.0,
+        medium_type: str = "standard",
+        mutable: bool = True,
+        seeded: bool = True,
+        formed_at_tick: int = 0,
+    ) -> None:
+        """Create a new bridge between two node identifiers."""
         self.node_a_id = node_a_id
         self.node_b_id = node_b_id
         self.bridge_type = bridge_type  # "braided", "mirror", "unidirectional", etc.
@@ -108,6 +113,7 @@ class Bridge:
         log_json(Config.output_path("bridge_dynamics_log.json"), record)
 
     def update_state(self, tick: int) -> None:
+        """Update ``self.state`` based on fatigue and activation."""
         old = self.state
         if not self.active:
             if self.current_strength > 0 and self.fatigue <= 3.0:
@@ -170,6 +176,7 @@ class Bridge:
         rupture_threshold: float = 0.3,
         rupture_prob: float = 0.9,
     ) -> bool:
+        """Return ``True`` if decoherence causes the bridge to rupture."""
         if decoherence_strength > rupture_threshold and random() < rupture_prob:
             print(
                 f"[BRIDGE] Probabilistic rupture at tick due to decoherence={decoherence_strength:.2f}"
@@ -180,6 +187,7 @@ class Bridge:
 
     # ---- Phase 6: plasticity ----
     def decay(self, tick_time: int, inactive_threshold: int = 5) -> None:
+        """Reduce strength when inactive for ``inactive_threshold`` ticks."""
         if self.last_active_tick is None:
             self.last_active_tick = tick_time
         if (
@@ -211,6 +219,7 @@ class Bridge:
         node_b: "Node",
         coherence_threshold: float = 0.9,
     ) -> None:
+        """Reactivate a ruptured bridge when coherence is high enough."""
         if not self.reformable or self.active:
             return
         coherence = (
@@ -243,6 +252,7 @@ class Bridge:
         node_b: "Node",
         coherence_threshold: float = 0.9,
     ) -> None:
+        """Re-enable an inactive bridge when coherence improves."""
         coherence = (
             node_a.compute_coherence_level(tick_time)
             + node_b.compute_coherence_level(tick_time)
@@ -263,6 +273,7 @@ class Bridge:
         BridgeApplyService(self, tick_time, graph).process()
 
     def to_dict(self) -> dict:
+        """Return a serialization-friendly representation of the bridge."""
         return {
             "source": self.node_a_id,
             "target": self.node_b_id,
