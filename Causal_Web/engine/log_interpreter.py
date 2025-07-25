@@ -14,9 +14,7 @@ class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
     ) -> None:
         super().__init__(output_dir=output_dir)
         base = os.path.join(os.path.dirname(__file__), "..")
-        self.graph_path = graph_path or os.path.join(
-            base, "input", "graph.json"
-        )
+        self.graph_path = graph_path or os.path.join(base, "input", "graph.json")
         self.graph = {}
         self.summary: Dict[str, Dict] = {}
 
@@ -43,9 +41,7 @@ class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
         for entry in records:
             for edge in entry.get("edges", []):
                 key = f"{edge['source']}->{edge['target']}"
-                stats.setdefault(
-                    key, {"min": float("inf"), "max": float("-inf")}
-                )
+                stats.setdefault(key, {"min": float("inf"), "max": float("-inf")})
                 d = edge.get("delay", 0)
                 if d < stats[key]["min"]:
                     stats[key]["min"] = d
@@ -57,7 +53,7 @@ class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
 
     # ------------------------------------------------------------
     def interpret_collapse(self) -> None:
-        path = os.path.join(self.output_dir, "classicalization_map.json")
+        path = self._path("classicalization_map.json")
         lines = self.load_json_lines(path)
         if not lines:
             return
@@ -74,7 +70,7 @@ class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
 
     # ------------------------------------------------------------
     def interpret_coherence(self) -> None:
-        path = os.path.join(self.output_dir, "coherence_log.json")
+        path = self._path("coherence_log.json")
         lines = self.load_json_lines(path)
         if not lines:
             return
@@ -90,7 +86,7 @@ class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
 
     # ------------------------------------------------------------
     def interpret_law_wave(self) -> None:
-        path = os.path.join(self.output_dir, "law_wave_log.json")
+        path = self._path("law_wave_log.json")
         lines = self.load_json_lines(path)
         if not lines:
             return
@@ -317,8 +313,7 @@ class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
         with open(path) as f:
             data = json.load(f)
         counts = {
-            nid: len(n.get("ticks", []))
-            for nid, n in data.get("nodes", {}).items()
+            nid: len(n.get("ticks", [])) for nid, n in data.get("nodes", {}).items()
         }
         layer_summary: Dict[str, Dict[str, int]] = {}
         for nid, n in data.get("nodes", {}).items():
@@ -384,11 +379,11 @@ class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
         self.interpret_tick_trace()
         self.interpret_inspection()
         self.interpret_console_log()
-        out_path = os.path.join(self.output_dir, "interpretation_log.json")
+        out_path = self._path("interpretation_log.json")
         with open(out_path, "w") as f:
             json.dump(self.summary, f, indent=2)
         text_summary = self.generate_narrative()
-        text_path = os.path.join(self.output_dir, "interpretation_summary.txt")
+        text_path = self._path("interpretation_summary.txt")
         with open(text_path, "w") as f:
             f.write(text_summary)
         print(f"✅ Interpretation saved to {out_path}")
@@ -416,9 +411,7 @@ def run_interpreter(
         Optional path to the input graph JSON used for the run.
     """
 
-    interpreter = CWTLogInterpreter(
-        output_dir=output_dir, graph_path=graph_path
-    )
+    interpreter = CWTLogInterpreter(output_dir=output_dir, graph_path=graph_path)
     interpreter.run()
 
 
