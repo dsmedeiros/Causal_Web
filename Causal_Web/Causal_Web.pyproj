@@ -28,16 +28,13 @@
     <Compile Include="database\__init__.py" />
     <Compile Include="engine\bridge.py" />
     <Compile Include="engine\causal_analyst.py" />
-    <Compile Include="engine\explanation_rules.py" />
     <Compile Include="engine\graph.py" />
     <Compile Include="engine\logger.py" />
     <Compile Include="engine\logging_models.py" />
     <Compile Include="engine\meta_node.py" />
     <Compile Include="engine\node.py" />
     <Compile Include="engine\node_manager.py" />
-    <Compile Include="engine\node_services.py" />
     <Compile Include="engine\observer.py" />
-    <Compile Include="engine\services.py" />
     <Compile Include="engine\tick.py" />
     <Compile Include="engine\tick_engine.py" />
     <Compile Include="engine\log_interpreter.py" />
@@ -52,7 +49,6 @@
     <Compile Include="gui_pyside\canvas_widget.py" />
     <Compile Include="gui_pyside\log_files_window.py" />
     <Compile Include="gui_pyside\main_window.py" />
-    <Compile Include="gui_pyside\panel_services.py" />
     <Compile Include="gui_pyside\toolbar_builder.py" />
     <Compile Include="gui_pyside\__init__.py" />
     <Compile Include="ingest\service.py" />
@@ -66,15 +62,23 @@
     <Folder Include="database\" />
     <Folder Include="engine\" />
     <Folder Include="graph\" />
+    <Folder Include="graph\__pycache__\" />
     <Folder Include="gui\" />
     <Folder Include="assets\" />
     <Folder Include="gui_pyside\" />
+    <Folder Include="gui_pyside\__pycache__\" />
     <Folder Include="ingest\" />
     <Folder Include="input\" />
     <Folder Include="output\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="assets\fonts\consola.ttf" />
+    <Content Include="graph\__pycache__\io.cpython-310.pyc" />
+    <Content Include="graph\__pycache__\model.cpython-310.pyc" />
+    <Content Include="graph\__pycache__\__init__.cpython-310.pyc" />
+    <Content Include="gui_pyside\__pycache__\canvas_widget.cpython-310.pyc" />
+    <Content Include="gui_pyside\__pycache__\main_window.cpython-310.pyc" />
+    <Content Include="gui_pyside\__pycache__\__init__.cpython-310.pyc" />
     <Content Include="input\config.json" />
     <Content Include="input\destructive_interference_test.json" />
     <Content Include="input\dilation_baseline_test_case.json" />

@@ -811,71 +811,8 @@ class MetaNodePanel(QDockWidget):
 
 
 def build_toolbar(main_window) -> QToolBar:
-    """Create the graph editing toolbar and property docks.
+    """Create the graph editing toolbar and property docks."""
 
-    The returned :class:`QToolBar` contains actions for adding nodes,
-    creating connections and applying automatic layout.  The caller is
-    responsible for embedding the toolbar, typically inside the Graph View
-    dock.  File and edit menu actions are handled separately by the main
-    window.
-    """
+    from .toolbar_services import ToolbarBuildService
 
-    toolbar = QToolBar("Graph", main_window)
-
-    add_node_action = QAction("Add Node", main_window)
-    add_node_action.triggered.connect(main_window.add_node)
-    toolbar.addAction(add_node_action)
-
-    add_conn_action = QAction("Add Connection", main_window)
-    add_conn_action.triggered.connect(main_window.start_add_connection)
-    toolbar.addAction(add_conn_action)
-
-    add_obs_action = QAction("Add Observer", main_window)
-    add_obs_action.triggered.connect(main_window.add_observer)
-    toolbar.addAction(add_obs_action)
-
-    add_meta_action = QAction("Add MetaNode", main_window)
-    add_meta_action.triggered.connect(main_window.add_meta_node)
-    toolbar.addAction(add_meta_action)
-
-    layout_action = QAction("Auto Layout", main_window)
-    layout_action.triggered.connect(main_window.canvas.auto_layout)
-    toolbar.addAction(layout_action)
-
-    main_window.node_panel = NodePanel(main_window, main_window.graph_window)
-    main_window.graph_window.addDockWidget(
-        Qt.RightDockWidgetArea, main_window.node_panel
-    )
-    main_window.node_panel.hide()
-
-    main_window.connection_panel = ConnectionPanel(
-        main_window, main_window.graph_window
-    )
-    main_window.graph_window.addDockWidget(
-        Qt.RightDockWidgetArea, main_window.connection_panel
-    )
-    main_window.connection_panel.hide()
-
-    main_window.observer_panel = ObserverPanel(main_window, main_window.graph_window)
-    main_window.graph_window.addDockWidget(
-        Qt.RightDockWidgetArea, main_window.observer_panel
-    )
-    main_window.observer_panel.hide()
-
-    main_window.meta_node_panel = MetaNodePanel(main_window, main_window.graph_window)
-    main_window.graph_window.addDockWidget(
-        Qt.RightDockWidgetArea, main_window.meta_node_panel
-    )
-    main_window.meta_node_panel.hide()
-
-    main_window.canvas.node_selected.connect(main_window.node_panel.show_node)
-    main_window.canvas.connection_request.connect(main_window.connection_panel.open_for)
-    main_window.canvas.connection_selected.connect(
-        main_window.connection_panel.show_connection
-    )
-    main_window.canvas.meta_node_selected.connect(
-        main_window.meta_node_panel.show_meta_node
-    )
-    main_window.canvas.observer_selected.connect(main_window.observer_panel.open_for)
-
-    return toolbar
+    return ToolbarBuildService(main_window).build()
