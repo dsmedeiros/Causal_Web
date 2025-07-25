@@ -481,89 +481,121 @@ def trigger_csp(parent_id: str, x: float, y: float, tick: int) -> None:
         )
 
 
+class CSPSeedService:
+    """Process collapse-seeded propagation events."""
+
+    def __init__(self, graph):
+        self.graph = graph
+        self.success = 0
+        self.failure = 0
+
+    # ------------------------------------------------------------------
+    def process(self, seeds: list, tick: int) -> list:
+        remaining = []
+        for seed in list(seeds):
+            if tick - seed["tick"] < Config.CSP_STABILIZATION_WINDOW:
+                remaining.append(seed)
+                continue
+            if np.random.rand() > 0.5:
+                if (
+                    _spawn_counts.get(seed["parent"], 0)
+                    >= Config.max_children_per_node
+                    > 0
+                ):
+                    if Config.is_log_enabled("propagation_failure_log.json"):
+                        log_json(
+                            Config.output_path("propagation_failure_log.json"),
+                            {
+                                "tick": tick,
+                                "type": "SPAWN_LIMIT",
+                                "parent": seed["parent"],
+                                "origin_type": "CSP",
+                            },
+                        )
+                    continue
+                self._spawn_node(seed, tick)
+            else:
+                self._record_failure(seed, tick)
+            # remove processed seed
+        return remaining
+
+    # ------------------------------------------------------------------
+    def _spawn_node(self, seed: dict, tick: int) -> None:
+        node_id = seed["id"].replace("CSPseed", "CSP")
+        self.graph.add_node(
+            node_id,
+            x=seed["x"],
+            y=seed["y"],
+            origin_type="CSP",
+            generation_tick=tick,
+            parent_ids=[seed["parent"]],
+        )
+        parent_id = seed["parent"]
+        if "->" in parent_id:
+            src, tgt = parent_id.split("->", 1)
+            for pid in (src, tgt):
+                if pid in self.graph.nodes:
+                    self.graph.add_edge(pid, node_id)
+        else:
+            self.graph.add_edge(parent_id, node_id)
+        payload = NodeEmergencePayload(
+            node_id=node_id,
+            origin_type="CSP",
+            parents=[seed["parent"]],
+        )
+        entry = NodeEmergenceLog(tick=tick, payload=payload)
+        log_manager.log(Config.output_path("node_emergence_log.json"), entry)
+        log_json(
+            Config.output_path("collapse_chain_log.json"),
+            {
+                "tick": tick,
+                "source": seed["parent"],
+                "children_spawned": [node_id],
+            },
+        )
+        self.success += 1
+        _spawn_counts[seed["parent"]] = _spawn_counts.get(seed["parent"], 0) + 1
+
+    # ------------------------------------------------------------------
+    def _record_failure(self, seed: dict, tick: int) -> None:
+        parent = self.graph.get_node(seed["parent"])
+        if parent:
+            parent.decoherence_debt += Config.CSP_ENTROPY_INJECTION
+        log_json(
+            Config.output_path("propagation_failure_log.json"),
+            {
+                "tick": tick,
+                "type": "CSP_FAILURE",
+                "parent": seed["parent"],
+                "reason": "Seed failed to cohere",
+                "entropy_injected": Config.CSP_ENTROPY_INJECTION,
+                "origin_type": "CSP",
+                "location": [seed["x"], seed["y"]],
+            },
+        )
+        recent_csp_failures.append(
+            {
+                "x": seed["x"],
+                "y": seed["y"],
+                "tick": tick,
+                "intensity": Config.CSP_ENTROPY_INJECTION,
+            }
+        )
+        self.failure += 1
+
+
 def _process_csp_seeds(tick: int) -> None:
+    """Delegate seed handling to :class:`CSPSeedService`."""
+
     global _csp_seeds, _csp_success_count, _csp_failure_count
     if not Config.propagation_control.get("enable_csp", True):
         _csp_seeds.clear()
         return
-    for seed in list(_csp_seeds):
-        if tick - seed["tick"] < Config.CSP_STABILIZATION_WINDOW:
-            continue
-        coherence = np.random.rand()
-        if coherence > 0.5:
-            if _spawn_counts.get(seed["parent"], 0) >= Config.max_children_per_node > 0:
-                if Config.is_log_enabled("propagation_failure_log.json"):
-                    log_json(
-                        Config.output_path("propagation_failure_log.json"),
-                        {
-                            "tick": tick,
-                            "type": "SPAWN_LIMIT",
-                            "parent": seed["parent"],
-                            "origin_type": "CSP",
-                        },
-                    )
-                _csp_seeds.remove(seed)
-                continue
-            node_id = seed["id"].replace("CSPseed", "CSP")
-            graph.add_node(
-                node_id,
-                x=seed["x"],
-                y=seed["y"],
-                origin_type="CSP",
-                generation_tick=tick,
-                parent_ids=[seed["parent"]],
-            )
-            parent_id = seed["parent"]
-            if "->" in parent_id:
-                src, tgt = parent_id.split("->", 1)
-                for pid in (src, tgt):
-                    if pid in graph.nodes:
-                        graph.add_edge(pid, node_id)
-            else:
-                graph.add_edge(parent_id, node_id)
-            payload = NodeEmergencePayload(
-                node_id=node_id,
-                origin_type="CSP",
-                parents=[seed["parent"]],
-            )
-            entry = NodeEmergenceLog(tick=tick, payload=payload)
-            log_manager.log(Config.output_path("node_emergence_log.json"), entry)
-            log_json(
-                Config.output_path("collapse_chain_log.json"),
-                {
-                    "tick": tick,
-                    "source": seed["parent"],
-                    "children_spawned": [node_id],
-                },
-            )
-            _csp_success_count += 1
-            _spawn_counts[seed["parent"]] = _spawn_counts.get(seed["parent"], 0) + 1
-        else:
-            parent = graph.get_node(seed["parent"])
-            if parent:
-                parent.decoherence_debt += Config.CSP_ENTROPY_INJECTION
-            log_json(
-                Config.output_path("propagation_failure_log.json"),
-                {
-                    "tick": tick,
-                    "type": "CSP_FAILURE",
-                    "parent": seed["parent"],
-                    "reason": "Seed failed to cohere",
-                    "entropy_injected": Config.CSP_ENTROPY_INJECTION,
-                    "origin_type": "CSP",
-                    "location": [seed["x"], seed["y"]],
-                },
-            )
-            recent_csp_failures.append(
-                {
-                    "x": seed["x"],
-                    "y": seed["y"],
-                    "tick": tick,
-                    "intensity": Config.CSP_ENTROPY_INJECTION,
-                }
-            )
-            _csp_failure_count += 1
-        _csp_seeds.remove(seed)
+
+    service = CSPSeedService(graph)
+    _csp_seeds = service.process(_csp_seeds, tick)
+    _csp_success_count += service.success
+    _csp_failure_count += service.failure
 
 
 def _update_simulation_state(
@@ -649,104 +681,121 @@ def stop_simulation() -> None:
         _stop_requested = True
 
 
-def simulation_loop():
-    """Start the main simulation thread on a background worker."""
+class SimulationRunner:
+    """Background worker driving the main simulation loop."""
 
-    def run():
-        global_tick = 0
+    def __init__(self) -> None:
+        self.global_tick = 0
+
+    # ------------------------------------------------------------------
+    def start(self) -> None:
+        threading.Thread(target=self.run, daemon=True).start()
+
+    # ------------------------------------------------------------------
+    def run(self) -> None:
         global _stop_requested
         _stop_requested = False
-        if getattr(Config, "random_seed", None) is not None:
-            import random
-
-            random.seed(Config.random_seed)
-            np.random.seed(Config.random_seed)
-        _update_simulation_state(False, False, global_tick, None)
+        self._seed_random()
+        _update_simulation_state(False, False, self.global_tick, None)
         while True:
-            with Config.state_lock:
-                running = Config.is_running
-                stop = _stop_requested
-                Config.current_tick = global_tick
-                rate = Config.tick_rate
-                # ``allow_tick_override`` enables the ``max_ticks`` setting to
-                # control runtime duration. When disabled a fixed ``tick_limit``
-                # acts as the ceiling.
-                limit = (
-                    Config.max_ticks
-                    if Config.allow_tick_override
-                    else Config.tick_limit
-                )
+            running, stop, rate, limit = self._read_state()
             if stop:
-                snapshot_path = snapshot_graph(global_tick)
-                _update_simulation_state(False, True, global_tick, snapshot_path)
+                snapshot = snapshot_graph(self.global_tick)
+                _update_simulation_state(False, True, self.global_tick, snapshot)
                 write_output()
                 break
             if not running:
                 time.sleep(0.1)
                 continue
-            print(f"== Tick {global_tick} ==")
-
-            apply_global_forcing(global_tick)
-            update_coherence_constraints()
-
-            emit_ticks(global_tick)
-            propagate_phases(global_tick)
-
-            if global_tick % getattr(Config, "cluster_interval", 1) == 0:
-                graph.detect_clusters()
-                evaluate_nodes(global_tick)
-                graph.update_meta_nodes(global_tick)
-                if not Config.headless:
-                    log_metrics_per_tick(global_tick)
-                    log_bridge_states(global_tick)
-                    log_meta_node_ticks(global_tick)
-                    log_curvature_per_tick(global_tick)
-                dynamic_bridge_management(global_tick)
-
-            check_propagation(global_tick)
-            snapshot_path = None
-            if not Config.headless:
-                snapshot_path = snapshot_graph(global_tick)
-            _update_simulation_state(False, False, global_tick, snapshot_path)
-
-            if not Config.headless:
-                for obs in observers:
-                    obs.observe(graph, global_tick)
-                    inferred = obs.infer_field_state()
-                    log_json(
-                        Config.output_path("observer_perceived_field.json"),
-                        {"tick": global_tick, "observer": obs.id, "state": inferred},
-                    )
-
-                    actual = {n.id: len(n.tick_history) for n in graph.nodes.values()}
-                    diff = {
-                        nid: {
-                            "actual": actual.get(nid, 0),
-                            "inferred": inferred.get(nid, 0),
-                        }
-                        for nid in set(actual) | set(inferred)
-                        if actual.get(nid, 0) != inferred.get(nid, 0)
-                    }
-                    if diff:
-                        log_json(
-                            Config.output_path("observer_disagreement_log.json"),
-                            {"tick": global_tick, "observer": obs.id, "diff": diff},
-                        )
-
-            for bridge in graph.bridges:
-                bridge.apply(global_tick, graph)
-
-            if limit and limit != -1 and global_tick >= limit:
+            self._process_tick()
+            if limit and limit != -1 and self.global_tick >= limit:
                 with Config.state_lock:
                     Config.is_running = False
-                _update_simulation_state(False, True, global_tick, snapshot_path)
+                snapshot = snapshot_graph(self.global_tick)
+                _update_simulation_state(False, True, self.global_tick, snapshot)
                 write_output()
                 break
-
-            global_tick += 1
+            self.global_tick += 1
             time.sleep(rate)
 
-    threading.Thread(target=run, daemon=True).start()
+    # ------------------------------------------------------------------
+    def _seed_random(self) -> None:
+        if getattr(Config, "random_seed", None) is not None:
+            import random
+
+            random.seed(Config.random_seed)
+            np.random.seed(Config.random_seed)
+
+    # ------------------------------------------------------------------
+    def _read_state(self):
+        with Config.state_lock:
+            running = Config.is_running
+            stop = _stop_requested
+            Config.current_tick = self.global_tick
+            rate = Config.tick_rate
+            limit = (
+                Config.max_ticks if Config.allow_tick_override else Config.tick_limit
+            )
+        return running, stop, rate, limit
+
+    # ------------------------------------------------------------------
+    def _process_tick(self) -> None:
+        print(f"== Tick {self.global_tick} ==")
+        apply_global_forcing(self.global_tick)
+        update_coherence_constraints()
+        emit_ticks(self.global_tick)
+        propagate_phases(self.global_tick)
+
+        if self.global_tick % getattr(Config, "cluster_interval", 1) == 0:
+            graph.detect_clusters()
+            evaluate_nodes(self.global_tick)
+            graph.update_meta_nodes(self.global_tick)
+            if not Config.headless:
+                log_metrics_per_tick(self.global_tick)
+                log_bridge_states(self.global_tick)
+                log_meta_node_ticks(self.global_tick)
+                log_curvature_per_tick(self.global_tick)
+            dynamic_bridge_management(self.global_tick)
+
+        check_propagation(self.global_tick)
+        snapshot_path = None
+        if not Config.headless:
+            snapshot_path = snapshot_graph(self.global_tick)
+        _update_simulation_state(False, False, self.global_tick, snapshot_path)
+
+        if not Config.headless:
+            self._handle_observers()
+
+        for bridge in graph.bridges:
+            bridge.apply(self.global_tick, graph)
+
+    # ------------------------------------------------------------------
+    def _handle_observers(self) -> None:
+        for obs in observers:
+            obs.observe(graph, self.global_tick)
+            inferred = obs.infer_field_state()
+            log_json(
+                Config.output_path("observer_perceived_field.json"),
+                {"tick": self.global_tick, "observer": obs.id, "state": inferred},
+            )
+
+            actual = {n.id: len(n.tick_history) for n in graph.nodes.values()}
+            diff = {
+                nid: {"actual": actual.get(nid, 0), "inferred": inferred.get(nid, 0)}
+                for nid in set(actual) | set(inferred)
+                if actual.get(nid, 0) != inferred.get(nid, 0)
+            }
+            if diff:
+                log_json(
+                    Config.output_path("observer_disagreement_log.json"),
+                    {"tick": self.global_tick, "observer": obs.id, "diff": diff},
+                )
+
+
+def simulation_loop():
+    """Start the main simulation thread on a background worker."""
+
+    SimulationRunner().start()
 
 
 def write_output():
