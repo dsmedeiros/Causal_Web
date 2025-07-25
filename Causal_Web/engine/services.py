@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import uuid
 from dataclasses import dataclass, field
+from typing import Any
 from concurrent.futures import ThreadPoolExecutor
 import math
 import cmath
@@ -606,3 +607,160 @@ class NodeTickDecisionService:
             fired,
             reason,
         )
+
+
+@dataclass
+class BridgeApplyService:
+    """Lifecycle handler for :meth:`Bridge.apply`."""
+
+    bridge: Any
+    tick_time: int
+    graph: Any
+
+    def process(self) -> None:
+        self._gather_nodes()
+        self.bridge.decay(self.tick_time)
+        self.bridge.try_reform(self.tick_time, self.node_a, self.node_b)
+        if not self._validate_collapse():
+            return
+        if self._check_drift():
+            return
+        if self._handle_decoherence():
+            return
+        if not self.bridge.active:
+            self.bridge.update_state(self.tick_time)
+            return
+        self._propagate()
+        self._record_metrics()
+        self.bridge.update_state(self.tick_time)
+
+    # ------------------------------------------------------------------
+    def _gather_nodes(self) -> None:
+        self.node_a = self.graph.get_node(self.bridge.node_a_id)
+        self.node_b = self.graph.get_node(self.bridge.node_b_id)
+        self.phase_a = self.node_a.get_phase_at(self.tick_time)
+        self.phase_b = self.node_b.get_phase_at(self.tick_time)
+        self.a_collapsed = self.node_a.collapse_origin.get(self.tick_time) == "self"
+        self.b_collapsed = self.node_b.collapse_origin.get(self.tick_time) == "self"
+
+    # ------------------------------------------------------------------
+    def _validate_collapse(self) -> bool:
+        return self.a_collapsed != self.b_collapsed
+
+    # ------------------------------------------------------------------
+    def _check_drift(self) -> bool:
+        if (
+            self.bridge.drift_tolerance is not None
+            and self.phase_a is not None
+            and self.phase_b is not None
+        ):
+            drift = abs(
+                (self.phase_a - self.phase_b + math.pi) % (2 * math.pi) - math.pi
+            )
+            if drift > self.bridge.drift_tolerance:
+                print(
+                    f"[BRIDGE] Drift too high at tick {self.tick_time}: {drift:.2f} > {self.bridge.drift_tolerance}"
+                )
+                self.bridge._log_event(self.tick_time, "bridge_drift", drift)
+                self.bridge.trust_score = max(0.0, self.bridge.trust_score - 0.05)
+                self.bridge.reinforcement_streak = 0
+                return True
+        return False
+
+    # ------------------------------------------------------------------
+    def _handle_decoherence(self) -> bool:
+        deco_a = self.node_a.compute_decoherence_field(self.tick_time)
+        deco_b = self.node_b.compute_decoherence_field(self.tick_time)
+        avg = (deco_a + deco_b) / 2
+        debt = (self.node_a.decoherence_debt + self.node_b.decoherence_debt) / 6.0
+        rupture_chance = avg + debt
+        self.bridge.decoherence_exposure.append(avg)
+        if len(self.bridge.decoherence_exposure) > 20:
+            self.bridge.decoherence_exposure.pop(0)
+        if self.bridge.probabilistic_bridge_failure(rupture_chance):
+            self._record_rupture(avg, "decoherence")
+            return True
+        if self.bridge.decoherence_limit and self.bridge.last_activation is not None:
+            if (
+                self.tick_time - self.bridge.last_activation
+                > self.bridge.decoherence_limit
+            ):
+                print(f"[BRIDGE] Decohered at tick {self.tick_time}, disabling bridge.")
+                self.bridge.active = False
+                self._record_rupture(avg, "decoherence_limit")
+                return True
+        return False
+
+    # ------------------------------------------------------------------
+    def _record_rupture(self, avg_decoherence: float, reason: str) -> None:
+        self.bridge.last_rupture_tick = self.tick_time
+        self.bridge._log_event(self.tick_time, "bridge_ruptured", avg_decoherence)
+        avg_coh = (
+            self.node_a.compute_coherence_level(self.tick_time)
+            + self.node_b.compute_coherence_level(self.tick_time)
+        ) / 2
+        self.bridge._log_rupture(self.tick_time, reason, avg_coh)
+        self.bridge._log_dynamics(
+            self.tick_time, "ruptured", {"decoherence": avg_decoherence}
+        )
+        self.bridge.rupture_history.append((self.tick_time, avg_decoherence))
+        self.bridge.trust_score = max(0.0, self.bridge.trust_score - 0.1)
+        self.bridge.reinforcement_streak = 0
+        from . import tick_engine as te
+
+        te.trigger_csp(
+            self.bridge.bridge_id, self.node_a.x, self.node_a.y, self.tick_time
+        )
+        self.bridge.update_state(self.tick_time)
+
+    # ------------------------------------------------------------------
+    def _propagate(self) -> None:
+        if self.bridge.bridge_type == "braided":
+            if self.a_collapsed:
+                phase = self.node_a.get_phase_at(self.tick_time)
+                self.node_b.apply_tick(
+                    self.tick_time,
+                    phase + self.bridge.phase_offset,
+                    self.graph,
+                    origin="bridge",
+                )
+                self.node_a.entangled_with.add(self.node_b.id)
+                self.node_b.entangled_with.add(self.node_a.id)
+            elif self.b_collapsed:
+                phase = self.node_b.get_phase_at(self.tick_time)
+                self.node_a.apply_tick(
+                    self.tick_time,
+                    phase + self.bridge.phase_offset,
+                    self.graph,
+                    origin="bridge",
+                )
+                self.node_a.entangled_with.add(self.node_b.id)
+                self.node_b.entangled_with.add(self.node_a.id)
+        elif self.bridge.bridge_type in {"unidirectional", "mirror"}:
+            if self.a_collapsed:
+                phase = self.node_a.get_phase_at(self.tick_time)
+                self.node_b.apply_tick(
+                    self.tick_time,
+                    phase + self.bridge.phase_offset,
+                    self.graph,
+                    origin="bridge",
+                )
+                self.node_a.entangled_with.add(self.node_b.id)
+                self.node_b.entangled_with.add(self.node_a.id)
+
+    # ------------------------------------------------------------------
+    def _record_metrics(self) -> None:
+        if self.bridge.active:
+            self.bridge.tick_load += 1
+            if self.phase_a is not None and self.phase_b is not None:
+                self.bridge.phase_drift += abs(
+                    (self.phase_a - self.phase_b + math.pi) % (2 * math.pi) - math.pi
+                )
+            self.bridge.coherence_flux += (
+                self.node_a.coherence + self.node_b.coherence
+            ) / 2
+        self.bridge.last_activation = self.tick_time
+        if self.bridge.active:
+            self.bridge.last_active_tick = self.tick_time
+        self.bridge.reinforcement_streak += 1
+        self.bridge.trust_score = min(1.0, self.bridge.trust_score + 0.01)
