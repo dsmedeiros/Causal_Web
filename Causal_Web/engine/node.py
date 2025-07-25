@@ -9,6 +9,7 @@ import uuid
 from ..config import Config
 from .logger import log_json
 from .tick import Tick, GLOBAL_TICK_POOL
+from .node_services import NodeInitializationService
 
 
 class NodeType(Enum):
@@ -36,90 +37,21 @@ class Node:
         origin_type: str = "seed",
         generation_tick: int = 0,
         parent_ids: Optional[List[str]] = None,
-    ):
-        self.id = node_id
-        self.x = x
-        self.y = y
-        self.frequency = frequency
-        self.phase = phase
-        self.coherence = 1.0
-        self.decoherence = 0.0
-        self.tick_history = []  # List[Tick]
-        # Separate tracking for self-emitted vs externally sourced ticks
-        self.emitted_tick_times: Set[float] = set()
-        self.received_tick_times: Set[float] = set()
-        self._tick_phase_lookup: Dict[int, float] = {}
-        self.incoming_phase_queue = defaultdict(
-            list
-        )  # tick_time -> [(phase, created_tick)]
-        # count of incoming ticks per tick time
-        self.incoming_tick_counts = defaultdict(int)
-        # track scheduled phases for coherence/decoherence metrics
-        self.pending_superpositions = defaultdict(list)
-        self._phase_cache: Dict[int, float] = {}
-        self._coherence_cache: Dict[int, float] = {}
-        self._decoherence_cache: Dict[int, float] = {}
-        self.current_tick = 0
-        self.subjective_ticks = 0  # For relativistic tracking
-        self.last_emission_tick = None
-        if refractory_period is None:
-            refractory_period = getattr(Config, "refractory_period", 2.0)
-        self.refractory_period = refractory_period
-        self.last_tick_time: Optional[float] = None
-        self.base_threshold = base_threshold
-        self.current_threshold = self.base_threshold
-        self.collapse_origin = {}  # tick_time -> "self" or "bridge"
-        self._decoherence_streak = 0
-        self.is_classical = False
-        self.coherence_series: List[float] = []
-        self.law_wave_frequency: float = 0.0
-        self.entangled_with: Set[str] = set()
-        self.coherence_velocity: float = 0.0
-        self.node_type: NodeType = NodeType.NORMAL
-        self.prev_node_type: NodeType = NodeType.NORMAL
-        self.coherence_credit: float = 0.0
-        self.decoherence_debt: float = 0.0
-        self.phase_lock: bool = False
-        self.collapse_pressure: float = 0.0
+    ) -> None:
+        """Create a new node and delegate attribute setup."""
 
-        # ---- Cluster metadata ----
-        # Mapping of hierarchy level -> cluster id
-        self.cluster_ids: Dict[int, int] = {}
-
-        # ---- Propagation metadata ----
-        self.origin_type = origin_type
-        self.generation_tick = generation_tick
-        self.parent_ids = parent_ids or []
-        self.sip_streak = 0
-
-        # ---- Phase 4 additions ----
-        self.memory_window = getattr(Config, "memory_window", 20)
-        self.memory: Dict[str, deque] = {
-            "origins": deque(maxlen=self.memory_window),
-            "coherence": deque(maxlen=self.memory_window),
-            "decoherence": deque(maxlen=self.memory_window),
-        }
-        self.trust_profile: Dict[str, float] = {}
-        self.phase_confidence_index: float = 1.0
-        self.goals: Dict[str, float] = {}
-        self.goal_error: Dict[str, float] = {}
-
-        # ---- Coherence threshold ramp parameters ----
-        self.initial_coherence_threshold = getattr(
-            Config, "initial_coherence_threshold", 0.6
+        NodeInitializationService(self).setup(
+            node_id,
+            x=x,
+            y=y,
+            frequency=frequency,
+            refractory_period=refractory_period,
+            base_threshold=base_threshold,
+            phase=phase,
+            origin_type=origin_type,
+            generation_tick=generation_tick,
+            parent_ids=parent_ids,
         )
-        self.steady_coherence_threshold = getattr(
-            Config, "steady_coherence_threshold", 0.85
-        )
-        self.coherence_ramp_ticks = getattr(Config, "coherence_ramp_ticks", 10)
-
-        # additional offset applied from global network constraints
-        self.dynamic_offset = 0.0
-
-        # ---- Spatial indexing ----
-        cell_size = getattr(Config, "SPATIAL_GRID_SIZE", 50)
-        self.grid_x = int(self.x // cell_size)
-        self.grid_y = int(self.y // cell_size)
 
     def compute_phase(self, tick_time):
         """Return phase value incorporating time-dependent global jitter."""
