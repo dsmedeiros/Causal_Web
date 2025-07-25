@@ -17,7 +17,9 @@ from .logger import log_json
 class CausalGraph:
     """Container for nodes, edges and bridges comprising the simulation."""
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialize empty collections tracking graph elements."""
+
         self.nodes = {}
         self.edges = []
         self.edges_from = defaultdict(list)
