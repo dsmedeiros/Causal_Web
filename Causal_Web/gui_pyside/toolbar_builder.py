@@ -599,72 +599,9 @@ class MetaNodePanel(QDockWidget):
 
     def __init__(self, main_window, parent=None):
         super().__init__("MetaNode", parent)
-        self.main_window = main_window
-        self.current: Optional[str] = None
-        self.dirty = False
-        self._force_close = False
-        widget = QWidget()
-        layout = QFormLayout(widget)
+        from .panel_services import MetaNodePanelSetupService
 
-        self.id_label = QLabel()
-        layout.addRow(TooltipLabel("ID"), self.id_label)
-
-        self.member_list = QListWidget()
-        self.member_list.setSelectionMode(QListWidget.MultiSelection)
-        layout.addRow(
-            TooltipLabel("Members", TOOLTIPS.get("members")), self.member_list
-        )
-        self.member_list.itemSelectionChanged.connect(self._mark_dirty)
-
-        self.phase_tol = QDoubleSpinBox()
-        self.phase_tol.setDecimals(3)
-        layout.addRow(
-            TooltipLabel("Tolerance", TOOLTIPS.get("tolerance")), self.phase_tol
-        )
-        self.phase_tol.valueChanged.connect(self._mark_dirty)
-
-        self.min_coherence = QDoubleSpinBox()
-        self.min_coherence.setDecimals(3)
-        layout.addRow(
-            TooltipLabel("Min Coherence", TOOLTIPS.get("min_coherence")),
-            self.min_coherence,
-        )
-        self.min_coherence.valueChanged.connect(self._mark_dirty)
-
-        self.shared_tick = QCheckBox()
-        layout.addRow(
-            TooltipLabel("Shared Tick Input", TOOLTIPS.get("shared_tick_input")),
-            self.shared_tick,
-        )
-        self.shared_tick.toggled.connect(self._mark_dirty)
-
-        self.sync_topology = QCheckBox()
-        layout.addRow(
-            TooltipLabel("Sync Topology", TOOLTIPS.get("sync_topology")),
-            self.sync_topology,
-        )
-        self.sync_topology.toggled.connect(self._mark_dirty)
-
-        self.role_lock = QLineEdit()
-        layout.addRow(
-            TooltipLabel("Role Lock", TOOLTIPS.get("role_lock")), self.role_lock
-        )
-        self.role_lock.textChanged.connect(self._mark_dirty)
-
-        self.type_label = QLabel("Configured")
-        layout.addRow(TooltipLabel("Type", TOOLTIPS.get("type")), self.type_label)
-
-        self.collapsed_check = QCheckBox()
-        layout.addRow(
-            TooltipLabel("Collapsed", TOOLTIPS.get("collapsed")), self.collapsed_check
-        )
-        self.collapsed_check.toggled.connect(self._mark_dirty)
-
-        apply_btn = QPushButton("Apply")
-        apply_btn.clicked.connect(self.commit)
-        layout.addRow(apply_btn)
-        widget.installEventFilter(_FocusWatcher(self._minimize))
-        self.setWidget(widget)
+        MetaNodePanelSetupService(self, main_window).build()
 
     def _minimize(self) -> None:
         """Hide the meta node panel when focus is lost."""

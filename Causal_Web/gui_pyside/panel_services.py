@@ -14,6 +14,8 @@ from PySide6.QtWidgets import (
     QCheckBox,
     QPushButton,
     QWidget,
+    QLabel,
+    QListWidget,
 )
 
 from .toolbar_builder import TooltipLabel, TOOLTIPS, _FocusWatcher, mark_graph_dirty
@@ -148,6 +150,92 @@ class ConnectionPanelSetupService:
         tc.currentIndexChanged.connect(self.panel._update_fields)
         tc.currentIndexChanged.connect(self.panel._mark_dirty)
         self.panel._update_fields()
+
+
+@dataclass
+class MetaNodePanelSetupService:
+    """Build widgets for :class:`~Causal_Web.gui_pyside.toolbar_builder.MetaNodePanel`."""
+
+    panel: QDockWidget
+    main_window: Any
+
+    def build(self) -> None:
+        self._init_state()
+        widget = QWidget()
+        layout = QFormLayout(widget)
+        self._build_member_fields(layout)
+        self._build_constraint_fields(layout)
+        self._finish(widget, layout)
+
+    # ------------------------------------------------------------------
+    def _init_state(self) -> None:
+        p = self.panel
+        p.main_window = self.main_window
+        p.current = None
+        p.dirty = False
+        p._force_close = False
+
+    # ------------------------------------------------------------------
+    def _build_member_fields(self, layout) -> None:
+        p = self.panel
+        p.id_label = QLabel()
+        layout.addRow(TooltipLabel("ID"), p.id_label)
+
+        p.member_list = QListWidget()
+        p.member_list.setSelectionMode(QListWidget.MultiSelection)
+        layout.addRow(TooltipLabel("Members", TOOLTIPS.get("members")), p.member_list)
+        p.member_list.itemSelectionChanged.connect(p._mark_dirty)
+
+    # ------------------------------------------------------------------
+    def _build_constraint_fields(self, layout) -> None:
+        p = self.panel
+        p.phase_tol = QDoubleSpinBox()
+        p.phase_tol.setDecimals(3)
+        layout.addRow(TooltipLabel("Tolerance", TOOLTIPS.get("tolerance")), p.phase_tol)
+        p.phase_tol.valueChanged.connect(p._mark_dirty)
+
+        p.min_coherence = QDoubleSpinBox()
+        p.min_coherence.setDecimals(3)
+        layout.addRow(
+            TooltipLabel("Min Coherence", TOOLTIPS.get("min_coherence")),
+            p.min_coherence,
+        )
+        p.min_coherence.valueChanged.connect(p._mark_dirty)
+
+        p.shared_tick = QCheckBox()
+        layout.addRow(
+            TooltipLabel("Shared Tick Input", TOOLTIPS.get("shared_tick_input")),
+            p.shared_tick,
+        )
+        p.shared_tick.toggled.connect(p._mark_dirty)
+
+        p.sync_topology = QCheckBox()
+        layout.addRow(
+            TooltipLabel("Sync Topology", TOOLTIPS.get("sync_topology")),
+            p.sync_topology,
+        )
+        p.sync_topology.toggled.connect(p._mark_dirty)
+
+        p.role_lock = QLineEdit()
+        layout.addRow(TooltipLabel("Role Lock", TOOLTIPS.get("role_lock")), p.role_lock)
+        p.role_lock.textChanged.connect(p._mark_dirty)
+
+        p.type_label = QLabel("Configured")
+        layout.addRow(TooltipLabel("Type", TOOLTIPS.get("type")), p.type_label)
+
+        p.collapsed_check = QCheckBox()
+        layout.addRow(
+            TooltipLabel("Collapsed", TOOLTIPS.get("collapsed")), p.collapsed_check
+        )
+        p.collapsed_check.toggled.connect(p._mark_dirty)
+
+    # ------------------------------------------------------------------
+    def _finish(self, widget, layout) -> None:
+        apply_btn = QPushButton("Apply")
+        apply_btn.clicked.connect(self.panel.commit)
+        layout.addRow(apply_btn)
+        widget.installEventFilter(_FocusWatcher(self.panel._minimize))
+        self.panel.setWidget(widget)
 
 
 @dataclass
