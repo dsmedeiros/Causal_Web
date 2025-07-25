@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import cmath
 import math
 import random
@@ -30,18 +32,18 @@ class CausalGraph:
 
     def add_node(
         self,
-        node_id,
-        x=0.0,
-        y=0.0,
-        frequency=1.0,
+        node_id: str,
+        x: float = 0.0,
+        y: float = 0.0,
+        frequency: float = 1.0,
         refractory_period: float | None = None,
-        base_threshold=0.5,
-        phase=0.0,
+        base_threshold: float = 0.5,
+        phase: float = 0.0,
         *,
-        origin_type="seed",
-        generation_tick=0,
-        parent_ids=None,
-    ):
+        origin_type: str = "seed",
+        generation_tick: int = 0,
+        parent_ids: list[str] | None = None,
+    ) -> None:
         x, y = self._non_overlapping_position(x, y)
         if refractory_period is None:
             refractory_period = getattr(Config, "refractory_period", 2.0)
@@ -92,14 +94,14 @@ class CausalGraph:
 
     def add_edge(
         self,
-        source_id,
-        target_id,
-        attenuation=1.0,
-        density=0.0,
-        delay=1,
-        phase_shift=0.0,
-        weight=None,
-    ):
+        source_id: str,
+        target_id: str,
+        attenuation: float = 1.0,
+        density: float = 0.0,
+        delay: int = 1,
+        phase_shift: float = 0.0,
+        weight: float | None = None,
+    ) -> None:
         if weight is None:
             low, high = getattr(Config, "edge_weight_range", [1.0, 1.0])
             weight = random.uniform(low, high)
@@ -118,18 +120,18 @@ class CausalGraph:
 
     def add_bridge(
         self,
-        node_a_id,
-        node_b_id,
-        bridge_type="braided",
-        phase_offset=0.0,
-        drift_tolerance=None,
-        decoherence_limit=None,
-        initial_strength=1.0,
-        medium_type="standard",
-        mutable=True,
-        seeded=True,
-        formed_at_tick=0,
-    ):
+        node_a_id: str,
+        node_b_id: str,
+        bridge_type: str = "braided",
+        phase_offset: float = 0.0,
+        drift_tolerance: float | None = None,
+        decoherence_limit: float | None = None,
+        initial_strength: float = 1.0,
+        medium_type: str = "standard",
+        mutable: bool = True,
+        seeded: bool = True,
+        formed_at_tick: int = 0,
+    ) -> None:
         bridge = Bridge(
             node_a_id,
             node_b_id,
@@ -352,7 +354,7 @@ class CausalGraph:
 
     def detect_clusters(
         self, coherence_threshold: float = 0.8, freq_tolerance: float = 0.1
-    ):
+    ) -> list[list[str]]:
         """Detect sets of phase-aligned nodes and assign cluster IDs.
 
         Nodes are compared only with others in adjacent spatial bins to

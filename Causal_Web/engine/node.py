@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import math
 import cmath
 from collections import defaultdict, deque
@@ -26,13 +28,13 @@ class Node:
 
     def __init__(
         self,
-        node_id,
-        x=0.0,
-        y=0.0,
-        frequency=1.0,
+        node_id: str,
+        x: float = 0.0,
+        y: float = 0.0,
+        frequency: float = 1.0,
         refractory_period: float | None = None,
-        base_threshold=0.5,
-        phase=0.0,
+        base_threshold: float = 0.5,
+        phase: float = 0.0,
         *,
         origin_type: str = "seed",
         generation_tick: int = 0,
@@ -53,7 +55,7 @@ class Node:
             parent_ids=parent_ids,
         )
 
-    def compute_phase(self, tick_time):
+    def compute_phase(self, tick_time: float) -> float:
         """Return phase value incorporating time-dependent global jitter."""
         if tick_time in self._phase_cache:
             return self._phase_cache[tick_time]
@@ -82,7 +84,7 @@ class Node:
         )
         return base + self.dynamic_offset
 
-    def compute_coherence_level(self, tick_time):
+    def compute_coherence_level(self, tick_time: float) -> float:
         if tick_time in self._coherence_cache:
             return self._coherence_cache[tick_time]
         phases = self.pending_superpositions.get(tick_time, [])
@@ -127,7 +129,7 @@ class Node:
         self._coherence_cache[tick_time] = self.coherence
         return self.coherence
 
-    def compute_decoherence_field(self, tick_time):
+    def compute_decoherence_field(self, tick_time: float) -> float:
         if tick_time in self._decoherence_cache:
             return self._decoherence_cache[tick_time]
         phases = self.pending_superpositions.get(tick_time, [])
@@ -367,7 +369,13 @@ class Node:
         }
         log_json(Config.output_path("propagation_failure_log.json"), fail_rec)
 
-    def schedule_tick(self, tick_time, incoming_phase, origin=None, created_tick=None):
+    def schedule_tick(
+        self,
+        tick_time: float,
+        incoming_phase: float,
+        origin: str | None = None,
+        created_tick: int | None = None,
+    ) -> None:
         """Store an incoming phase for future evaluation.
 
         Parameters
@@ -406,17 +414,23 @@ class Node:
 
         te.mark_for_update(self.id)
 
-    def should_tick(self, tick_time):
+    def should_tick(self, tick_time: float) -> tuple[bool, float | None, str]:
         """Return whether the node should fire at ``tick_time``."""
 
         from .services import NodeTickDecisionService
 
         return NodeTickDecisionService(self, tick_time).decide()
 
-    def get_phase_at(self, tick_time):
+    def get_phase_at(self, tick_time: float) -> float | None:
         return self._tick_phase_lookup.get(tick_time)
 
-    def apply_tick(self, tick_time, phase, graph, origin="self"):
+    def apply_tick(
+        self,
+        tick_time: float,
+        phase: float,
+        graph: "CausalGraph",
+        origin: str = "self",
+    ) -> None:
         """Emit a tick and propagate resulting phases to neighbours."""
 
         from .services import NodeTickService
@@ -424,8 +438,13 @@ class Node:
         NodeTickService(self, tick_time, phase, graph, origin).process()
 
     def propagate_collapse(
-        self, tick_time, graph, threshold: float = 0.5, depth: int = 1, visited=None
-    ):
+        self,
+        tick_time: int,
+        graph: "CausalGraph",
+        threshold: float = 0.5,
+        depth: int = 1,
+        visited: Set[str] | None = None,
+    ) -> list[dict]:
         """Recursively propagate collapse and track chain depth."""
         if visited is None:
             visited = set()
@@ -452,7 +471,7 @@ class Node:
             log_json(Config.output_path("collapse_front_log.json"), record)
         return chain
 
-    def _log_collapse_chain(self, tick_time, collapsed):
+    def _log_collapse_chain(self, tick_time: int, collapsed: list[dict]) -> None:
         """Log collapse propagation events to file with depth info."""
         record = {
             "tick": tick_time,
@@ -463,7 +482,7 @@ class Node:
         }
         log_json(Config.output_path("collapse_chain_log.json"), record)
 
-    def maybe_tick(self, global_tick, graph):
+    def maybe_tick(self, global_tick: int, graph: "CausalGraph") -> None:
         """Evaluate queued phases and emit a tick if conditions are met."""
         if self.tick_history:
             from .tick_router import TickRouter
@@ -499,7 +518,7 @@ class Node:
                 self.base_threshold, self.current_threshold - 0.01
             )
 
-    def _emit(self, tick_time):
+    def _emit(self, tick_time: float) -> None:
         phase = self.compute_phase(tick_time)
         tick_obj = GLOBAL_TICK_POOL.acquire()
         tick_obj.origin = "self"
@@ -518,14 +537,14 @@ class Edge:
 
     def __init__(
         self,
-        source,
-        target,
-        attenuation,
-        density,
-        delay=1,
-        phase_shift=0.0,
-        weight=1.0,
-    ):
+        source: str,
+        target: str,
+        attenuation: float,
+        density: float,
+        delay: int = 1,
+        phase_shift: float = 0.0,
+        weight: float = 1.0,
+    ) -> None:
         self.source = source
         self.target = target
         self.attenuation = attenuation  # Multiplier for phase amplitude
@@ -536,7 +555,7 @@ class Edge:
 
     def adjusted_delay(
         self, source_freq: float = 0.0, target_freq: float = 0.0, kappa: float = 1.0
-    ):
+    ) -> int:
         """Delay adjusted by local law-wave gradient."""
         base = self.delay + int(self.density)
         delta_f = abs(source_freq - target_freq)
@@ -545,7 +564,12 @@ class Edge:
         # ensure delay remains positive to avoid scheduling errors
         return max(1, int(round(adjusted)))
 
-    def propagate_phase(self, phase, global_tick, graph):
+    def propagate_phase(
+        self,
+        phase: float,
+        global_tick: int,
+        graph: "CausalGraph",
+    ) -> None:
         target_node = graph.get_node(self.target)
 
         drift_phase = 0.0

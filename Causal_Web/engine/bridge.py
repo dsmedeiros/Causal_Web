@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 import math
 from random import random
@@ -90,7 +92,9 @@ class Bridge:
         progress = min(max(tick - self.formed_at_tick, 0), ramp) / ramp
         return 0.75 + 0.15 * progress
 
-    def _log_dynamics(self, tick, event, conditions=None):
+    def _log_dynamics(
+        self, tick: int, event: str, conditions: dict | None = None
+    ) -> None:
         record = {
             "bridge_id": self.bridge_id,
             "source": self.node_a_id,
@@ -137,7 +141,7 @@ class Bridge:
                 avg_coh = 1 - avg_decoh
                 self._log_rupture(tick, "fatigue", avg_coh)
 
-    def _log_event(self, tick, event_type, value):
+    def _log_event(self, tick: int, event_type: str, value: float | None) -> None:
         event = BridgeEvent(
             tick=tick,
             event_type=event_type,
@@ -148,7 +152,7 @@ class Bridge:
         )
         log_json(Config.output_path("event_log.json"), event.__dict__)
 
-    def _log_rupture(self, tick, reason, coherence):
+    def _log_rupture(self, tick: int, reason: str, coherence: float | None) -> None:
         record = {
             "tick": tick,
             "bridge": self.bridge_id,
@@ -161,8 +165,11 @@ class Bridge:
         log_json(Config.output_path("bridge_rupture_log.json"), record)
 
     def probabilistic_bridge_failure(
-        self, decoherence_strength, rupture_threshold=0.3, rupture_prob=0.9
-    ):
+        self,
+        decoherence_strength: float,
+        rupture_threshold: float = 0.3,
+        rupture_prob: float = 0.9,
+    ) -> bool:
         if decoherence_strength > rupture_threshold and random() < rupture_prob:
             print(
                 f"[BRIDGE] Probabilistic rupture at tick due to decoherence={decoherence_strength:.2f}"
@@ -172,7 +179,7 @@ class Bridge:
         return False
 
     # ---- Phase 6: plasticity ----
-    def decay(self, tick_time, inactive_threshold=5):
+    def decay(self, tick_time: int, inactive_threshold: int = 5) -> None:
         if self.last_active_tick is None:
             self.last_active_tick = tick_time
         if (
@@ -197,7 +204,13 @@ class Bridge:
                 te._decay_durations.append(duration)
                 self._log_dynamics(tick_time, "decayed")
 
-    def try_reform(self, tick_time, node_a, node_b, coherence_threshold=0.9):
+    def try_reform(
+        self,
+        tick_time: int,
+        node_a: "Node",
+        node_b: "Node",
+        coherence_threshold: float = 0.9,
+    ) -> None:
         if not self.reformable or self.active:
             return
         coherence = (
@@ -223,7 +236,13 @@ class Bridge:
             self._log_event(tick_time, "bridge_reformed", coherence)
             self._log_dynamics(tick_time, "recovered", {"coherence": coherence})
 
-    def try_reactivate(self, tick_time, node_a, node_b, coherence_threshold=0.9):
+    def try_reactivate(
+        self,
+        tick_time: int,
+        node_a: "Node",
+        node_b: "Node",
+        coherence_threshold: float = 0.9,
+    ) -> None:
         coherence = (
             node_a.compute_coherence_level(tick_time)
             + node_b.compute_coherence_level(tick_time)
@@ -239,11 +258,11 @@ class Bridge:
             self._log_event(tick_time, "bridge_reformed", coherence)
             self._log_dynamics(tick_time, "recovered", {"coherence": coherence})
 
-    def apply(self, tick_time, graph):
+    def apply(self, tick_time: int, graph: "CausalGraph") -> None:
         """Apply the bridge logic for ``tick_time``."""
         BridgeApplyService(self, tick_time, graph).process()
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             "source": self.node_a_id,
             "target": self.node_b_id,
