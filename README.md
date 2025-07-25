@@ -584,7 +584,9 @@ pytest
 
 Large functions have been decomposed into reusable services. The `NodeTickService`
 encapsulates the tick emission lifecycle while `GraphLoadService` handles JSON
-graph loading. Both live in `Causal_Web/engine/services.py`.
+graph loading. Metric collection is delegated to `NodeMetricsService` which
+replaced the bulky `log_metrics_per_tick` function. All services live in
+`Causal_Web/engine/services.py`.
 
 ### Identified long functions
 
@@ -592,7 +594,7 @@ graph loading. Both live in `Causal_Web/engine/services.py`.
 - `graph/model.py:add_connection` – 56 lines
 - `engine/tick_engine.py:_spawn_sip_recomb_child` – 51 lines
 - `engine/tick_engine.py:_process_csp_seeds` – 83 lines
-- `engine/tick_engine.py:log_metrics_per_tick` – 118 lines
+- `engine/services.py:NodeMetricsService.log_metrics` – 45 lines
 - `engine/tick_engine.py:simulation_loop` – 98 lines
 - `engine/tick_engine.py:export_global_diagnostics` – 55 lines
 - `engine/tick_engine.py:run` – 93 lines

@@ -1,14 +1,18 @@
 """Service objects encapsulating large behaviour blocks."""
+
 from __future__ import annotations
 
 import json
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from concurrent.futures import ThreadPoolExecutor
+import numpy as np
 
 from ..config import Config
 from .logger import log_json
 from .tick import GLOBAL_TICK_POOL
 from .node import Node, NodeType
+from . import tick_engine as te
 
 
 @dataclass
@@ -161,6 +165,174 @@ class NodeTickService:
                 origin=n.id,
                 created_tick=self.tick_time,
             )
+
+
+@dataclass
+class NodeMetricsService:
+    """Collect and persist per-tick node metrics."""
+
+    graph: any
+    last_coherence: dict = field(default_factory=dict)
+
+    # ------------------------------------------------------------------
+    def log_metrics(self, tick: int) -> None:
+        """Gather metrics for ``tick`` and write log files."""
+        results = self._gather(tick)
+        logs = self._process_results(results, tick)
+        self._maybe_handle_clusters(tick)
+        if tick % getattr(Config, "log_interval", 1) == 0:
+            self._write_logs(tick, logs)
+
+    # ------------------------------------------------------------------
+    def _gather(self, tick: int):
+        with ThreadPoolExecutor(
+            max_workers=getattr(Config, "thread_count", None)
+        ) as ex:
+            return list(
+                ex.map(lambda n: self._compute(n, tick), self.graph.nodes.values())
+            )
+
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _compute(node, tick):
+        decoherence = node.compute_decoherence_field(tick)
+        coherence = node.compute_coherence_level(tick)
+        interference = len(node.pending_superpositions.get(tick, []))
+        return (
+            node.id,
+            decoherence,
+            coherence,
+            interference,
+            node.node_type.value,
+            node.coherence_credit,
+            node.decoherence_debt,
+        )
+
+    # ------------------------------------------------------------------
+    def _process_results(self, results, tick):
+        decoherence_log = {}
+        coherence_log = {}
+        classical_state = {}
+        coherence_velocity = {}
+        law_wave_log = {}
+        stable_frequency_log = {}
+        interference_log = {}
+        credit_log = {}
+        debt_log = {}
+        type_log = {}
+
+        for node_id, deco, coh, inter, ntype, credit, debt in results:
+            node = self.graph.get_node(node_id)
+            prev = self.last_coherence.get(node_id, coh)
+            delta = coh - prev
+            self.last_coherence[node_id] = coh
+            node.coherence_velocity = delta
+
+            node.update_classical_state(deco, tick_time=tick, graph=self.graph)
+
+            record = te._law_wave_stability.setdefault(
+                node_id, {"freqs": [], "stable": 0}
+            )
+            record["freqs"].append(node.law_wave_frequency)
+            if len(record["freqs"]) > 5:
+                record["freqs"].pop(0)
+            if len(record["freqs"]) == 5:
+                if np.std(record["freqs"]) < 0.01:
+                    record["stable"] += 1
+                else:
+                    record["stable"] = 0
+            if record["stable"] >= 10:
+                node.refractory_period = max(1.0, node.refractory_period - 0.1)
+                log_json(
+                    Config.output_path("law_drift_log.json"),
+                    {
+                        "tick": tick,
+                        "node": node_id,
+                        "new_refractory_period": node.refractory_period,
+                    },
+                )
+                record["stable"] = 0
+
+            if record["stable"] >= 5:
+                stable_frequency_log[node_id] = round(np.mean(record["freqs"]), 4)
+
+            decoherence_log[node_id] = round(deco, 4)
+            coherence_log[node_id] = round(coh, 4)
+            classical_state[node_id] = getattr(node, "is_classical", False)
+            coherence_velocity[node_id] = round(delta, 5)
+            law_wave_log[node_id] = round(node.law_wave_frequency, 4)
+            interference_log[node_id] = inter
+            credit_log[node_id] = round(credit, 3)
+            debt_log[node_id] = round(debt, 3)
+            type_log[node_id] = ntype
+
+        return {
+            "decoherence_log": decoherence_log,
+            "coherence_log": coherence_log,
+            "classical_state": classical_state,
+            "coherence_velocity": coherence_velocity,
+            "law_wave_log": law_wave_log,
+            "stable_frequency_log": stable_frequency_log,
+            "interference_log": interference_log,
+            "credit_log": credit_log,
+            "debt_log": debt_log,
+            "type_log": type_log,
+        }
+
+    # ------------------------------------------------------------------
+    def _maybe_handle_clusters(self, tick: int) -> None:
+        if tick % getattr(Config, "cluster_interval", 1) != 0:
+            return
+        clusters = self.graph.hierarchical_clusters()
+        self.graph.create_meta_nodes(clusters.get(0, []))
+        if tick % getattr(Config, "log_interval", 1) == 0:
+            log_json(Config.output_path("cluster_log.json"), {str(tick): clusters})
+
+    # ------------------------------------------------------------------
+    def _write_logs(self, tick: int, logs: dict) -> None:
+        log_json(
+            Config.output_path("law_wave_log.json"),
+            {str(tick): logs["law_wave_log"]},
+        )
+        if logs["stable_frequency_log"]:
+            log_json(
+                Config.output_path("stable_frequency_log.json"),
+                {str(tick): logs["stable_frequency_log"]},
+            )
+        log_json(
+            Config.output_path("decoherence_log.json"),
+            {str(tick): logs["decoherence_log"]},
+        )
+        log_json(
+            Config.output_path("coherence_log.json"),
+            {str(tick): logs["coherence_log"]},
+        )
+        log_json(
+            Config.output_path("coherence_velocity_log.json"),
+            {str(tick): logs["coherence_velocity"]},
+        )
+        log_json(
+            Config.output_path("classicalization_map.json"),
+            {str(tick): logs["classical_state"]},
+        )
+        log_json(
+            Config.output_path("interference_log.json"),
+            {str(tick): logs["interference_log"]},
+        )
+        log_json(
+            Config.output_path("tick_density_map.json"),
+            {str(tick): logs["interference_log"]},
+        )
+        log_json(
+            Config.output_path("node_state_log.json"),
+            {
+                str(tick): {
+                    "type": logs["type_log"],
+                    "credit": logs["credit_log"],
+                    "debt": logs["debt_log"],
+                }
+            },
+        )
 
 
 class GraphLoadService:
