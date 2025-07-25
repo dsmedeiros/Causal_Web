@@ -597,6 +597,8 @@ Recent refactors introduced `ConnectionDisplayService` for showing existing
 links, `GlobalDiagnosticsService` for exporting run metrics and
 `SIPRecombinationService` for recombination-based spawning. A lightweight
 `LoggingMixin` now centralises JSON logging for classes like `Node` and `Bridge`.
+`OutputDirMixin` adds a common `_path` helper used by the log interpreter and
+causal analyst.
 
 ### Identified long functions
 
