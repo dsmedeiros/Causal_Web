@@ -43,6 +43,20 @@ def _graph_metadata(path: str) -> Dict[str, Any]:
 def record_run(
     run_id: str, config_path: str, graph_path: str, archive_path: str
 ) -> None:
+    """Persist run metadata to PostgreSQL.
+
+    Parameters
+    ----------
+    run_id:
+        Identifier of the run directory.
+    config_path:
+        Path to the configuration file used for the run.
+    graph_path:
+        Path to the graph file used for the run.
+    archive_path:
+        Directory where the run outputs are archived.
+    """
+
     metadata = _graph_metadata(graph_path)
     with open(config_path) as fh:
         cfg = json.load(fh)

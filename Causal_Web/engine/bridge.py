@@ -42,13 +42,14 @@ class Bridge:
         bridge_type: str = "braided",
         phase_offset: float = 0.0,
         drift_tolerance: float | None = None,
-        decoherence_limit: int | None = None,
+        decoherence_limit: float | None = None,
         initial_strength: float = 1.0,
         medium_type: str = "standard",
         mutable: bool = True,
         seeded: bool = True,
         formed_at_tick: int = 0,
     ) -> None:
+
         """Create a new bridge between two node identifiers."""
         self.node_a_id = node_a_id
         self.node_b_id = node_b_id

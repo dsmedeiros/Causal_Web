@@ -13,8 +13,8 @@ import numpy as np
 
 from ..config import Config
 from .logger import log_json
-from .tick import GLOBAL_TICK_POOL
-from .node import Node, NodeType
+from .tick import Tick, GLOBAL_TICK_POOL
+from .node import Node, NodeType, Edge
 from .graph import CausalGraph
 from . import tick_engine as te
 
@@ -78,7 +78,7 @@ class NodeTickService:
         return True
 
     # ------------------------------------------------------------------
-    def _register_tick(self):
+    def _register_tick(self) -> Tick:
         trace_id = str(uuid.uuid4())
         tick_obj = GLOBAL_TICK_POOL.acquire()
         tick_obj.origin = self.origin
@@ -121,7 +121,7 @@ class NodeTickService:
         return tick_obj
 
     # ------------------------------------------------------------------
-    def _propagate_edges(self):
+    def _propagate_edges(self) -> None:
         EdgePropagationService(
             node=self.node,
             tick_time=self.tick_time,
@@ -163,7 +163,7 @@ class EdgePropagationService:
             )
 
     # ------------------------------------------------------------------
-    def _propagate_edge(self, edge, kappa: float) -> None:
+    def _propagate_edge(self, edge: Edge, kappa: float) -> None:
         target = self.graph.get_node(edge.target)
         delay = edge.adjusted_delay(
             self.node.law_wave_frequency, target.law_wave_frequency, kappa
@@ -180,11 +180,11 @@ class EdgePropagationService:
         )
 
     # ------------------------------------------------------------------
-    def _shift_phase(self, edge) -> float:
+    def _shift_phase(self, edge: Edge) -> float:
         return self.phase * edge.attenuation + edge.phase_shift
 
     # ------------------------------------------------------------------
-    def _log_propagation(self, target, delay: float, shifted: float) -> None:
+    def _log_propagation(self, target: Node, delay: float, shifted: float) -> None:
         log_json(
             Config.output_path("tick_propagation_log.json"),
             {
@@ -198,7 +198,7 @@ class EdgePropagationService:
 
     # ------------------------------------------------------------------
     def _handle_refraction(
-        self, target, delay: float, shifted: float, kappa: float
+        self, target: Node, delay: float, shifted: float, kappa: float
     ) -> bool:
         if target.node_type != NodeType.DECOHERENT:
             return False
@@ -282,7 +282,7 @@ class NodeMetricsResultService:
         self._record_logs(node_id, deco, coh, inter, ntype, credit, debt, delta, node)
 
     # ------------------------------------------------------------------
-    def _update_stability(self, node_id: str, node) -> None:
+    def _update_stability(self, node_id: str, node: Node) -> None:
         record = te._law_wave_stability.setdefault(node_id, {"freqs": [], "stable": 0})
         record["freqs"].append(node.law_wave_frequency)
         if len(record["freqs"]) > 5:
@@ -319,7 +319,7 @@ class NodeMetricsResultService:
         credit: float,
         debt: float,
         delta: float,
-        node,
+        node: Node,
     ) -> None:
         self.logs["decoherence_log"][node_id] = round(deco, 4)
         self.logs["coherence_log"][node_id] = round(coh, 4)
@@ -349,7 +349,7 @@ class NodeMetricsService:
             self._write_logs(tick, logs)
 
     # ------------------------------------------------------------------
-    def _gather(self, tick: int):
+    def _gather(self, tick: int) -> list:
         with ThreadPoolExecutor(
             max_workers=getattr(Config, "thread_count", None)
         ) as ex:
@@ -359,7 +359,9 @@ class NodeMetricsService:
 
     # ------------------------------------------------------------------
     @staticmethod
-    def _compute(node, tick):
+    def _compute(
+        node: Node, tick: int
+    ) -> tuple[str, float, float, int, str, float, float]:
         decoherence = node.compute_decoherence_field(tick)
         coherence = node.compute_coherence_level(tick)
         interference = len(node.pending_superpositions.get(tick, []))
@@ -374,7 +376,7 @@ class NodeMetricsService:
         )
 
     # ------------------------------------------------------------------
-    def _process_results(self, results, tick):
+    def _process_results(self, results: list, tick: int) -> dict:
         return NodeMetricsResultService(
             graph=self.graph,
             results=results,
@@ -640,7 +642,7 @@ class NodeTickDecisionService:
         return False
 
     # ------------------------------------------------------------------
-    def _phase_metrics(self):
+    def _phase_metrics(self) -> tuple[list, complex, float, float, float]:
         raw_items = self.node.incoming_phase_queue[self.tick_time]
         complex_phases = []
         weights = []
