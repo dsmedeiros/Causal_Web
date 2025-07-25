@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from typing import Optional, Any, Dict
+from typing import Optional, Any, Dict, Callable
 
 from pathlib import Path
 import json
 
 from PySide6.QtCore import QObject, Qt, QEvent, QTimer
-from PySide6.QtGui import QAction, QCursor
+from PySide6.QtGui import QAction, QCursor, QCloseEvent
 from PySide6.QtWidgets import (
     QComboBox,
     QDockWidget,
@@ -67,12 +67,12 @@ class TooltipLabel(QLabel):
         self._timer.setSingleShot(True)
         self._timer.timeout.connect(self._show_tooltip)
 
-    def enterEvent(self, event) -> None:  # type: ignore[override]
+    def enterEvent(self, event: QEvent) -> None:  # type: ignore[override]
         if self.tip:
             self._timer.start(500)
         super().enterEvent(event)
 
-    def leaveEvent(self, event) -> None:  # type: ignore[override]
+    def leaveEvent(self, event: QEvent) -> None:  # type: ignore[override]
         self._timer.stop()
         QLabel.setToolTip(self, "")
         super().leaveEvent(event)
@@ -88,11 +88,11 @@ class TooltipLabel(QLabel):
 class _FocusWatcher(QObject):
     """Call a function when the watched widget loses focus."""
 
-    def __init__(self, callback):
+    def __init__(self, callback: Callable[[], None]):
         super().__init__()
         self.callback = callback
 
-    def eventFilter(self, obj, event):  # type: ignore[override]
+    def eventFilter(self, obj: QObject, event: QEvent) -> bool:  # type: ignore[override]
         if event.type() == QEvent.FocusOut:
             self.callback()
         return False
@@ -101,7 +101,8 @@ class _FocusWatcher(QObject):
 class NodePanel(QDockWidget):
     """Dock widget for editing node attributes."""
 
-    def __init__(self, main_window, parent=None):
+    def __init__(self, main_window: Any, parent: Optional[QWidget] = None) -> None:
+        """Create a new node panel."""
         super().__init__("Node", parent)
         NodePanelSetupService(self, main_window).build()
 
@@ -205,7 +206,8 @@ class NodePanel(QDockWidget):
             self.inputs["x"].setValue(x)
             self.inputs["y"].setValue(y)
 
-    def closeEvent(self, event) -> None:  # type: ignore[override]
+    def closeEvent(self, event: QCloseEvent) -> None:  # type: ignore[override]
+        """Prompt to discard changes when closing."""
         if self._force_close or not self.dirty:
             self._force_close = False
             return super().closeEvent(event)
@@ -230,7 +232,8 @@ class NodePanel(QDockWidget):
 class ConnectionPanel(QDockWidget):
     """Dock widget for adding a connection between two nodes."""
 
-    def __init__(self, main_window, parent=None):
+    def __init__(self, main_window: Any, parent: Optional[QWidget] = None) -> None:
+        """Create a new connection panel."""
         super().__init__("Connection", parent)
         ConnectionPanelSetupService(self, main_window).build()
 
@@ -309,7 +312,8 @@ class ConnectionPanel(QDockWidget):
         self.current_index = None
         self.dirty = False
 
-    def closeEvent(self, event) -> None:  # type: ignore[override]
+    def closeEvent(self, event: QCloseEvent) -> None:  # type: ignore[override]
+        """Prompt to discard changes when closing."""
         if self._force_close or not self.dirty:
             self._force_close = False
             return super().closeEvent(event)
@@ -334,7 +338,8 @@ class ConnectionPanel(QDockWidget):
 class ObserverPanel(QDockWidget):
     """Dock widget for editing observer definitions."""
 
-    def __init__(self, main_window, parent=None):
+    def __init__(self, main_window: Any, parent: Optional[QWidget] = None) -> None:
+        """Create a new observer panel."""
         super().__init__("Observer", parent)
         self.main_window = main_window
         self.current_index: Optional[int] = None
@@ -480,7 +485,8 @@ class ObserverPanel(QDockWidget):
         self.hide()
         self.dirty = False
 
-    def closeEvent(self, event) -> None:  # type: ignore[override]
+    def closeEvent(self, event: QCloseEvent) -> None:  # type: ignore[override]
+        """Prompt to discard changes when closing."""
         if self._force_close or not self.dirty:
             self._force_close = False
             return super().closeEvent(event)
@@ -505,7 +511,8 @@ class ObserverPanel(QDockWidget):
 class MetaNodePanel(QDockWidget):
     """Dock widget for editing meta node definitions."""
 
-    def __init__(self, main_window, parent=None):
+    def __init__(self, main_window: Any, parent: Optional[QWidget] = None) -> None:
+        """Create a new meta node panel."""
         super().__init__("MetaNode", parent)
         from .panel_services import MetaNodePanelSetupService
 
@@ -633,7 +640,8 @@ class MetaNodePanel(QDockWidget):
         self.hide()
         self.dirty = False
 
-    def closeEvent(self, event) -> None:  # type: ignore[override]
+    def closeEvent(self, event: QCloseEvent) -> None:  # type: ignore[override]
+        """Prompt to discard changes when closing."""
         if self._force_close or not self.dirty:
             self._force_close = False
             return super().closeEvent(event)
@@ -655,7 +663,7 @@ class MetaNodePanel(QDockWidget):
         self.close()
 
 
-def build_toolbar(main_window) -> QToolBar:
+def build_toolbar(main_window: Any) -> QToolBar:
     """Create the graph editing toolbar and property docks."""
 
     from .toolbar_services import ToolbarBuildService
