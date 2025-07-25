@@ -579,3 +579,37 @@ several node behaviours. Run them with:
 ```bash
 pytest
 ```
+
+## Service objects
+
+Large functions have been decomposed into reusable services. The `NodeTickService`
+encapsulates the tick emission lifecycle while `GraphLoadService` handles JSON
+graph loading. Both live in `Causal_Web/engine/services.py`.
+
+### Identified long functions
+
+- `main.py:main` – 66 lines
+- `graph/model.py:add_connection` – 56 lines
+- `engine/tick_engine.py:_spawn_sip_recomb_child` – 51 lines
+- `engine/tick_engine.py:_process_csp_seeds` – 83 lines
+- `engine/tick_engine.py:log_metrics_per_tick` – 118 lines
+- `engine/tick_engine.py:simulation_loop` – 98 lines
+- `engine/tick_engine.py:export_global_diagnostics` – 55 lines
+- `engine/tick_engine.py:run` – 93 lines
+- `engine/causal_analyst.py:infer_causal_chains` – 53 lines
+- `engine/bridge.py:apply` – 125 lines
+- `engine/node.py:__init__` – 97 lines
+- `engine/node.py:should_tick` – 111 lines
+- `engine/node.py:apply_tick` – 143 lines
+- `engine/graph.py:detect_clusters` – 55 lines
+- `engine/graph.py:to_dict` – 81 lines
+- `engine/graph.py:load_from_file` – 138 lines
+- `engine/explanation_rules.py:_match_emergence_events` – 51 lines
+- `engine/log_interpreter.py:generate_narrative` – 79 lines
+- `gui_pyside/toolbar_builder.py:build_toolbar` – 69 lines
+- `gui_pyside/toolbar_builder.py:__init__` – 57 lines
+- `gui_pyside/toolbar_builder.py:__init__` – 101 lines
+- `gui_pyside/toolbar_builder.py:show_connection` – 52 lines
+- `gui_pyside/toolbar_builder.py:commit` – 99 lines
+- `gui_pyside/toolbar_builder.py:__init__` – 68 lines
+
