@@ -40,6 +40,9 @@
     <Compile Include="engine\observer.py" />
     <Compile Include="engine\serialization_service.py" />
     <Compile Include="engine\services.py" />
+    <Compile Include="engine\services\node_services.py" />
+    <Compile Include="engine\services\sim_services.py" />
+    <Compile Include="engine\services\__init__.py" />
     <Compile Include="engine\tick.py" />
     <Compile Include="engine\log_interpreter.py" />
     <Compile Include="engine\tick_engine\bridge_manager.py" />
@@ -73,6 +76,7 @@
     <Folder Include="assets\fonts\" />
     <Folder Include="database\" />
     <Folder Include="engine\" />
+    <Folder Include="engine\services\" />
     <Folder Include="engine\tick_engine\" />
     <Folder Include="graph\" />
     <Folder Include="gui\" />
