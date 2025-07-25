@@ -34,7 +34,9 @@ class NodeTickService:
         self._register_tick()
         self._propagate_edges()
         if self.origin == "self":
-            collapsed = self.node.propagate_collapse(self.tick_time, self.graph)
+            collapsed = self.node.propagate_collapse(
+                self.tick_time, self.graph
+            )
             if collapsed:
                 self.node._log_collapse_chain(self.tick_time, collapsed)
 
@@ -45,7 +47,11 @@ class NodeTickService:
         if self.node.node_type == NodeType.NULL:
             log_json(
                 Config.output_path("boundary_interaction_log.json"),
-                {"tick": self.tick_time, "void": self.node.id, "origin": self.origin},
+                {
+                    "tick": self.tick_time,
+                    "void": self.node.id,
+                    "origin": self.origin,
+                },
             )
             te.void_absorption_events += 1
             self.node._log_tick_drop(self.tick_time, "void_node")
@@ -57,13 +63,20 @@ class NodeTickService:
         if getattr(self.node, "boundary", False):
             log_json(
                 Config.output_path("boundary_interaction_log.json"),
-                {"tick": self.tick_time, "node": self.node.id, "origin": self.origin},
+                {
+                    "tick": self.tick_time,
+                    "node": self.node.id,
+                    "origin": self.origin,
+                },
             )
             te.boundary_interactions_count += 1
         if not te.register_firing(self.node):
             self.node._log_tick_drop(self.tick_time, "bandwidth_limit")
             return False
-        if self.origin == "self" and self.tick_time in self.node.emitted_tick_times:
+        if (
+            self.origin == "self"
+            and self.tick_time in self.node.emitted_tick_times
+        ):
             self.node._log_tick_drop(self.tick_time, "duplicate")
             return False
         return True
@@ -88,7 +101,11 @@ class NodeTickService:
         n.tick_history.append(tick_obj)
         log_json(
             Config.output_path("tick_emission_log.json"),
-            {"node_id": n.id, "tick_time": self.tick_time, "phase": self.phase},
+            {
+                "node_id": n.id,
+                "tick_time": self.tick_time,
+                "phase": self.phase,
+            },
         )
         if self.origin == "self":
             n.emitted_tick_times.add(self.tick_time)
@@ -109,65 +126,114 @@ class NodeTickService:
 
     # ------------------------------------------------------------------
     def _propagate_edges(self):
-        n = self.node
-        g = self.graph
+        EdgePropagationService(
+            node=self.node,
+            tick_time=self.tick_time,
+            phase=self.phase,
+            origin=self.origin,
+            graph=self.graph,
+        ).propagate()
+
+
+@dataclass
+class EdgePropagationService:
+    """Handle tick propagation across outgoing edges."""
+
+    node: Node
+    tick_time: int
+    phase: float
+    origin: str
+    graph: Any
+
+    def propagate(self) -> None:
+        self._log_recursion()
+        from .tick_engine import kappa
+
+        for edge in self.node._fanout_edges(self.graph):
+            self._propagate_edge(edge, kappa)
+
+    # ------------------------------------------------------------------
+    def _log_recursion(self) -> None:
         if self.origin != "self" and any(
-            e.target == self.origin for e in g.get_edges_from(n.id)
+            e.target == self.origin
+            for e in self.graph.get_edges_from(self.node.id)
         ):
             log_json(
                 Config.output_path("refraction_log.json"),
-                {"tick": self.tick_time, "recursion_from": self.origin, "node": n.id},
-            )
-        from .tick_engine import kappa
-
-        for edge in n._fanout_edges(g):
-            target = g.get_node(edge.target)
-            delay = edge.adjusted_delay(
-                n.law_wave_frequency, target.law_wave_frequency, kappa
-            )
-            attenuated = self.phase * edge.attenuation
-            shifted = attenuated + edge.phase_shift
-            log_json(
-                Config.output_path("tick_propagation_log.json"),
                 {
-                    "source": n.id,
-                    "target": target.id,
-                    "tick_time": self.tick_time,
-                    "arrival_time": self.tick_time + delay,
-                    "phase": shifted,
+                    "tick": self.tick_time,
+                    "recursion_from": self.origin,
+                    "node": self.node.id,
                 },
             )
-            if target.node_type == NodeType.DECOHERENT:
-                alts = g.get_edges_from(target.id)
-                if alts:
-                    alt = alts[0]
-                    alt_tgt = g.get_node(alt.target)
-                    alt_delay = alt.adjusted_delay(
-                        target.law_wave_frequency, alt_tgt.law_wave_frequency, kappa
-                    )
-                    alt_tgt.schedule_tick(
-                        self.tick_time + delay + alt_delay,
-                        shifted,
-                        origin=n.id,
-                        created_tick=self.tick_time,
-                    )
-                    target.node_type = NodeType.REFRACTIVE
-                    log_json(
-                        Config.output_path("refraction_log.json"),
-                        {
-                            "tick": self.tick_time,
-                            "from": n.id,
-                            "via": target.id,
-                            "to": alt_tgt.id,
-                        },
-                    )
-                    continue
-            target.schedule_tick(
-                self.tick_time + delay,
-                shifted,
-                origin=n.id,
-                created_tick=self.tick_time,
-            )
+
+    # ------------------------------------------------------------------
+    def _propagate_edge(self, edge, kappa: float) -> None:
+        target = self.graph.get_node(edge.target)
+        delay = edge.adjusted_delay(
+            self.node.law_wave_frequency, target.law_wave_frequency, kappa
+        )
+        shifted = self._shift_phase(edge)
+        self._log_propagation(target, delay, shifted)
+        if self._handle_refraction(target, delay, shifted, kappa):
+            return
+        target.schedule_tick(
+            self.tick_time + delay,
+            shifted,
+            origin=self.node.id,
+            created_tick=self.tick_time,
+        )
+
+    # ------------------------------------------------------------------
+    def _shift_phase(self, edge) -> float:
+        return self.phase * edge.attenuation + edge.phase_shift
+
+    # ------------------------------------------------------------------
+    def _log_propagation(self, target, delay: float, shifted: float) -> None:
+        log_json(
+            Config.output_path("tick_propagation_log.json"),
+            {
+                "source": self.node.id,
+                "target": target.id,
+                "tick_time": self.tick_time,
+                "arrival_time": self.tick_time + delay,
+                "phase": shifted,
+            },
+        )
+
+    # ------------------------------------------------------------------
+    def _handle_refraction(
+        self, target, delay: float, shifted: float, kappa: float
+    ) -> bool:
+        if target.node_type != NodeType.DECOHERENT:
+            return False
+        alts = self.graph.get_edges_from(target.id)
+        if not alts:
+            return False
+        alt = alts[0]
+        alt_tgt = self.graph.get_node(alt.target)
+        alt_delay = alt.adjusted_delay(
+            target.law_wave_frequency,
+            alt_tgt.law_wave_frequency,
+            kappa,
+        )
+        alt_tgt.schedule_tick(
+            self.tick_time + delay + alt_delay,
+            shifted,
+            origin=self.node.id,
+            created_tick=self.tick_time,
+        )
+        target.node_type = NodeType.REFRACTIVE
+        log_json(
+            Config.output_path("refraction_log.json"),
+            {
+                "tick": self.tick_time,
+                "from": self.node.id,
+                "via": target.id,
+                "to": alt_tgt.id,
+            },
+        )
+        return True
 
 
 @dataclass
@@ -216,13 +282,19 @@ class NodeMetricsResultService:
         delta = coh - prev
         self.last_coherence[node_id] = coh
         node.coherence_velocity = delta
-        node.update_classical_state(deco, tick_time=self.tick, graph=self.graph)
+        node.update_classical_state(
+            deco, tick_time=self.tick, graph=self.graph
+        )
         self._update_stability(node_id, node)
-        self._record_logs(node_id, deco, coh, inter, ntype, credit, debt, delta, node)
+        self._record_logs(
+            node_id, deco, coh, inter, ntype, credit, debt, delta, node
+        )
 
     # ------------------------------------------------------------------
     def _update_stability(self, node_id: str, node) -> None:
-        record = te._law_wave_stability.setdefault(node_id, {"freqs": [], "stable": 0})
+        record = te._law_wave_stability.setdefault(
+            node_id, {"freqs": [], "stable": 0}
+        )
         record["freqs"].append(node.law_wave_frequency)
         if len(record["freqs"]) > 5:
             record["freqs"].pop(0)
@@ -262,7 +334,9 @@ class NodeMetricsResultService:
     ) -> None:
         self.logs["decoherence_log"][node_id] = round(deco, 4)
         self.logs["coherence_log"][node_id] = round(coh, 4)
-        self.logs["classical_state"][node_id] = getattr(node, "is_classical", False)
+        self.logs["classical_state"][node_id] = getattr(
+            node, "is_classical", False
+        )
         self.logs["coherence_velocity"][node_id] = round(delta, 5)
         self.logs["law_wave_log"][node_id] = round(node.law_wave_frequency, 4)
         self.logs["interference_log"][node_id] = inter
@@ -293,7 +367,9 @@ class NodeMetricsService:
             max_workers=getattr(Config, "thread_count", None)
         ) as ex:
             return list(
-                ex.map(lambda n: self._compute(n, tick), self.graph.nodes.values())
+                ex.map(
+                    lambda n: self._compute(n, tick), self.graph.nodes.values()
+                )
             )
 
     # ------------------------------------------------------------------
@@ -328,7 +404,9 @@ class NodeMetricsService:
         clusters = self.graph.hierarchical_clusters()
         self.graph.create_meta_nodes(clusters.get(0, []))
         if tick % getattr(Config, "log_interval", 1) == 0:
-            log_json(Config.output_path("cluster_log.json"), {str(tick): clusters})
+            log_json(
+                Config.output_path("cluster_log.json"), {str(tick): clusters}
+            )
 
     # ------------------------------------------------------------------
     def _write_logs(self, tick: int, logs: dict) -> None:
@@ -426,7 +504,8 @@ class GraphLoadService:
                 y=node_data.get("y", 0.0),
                 frequency=node_data.get("frequency", 1.0),
                 refractory_period=node_data.get(
-                    "refractory_period", getattr(Config, "refractory_period", 2.0)
+                    "refractory_period",
+                    getattr(Config, "refractory_period", 2.0),
                 ),
                 base_threshold=node_data.get("base_threshold", 0.5),
                 phase=node_data.get("phase", 0.0),
@@ -542,6 +621,7 @@ class NodeTickDecisionService:
 
     # ------------------------------------------------------------------
     def decide(self) -> tuple[bool, float | None, str]:
+        """Return firing decision, phase and reason."""
         in_refractory = self._is_in_refractory()
         (
             raw_items,
@@ -552,58 +632,28 @@ class NodeTickDecisionService:
         ) = self._phase_metrics()
 
         if tick_energy < getattr(Config, "tick_threshold", 1):
-            self._log_eval(coherence, False, False, "below_count")
-            log_json(
-                Config.output_path("should_tick_log.json"),
-                {"tick": self.tick_time, "node": self.node.id, "reason": "below_count"},
-            )
-            return False, None, "count_threshold"
+            return self._below_count(coherence)
 
         if in_refractory:
-            self._log_eval(coherence, True, False, "refractory")
-            print(
-                f"[{self.node.id}] Suppressed by refractory period at {self.tick_time}"
-            )
-            return False, None, "refractory"
+            return self._during_refractory(coherence)
 
         if coherence >= self.node.current_threshold:
-            resultant_phase = cmath.phase(vector_sum)
-            self._log_eval(coherence, False, True)
-            log_json(
-                Config.output_path("should_tick_log.json"),
-                {"tick": self.tick_time, "node": self.node.id, "reason": "threshold"},
-            )
-            return True, resultant_phase, "threshold"
+            return self._fire_by_threshold(coherence, vector_sum)
 
         merged, phase = self.node._resolve_interference(
             self.tick_time, raw_items, vector_sum
         )
         if merged:
-            self._log_eval(coherence, False, True, "merged")
-            log_json(
-                Config.output_path("should_tick_log.json"),
-                {"tick": self.tick_time, "node": self.node.id, "reason": "merged"},
-            )
-            return True, phase, "merged"
+            return self._fire_by_merge(coherence, phase)
 
-        self._log_eval(coherence, False, False, "below_threshold")
-        log_json(
-            Config.output_path("magnitude_failure_log.json"),
-            {
-                "tick": self.tick_time,
-                "node": self.node.id,
-                "magnitude": round(magnitude, 4),
-                "threshold": round(self.node.current_threshold, 4),
-                "phases": len(raw_items),
-            },
-        )
-        return False, None, "below_threshold"
+        return self._fail_below_threshold(coherence, magnitude, raw_items)
 
     # ------------------------------------------------------------------
     def _is_in_refractory(self) -> bool:
         if self.node.current_tick > 0 and self.node.last_tick_time is not None:
             return (
-                self.tick_time - self.node.last_tick_time < self.node.refractory_period
+                self.tick_time - self.node.last_tick_time
+                < self.node.refractory_period
             )
         return False
 
@@ -647,6 +697,71 @@ class NodeTickDecisionService:
             reason,
         )
 
+    # ------------------------------------------------------------------
+    def _below_count(self, coherence: float) -> tuple[bool, None, str]:
+        self._log_eval(coherence, False, False, "below_count")
+        log_json(
+            Config.output_path("should_tick_log.json"),
+            {
+                "tick": self.tick_time,
+                "node": self.node.id,
+                "reason": "below_count",
+            },
+        )
+        return False, None, "count_threshold"
+
+    # ------------------------------------------------------------------
+    def _during_refractory(self, coherence: float) -> tuple[bool, None, str]:
+        self._log_eval(coherence, True, False, "refractory")
+        print(
+            f"[{self.node.id}] Suppressed by refractory period at {self.tick_time}"
+        )
+        return False, None, "refractory"
+
+    # ------------------------------------------------------------------
+    def _fire_by_threshold(
+        self, coherence: float, vector_sum
+    ) -> tuple[bool, float, str]:
+        resultant_phase = cmath.phase(vector_sum)
+        self._log_eval(coherence, False, True)
+        log_json(
+            Config.output_path("should_tick_log.json"),
+            {
+                "tick": self.tick_time,
+                "node": self.node.id,
+                "reason": "threshold",
+            },
+        )
+        return True, resultant_phase, "threshold"
+
+    # ------------------------------------------------------------------
+    def _fire_by_merge(
+        self, coherence: float, phase: float
+    ) -> tuple[bool, float, str]:
+        self._log_eval(coherence, False, True, "merged")
+        log_json(
+            Config.output_path("should_tick_log.json"),
+            {"tick": self.tick_time, "node": self.node.id, "reason": "merged"},
+        )
+        return True, phase, "merged"
+
+    # ------------------------------------------------------------------
+    def _fail_below_threshold(
+        self, coherence: float, magnitude: float, raw_items
+    ) -> tuple[bool, None, str]:
+        self._log_eval(coherence, False, False, "below_threshold")
+        log_json(
+            Config.output_path("magnitude_failure_log.json"),
+            {
+                "tick": self.tick_time,
+                "node": self.node.id,
+                "magnitude": round(magnitude, 4),
+                "threshold": round(self.node.current_threshold, 4),
+                "phases": len(raw_items),
+            },
+        )
+        return False, None, "below_threshold"
+
 
 @dataclass
 class BridgeApplyService:
@@ -679,8 +794,12 @@ class BridgeApplyService:
         self.node_b = self.graph.get_node(self.bridge.node_b_id)
         self.phase_a = self.node_a.get_phase_at(self.tick_time)
         self.phase_b = self.node_b.get_phase_at(self.tick_time)
-        self.a_collapsed = self.node_a.collapse_origin.get(self.tick_time) == "self"
-        self.b_collapsed = self.node_b.collapse_origin.get(self.tick_time) == "self"
+        self.a_collapsed = (
+            self.node_a.collapse_origin.get(self.tick_time) == "self"
+        )
+        self.b_collapsed = (
+            self.node_b.collapse_origin.get(self.tick_time) == "self"
+        )
 
     # ------------------------------------------------------------------
     def _validate_collapse(self) -> bool:
@@ -694,14 +813,17 @@ class BridgeApplyService:
             and self.phase_b is not None
         ):
             drift = abs(
-                (self.phase_a - self.phase_b + math.pi) % (2 * math.pi) - math.pi
+                (self.phase_a - self.phase_b + math.pi) % (2 * math.pi)
+                - math.pi
             )
             if drift > self.bridge.drift_tolerance:
                 print(
                     f"[BRIDGE] Drift too high at tick {self.tick_time}: {drift:.2f} > {self.bridge.drift_tolerance}"
                 )
                 self.bridge._log_event(self.tick_time, "bridge_drift", drift)
-                self.bridge.trust_score = max(0.0, self.bridge.trust_score - 0.05)
+                self.bridge.trust_score = max(
+                    0.0, self.bridge.trust_score - 0.05
+                )
                 self.bridge.reinforcement_streak = 0
                 return True
         return False
@@ -711,7 +833,9 @@ class BridgeApplyService:
         deco_a = self.node_a.compute_decoherence_field(self.tick_time)
         deco_b = self.node_b.compute_decoherence_field(self.tick_time)
         avg = (deco_a + deco_b) / 2
-        debt = (self.node_a.decoherence_debt + self.node_b.decoherence_debt) / 6.0
+        debt = (
+            self.node_a.decoherence_debt + self.node_b.decoherence_debt
+        ) / 6.0
         rupture_chance = avg + debt
         self.bridge.decoherence_exposure.append(avg)
         if len(self.bridge.decoherence_exposure) > 20:
@@ -719,12 +843,17 @@ class BridgeApplyService:
         if self.bridge.probabilistic_bridge_failure(rupture_chance):
             self._record_rupture(avg, "decoherence")
             return True
-        if self.bridge.decoherence_limit and self.bridge.last_activation is not None:
+        if (
+            self.bridge.decoherence_limit
+            and self.bridge.last_activation is not None
+        ):
             if (
                 self.tick_time - self.bridge.last_activation
                 > self.bridge.decoherence_limit
             ):
-                print(f"[BRIDGE] Decohered at tick {self.tick_time}, disabling bridge.")
+                print(
+                    f"[BRIDGE] Decohered at tick {self.tick_time}, disabling bridge."
+                )
                 self.bridge.active = False
                 self._record_rupture(avg, "decoherence_limit")
                 return True
@@ -733,7 +862,9 @@ class BridgeApplyService:
     # ------------------------------------------------------------------
     def _record_rupture(self, avg_decoherence: float, reason: str) -> None:
         self.bridge.last_rupture_tick = self.tick_time
-        self.bridge._log_event(self.tick_time, "bridge_ruptured", avg_decoherence)
+        self.bridge._log_event(
+            self.tick_time, "bridge_ruptured", avg_decoherence
+        )
         avg_coh = (
             self.node_a.compute_coherence_level(self.tick_time)
             + self.node_b.compute_coherence_level(self.tick_time)
@@ -793,7 +924,8 @@ class BridgeApplyService:
             self.bridge.tick_load += 1
             if self.phase_a is not None and self.phase_b is not None:
                 self.bridge.phase_drift += abs(
-                    (self.phase_a - self.phase_b + math.pi) % (2 * math.pi) - math.pi
+                    (self.phase_a - self.phase_b + math.pi) % (2 * math.pi)
+                    - math.pi
                 )
             self.bridge.coherence_flux += (
                 self.node_a.coherence + self.node_b.coherence
