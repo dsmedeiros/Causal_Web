@@ -20,7 +20,7 @@ Key modules include:
 - **`engine/graph.py`** – container for nodes, edges and bridges. Graphs can be loaded from or written to JSON files.
 - **`engine/node.py`** – implementation of `Node`, `Edge` and related logic.
 - **`engine/bridge.py`** – manages dynamic bridges between nodes.
-- **`engine/tick_engine.py`** – drives the discrete simulation and records metrics under `output/`.
+- **`engine/tick_engine/`** – modular package driving the simulation and logging metrics under `output/`.
 - **`engine/tick_router.py`** – moves ticks through LCCM layers and logs transitions.
 - **`engine/tick_seeder.py`** – seeds periodic ticks based on the configuration file.
 - **`engine/log_interpreter.py`** – parses the generated logs and aggregates statistics.
@@ -600,10 +600,10 @@ links, `GlobalDiagnosticsService` for exporting run metrics and
 
 - `main.py:main` – 66 lines
 - `graph/model.py:add_connection` – 56 lines
-- `engine/tick_engine.py:_process_csp_seeds` – 83 lines
+- `engine/tick_engine/evaluator.py:_process_csp_seeds` – 83 lines
 - `engine/services.py:NodeMetricsService.log_metrics` – 45 lines
-- `engine/tick_engine.py:simulation_loop` – 98 lines
-- `engine/tick_engine.py:run` – 93 lines
+- `engine/tick_engine/core.py:simulation_loop` – 98 lines
+- `engine/tick_engine/core.py:SimulationRunner.run` – 93 lines
 - `engine/causal_analyst.py:infer_causal_chains` – 53 lines
 - `engine/bridge.py:apply` – 125 lines
 - `engine/node.py:__init__` – 97 lines
