@@ -10,6 +10,7 @@ import numpy as np
 
 from ...config import Config
 from ..graph import CausalGraph
+from ..node import Node
 from ..logger import log_json, log_manager
 from ..logging_models import (
     NodeEmergenceLog,
@@ -58,8 +59,8 @@ def reset_firing_limits() -> None:
     _cluster_firing_counts = {}
 
 
-def register_firing(node) -> bool:
-    """Register a node firing and enforce concurrency limits."""
+def register_firing(node: Node) -> bool:
+    """Register ``node`` firing and enforce concurrency limits."""
 
     global _current_firing_count, _cluster_firing_counts
     total_limit = getattr(Config, "total_max_concurrent_firings", 0)
@@ -302,7 +303,8 @@ class SIPRecombinationService:
         for pid in (a_id, b_id):
             _spawn_counts[pid] = _spawn_counts.get(pid, 0) + 1
 
-    def spawn_child(self, parent_a, parent_b, tick: int) -> None:
+    def spawn_child(self, parent_a: Node, parent_b: Node, tick: int) -> None:
+        """Spawn a recombination child node from ``parent_a`` and ``parent_b``."""
         if not Config.propagation_control.get("enable_sip", True):
             return
         if self._limit_reached(parent_a.id, parent_b.id):
