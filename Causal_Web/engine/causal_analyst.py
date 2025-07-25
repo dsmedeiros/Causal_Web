@@ -87,7 +87,9 @@ class ExplanationEvent:
 class CausalAnalyst:
     """Analyze logs to generate causal explanations."""
 
-    def __init__(self, output_dir: str = None, input_dir: str = None):
+    def __init__(
+        self, output_dir: Optional[str] = None, input_dir: Optional[str] = None
+    ) -> None:
         base = os.path.join(os.path.dirname(__file__), "..")
         self.output_dir = output_dir or os.path.join(base, "output")
         self.input_dir = input_dir or os.path.join(base, "input")
@@ -196,7 +198,7 @@ class CausalAnalyst:
         return None
 
     # ------------------------------------------------------------
-    def infer_causal_chains(self) -> None:
+    def infer_causal_chains(self) -> List[Dict]:
         """Infer causal chains leading to collapses or other events."""
         collapse_events = self._collapse_events()
         spikes = self.transitions.get("decoherence_spikes", {})
@@ -312,7 +314,7 @@ class CausalAnalyst:
         return text
 
     # ------------------------------------------------------------
-    def generate_explanation_graph(self) -> dict:
+    def generate_explanation_graph(self) -> Dict[str, List[Dict]]:
         """Export causal chains as a DAG for visualization."""
         nodes = []
         edges = []
