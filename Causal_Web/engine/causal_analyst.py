@@ -84,14 +84,17 @@ class ExplanationEvent:
     explanation_text: str
 
 
-class CausalAnalyst:
+from .base import OutputDirMixin
+
+
+class CausalAnalyst(OutputDirMixin):
     """Analyze logs to generate causal explanations."""
 
     def __init__(
         self, output_dir: Optional[str] = None, input_dir: Optional[str] = None
     ) -> None:
+        super().__init__(output_dir=output_dir)
         base = os.path.join(os.path.dirname(__file__), "..")
-        self.output_dir = output_dir or os.path.join(base, "output")
         self.input_dir = input_dir or os.path.join(base, "input")
         self.logs: Dict[str, Dict[int, Dict]] = {}
         self.graph: Dict = {}
@@ -99,10 +102,6 @@ class CausalAnalyst:
         self.causal_chains: List[Dict] = []
         self.params = {"window": 8}
         self.summary: Dict[str, Dict] = {}
-
-    # ------------------------------------------------------------
-    def _path(self, name: str) -> str:
-        return os.path.join(self.output_dir, name)
 
     # ------------------------------------------------------------
     def load_logs(self) -> None:

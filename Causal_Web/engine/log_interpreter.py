@@ -3,6 +3,7 @@ import os
 from typing import Dict, List
 
 from .causal_analyst import CausalAnalyst
+from .base import OutputDirMixin
 
 
 def _load_json_lines(path: str) -> Dict[str, Dict]:
@@ -22,21 +23,17 @@ def _load_json_lines(path: str) -> Dict[str, Dict]:
     return data
 
 
-class CWTLogInterpreter:
+class CWTLogInterpreter(OutputDirMixin):
     """Simple multilayer interpreter for CWT logs."""
 
     def __init__(
         self, output_dir: str | None = None, graph_path: str | None = None
     ) -> None:
+        super().__init__(output_dir=output_dir)
         base = os.path.join(os.path.dirname(__file__), "..")
-        self.output_dir = output_dir or os.path.join(base, "output")
         self.graph_path = graph_path or os.path.join(base, "input", "graph.json")
         self.graph = {}
         self.summary: Dict[str, Dict] = {}
-
-    # ------------------------------------------------------------
-    def _path(self, name: str) -> str:
-        return os.path.join(self.output_dir, name)
 
     # ------------------------------------------------------------
     def load_graph(self) -> None:
