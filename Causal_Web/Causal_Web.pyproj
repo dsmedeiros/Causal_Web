@@ -68,23 +68,15 @@
     <Folder Include="database\" />
     <Folder Include="engine\" />
     <Folder Include="graph\" />
-    <Folder Include="graph\__pycache__\" />
     <Folder Include="gui\" />
     <Folder Include="assets\" />
     <Folder Include="gui_pyside\" />
-    <Folder Include="gui_pyside\__pycache__\" />
     <Folder Include="ingest\" />
     <Folder Include="input\" />
     <Folder Include="output\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="assets\fonts\consola.ttf" />
-    <Content Include="graph\__pycache__\io.cpython-310.pyc" />
-    <Content Include="graph\__pycache__\model.cpython-310.pyc" />
-    <Content Include="graph\__pycache__\__init__.cpython-310.pyc" />
-    <Content Include="gui_pyside\__pycache__\canvas_widget.cpython-310.pyc" />
-    <Content Include="gui_pyside\__pycache__\main_window.cpython-310.pyc" />
-    <Content Include="gui_pyside\__pycache__\__init__.cpython-310.pyc" />
     <Content Include="input\config.json" />
     <Content Include="input\destructive_interference_test.json" />
     <Content Include="input\dilation_baseline_test_case.json" />
