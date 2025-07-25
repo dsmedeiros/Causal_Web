@@ -49,6 +49,7 @@
     <Compile Include="engine\tick_engine\core.py" />
     <Compile Include="engine\tick_engine\evaluator.py" />
     <Compile Include="engine\tick_engine\log_utils.py" />
+    <Compile Include="engine\tick_engine\orchestrators.py" />
     <Compile Include="engine\tick_engine\__init__.py" />
     <Compile Include="engine\tick_router.py" />
     <Compile Include="engine\tick_seeder.py" />
