@@ -6,76 +6,6 @@ from dataclasses import dataclass
 from typing import Dict, List, Tuple, Optional
 
 
-# ------------------------------------------------------------
-# Helper to load newline-delimited JSON where each line maps a tick to values
-
-
-def _load_json_lines(path: str) -> Dict[int, Dict]:
-    """Load newline-delimited JSON where each line may take multiple forms.
-
-    Supported line formats::
-
-        {"12": {...}}                     # mapping of tick -> values
-        {"tick": 12, "foo": "bar"}        # tick field plus other keys
-
-    Returns a mapping from tick (int) to the associated value dict.
-    """
-
-    records: Dict[int, Dict] = {}
-    if not os.path.exists(path):
-        return records
-
-    with open(path) as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                obj = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-
-            # Case 1: single key that is a tick string
-            if len(obj) == 1 and next(iter(obj)).isdigit():
-                k = next(iter(obj))
-                records[int(k)] = obj[k]
-                continue
-
-            # Case 2: object contains explicit 'tick' field
-            if "tick" in obj:
-                tick = int(obj.pop("tick"))
-                records[tick] = obj
-                continue
-
-            # Fallback: attempt to coerce any digit-like keys
-            for k, v in obj.items():
-                if isinstance(k, str) and k.isdigit():
-                    records[int(k)] = v
-
-    return records
-
-
-# Specialized loader for event_log.json where multiple entries
-# may share the same tick and we want to preserve them all.
-def _load_event_log(path: str) -> Dict[int, List[Dict]]:
-    records: Dict[int, List[Dict]] = {}
-    if not os.path.exists(path):
-        return records
-
-    with open(path) as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                obj = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            tick = int(obj.get("tick", 0))
-            records.setdefault(tick, []).append(obj)
-    return records
-
-
 @dataclass
 class ExplanationEvent:
     tick_range: Tuple[int, int]
@@ -84,10 +14,10 @@ class ExplanationEvent:
     explanation_text: str
 
 
-from .base import OutputDirMixin
+from .base import OutputDirMixin, JsonLinesMixin
 
 
-class CausalAnalyst(OutputDirMixin):
+class CausalAnalyst(OutputDirMixin, JsonLinesMixin):
     """Analyze logs to generate causal explanations."""
 
     def __init__(
@@ -126,9 +56,11 @@ class CausalAnalyst(OutputDirMixin):
 
         for key, path in paths.items():
             if key in ("event", "layer_transitions"):
-                self.logs[key] = _load_event_log(path)
-            elif path.endswith(".json") and not path.endswith("tick_trace.json"):
-                self.logs[key] = _load_json_lines(path)
+                self.logs[key] = self.load_event_log(path, int_keys=True)
+            elif path.endswith(".json") and not path.endswith(
+                "tick_trace.json"
+            ):
+                self.logs[key] = self.load_json_lines(path, int_keys=True)
             elif key == "tick_trace" and os.path.exists(path):
                 with open(path) as f:
                     try:
@@ -158,13 +90,17 @@ class CausalAnalyst(OutputDirMixin):
                 else:
                     if len(lst) >= 3:
                         start = tick - len(lst)
-                        spikes.setdefault(node, []).append((start, tick - 1, max(lst)))
+                        spikes.setdefault(node, []).append(
+                            (start, tick - 1, max(lst))
+                        )
                     streaks[node] = []
         # flush
         for node, lst in streaks.items():
             if len(lst) >= 3:
                 start = max(deco.keys()) - len(lst) + 1
-                spikes.setdefault(node, []).append((start, max(deco.keys()), max(lst)))
+                spikes.setdefault(node, []).append(
+                    (start, max(deco.keys()), max(lst))
+                )
         self.transitions = {"decoherence_spikes": spikes}
 
     # ------------------------------------------------------------
@@ -188,7 +124,9 @@ class CausalAnalyst(OutputDirMixin):
         event_log = self.logs.get("event", {})
         if not event_log:
             return None
-        for t in sorted([t for t in event_log if t < before_tick], reverse=True):
+        for t in sorted(
+            [t for t in event_log if t < before_tick], reverse=True
+        ):
             for ev in event_log[t]:
                 if ev.get("event_type") == "bridge_ruptured" and (
                     ev.get("source") == node_id or ev.get("target") == node_id
@@ -228,7 +166,9 @@ class CausalAnalyst(OutputDirMixin):
                         "value": spike[2],
                     }
                 )
-            chain_steps.append({"tick": tick, "event": "node_collapsed", "node": node})
+            chain_steps.append(
+                {"tick": tick, "event": "node_collapsed", "node": node}
+            )
 
             conf = 0.5
             if last_rupture and tick - last_rupture[0] <= window:
@@ -319,7 +259,9 @@ class CausalAnalyst(OutputDirMixin):
         edges = []
         counter = 1
         for chain in self.causal_chains:
-            steps = sorted(chain.get("chain", []), key=lambda s: s.get("tick", 0))
+            steps = sorted(
+                chain.get("chain", []), key=lambda s: s.get("tick", 0)
+            )
             ids = []
             step_objs = []
             for step in steps:
@@ -368,7 +310,9 @@ class CausalAnalyst(OutputDirMixin):
             for ev in events:
                 entry = {
                     "type": ev.get("event_type"),
-                    "nodes": [n for n in (ev.get("source"), ev.get("target")) if n],
+                    "nodes": [
+                        n for n in (ev.get("source"), ev.get("target")) if n
+                    ],
                 }
                 timeline.setdefault(tick, []).append(entry)
 
@@ -379,7 +323,9 @@ class CausalAnalyst(OutputDirMixin):
             )
 
         # Detected decoherence spikes
-        for node, spikes in self.transitions.get("decoherence_spikes", {}).items():
+        for node, spikes in self.transitions.get(
+            "decoherence_spikes", {}
+        ).items():
             for start, end, val in spikes:
                 timeline.setdefault(end, []).append(
                     {
