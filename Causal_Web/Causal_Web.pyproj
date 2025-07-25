@@ -26,6 +26,7 @@
     <Compile Include="database\db_setup.py" />
     <Compile Include="database\run_meta.py" />
     <Compile Include="database\__init__.py" />
+    <Compile Include="engine\base.py" />
     <Compile Include="engine\bridge.py" />
     <Compile Include="engine\causal_analyst.py" />
     <Compile Include="engine\explanation_rules.py" />
