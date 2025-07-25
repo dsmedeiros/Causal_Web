@@ -39,7 +39,6 @@
     <Compile Include="engine\node_services.py" />
     <Compile Include="engine\observer.py" />
     <Compile Include="engine\serialization_service.py" />
-    <Compile Include="engine\services.py" />
     <Compile Include="engine\services\node_services.py" />
     <Compile Include="engine\services\sim_services.py" />
     <Compile Include="engine\services\__init__.py" />
