@@ -475,116 +475,11 @@ class Node:
         te.mark_for_update(self.id)
 
     def should_tick(self, tick_time):
-        """Determine if the node should emit a tick at ``tick_time``.
+        """Return whether the node should fire at ``tick_time``."""
 
-        Returns a tuple ``(fire, phase, reason)`` where ``fire`` indicates
-        whether a tick should be emitted, ``phase`` is the resultant phase if a
-        tick is fired, and ``reason`` provides context for logging when ``fire``
-        is ``False``.
-        """
+        from .services import NodeTickDecisionService
 
-        in_refractory = False
-        if self.current_tick > 0 and self.last_tick_time is not None:
-            in_refractory = tick_time - self.last_tick_time < self.refractory_period
-        if self.current_tick == 0:
-            in_refractory = False
-        raw_items = self.incoming_phase_queue[tick_time]
-        complex_phases = []
-        weights = []
-        for item in raw_items:
-            if isinstance(item, (tuple, list)) and len(item) == 2:
-                ph, created = item
-                decay = getattr(Config, "tick_decay_factor", 1.0) ** (
-                    max(0, Config.current_tick - created)
-                )
-            else:
-                ph = item
-                decay = 1.0
-            complex_phases.append(decay * cmath.rect(1.0, ph % (2 * math.pi)))
-            weights.append(decay)
-        vector_sum = sum(complex_phases)
-        magnitude = abs(vector_sum)
-        total_weight = sum(weights) if weights else 0.0
-        coherence = magnitude / total_weight if total_weight else 1.0
-        tick_energy = total_weight
-
-        if tick_energy < getattr(Config, "tick_threshold", 1):
-            self._log_tick_evaluation(
-                tick_time,
-                coherence,
-                self.current_threshold,
-                False,
-                False,
-                "below_count",
-            )
-            log_json(
-                Config.output_path("should_tick_log.json"),
-                {"tick": tick_time, "node": self.id, "reason": "below_count"},
-            )
-            return False, None, "count_threshold"
-
-        if in_refractory:
-            self._log_tick_evaluation(
-                tick_time,
-                coherence,
-                self.current_threshold,
-                True,
-                False,
-                "refractory",
-            )
-            print(f"[{self.id}] Suppressed by refractory period at {tick_time}")
-            return False, None, "refractory"
-
-        if coherence >= self.current_threshold:
-            resultant_phase = cmath.phase(vector_sum)
-            self._log_tick_evaluation(
-                tick_time,
-                coherence,
-                self.current_threshold,
-                False,
-                True,
-            )
-            log_json(
-                Config.output_path("should_tick_log.json"),
-                {"tick": tick_time, "node": self.id, "reason": "threshold"},
-            )
-            return True, resultant_phase, "threshold"
-
-        merged, phase = self._resolve_interference(tick_time, raw_items, vector_sum)
-        if merged:
-            self._log_tick_evaluation(
-                tick_time,
-                coherence,
-                self.current_threshold,
-                False,
-                True,
-                "merged",
-            )
-            log_json(
-                Config.output_path("should_tick_log.json"),
-                {"tick": tick_time, "node": self.id, "reason": "merged"},
-            )
-            return True, phase, "merged"
-
-        self._log_tick_evaluation(
-            tick_time,
-            coherence,
-            self.current_threshold,
-            False,
-            False,
-            "below_threshold",
-        )
-        log_json(
-            Config.output_path("magnitude_failure_log.json"),
-            {
-                "tick": tick_time,
-                "node": self.id,
-                "magnitude": round(magnitude, 4),
-                "threshold": round(self.current_threshold, 4),
-                "phases": len(raw_items),
-            },
-        )
-        return False, None, "below_threshold"
+        return NodeTickDecisionService(self, tick_time).decide()
 
     def get_phase_at(self, tick_time):
         return self._tick_phase_lookup.get(tick_time)
