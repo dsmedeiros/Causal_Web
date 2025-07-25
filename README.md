@@ -595,7 +595,8 @@ narrative generation are now handled by `GraphSerializationService` and
 services live in `Causal_Web/engine/services.py` or the GUI package.
 Recent refactors introduced `ConnectionDisplayService` for showing existing
 links, `GlobalDiagnosticsService` for exporting run metrics and
-`SIPRecombinationService` for recombination-based spawning.
+`SIPRecombinationService` for recombination-based spawning. A lightweight
+`LoggingMixin` now centralises JSON logging for classes like `Node` and `Bridge`.
 
 ### Identified long functions
 
