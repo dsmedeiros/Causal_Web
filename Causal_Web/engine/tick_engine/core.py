@@ -18,6 +18,7 @@ from ..logger import log_json
 from ..observer import Observer
 from ..tick_seeder import TickSeeder
 from . import bridge_manager, evaluator, log_utils
+from .orchestrators import EvaluationOrchestrator, MutationOrchestrator, IOOrchestrator
 
 
 # ---------------------------------------------------------------------------
@@ -122,6 +123,9 @@ class SimulationRunner:
 
     def __init__(self) -> None:
         self.global_tick = 0
+        self.evaluation = EvaluationOrchestrator(graph)
+        self.mutation = MutationOrchestrator(graph, emit_ticks, propagate_phases)
+        self.io = IOOrchestrator(graph, observers, _update_simulation_state)
 
     def start(self) -> None:
         threading.Thread(target=self.run, daemon=True).start()
@@ -173,53 +177,20 @@ class SimulationRunner:
 
     def _process_tick(self) -> None:
         print(f"== Tick {self.global_tick} ==")
-        evaluator.apply_global_forcing(self.global_tick)
-        evaluator.update_coherence_constraints()
-        emit_ticks(self.global_tick)
-        propagate_phases(self.global_tick)
+        self.evaluation.prepare(self.global_tick)
+        self.mutation.pre_process(self.global_tick)
 
-        if self.global_tick % getattr(Config, "cluster_interval", 1) == 0:
-            graph.detect_clusters()
-            evaluator.evaluate_nodes(self.global_tick)
-            graph.update_meta_nodes(self.global_tick)
-            if not Config.headless:
-                log_utils.log_metrics_per_tick(self.global_tick)
-                log_utils.log_bridge_states(self.global_tick)
-                log_utils.log_meta_node_ticks(self.global_tick)
-                log_utils.log_curvature_per_tick(self.global_tick)
-            bridge_manager.dynamic_bridge_management(self.global_tick)
+        cluster_cycle = self.global_tick % getattr(Config, "cluster_interval", 1) == 0
+        if cluster_cycle:
+            self.mutation.cluster_ops(self.global_tick)
+            self.evaluation.evaluate(self.global_tick)
+            self.io.log_cluster_info(self.global_tick)
 
-        evaluator.check_propagation(self.global_tick)
-        snapshot_path = None
-        if not Config.headless:
-            snapshot_path = log_utils.snapshot_graph(self.global_tick)
-        _update_simulation_state(False, False, self.global_tick, snapshot_path)
-
-        if not Config.headless:
-            self._handle_observers()
-
-        for bridge in graph.bridges:
-            bridge.apply(self.global_tick, graph)
-
-    def _handle_observers(self) -> None:
-        for obs in observers:
-            obs.observe(graph, self.global_tick)
-            inferred = obs.infer_field_state()
-            log_json(
-                Config.output_path("observer_perceived_field.json"),
-                {"tick": self.global_tick, "observer": obs.id, "state": inferred},
-            )
-            actual = {n.id: len(n.tick_history) for n in graph.nodes.values()}
-            diff = {
-                nid: {"actual": actual.get(nid, 0), "inferred": inferred.get(nid, 0)}
-                for nid in set(actual) | set(inferred)
-                if actual.get(nid, 0) != inferred.get(nid, 0)
-            }
-            if diff:
-                log_json(
-                    Config.output_path("observer_disagreement_log.json"),
-                    {"tick": self.global_tick, "observer": obs.id, "diff": diff},
-                )
+        self.evaluation.finalize(self.global_tick)
+        snapshot_path = self.io.snapshot_state(self.global_tick)
+        self.io.update_state(self.global_tick, False, False, snapshot_path)
+        self.io.handle_observers(self.global_tick)
+        self.mutation.apply_bridges(self.global_tick)
 
 
 # ---------------------------------------------------------------------------

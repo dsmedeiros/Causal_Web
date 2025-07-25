@@ -13,6 +13,7 @@ from .core import (
     stop_simulation,
     simulation_loop,
 )
+from .orchestrators import EvaluationOrchestrator, MutationOrchestrator, IOOrchestrator
 from .evaluator import (
     attach_graph as _attach_eval_graph,
     evaluate_nodes,
@@ -69,4 +70,7 @@ __all__ = [
     "export_curvature_map",
     "export_global_diagnostics",
     "export_regional_maps",
+    "EvaluationOrchestrator",
+    "MutationOrchestrator",
+    "IOOrchestrator",
 ]
