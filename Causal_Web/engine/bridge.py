@@ -270,6 +270,8 @@ class Bridge:
 
     def apply(self, tick_time: int, graph: "CausalGraph") -> None:
         """Apply the bridge logic for ``tick_time``."""
+        from .services import BridgeApplyService
+
         BridgeApplyService(self, tick_time, graph).process()
 
     def to_dict(self) -> dict:
