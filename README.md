@@ -21,6 +21,7 @@ Key modules include:
 - **`engine/node.py`** – implementation of `Node`, `Edge` and related logic.
 - **`engine/bridge.py`** – manages dynamic bridges between nodes.
 - **`engine/tick_engine/`** – modular package driving the simulation and logging metrics under `output/`.
+- **`engine/tick_engine/orchestrators.py`** – separates evaluation, mutation and I/O duties for the simulation loop.
 - **`engine/tick_router.py`** – moves ticks through LCCM layers and logs transitions.
 - **`engine/tick_seeder.py`** – seeds periodic ticks based on the configuration file.
 - **`engine/log_interpreter.py`** – parses the generated logs and aggregates statistics.
