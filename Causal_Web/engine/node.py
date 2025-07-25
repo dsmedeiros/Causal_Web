@@ -434,7 +434,7 @@ class Node(LoggingMixin):
     def should_tick(self, tick_time: float) -> tuple[bool, float | None, str]:
         """Return whether the node should fire at ``tick_time``."""
 
-        from .services import NodeTickDecisionService
+        from .services.node_services import NodeTickDecisionService
 
         return NodeTickDecisionService(self, tick_time).decide()
 
@@ -450,7 +450,7 @@ class Node(LoggingMixin):
     ) -> None:
         """Emit a tick and propagate resulting phases to neighbours."""
 
-        from .services import NodeTickService
+        from .services.node_services import NodeTickService
 
         NodeTickService(self, tick_time, phase, graph, origin).process()
 

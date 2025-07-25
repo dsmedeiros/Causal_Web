@@ -270,7 +270,7 @@ class Bridge(LoggingMixin):
 
     def apply(self, tick_time: int, graph: "CausalGraph") -> None:
         """Apply the bridge logic for ``tick_time``."""
-        from .services import BridgeApplyService
+        from .services.sim_services import BridgeApplyService
 
         BridgeApplyService(self, tick_time, graph).process()
 

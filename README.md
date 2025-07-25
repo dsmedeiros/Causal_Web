@@ -592,7 +592,7 @@ isolates the tick decision logic from `Node.should_tick`. Serialization and
 narrative generation are now handled by `GraphSerializationService` and
 `NarrativeGeneratorService`. GUI setup moved to `ToolbarBuildService` and
 `NodePanelSetupService`. All
-services live in `Causal_Web/engine/services.py` or the GUI package.
+services now live in `Causal_Web/engine/services/` or the GUI package.
 Recent refactors introduced `ConnectionDisplayService` for showing existing
 links, `GlobalDiagnosticsService` for exporting run metrics and
 `SIPRecombinationService` for recombination-based spawning. A lightweight
@@ -606,7 +606,7 @@ for utilities like the tick seeder.
 - `main.py:main` – 66 lines
 - `graph/model.py:add_connection` – 56 lines
 - `engine/tick_engine/evaluator.py:_process_csp_seeds` – 83 lines
-- `engine/services.py:NodeMetricsService.log_metrics` – 45 lines
+- `engine/services/sim_services.py:NodeMetricsService.log_metrics` – 45 lines
 - `engine/tick_engine/core.py:simulation_loop` – 98 lines
 - `engine/tick_engine/core.py:SimulationRunner.run` – 93 lines
 - `engine/causal_analyst.py:infer_causal_chains` – 53 lines

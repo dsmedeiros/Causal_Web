@@ -9,7 +9,7 @@ from typing import Optional
 from ...config import Config
 from ..graph import CausalGraph
 from ..logger import log_json, logger, log_manager
-from ..services import GlobalDiagnosticsService
+from ..services.sim_services import GlobalDiagnosticsService
 from ..logging_models import StructuralGrowthLog, StructuralGrowthPayload
 
 # The global graph instance is injected at runtime
@@ -89,7 +89,7 @@ def snapshot_graph(global_tick: int) -> Optional[str]:
 
 
 def log_metrics_per_tick(global_tick: int) -> None:
-    from ..services import NodeMetricsService
+    from ..services.sim_services import NodeMetricsService
 
     assert _graph is not None
     NodeMetricsService(_graph).log_metrics(global_tick)

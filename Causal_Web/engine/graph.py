@@ -495,7 +495,7 @@ class CausalGraph:
     def load_from_file(self, path: str) -> None:
         """Populate the graph from a JSON file."""
 
-        from .services import GraphLoadService
+        from .services.sim_services import GraphLoadService
 
         GraphLoadService(self, path).load()
 
