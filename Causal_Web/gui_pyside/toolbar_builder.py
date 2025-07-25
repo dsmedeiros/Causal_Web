@@ -25,6 +25,8 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
+from .panel_mixins import PanelMixin
+
 from ..gui.state import (
     get_graph,
     set_selected_node,
@@ -98,21 +100,13 @@ class _FocusWatcher(QObject):
         return False
 
 
-class NodePanel(QDockWidget):
+class NodePanel(QDockWidget, PanelMixin):
     """Dock widget for editing node attributes."""
 
     def __init__(self, main_window: Any, parent: Optional[QWidget] = None) -> None:
         """Create a new node panel."""
         super().__init__("Node", parent)
         NodePanelSetupService(self, main_window).build()
-
-    def _minimize(self) -> None:
-        """Hide the panel when it loses focus."""
-        self.hide()
-
-    def _mark_dirty(self, *args) -> None:
-        """Indicate that edits are pending."""
-        self.dirty = True
 
     def _toggle_tick_source_fields(self, checked: bool) -> None:
         for label, spin in self.ts_fields.values():
@@ -229,16 +223,13 @@ class NodePanel(QDockWidget):
         self.close()
 
 
-class ConnectionPanel(QDockWidget):
+class ConnectionPanel(QDockWidget, PanelMixin):
     """Dock widget for adding a connection between two nodes."""
 
     def __init__(self, main_window: Any, parent: Optional[QWidget] = None) -> None:
         """Create a new connection panel."""
         super().__init__("Connection", parent)
         ConnectionPanelSetupService(self, main_window).build()
-
-    def _mark_dirty(self, *args) -> None:
-        self.dirty = True
 
     def _update_fields(self) -> None:
         is_edge = self.type_combo.currentText() == "Edge"
@@ -248,10 +239,6 @@ class ConnectionPanel(QDockWidget):
         for lbl, w in self.bridge_widgets:
             lbl.setVisible(not is_edge)
             w.setVisible(not is_edge)
-
-    def _minimize(self) -> None:
-        """Hide the connection panel when focus is lost."""
-        self.hide()
 
     def _populate_node_lists(self) -> None:
         nodes = list(get_graph().nodes)
@@ -335,7 +322,7 @@ class ConnectionPanel(QDockWidget):
         self.close()
 
 
-class ObserverPanel(QDockWidget):
+class ObserverPanel(QDockWidget, PanelMixin):
     """Dock widget for editing observer definitions."""
 
     def __init__(self, main_window: Any, parent: Optional[QWidget] = None) -> None:
@@ -384,14 +371,6 @@ class ObserverPanel(QDockWidget):
         layout.addRow(apply_btn)
         widget.installEventFilter(_FocusWatcher(self._minimize))
         self.setWidget(widget)
-
-    def _minimize(self) -> None:
-        """Hide the observer panel when focus is lost."""
-        self.hide()
-
-    def _mark_dirty(self, *args) -> None:
-        """Mark the panel state as having unsaved changes."""
-        self.dirty = True
 
     def open_for(self, index: int) -> None:
         if self.current_index == index:
@@ -508,7 +487,7 @@ class ObserverPanel(QDockWidget):
         self.close()
 
 
-class MetaNodePanel(QDockWidget):
+class MetaNodePanel(QDockWidget, PanelMixin):
     """Dock widget for editing meta node definitions."""
 
     def __init__(self, main_window: Any, parent: Optional[QWidget] = None) -> None:
@@ -517,14 +496,6 @@ class MetaNodePanel(QDockWidget):
         from .panel_services import MetaNodePanelSetupService
 
         MetaNodePanelSetupService(self, main_window).build()
-
-    def _minimize(self) -> None:
-        """Hide the meta node panel when focus is lost."""
-        self.hide()
-
-    def _mark_dirty(self, *args) -> None:
-        """Indicate that changes need saving."""
-        self.dirty = True
 
     def open_new(self, meta_id: str) -> None:
         if self.current and self.dirty:
