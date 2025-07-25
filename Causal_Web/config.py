@@ -230,9 +230,9 @@ class Config:
         str
             Absolute path to the newly created directory.
         """
-        from datetime import datetime
+        from datetime import datetime, timezone
 
-        ts = datetime.utcnow().strftime("%Y-%m-%d_%H-%M-%S")
+        ts = datetime.now(timezone.utc).strftime("%Y-%m-%d_%H-%M-%S")
         run_dir = os.path.join(cls.runs_dir, f"{ts}__{slug}")
         os.makedirs(run_dir, exist_ok=True)
 

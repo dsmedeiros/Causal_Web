@@ -49,7 +49,6 @@ class Bridge:
         seeded: bool = True,
         formed_at_tick: int = 0,
     ) -> None:
-
         """Create a new bridge between two node identifiers."""
         self.node_a_id = node_a_id
         self.node_b_id = node_b_id
