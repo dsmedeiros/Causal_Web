@@ -11,7 +11,6 @@ import uuid
 from ..config import Config
 from .base import LoggingMixin
 from .tick import Tick, GLOBAL_TICK_POOL
-from .node_services import NodeInitializationService
 
 
 class NodeType(Enum):
@@ -41,6 +40,8 @@ class Node(LoggingMixin):
         parent_ids: Optional[List[str]] = None,
     ) -> None:
         """Create a new node and delegate attribute setup."""
+
+        from .services.node_services import NodeInitializationService
 
         NodeInitializationService(self).setup(
             node_id,
