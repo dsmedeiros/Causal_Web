@@ -45,6 +45,10 @@ module can be run from any working directory, while paths in a configuration
 file are resolved relative to that file's location. All output is written next
 to the code in the `output` directory.
 
+The default `config.json` uses simple relative paths. For example `graph_file`
+is specified as just ``"graph.json"`` so it resolves to the same folder as the
+configuration file.
+
 ## Configuration
 
 Runtime parameters such as tick rate or seeding strategy can be overridden by

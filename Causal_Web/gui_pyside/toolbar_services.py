@@ -7,7 +7,7 @@ from typing import Any
 
 try:
     from PySide6.QtGui import QAction
-except ModuleNotFoundError:  # pragma: no cover - fallback for older PySide6
+except ImportError:  # pragma: no cover - fallback for older PySide6
     from PySide6.QtWidgets import QAction
 from PySide6.QtWidgets import QToolBar
 from PySide6.QtCore import Qt

@@ -1,13 +1,13 @@
 {
   "paths": {
-    "input_dir": "./Causal_Web/input",
-    "output_root": "./Causal_Web/output",
-    "runs_dir": "./Causal_Web/output/runs",
-    "archive_dir": "./Causal_Web/output/archive",
-    "analysis_dir": "./Causal_Web/output/analysis",
-    "ingest_dir": "./Causal_Web/output/ingest"
+    "input_dir": "./",
+    "output_root": "../output",
+    "runs_dir": "../output/runs",
+    "archive_dir": "../output/archive",
+    "analysis_dir": "../output/analysis",
+    "ingest_dir": "../output/ingest"
   },
-  "graph_file": "./Causal_Web/input/graph.json",
+  "graph_file": "graph.json",
   "tick_rate": 0.5,
   "max_ticks": 50,
   "seeding": {
