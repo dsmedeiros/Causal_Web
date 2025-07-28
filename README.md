@@ -102,6 +102,10 @@ range when the graph loads. The weight scales the delay returned by
 `Edge.adjusted_delay` and inversely affects attenuation, allowing the network to
 model non-uniform distances or resistance.
 
+When `use_dynamic_density` is enabled each edge's delay is further modified by
+the local connection density computed within `density_radius` hops. The effect
+is scaled by `delay_density_scaling`.
+
 To model limited causal bandwidth you can restrict how many nodes may fire on a
 single tick. Set `total_max_concurrent_firings` for a global limit or
 `max_concurrent_firings_per_cluster` to cap activity within each detected

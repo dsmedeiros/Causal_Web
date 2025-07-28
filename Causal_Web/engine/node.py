@@ -561,25 +561,53 @@ class Edge:
         delay: int = 1,
         phase_shift: float = 0.0,
         weight: float = 1.0,
+        *,
+        density_specified: bool = True,
     ) -> None:
         self.source = source
         self.target = target
         self.attenuation = attenuation  # Multiplier for phase amplitude
-        self.density = density  # Can affect delay dynamically
+        self.density = density  # Base density value
+        self.density_specified = density_specified
         self.delay = delay
         self.phase_shift = phase_shift
         self.weight = weight
 
     def adjusted_delay(
-        self, source_freq: float = 0.0, target_freq: float = 0.0, kappa: float = 1.0
+        self,
+        source_freq: float = 0.0,
+        target_freq: float = 0.0,
+        kappa: float = 1.0,
+        *,
+        graph: "CausalGraph | None" = None,
+        radius: int | None = None,
     ) -> int:
-        """Delay adjusted by local law-wave gradient."""
-        base = self.delay + int(self.density)
-        delta_f = abs(source_freq - target_freq)
-        modifier = kappa * math.sin(2 * math.pi * delta_f) * self.density
-        adjusted = (base + modifier) * self.weight
-        # ensure delay remains positive to avoid scheduling errors
-        return max(1, int(round(adjusted)))
+        """Return delay modified by local density."""
+
+        rho = self.density
+        if graph is not None and (
+            getattr(Config, "use_dynamic_density", False) or not self.density_specified
+        ):
+            rad = radius if radius is not None else getattr(Config, "density_radius", 1)
+            rho = graph.compute_local_density(self, radius=rad)
+
+        adjusted = self.delay * (1 + kappa * rho) * self.weight
+        delay_int = max(1, int(round(adjusted)))
+
+        if getattr(Config, "log_verbosity", "info") == "debug" and graph is not None:
+            from .logger import log_json
+
+            log_json(
+                Config.output_path("delay_density_log.json"),
+                {
+                    "edge": f"{self.source}->{self.target}",
+                    "rho": rho,
+                    "base": self.delay,
+                    "result": delay_int,
+                },
+            )
+
+        return delay_int
 
     def propagate_phase(
         self,
@@ -613,6 +641,8 @@ class Edge:
                 else 0.0
             ),
             target_node.law_wave_frequency,
+            getattr(Config, "delay_density_scaling", 1.0),
+            graph=graph,
         )
         target_node.schedule_tick(
             scheduled_tick,

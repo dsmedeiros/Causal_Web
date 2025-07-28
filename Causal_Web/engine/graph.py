@@ -101,7 +101,7 @@ class CausalGraph:
         source_id: str,
         target_id: str,
         attenuation: float = 1.0,
-        density: float = 0.0,
+        density: float | None = 0.0,
         delay: int = 1,
         phase_shift: float = 0.0,
         weight: float | None = None,
@@ -109,6 +109,9 @@ class CausalGraph:
         if weight is None:
             low, high = getattr(Config, "edge_weight_range", [1.0, 1.0])
             weight = random.uniform(low, high)
+        density_specified = density is not None
+        if density is None:
+            density = 0.0
         edge = Edge(
             source_id,
             target_id,
@@ -117,6 +120,7 @@ class CausalGraph:
             delay,
             phase_shift,
             weight,
+            density_specified=density_specified,
         )
         self.edges.append(edge)
         self.edges_from[source_id].append(edge)
@@ -240,6 +244,38 @@ class CausalGraph:
             ids = [i for i in ids if i in self.nodes]
             self._nearby_cache[cache_key] = ids
         return [self.nodes[i] for i in ids]
+
+    def compute_local_density(self, edge: Edge, radius: int = 1) -> float:
+        """Return edge density around ``edge`` within ``radius`` hops."""
+
+        visited: set[str] = set()
+        queue = deque([(edge.source, 0), (edge.target, 0)])
+        edges_seen: set[int] = set()
+        weight_sum = 0.0
+
+        while queue:
+            nid, dist = queue.popleft()
+            if nid in visited:
+                continue
+            visited.add(nid)
+            for e in self.get_edges_from(nid) + self.get_edges_to(nid):
+                if id(e) not in edges_seen:
+                    edges_seen.add(id(e))
+                    weight_sum += getattr(e, "weight", 1.0)
+                if dist < radius:
+                    next_id = e.target if e.source == nid else e.source
+                    queue.append((next_id, dist + 1))
+
+        return weight_sum / max(1, radius)
+
+    def precompute_local_densities(self, radius: int = 1) -> None:
+        """Populate dynamic density for all edges."""
+
+        for e in self.edges:
+            if not getattr(e, "density_specified", True) or getattr(
+                Config, "use_dynamic_density", False
+            ):
+                e.density = self.compute_local_density(e, radius)
 
     # --- Bridge-aware connectivity helpers ---
     def get_bridge_neighbors(self, node_id: str, active_only: bool = True) -> list[str]:

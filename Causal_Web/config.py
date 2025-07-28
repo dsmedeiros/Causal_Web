@@ -142,6 +142,9 @@ class Config:
     random_seed: int | None = None
     thread_count = 1
     log_verbosity = "info"
+    use_dynamic_density = False
+    density_radius = 1
+    delay_density_scaling = 1.0
     # interval between metric logs
     log_interval = 1
     # disable observers and intermediate logging when True
