@@ -1,4 +1,25 @@
-"""Modular tick engine package."""
+"""Modular tick engine package.
+
+This module exposes the public API of the tick engine and initialises a
+number of diagnostic counters accessed by other services. These counters are
+used during headless runs where the GUI is not active and therefore must
+exist at import time.
+"""
+
+boundary_interactions_count = 0
+"""Number of times ticks interacted with boundary nodes."""
+
+void_absorption_events = 0
+"""Ticks absorbed by void nodes."""
+
+bridges_reformed_count = 0
+"""Count of bridges reactivated after rupture."""
+
+_law_wave_stability: dict[str, dict] = {}
+"""Internal record of node law-wave frequency stability."""
+
+_decay_durations: list[int] = []
+"""Durations for which bridges decayed until deactivation."""
 
 from .core import (
     SimulationRunner,
