@@ -5,6 +5,8 @@ import math
 from random import random
 from typing import Optional, TYPE_CHECKING
 import json
+from enum import Enum
+
 from ..config import Config
 from .base import LoggingMixin
 
@@ -24,6 +26,20 @@ class BridgeState(Enum):
     DORMANT = "dormant"
 
 
+class BridgeType(Enum):
+    """Available bridging mechanisms between nodes."""
+
+    BRAIDED = "braided"
+    MIRROR = "mirror"
+    UNIDIRECTIONAL = "unidirectional"
+
+
+class MediumType(Enum):
+    """Transport mediums for bridge propagation."""
+
+    STANDARD = "standard"
+
+
 @dataclass
 class BridgeEvent:
     tick: int
@@ -39,12 +55,12 @@ class Bridge(LoggingMixin):
         self,
         node_a_id: str,
         node_b_id: str,
-        bridge_type: str = "braided",
+        bridge_type: BridgeType | str = BridgeType.BRAIDED,
         phase_offset: float = 0.0,
         drift_tolerance: float | None = None,
         decoherence_limit: float | None = None,
         initial_strength: float = 1.0,
-        medium_type: str = "standard",
+        medium_type: MediumType | str = MediumType.STANDARD,
         mutable: bool = True,
         seeded: bool = True,
         formed_at_tick: int = 0,
@@ -52,7 +68,11 @@ class Bridge(LoggingMixin):
         """Create a new bridge between two node identifiers."""
         self.node_a_id = node_a_id
         self.node_b_id = node_b_id
-        self.bridge_type = bridge_type  # "braided", "mirror", "unidirectional", etc.
+        if isinstance(bridge_type, str):
+            bridge_type = BridgeType(bridge_type)
+        if isinstance(medium_type, str):
+            medium_type = MediumType(medium_type)
+        self.bridge_type = bridge_type
         self.phase_offset = phase_offset  # For inverted or phase-shifted mirroring
         self.drift_tolerance = drift_tolerance
         self.decoherence_limit = decoherence_limit
@@ -279,13 +299,13 @@ class Bridge(LoggingMixin):
         return {
             "source": self.node_a_id,
             "target": self.node_b_id,
-            "type": self.bridge_type,
+            "type": self.bridge_type.value,
             "phase_offset": self.phase_offset,
             "drift_tolerance": self.drift_tolerance,
             "decoherence_limit": self.decoherence_limit,
             "initial_strength": self.initial_strength,
             "current_strength": self.current_strength,
-            "medium_type": self.medium_type,
+            "medium_type": self.medium_type.value,
             "mutable": self.mutable,
             "seeded": self.seeded,
             "formed_at_tick": self.formed_at_tick,

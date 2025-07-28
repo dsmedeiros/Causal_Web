@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, TypedDict
 
+from ..engine.bridge import BridgeType, MediumType
+
 # Reusable typed mappings for graph JSON files
 
 NodeData = TypedDict(
@@ -41,12 +43,12 @@ BridgeData = TypedDict(
     {
         "from": str,
         "to": str,
-        "bridge_type": str,
+        "bridge_type": BridgeType | str,
         "phase_offset": float,
         "drift_tolerance": float | None,
         "decoherence_limit": float | None,
         "initial_strength": float,
-        "medium_type": str,
+        "medium_type": MediumType | str,
         "mutable": bool,
     },
     total=False,
