@@ -33,6 +33,15 @@ class CausalGraph:
         self._cluster_version = 0
         self._nearby_cache: dict[tuple[str, int], list[str]] = {}
         self._nearby_cache_tick: int | None = None
+        self._density_cache_version = 0
+        self._edge_density_cache: dict[tuple[int, int, int], float] = {}
+        self._node_density_cache: dict[tuple[str, int, int], dict[int, float]] = {}
+
+    def _invalidate_density_cache(self) -> None:
+        """Clear cached density values after topology changes."""
+        self._density_cache_version += 1
+        self._edge_density_cache.clear()
+        self._node_density_cache.clear()
 
     def add_node(
         self,
@@ -65,6 +74,7 @@ class CausalGraph:
         )
         node = self.nodes[node_id]
         self.spatial_index[(node.grid_x, node.grid_y)].add(node_id)
+        self._invalidate_density_cache()
 
     def _non_overlapping_position(
         self, x: float, y: float, gap: int = 50
@@ -125,6 +135,7 @@ class CausalGraph:
         self.edges.append(edge)
         self.edges_from[source_id].append(edge)
         self.edges_to[target_id].append(edge)
+        self._invalidate_density_cache()
 
     def add_bridge(
         self,
@@ -198,6 +209,7 @@ class CausalGraph:
             self.spatial_index[cell].discard(node_id)
             if not self.spatial_index[cell]:
                 del self.spatial_index[cell]
+        self._invalidate_density_cache()
 
     def get_node(self, node_id: str) -> Node | None:
         """Return the :class:`Node` with ``node_id`` if present."""
@@ -245,28 +257,54 @@ class CausalGraph:
             self._nearby_cache[cache_key] = ids
         return [self.nodes[i] for i in ids]
 
-    def compute_local_density(self, edge: Edge, radius: int = 1) -> float:
-        """Return edge density around ``edge`` within ``radius`` hops."""
+    def _node_density_weights(self, node_id: str, radius: int) -> dict[int, float]:
+        """Return edge weights within ``radius`` hops of ``node_id``."""
+        key = (node_id, radius, self._density_cache_version)
+        cached = self._node_density_cache.get(key)
+        if cached is not None:
+            return cached
 
-        visited: set[str] = set()
-        queue = deque([(edge.source, 0), (edge.target, 0)])
-        edges_seen: set[int] = set()
-        weight_sum = 0.0
+        visited = {node_id}
+        queue = deque([(node_id, 0)])
+        weights: dict[int, float] = {}
 
         while queue:
             nid, dist = queue.popleft()
-            if nid in visited:
-                continue
-            visited.add(nid)
             for e in self.get_edges_from(nid) + self.get_edges_to(nid):
-                if id(e) not in edges_seen:
-                    edges_seen.add(id(e))
-                    weight_sum += getattr(e, "weight", 1.0)
+                eid = id(e)
+                if eid not in weights:
+                    weights[eid] = getattr(e, "weight", 1.0)
                 if dist < radius:
                     next_id = e.target if e.source == nid else e.source
-                    queue.append((next_id, dist + 1))
+                    if next_id not in visited:
+                        visited.add(next_id)
+                        queue.append((next_id, dist + 1))
 
-        return weight_sum / max(1, radius)
+        self._node_density_cache[key] = weights
+        return weights
+
+    def compute_local_density(self, edge: Edge, radius: int = 1) -> float:
+        """Return edge density around ``edge`` within ``radius`` hops."""
+
+        key = (id(edge), radius, self._density_cache_version)
+        cached = self._edge_density_cache.get(key)
+        if cached is not None:
+            return cached
+
+        src_weights = self._node_density_weights(edge.source, radius)
+        tgt_weights = self._node_density_weights(edge.target, radius)
+
+        all_edges = set(src_weights) | set(tgt_weights)
+        weight_sum = 0.0
+        for eid in all_edges:
+            if eid in src_weights:
+                weight_sum += src_weights[eid]
+            else:
+                weight_sum += tgt_weights[eid]
+
+        density = weight_sum / max(1, radius)
+        self._edge_density_cache[key] = density
+        return density
 
     def precompute_local_densities(self, radius: int = 1) -> None:
         """Populate dynamic density for all edges."""
