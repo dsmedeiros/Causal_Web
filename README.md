@@ -97,9 +97,12 @@ cluster. A value of `0` disables these limits. Both parameters are configurable
 via CLI flags or the Parameters window in the GUI.
 
 Cluster detection and bridge management are computationally heavy. The
-`cluster_interval` setting controls how often these operations run (default
-every 10 ticks). Node evaluation, meta-node updates and metric logging also
-run on this interval to reduce overhead.
+`cluster_interval` setting controls how often clustering occurs, while
+`bridge_interval` governs dynamic bridge formation. Both default to ten
+ticks. Metric logging frequency is determined separately by the `log_interval`
+setting.
+Node evaluation and meta-node updates still follow the clustering cadence to
+reduce overhead.
 Spatial queries are cached for the duration of each tick to avoid redundant
 lookups when clustering and managing bridges.
 

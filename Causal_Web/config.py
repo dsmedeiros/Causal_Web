@@ -131,8 +131,10 @@ class Config:
     forcing_ramp_ticks = 20
     # interval for saving runtime snapshots of the graph
     snapshot_interval = 10
-    # interval for expensive clustering and bridge management
+    # interval for expensive clustering operations
     cluster_interval = 10
+    # interval for dynamic bridge management
+    bridge_interval = 10
     random_seed: int | None = None
     thread_count = 1
     log_verbosity = "info"
