@@ -78,6 +78,11 @@ class MainService:
             help="Path to JSON configuration file",
         )
         initial.add_argument(
+            "--graph",
+            default=Config.graph_file,
+            help="Path to graph JSON file",
+        )
+        initial.add_argument(
             "--no-gui",
             action="store_true",
             help="Run simulation without launching the GUI",
@@ -88,6 +93,7 @@ class MainService:
             help="Initialize PostgreSQL schema and exit.",
         )
         known, _ = initial.parse_known_args(self.argv)
+        Config.graph_file = known.graph
 
         config_data: dict[str, Any] = {}
         if known.config and os.path.exists(known.config):
@@ -100,6 +106,7 @@ class MainService:
         )
         _add_config_args(parser, config_data)
         args = parser.parse_args(self.argv)
+        Config.graph_file = args.graph
         return args, config_data
 
     # ------------------------------------------------------------------

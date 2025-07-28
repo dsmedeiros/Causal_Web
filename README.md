@@ -38,7 +38,7 @@ Key modules include:
 - **`gui_pyside/canvas_widget.py`** – reusable ``QGraphicsView`` for graph rendering.
 - **`main.py`** – simple entry point that launches the dashboard.
 
-Graphs are stored in `input/graph.json` inside the package. Paths are resolved relative to the package so the module can be run from any working directory. All output is written next to the code in the `output` directory.
+Graphs are stored in `input/graph.json` by default. Use the `--graph` argument or `Config.graph_file` to load a different file. Paths are resolved relative to the package so the module can be run from any working directory. All output is written next to the code in the `output` directory.
 
 ## Configuration
 
@@ -214,12 +214,12 @@ The **Graph View** dock now embeds a small toolbar offering **Add Node**,
 **Add Connection**, **Add Observer**, **Auto Layout** and a **Load Graph** button for quick access.
 The **Auto Layout** action still arranges nodes using a spring layout.
 When you press **Start Simulation** the current graph is saved and also copied
-to `input/graph.json`. A new run directory is created via `Config.new_run()` and
+to the path specified by `Config.graph_file`. A new run directory is created via `Config.new_run()` and
 the graph file is copied into the run's `input/` folder. This preserves the
 exact input used for each run. Any unsaved edits in the **Graph View** are
 applied automatically so the main window reflects the latest changes when the
 simulation begins.
-These actions operate on the `graph.json` format and update the shared in-memory model.
+These actions operate on the graph file format and update the shared in-memory model.
 The dashboard also includes a **Graph View** tab which renders the loaded graph and displays
 basic information for the currently selected node. The **Graph View** window
 now includes **Add Node**, **Add Connection**, **Add Observer**, **Auto Layout** and **Load Graph**
@@ -254,7 +254,7 @@ A resize handler bug that halted GUI updates after resizing has been fixed.
 Dragging connections between nodes now works again across PySide6 versions.
 
 Rendering is now event driven so the canvas only updates when the graph changes, greatly reducing idle CPU usage.
-Graph editing panels are now docked within the Graph View window. They close automatically when the view is hidden and prompt about unapplied changes before closing. Panels minimize when they lose focus and restore when clicked again, warning about unsaved edits if you switch to a different object. The Graph View also warns when in-memory edits have not been saved to ``graph.json``.
+Graph editing panels are now docked within the Graph View window. They close automatically when the view is hidden and prompt about unapplied changes before closing. Panels minimize when they lose focus and restore when clicked again, warning about unsaved edits if you switch to a different object. The Graph View also warns when in-memory edits have not been saved to the graph file.
 
 ### Analysing the output
 
@@ -276,7 +276,7 @@ This command loads the logs and generates several summary files:
 Simulation results are organised under `output/` which now contains separate
 directories for each run. A new run directory is created via
 `Config.new_run()` and has the form `runs/<timestamp>__<slug>`. The current
-`graph.json` and `config.json` files are copied into each run's `input/`
+graph file and `config.json` are copied into each run's `input/`
 subdirectory so every run has a frozen copy of its inputs. Basic metadata
 about the run, including timestamps generated in UTC to avoid timezone
 discrepancies, is inserted into the PostgreSQL `runs` table automatically. The

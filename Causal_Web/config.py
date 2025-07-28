@@ -17,12 +17,15 @@ class Config:
         Number of ticks between metric log writes.
     headless:
         When ``True`` disables observers and intermediate logging.
+    graph_file:
+        Path to the current graph JSON file used by the engine.
     """
 
     # Base directories for package resources
     base_dir = os.path.abspath(os.path.dirname(__file__))
     input_dir = os.path.join(base_dir, "input")
     config_file = os.path.join(input_dir, "config.json")
+    graph_file = os.path.join(input_dir, "graph.json")
     output_root = os.path.join(base_dir, "output")
     runs_dir = os.path.join(output_root, "runs")
     archive_dir = os.path.join(output_root, "archive")
@@ -241,9 +244,11 @@ class Config:
 
         input_dest = os.path.join(run_dir, "input")
         os.makedirs(input_dest, exist_ok=True)
-        graph_src = cls.input_path("graph.json")
+        graph_src = cls.graph_file
         if os.path.exists(graph_src):
-            shutil.copy2(graph_src, os.path.join(input_dest, "graph.json"))
+            shutil.copy2(
+                graph_src, os.path.join(input_dest, os.path.basename(graph_src))
+            )
         if os.path.exists(cls.config_file):
             shutil.copy2(cls.config_file, os.path.join(input_dest, "config.json"))
 
@@ -255,7 +260,7 @@ class Config:
             record_run(
                 os.path.basename(run_dir),
                 os.path.join(input_dest, "config.json"),
-                os.path.join(input_dest, "graph.json"),
+                os.path.join(input_dest, os.path.basename(graph_src)),
                 run_dir,
             )
         except Exception:
