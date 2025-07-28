@@ -327,7 +327,7 @@ class CausalGraph:
                             {
                                 "between": [bridge.node_a_id, bridge.node_b_id],
                                 "active": bridge.active,
-                                "type": bridge.bridge_type,
+                                "type": bridge.bridge_type.value,
                                 "drift_tolerance": bridge.drift_tolerance,
                                 "decoherence_limit": bridge.decoherence_limit,
                             }
