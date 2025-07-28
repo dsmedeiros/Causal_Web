@@ -46,6 +46,7 @@ class MutationOrchestrator:
         self._propagate(tick)
 
     def cluster_ops(self, tick: int) -> None:
+        self.graph.set_current_tick(tick)
         self.graph.detect_clusters()
         self.graph.update_meta_nodes(tick)
         bridge_manager.dynamic_bridge_management(tick)
