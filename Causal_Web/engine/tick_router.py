@@ -1,3 +1,9 @@
+from __future__ import annotations
+
+from .node import Node
+from .tick import Tick
+
+
 class TickRouter:
     """Route ticks across LCCM layers"""
 
@@ -22,9 +28,9 @@ class TickRouter:
         return cls.LAYERS[-1]
 
     @classmethod
-    def route_tick(cls, node, tick):
+    def route_tick(cls, node: Node, tick: Tick) -> None:
+        """Update ``tick`` to the next layer and record the transition."""
         from ..config import Config
-        import json
         from .logger import log_json
 
         new_layer = cls.next_layer(tick.layer)

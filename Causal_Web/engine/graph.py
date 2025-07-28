@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import cmath
 import math
 import random
 from collections import defaultdict, deque
 
-from .bridge import Bridge
+from .bridge import Bridge, BridgeType, MediumType
 from .node import Node, Edge, NodeType
 from .tick import GLOBAL_TICK_POOL
 from .meta_node import MetaNode
@@ -15,7 +17,9 @@ from .logger import log_json
 class CausalGraph:
     """Container for nodes, edges and bridges comprising the simulation."""
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialize empty collections tracking graph elements."""
+
         self.nodes = {}
         self.edges = []
         self.edges_from = defaultdict(list)
@@ -27,21 +31,23 @@ class CausalGraph:
         self.spatial_index = defaultdict(set)
         self._cluster_cache: dict[int, tuple[int, list[list[str]]]] = {}
         self._cluster_version = 0
+        self._nearby_cache: dict[tuple[str, int], list[str]] = {}
+        self._nearby_cache_tick: int | None = None
 
     def add_node(
         self,
-        node_id,
-        x=0.0,
-        y=0.0,
-        frequency=1.0,
+        node_id: str,
+        x: float = 0.0,
+        y: float = 0.0,
+        frequency: float = 1.0,
         refractory_period: float | None = None,
-        base_threshold=0.5,
-        phase=0.0,
+        base_threshold: float = 0.5,
+        phase: float = 0.0,
         *,
-        origin_type="seed",
-        generation_tick=0,
-        parent_ids=None,
-    ):
+        origin_type: str = "seed",
+        generation_tick: int = 0,
+        parent_ids: list[str] | None = None,
+    ) -> None:
         x, y = self._non_overlapping_position(x, y)
         if refractory_period is None:
             refractory_period = getattr(Config, "refractory_period", 2.0)
@@ -92,14 +98,14 @@ class CausalGraph:
 
     def add_edge(
         self,
-        source_id,
-        target_id,
-        attenuation=1.0,
-        density=0.0,
-        delay=1,
-        phase_shift=0.0,
-        weight=None,
-    ):
+        source_id: str,
+        target_id: str,
+        attenuation: float = 1.0,
+        density: float = 0.0,
+        delay: int = 1,
+        phase_shift: float = 0.0,
+        weight: float | None = None,
+    ) -> None:
         if weight is None:
             low, high = getattr(Config, "edge_weight_range", [1.0, 1.0])
             weight = random.uniform(low, high)
@@ -118,18 +124,22 @@ class CausalGraph:
 
     def add_bridge(
         self,
-        node_a_id,
-        node_b_id,
-        bridge_type="braided",
-        phase_offset=0.0,
-        drift_tolerance=None,
-        decoherence_limit=None,
-        initial_strength=1.0,
-        medium_type="standard",
-        mutable=True,
-        seeded=True,
-        formed_at_tick=0,
-    ):
+        node_a_id: str,
+        node_b_id: str,
+        bridge_type: BridgeType | str = BridgeType.BRAIDED,
+        phase_offset: float = 0.0,
+        drift_tolerance: float | None = None,
+        decoherence_limit: float | None = None,
+        initial_strength: float = 1.0,
+        medium_type: MediumType | str = MediumType.STANDARD,
+        mutable: bool = True,
+        seeded: bool = True,
+        formed_at_tick: int = 0,
+    ) -> None:
+        if isinstance(bridge_type, str):
+            bridge_type = BridgeType(bridge_type)
+        if isinstance(medium_type, str):
+            medium_type = MediumType(medium_type)
         bridge = Bridge(
             node_a_id,
             node_b_id,
@@ -185,36 +195,54 @@ class CausalGraph:
             if not self.spatial_index[cell]:
                 del self.spatial_index[cell]
 
-    def get_node(self, node_id):
+    def get_node(self, node_id: str) -> Node | None:
+        """Return the :class:`Node` with ``node_id`` if present."""
         return self.nodes.get(node_id)
 
-    def get_edges_from(self, node_id):
+    def get_edges_from(self, node_id: str) -> list[Edge]:
+        """Return outbound edges from ``node_id``."""
         return self.edges_from.get(node_id, [])
 
-    def get_edges_to(self, node_id):
+    def set_current_tick(self, tick: int | None) -> None:
+        """Reset neighborhood cache for a new tick."""
+        if tick != self._nearby_cache_tick:
+            self._nearby_cache_tick = tick
+            self._nearby_cache.clear()
+
+    def get_edges_to(self, node_id: str) -> list[Edge]:
+        """Return inbound edges to ``node_id``."""
         return self.edges_to.get(node_id, [])
 
-    def get_upstream_nodes(self, node_id):
+    def get_upstream_nodes(self, node_id: str) -> list[str]:
+        """IDs of nodes with edges into ``node_id``."""
         return [e.source for e in self.get_edges_to(node_id)]
 
-    def get_downstream_nodes(self, node_id):
+    def get_downstream_nodes(self, node_id: str) -> list[str]:
+        """IDs of nodes reachable from ``node_id`` via edges."""
         return [e.target for e in self.get_edges_from(node_id)]
 
-    def nearby_nodes(self, node, radius=1):
+    def nearby_nodes(self, node: Node, radius: int = 1) -> list[Node]:
         """Return nodes in adjacent spatial partitions."""
-        cells = [
-            (node.grid_x + dx, node.grid_y + dy)
-            for dx in range(-radius, radius + 1)
-            for dy in range(-radius, radius + 1)
-        ]
-        ids = set()
-        for c in cells:
-            ids.update(self.spatial_index.get(c, set()))
-        ids.discard(node.id)
-        return [self.nodes[i] for i in ids if i in self.nodes]
+
+        cache_key = (node.id, radius)
+        if cache_key in self._nearby_cache:
+            ids = self._nearby_cache[cache_key]
+        else:
+            cells = [
+                (node.grid_x + dx, node.grid_y + dy)
+                for dx in range(-radius, radius + 1)
+                for dy in range(-radius, radius + 1)
+            ]
+            ids = set()
+            for c in cells:
+                ids.update(self.spatial_index.get(c, set()))
+            ids.discard(node.id)
+            ids = [i for i in ids if i in self.nodes]
+            self._nearby_cache[cache_key] = ids
+        return [self.nodes[i] for i in ids]
 
     # --- Bridge-aware connectivity helpers ---
-    def get_bridge_neighbors(self, node_id, active_only=True):
+    def get_bridge_neighbors(self, node_id: str, active_only: bool = True) -> list[str]:
         """Return IDs of nodes connected via bridges."""
         neighbors = set()
         for b in self.bridges_by_node.get(node_id, set()):
@@ -226,7 +254,7 @@ class CausalGraph:
                 neighbors.add(b.node_a_id)
         return list(neighbors)
 
-    def get_connected_nodes(self, node_id):
+    def get_connected_nodes(self, node_id: str) -> list[str]:
         """All neighbors reachable via edges or active bridges."""
         connected = set(
             self.get_upstream_nodes(node_id) + self.get_downstream_nodes(node_id)
@@ -234,7 +262,7 @@ class CausalGraph:
         connected.update(self.get_bridge_neighbors(node_id))
         return list(connected)
 
-    def reset_ticks(self):
+    def reset_ticks(self) -> None:
         for node in self.nodes.values():
             for t in node.tick_history:
                 GLOBAL_TICK_POOL.release(t)
@@ -262,8 +290,9 @@ class CausalGraph:
         except Exception:
             pass
 
-    def inspect_superpositions(self):
-        inspection_log = []
+    def inspect_superpositions(self) -> list[dict]:
+        """Return details of multi-phase superpositions on each node."""
+        inspection_log: list[dict] = []
 
         for node in self.nodes.values():
             for tick, raw_phases in node.pending_superpositions.items():
@@ -310,7 +339,7 @@ class CausalGraph:
 
         return inspection_log
 
-    def _interference_type(self, phases):
+    def _interference_type(self, phases: list) -> str:
         """Classify the interference pattern of a set of phases.
 
         Parameters
@@ -346,7 +375,7 @@ class CausalGraph:
 
     def detect_clusters(
         self, coherence_threshold: float = 0.8, freq_tolerance: float = 0.1
-    ):
+    ) -> list[list[str]]:
         """Detect sets of phase-aligned nodes and assign cluster IDs.
 
         Nodes are compared only with others in adjacent spatial bins to
@@ -400,7 +429,7 @@ class CausalGraph:
 
         return clusters
 
-    def hierarchical_clusters(self) -> dict:
+    def hierarchical_clusters(self) -> dict[int, list[list[str]]]:
         """Compute hierarchical clustering assignments.
 
         The first-level clusters must already be detected or they will be
@@ -444,7 +473,7 @@ class CausalGraph:
         self._cluster_cache.clear()
         return {0: [c for c in self._clusters_by_level(0)], 1: components}
 
-    def _clusters_by_level(self, level: int) -> list:
+    def _clusters_by_level(self, level: int) -> list[list[str]]:
         cached = self._cluster_cache.get(level)
         if cached and cached[0] == self._cluster_version:
             return cached[1]
@@ -460,7 +489,7 @@ class CausalGraph:
         self._cluster_cache[level] = (self._cluster_version, result)
         return result
 
-    def create_meta_nodes(self, clusters):
+    def create_meta_nodes(self, clusters: list[list[str]]) -> None:
         """Instantiate MetaNode objects for given clusters."""
         for cluster in clusters:
             meta = MetaNode(cluster, self, meta_type="Emergent")
@@ -471,230 +500,23 @@ class CausalGraph:
         for meta in list(self.meta_nodes.values()):
             meta.update_internal_state(tick_time)
 
-    def to_dict(self):
-        node_list = [
-            {
-                "id": nid,
-                "x": n.x,
-                "y": n.y,
-                "ticks": [
-                    {
-                        "time": tick.time,
-                        "phase": tick.phase,
-                        "origin": tick.origin,
-                        "layer": getattr(tick, "layer", "tick"),
-                        "trace_id": getattr(tick, "trace_id", ""),
-                    }
-                    for tick in n.tick_history
-                ],
-                "phase": n.phase,
-                "coherence": n.coherence,
-                "decoherence": n.decoherence,
-                "frequency": n.frequency,
-                "refractory_period": n.refractory_period,
-                "base_threshold": n.base_threshold,
-                "collapse_origin": n.collapse_origin,
-                "is_classical": getattr(n, "is_classical", False),
-                "decoherence_streak": getattr(n, "_decoherence_streak", 0),
-                "last_tick_time": n.last_tick_time,
-                "subjective_ticks": n.subjective_ticks,
-                "law_wave_frequency": n.law_wave_frequency,
-                "trust_profile": n.trust_profile,
-                "phase_confidence": n.phase_confidence_index,
-                "goals": n.goals,
-                "origin_type": n.origin_type,
-                "generation_tick": n.generation_tick,
-                "parent_ids": n.parent_ids,
-                "node_type": n.node_type.value,
-                "coherence_credit": n.coherence_credit,
-                "decoherence_debt": n.decoherence_debt,
-                "phase_lock": n.phase_lock,
-            }
-            for nid, n in self.nodes.items()
-        ]
+    def to_dict(self) -> dict:
+        """Return a JSON serializable representation of the graph."""
 
-        return {
-            "nodes": node_list,
-            "superpositions": {
-                nid: {
-                    str(t): [
-                        round(float(p[0] if isinstance(p, (tuple, list)) else p), 4)
-                        for p in node.pending_superpositions[t]
-                    ]
-                    for t in node.pending_superpositions
-                }
-                for nid, node in self.nodes.items()
-                if node.pending_superpositions
-            },
-            "edges": [
-                {
-                    "from": e.source,
-                    "to": e.target,
-                    "delay": e.delay,
-                    "attenuation": e.attenuation,
-                    "density": e.density,
-                    "phase_shift": e.phase_shift,
-                }
-                for e in self.edges
-            ],
-            "bridges": [b.to_dict() for b in self.bridges],
-            "tick_sources": self.tick_sources,
-            "meta_nodes": {
-                mid: {
-                    "members": meta.member_ids,
-                    "constraints": meta.constraints,
-                    "type": meta.meta_type,
-                    "origin": meta.origin,
-                    "collapsed": meta.collapsed,
-                    "x": meta.x,
-                    "y": meta.y,
-                }
-                for mid, meta in self.meta_nodes.items()
-            },
-        }
+        from .serialization_service import GraphSerializationService
 
-    def save_to_file(self, path):
+        return GraphSerializationService(self).as_dict()
+
+    def save_to_file(self, path: str) -> None:
         with open(path, "w") as f:
             json.dump(self.to_dict(), f, indent=2)
 
-    def load_from_file(self, path):
-        """Populate the graph from a JSON file.
+    def load_from_file(self, path: str) -> None:
+        """Populate the graph from a JSON file."""
 
-        The ``nodes`` section may be either a list of node objects or a
-        dictionary mapping IDs to attribute dictionaries.  Likewise, ``edges``
-        can be provided as a list of edge objects or as an adjacency mapping of
-        ``{source: [target, ...]}`` or ``{source: {target: {params}}}``.
-        """
+        from .services.sim_services import GraphLoadService
 
-        with open(path, "r") as f:
-            data = json.load(f)
-
-        self.nodes.clear()
-        self.edges.clear()
-        self.edges_from.clear()
-        self.edges_to.clear()
-        self.bridges.clear()
-        self.bridges_by_node.clear()
-        self.tick_sources = []
-        self.spatial_index.clear()
-        self.meta_nodes.clear()
-
-        nodes_data = data.get("nodes", [])
-        if isinstance(nodes_data, dict):
-            nodes_iter = [dict(v, id=k) for k, v in nodes_data.items()]
-        else:
-            nodes_iter = nodes_data
-
-        for node_data in nodes_iter:
-            node_id = node_data.get("id")
-            if node_id is None:
-                continue
-            self.add_node(
-                node_id,
-                x=node_data.get("x", 0.0),
-                y=node_data.get("y", 0.0),
-                frequency=node_data.get("frequency", 1.0),
-                refractory_period=node_data.get(
-                    "refractory_period", getattr(Config, "refractory_period", 2.0)
-                ),
-                base_threshold=node_data.get("base_threshold", 0.5),
-                phase=node_data.get("phase", 0.0),
-                origin_type=node_data.get("origin_type", "seed"),
-                generation_tick=node_data.get("generation_tick", 0),
-                parent_ids=node_data.get("parent_ids"),
-            )
-            goals = node_data.get("goals")
-            if goals is not None:
-                self.nodes[node_id].goals = goals
-        edges_data = data.get("edges", [])
-        if isinstance(edges_data, dict):
-            edges_iter = []
-            for src, targets in edges_data.items():
-                if isinstance(targets, dict):
-                    for tgt, params in targets.items():
-                        rec = {"from": src, "to": tgt}
-                        if isinstance(params, dict):
-                            rec.update(params)
-                        edges_iter.append(rec)
-                else:
-                    for tgt in targets:
-                        if isinstance(tgt, str):
-                            edges_iter.append({"from": src, "to": tgt})
-                        elif isinstance(tgt, dict):
-                            rec = {"from": src}
-                            rec.update(tgt)
-                            edges_iter.append(rec)
-        else:
-            edges_iter = edges_data
-
-        for edge in edges_iter:
-            src = edge.get("from")
-            tgt = edge.get("to")
-            if src is None or tgt is None:
-                continue
-            if src == tgt:
-                # treat self-edge as tick seed definition
-                self.tick_sources.append(
-                    {
-                        "node_id": src,
-                        "tick_interval": edge.get("delay", 1),
-                        "phase": edge.get("phase_shift", 0.0),
-                    }
-                )
-                continue
-            self.add_edge(
-                src,
-                tgt,
-                attenuation=edge.get("attenuation", 1.0),
-                density=edge.get("density", 0.0),
-                delay=edge.get("delay", 1),
-                phase_shift=edge.get("phase_shift", 0.0),
-                weight=edge.get("weight"),
-            )
-
-        for bridge in data.get("bridges", []):
-            src = bridge.get("from")
-            tgt = bridge.get("to")
-            if src is None or tgt is None:
-                continue
-            self.add_bridge(
-                src,
-                tgt,
-                bridge_type=bridge.get("bridge_type", "braided"),
-                phase_offset=bridge.get("phase_offset", 0.0),
-                drift_tolerance=bridge.get("drift_tolerance"),
-                decoherence_limit=bridge.get("decoherence_limit"),
-                initial_strength=bridge.get("initial_strength", 1.0),
-                medium_type=bridge.get("medium_type", "standard"),
-                mutable=bridge.get("mutable", True),
-                seeded=True,
-                formed_at_tick=0,
-            )
-
-        self.tick_sources.extend(data.get("tick_sources", []))
-
-        # Load configured meta nodes ---------------------------------
-        for mid, meta in data.get("meta_nodes", {}).items():
-            members = list(meta.get("members", []))
-            constraints = dict(meta.get("constraints", {}))
-            mtype = meta.get("type", "Configured")
-            origin = meta.get("origin")
-            collapsed = bool(meta.get("collapsed", False))
-            x = float(meta.get("x", 0.0))
-            y = float(meta.get("y", 0.0))
-            self.meta_nodes[mid] = MetaNode(
-                members,
-                self,
-                meta_type=mtype,
-                constraints=constraints,
-                origin=origin,
-                collapsed=collapsed,
-                x=x,
-                y=y,
-                id=mid,
-            )
-
-        self.identify_boundaries()
+        GraphLoadService(self, path).load()
 
     # ------------------------------------------------------------
     def identify_boundaries(self) -> None:

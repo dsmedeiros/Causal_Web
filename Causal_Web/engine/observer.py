@@ -1,15 +1,22 @@
+from typing import Any, Dict, List
+
+
 class Observer:
     """Epistemic observer with limited perceptual window."""
 
-    def __init__(self, observer_id: str, window: int = 10):
+    def __init__(self, observer_id: str, window: int = 10) -> None:
+        """Create a new ``Observer`` instance."""
+
         self.id = observer_id
         self.window = window
-        self.memory = []  # list of {'tick': int, 'events': [...]}
-        self.belief_state = {}
-        self.disagreement = []  # list of diffs per tick
+        self.memory: List[Dict[str, Any]] = []
+        self.belief_state: Dict[int, Dict[str, int]] = {}
+        self.disagreement: List[Any] = []
 
-    def observe(self, graph, tick_time: int):
-        events = []
+    def observe(self, graph: Any, tick_time: int) -> None:
+        """Record events at ``tick_time`` from ``graph``."""
+
+        events: List[Dict[str, Any]] = []
         seen_nodes = set()
         for node in graph.nodes.values():
             if node.tick_history and node.tick_history[-1].time == tick_time:
@@ -41,9 +48,10 @@ class Observer:
         if len(self.memory) > self.window:
             self.memory.pop(0)
 
-    def infer_field_state(self):
-        """Simple inference based on memory of recent events."""
-        state = {}
+    def infer_field_state(self) -> Dict[str, int]:
+        """Return a naive belief state derived from recent events."""
+
+        state: Dict[str, int] = {}
         for entry in self.memory:
             for ev in entry["events"]:
                 state.setdefault(ev["node"], 0)

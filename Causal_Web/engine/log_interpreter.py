@@ -3,38 +3,20 @@ import os
 from typing import Dict, List
 
 from .causal_analyst import CausalAnalyst
+from .base import OutputDirMixin, JsonLinesMixin
 
 
-def _load_json_lines(path: str) -> Dict[str, Dict]:
-    data = {}
-    if not os.path.exists(path):
-        return data
-    with open(path) as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                obj = json.loads(line)
-                data.update(obj)
-            except json.JSONDecodeError:
-                continue
-    return data
-
-
-class CWTLogInterpreter:
+class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
     """Simple multilayer interpreter for CWT logs."""
 
-    def __init__(self, output_dir: str = None, graph_path: str = None):
+    def __init__(
+        self, output_dir: str | None = None, graph_path: str | None = None
+    ) -> None:
+        super().__init__(output_dir=output_dir)
         base = os.path.join(os.path.dirname(__file__), "..")
-        self.output_dir = output_dir or os.path.join(base, "output")
         self.graph_path = graph_path or os.path.join(base, "input", "graph.json")
         self.graph = {}
         self.summary: Dict[str, Dict] = {}
-
-    # ------------------------------------------------------------
-    def _path(self, name: str) -> str:
-        return os.path.join(self.output_dir, name)
 
     # ------------------------------------------------------------
     def load_graph(self) -> None:
@@ -71,8 +53,8 @@ class CWTLogInterpreter:
 
     # ------------------------------------------------------------
     def interpret_collapse(self) -> None:
-        path = os.path.join(self.output_dir, "classicalization_map.json")
-        lines = _load_json_lines(path)
+        path = self._path("classicalization_map.json")
+        lines = self.load_json_lines(path)
         if not lines:
             return
         collapse: Dict[str, int] = {}
@@ -88,8 +70,8 @@ class CWTLogInterpreter:
 
     # ------------------------------------------------------------
     def interpret_coherence(self) -> None:
-        path = os.path.join(self.output_dir, "coherence_log.json")
-        lines = _load_json_lines(path)
+        path = self._path("coherence_log.json")
+        lines = self.load_json_lines(path)
         if not lines:
             return
         summary: Dict[str, Dict[str, float]] = {}
@@ -104,8 +86,8 @@ class CWTLogInterpreter:
 
     # ------------------------------------------------------------
     def interpret_law_wave(self) -> None:
-        path = os.path.join(self.output_dir, "law_wave_log.json")
-        lines = _load_json_lines(path)
+        path = self._path("law_wave_log.json")
+        lines = self.load_json_lines(path)
         if not lines:
             return
         freqs: Dict[str, List[float]] = {}
@@ -194,7 +176,10 @@ class CWTLogInterpreter:
                 by_node.setdefault(node, {}).setdefault(to, 0)
                 by_node[node][to] += 1
         if totals:
-            self.summary["layer_transitions"] = {"totals": totals, "by_node": by_node}
+            self.summary["layer_transitions"] = {
+                "totals": totals,
+                "by_node": by_node,
+            }
 
     # ------------------------------------------------------------
     def interpret_rerouting(self) -> None:
@@ -249,7 +234,7 @@ class CWTLogInterpreter:
     # ------------------------------------------------------------
     def interpret_decoherence(self) -> None:
         path = self._path("decoherence_log.json")
-        lines = _load_json_lines(path)
+        lines = self.load_json_lines(path)
         if not lines:
             return
         stats: Dict[str, Dict[str, float]] = {}
@@ -265,7 +250,7 @@ class CWTLogInterpreter:
     # ------------------------------------------------------------
     def interpret_clusters(self) -> None:
         path = self._path("cluster_log.json")
-        lines = _load_json_lines(path)
+        lines = self.load_json_lines(path)
         if not lines:
             return
         first = None
@@ -283,7 +268,7 @@ class CWTLogInterpreter:
     # ------------------------------------------------------------
     def interpret_bridge_state(self) -> None:
         path = self._path("bridge_state_log.json")
-        lines = _load_json_lines(path)
+        lines = self.load_json_lines(path)
         if not lines:
             return
         last_tick = max(int(t) for t in lines)
@@ -311,7 +296,7 @@ class CWTLogInterpreter:
     # ------------------------------------------------------------
     def interpret_meta_nodes(self) -> None:
         path = self._path("meta_node_tick_log.json")
-        lines = _load_json_lines(path)
+        lines = self.load_json_lines(path)
         if not lines:
             return
         counts: Dict[str, int] = {}
@@ -361,88 +346,18 @@ class CWTLogInterpreter:
         with open(path) as f:
             lines = f.readlines()
         ticks_logged = sum(1 for l in lines if l.startswith("== Tick"))
-        self.summary["console"] = {"lines": len(lines), "ticks_logged": ticks_logged}
+        self.summary["console"] = {
+            "lines": len(lines),
+            "ticks_logged": ticks_logged,
+        }
 
     # ------------------------------------------------------------
     def generate_narrative(self) -> str:
-        lines: List[str] = []
-        ticks = self.summary.get("tick_counts", {})
-        if ticks:
-            total = sum(ticks.values())
-            lines.append(
-                f"The simulation recorded {total} ticks across {len(ticks)} nodes."
-            )
-            for nid, cnt in ticks.items():
-                lines.append(f"- Node {nid} emitted {cnt} ticks.")
+        """Return a textual summary of the collected metrics."""
 
-        collapse = self.summary.get("collapse")
-        if collapse:
-            parts = [f"{n} at tick {t}" for n, t in collapse.items()]
-            lines.append("Nodes collapsed to classical states: " + ", ".join(parts))
+        from .serialization_service import NarrativeGeneratorService
 
-        coh = self.summary.get("coherence")
-        if coh:
-            for nid, data in coh.items():
-                lines.append(
-                    f"- {nid} coherence ranged from {data['min']:.3f} to {data['max']:.3f}."
-                )
-
-        deco = self.summary.get("decoherence")
-        if deco:
-            for nid, data in deco.items():
-                lines.append(
-                    f"- {nid} decoherence ranged from {data['min']:.3f} to {data['max']:.3f}."
-                )
-
-        if "clusters" in self.summary:
-            c = self.summary["clusters"]
-            if c["first_detected"] is not None:
-                lines.append(
-                    f"Clusters first appeared at tick {c['first_detected']} with up to {c['max_clusters']} cluster(s)."
-                )
-
-        if "law_drift" in self.summary:
-            events = sum(self.summary["law_drift"].values())
-            lines.append(f"Law drift events recorded: {events} total.")
-
-        bridges = self.summary.get("bridges")
-        if bridges:
-            for b, data in bridges.items():
-                state = "active" if data.get("active") else "inactive"
-                lines.append(
-                    f"- Bridge {b} ended {state}; last rupture at {data.get('last_rupture_tick')}"
-                )
-
-        if "collapse_origins" in self.summary:
-            parts = [f"{n} at {t}" for n, t in self.summary["collapse_origins"].items()]
-            lines.append("Collapse origins: " + ", ".join(parts))
-
-        if "collapse_chains" in self.summary:
-            for src, length in self.summary["collapse_chains"].items():
-                lines.append(f"- Collapse from {src} affected {length} nodes")
-
-        if "layer_transitions" in self.summary:
-            total = sum(self.summary["layer_transitions"]["totals"].values())
-            lines.append(f"Layer transitions recorded: {total}")
-
-        if "rerouting" in self.summary:
-            r = self.summary["rerouting"]
-            lines.append(
-                f"Rerouting events - recursive: {r['recursive']}, alt paths: {r['alt_path']}"
-            )
-
-        if "inspection_events" in self.summary:
-            lines.append(
-                f"Recorded {self.summary['inspection_events']} superposition inspections."
-            )
-
-        if "console" in self.summary:
-            c = self.summary["console"]
-            lines.append(
-                f"Console log contains {c['lines']} lines covering {c['ticks_logged']} ticks."
-            )
-
-        return "\n".join(lines)
+        return NarrativeGeneratorService(self.summary).generate()
 
     # ------------------------------------------------------------
     def run(self) -> None:
@@ -464,11 +379,11 @@ class CWTLogInterpreter:
         self.interpret_tick_trace()
         self.interpret_inspection()
         self.interpret_console_log()
-        out_path = os.path.join(self.output_dir, "interpretation_log.json")
+        out_path = self._path("interpretation_log.json")
         with open(out_path, "w") as f:
             json.dump(self.summary, f, indent=2)
         text_summary = self.generate_narrative()
-        text_path = os.path.join(self.output_dir, "interpretation_summary.txt")
+        text_path = self._path("interpretation_summary.txt")
         with open(text_path, "w") as f:
             f.write(text_summary)
         print(f"✅ Interpretation saved to {out_path}")

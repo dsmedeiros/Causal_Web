@@ -8,6 +8,7 @@ import argparse
 import json
 import os
 import time
+from dataclasses import dataclass
 from typing import Any
 
 from .config import Config, load_config
@@ -51,57 +52,71 @@ def _apply_overrides(
             _apply_overrides(args, value, prefix=f"{key}.")
 
 
-def main() -> None:
-    """Parse CLI arguments and run the simulation or GUI."""
-    initial = argparse.ArgumentParser(add_help=False)
-    initial.add_argument(
-        "--config",
-        default=Config.input_path("config.json"),
-        help="Path to JSON configuration file",
-    )
-    initial.add_argument(
-        "--no-gui",
-        action="store_true",
-        help="Run simulation without launching the GUI",
-    )
-    initial.add_argument(
-        "--init-db",
-        action="store_true",
-        help="Initialize PostgreSQL schema and exit.",
-    )
-    known, remaining = initial.parse_known_args()
+@dataclass
+class MainService:
+    """Handle CLI parsing and runtime selection."""
 
-    config_data: dict[str, Any] = {}
-    if known.config and os.path.exists(known.config):
-        with open(known.config) as f:
-            config_data = json.load(f)
-        Config.load_from_file(known.config)
+    argv: list[str] | None = None
 
-    parser = argparse.ArgumentParser(
-        parents=[initial], description="Run Causal Web simulation"
-    )
-    _add_config_args(parser, config_data)
-    args = parser.parse_args()
+    def run(self) -> None:
+        args, cfg = self._parse_args()
+        _apply_overrides(args, cfg)
+        if args.init_db:
+            self._init_db(args.config)
+            return
+        if args.no_gui:
+            self._run_headless()
+        else:
+            self._launch_gui()
 
-    _apply_overrides(args, config_data)
+    # ------------------------------------------------------------------
+    def _parse_args(self) -> tuple[argparse.Namespace, dict[str, Any]]:
+        initial = argparse.ArgumentParser(add_help=False)
+        initial.add_argument(
+            "--config",
+            default=Config.input_path("config.json"),
+            help="Path to JSON configuration file",
+        )
+        initial.add_argument(
+            "--no-gui",
+            action="store_true",
+            help="Run simulation without launching the GUI",
+        )
+        initial.add_argument(
+            "--init-db",
+            action="store_true",
+            help="Initialize PostgreSQL schema and exit.",
+        )
+        known, _ = initial.parse_known_args(self.argv)
 
-    if args.init_db:
+        config_data: dict[str, Any] = {}
+        if known.config and os.path.exists(known.config):
+            with open(known.config) as f:
+                config_data = json.load(f)
+            Config.load_from_file(known.config)
+
+        parser = argparse.ArgumentParser(
+            parents=[initial], description="Run Causal Web simulation"
+        )
+        _add_config_args(parser, config_data)
+        args = parser.parse_args(self.argv)
+        return args, config_data
+
+    # ------------------------------------------------------------------
+    def _init_db(self, cfg_path: str) -> None:
         from .database import initialize_database
 
-        load_config(args.config)
+        load_config(cfg_path)
         initialize_database(Config.database)
-        return
 
-    if args.no_gui:
+    # ------------------------------------------------------------------
+    def _run_headless(self) -> None:
         from .engine import tick_engine
 
         tick_engine.build_graph()
         with Config.state_lock:
             Config.is_running = True
         tick_engine.simulation_loop()
-        # ``allow_tick_override`` lets command line flags override the default
-        # ``max_ticks`` setting. When disabled we fall back to ``tick_limit`` as
-        # a hard upper bound.
         limit = Config.max_ticks if Config.allow_tick_override else Config.tick_limit
         try:
             while True:
@@ -113,10 +128,18 @@ def main() -> None:
                 time.sleep(0.1)
         except KeyboardInterrupt:
             pass
-    else:
+
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _launch_gui() -> None:
         from .gui_pyside import launch
 
         launch()
+
+
+def main() -> None:
+    """Entry point for external callers."""
+    MainService().run()
 
 
 if __name__ == "__main__":

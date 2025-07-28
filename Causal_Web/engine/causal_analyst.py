@@ -6,76 +6,6 @@ from dataclasses import dataclass
 from typing import Dict, List, Tuple, Optional
 
 
-# ------------------------------------------------------------
-# Helper to load newline-delimited JSON where each line maps a tick to values
-
-
-def _load_json_lines(path: str) -> Dict[int, Dict]:
-    """Load newline-delimited JSON where each line may take multiple forms.
-
-    Supported line formats::
-
-        {"12": {...}}                     # mapping of tick -> values
-        {"tick": 12, "foo": "bar"}        # tick field plus other keys
-
-    Returns a mapping from tick (int) to the associated value dict.
-    """
-
-    records: Dict[int, Dict] = {}
-    if not os.path.exists(path):
-        return records
-
-    with open(path) as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                obj = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-
-            # Case 1: single key that is a tick string
-            if len(obj) == 1 and next(iter(obj)).isdigit():
-                k = next(iter(obj))
-                records[int(k)] = obj[k]
-                continue
-
-            # Case 2: object contains explicit 'tick' field
-            if "tick" in obj:
-                tick = int(obj.pop("tick"))
-                records[tick] = obj
-                continue
-
-            # Fallback: attempt to coerce any digit-like keys
-            for k, v in obj.items():
-                if isinstance(k, str) and k.isdigit():
-                    records[int(k)] = v
-
-    return records
-
-
-# Specialized loader for event_log.json where multiple entries
-# may share the same tick and we want to preserve them all.
-def _load_event_log(path: str) -> Dict[int, List[Dict]]:
-    records: Dict[int, List[Dict]] = {}
-    if not os.path.exists(path):
-        return records
-
-    with open(path) as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                obj = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            tick = int(obj.get("tick", 0))
-            records.setdefault(tick, []).append(obj)
-    return records
-
-
 @dataclass
 class ExplanationEvent:
     tick_range: Tuple[int, int]
@@ -84,12 +14,17 @@ class ExplanationEvent:
     explanation_text: str
 
 
-class CausalAnalyst:
+from .base import OutputDirMixin, JsonLinesMixin
+
+
+class CausalAnalyst(OutputDirMixin, JsonLinesMixin):
     """Analyze logs to generate causal explanations."""
 
-    def __init__(self, output_dir: str = None, input_dir: str = None):
+    def __init__(
+        self, output_dir: Optional[str] = None, input_dir: Optional[str] = None
+    ) -> None:
+        super().__init__(output_dir=output_dir)
         base = os.path.join(os.path.dirname(__file__), "..")
-        self.output_dir = output_dir or os.path.join(base, "output")
         self.input_dir = input_dir or os.path.join(base, "input")
         self.logs: Dict[str, Dict[int, Dict]] = {}
         self.graph: Dict = {}
@@ -97,10 +32,6 @@ class CausalAnalyst:
         self.causal_chains: List[Dict] = []
         self.params = {"window": 8}
         self.summary: Dict[str, Dict] = {}
-
-    # ------------------------------------------------------------
-    def _path(self, name: str) -> str:
-        return os.path.join(self.output_dir, name)
 
     # ------------------------------------------------------------
     def load_logs(self) -> None:
@@ -125,9 +56,9 @@ class CausalAnalyst:
 
         for key, path in paths.items():
             if key in ("event", "layer_transitions"):
-                self.logs[key] = _load_event_log(path)
+                self.logs[key] = self.load_event_log(path, int_keys=True)
             elif path.endswith(".json") and not path.endswith("tick_trace.json"):
-                self.logs[key] = _load_json_lines(path)
+                self.logs[key] = self.load_json_lines(path, int_keys=True)
             elif key == "tick_trace" and os.path.exists(path):
                 with open(path) as f:
                     try:
@@ -196,7 +127,7 @@ class CausalAnalyst:
         return None
 
     # ------------------------------------------------------------
-    def infer_causal_chains(self) -> None:
+    def infer_causal_chains(self) -> List[Dict]:
         """Infer causal chains leading to collapses or other events."""
         collapse_events = self._collapse_events()
         spikes = self.transitions.get("decoherence_spikes", {})
@@ -245,7 +176,7 @@ class CausalAnalyst:
 
         self.causal_chains = chains
 
-        path = os.path.join(self.output_dir, "causal_chains.json")
+        path = self._path("causal_chains.json")
         with open(path, "w") as f:
             json.dump(chains, f, indent=2)
         return chains
@@ -253,210 +184,10 @@ class CausalAnalyst:
     # ------------------------------------------------------------
     def match_explanatory_rules(self) -> None:
         """Apply rule patterns to logs to create explanation events."""
-        collapse_events = self._collapse_events()
-        spikes = self.transitions.get("decoherence_spikes", {})
+        from .explanation_rules import ExplanationRuleMatcher
 
-        for node, tick in collapse_events.items():
-            # Rule: Decoherence-Induced Collapse
-            candidate = [
-                s for s in spikes.get(node, []) if s[1] >= tick - 1 and s[0] <= tick - 3
-            ]
-            if candidate:
-                start, end, mx = candidate[-1]
-                text = (
-                    f"Node {node} collapsed after sustained decoherence (max {mx:.2f}) "
-                    f"between ticks {start}-{end}."
-                )
-                self.explanations.append(
-                    ExplanationEvent(
-                        (start, tick), [node], "rule:decoherence_induced_collapse", text
-                    )
-                )
-
-        # Rule: Law-Wave Stabilization
-        law_wave = self.logs.get("law_wave", {})
-        for node in {n for tick in law_wave for n in law_wave[tick]}:
-            values = [
-                law_wave[t][node] for t in sorted(law_wave) if node in law_wave[t]
-            ]
-            window = []
-            for i, v in enumerate(values):
-                window.append(v)
-                if len(window) > 5:
-                    window.pop(0)
-                if len(window) == 5:
-                    avg = sum(window) / 5
-                    var = sum((x - avg) ** 2 for x in window) / 5
-                    if var < 0.01:
-                        start_tick = sorted(law_wave.keys())[max(0, i - 4)]
-                        end_tick = sorted(law_wave.keys())[i]
-                        text = (
-                            f"Node {node} maintained stable law-wave variance {var:.4f} "
-                            f"from ticks {start_tick}-{end_tick}."
-                        )
-                        self.explanations.append(
-                            ExplanationEvent(
-                                (start_tick, end_tick),
-                                [node],
-                                "rule:law_wave_stabilization",
-                                text,
-                            )
-                        )
-                        break
-
-        # Rule: Meta-Node Onset
-        cluster_log = self.logs.get("cluster", {})
-        coherence = self.logs.get("coherence", {})
-        for tick in sorted(cluster_log):
-            clusters = cluster_log[tick]
-            if not clusters:
-                continue
-            for cluster in clusters:
-                if len(cluster) < 3:
-                    continue
-                if all(coherence.get(tick, {}).get(n, 0) > 0.85 for n in cluster):
-                    text = (
-                        f"Cluster {', '.join(cluster)} exhibited high coherence at tick {tick}, "
-                        "indicating possible meta-node formation."
-                    )
-                    self.explanations.append(
-                        ExplanationEvent(
-                            (tick, tick), list(cluster), "rule:meta_node_onset", text
-                        )
-                    )
-
-        # Rule: Layer Transition Events
-        transitions = self.logs.get("layer_transitions", {})
-        for t in sorted(transitions):
-            for ev in transitions[t]:
-                if ev.get("from") == "decoherence" and ev.get("to") == "collapse":
-                    text = f"Node {ev['node']} transitioned from decoherence to collapse at tick {t}."
-                    self.explanations.append(
-                        ExplanationEvent(
-                            (t, t), [ev["node"]], "rule:layer_transition", text
-                        )
-                    )
-
-        # Collapse origin events
-        front = self.logs.get("collapse_front", {})
-        for tick, info in front.items():
-            if info.get("event") == "collapse_start":
-                node = info.get("node")
-                text = f"Collapse initiated at node {node}"
-                self.explanations.append(
-                    ExplanationEvent((tick, tick), [node], "rule:collapse_origin", text)
-                )
-
-        # Entanglement chain propagation
-        chains = self.logs.get("collapse_chain", {})
-        for tick, info in chains.items():
-            src = info.get("source")
-            collapsed = [c.get("node") for c in info.get("collapsed", [])]
-            if src and collapsed:
-                text = f"Collapse from {src} propagated to {', '.join(collapsed)} at tick {tick}."
-                self.explanations.append(
-                    ExplanationEvent(
-                        (tick, tick), [src] + collapsed, "rule:collapse_chain", text
-                    )
-                )
-
-            children = info.get("children_spawned")
-            if src and children:
-                text = f"Node {children[0]} condensed from chaos following collapse of MetaNode {src}."
-                self.explanations.append(
-                    ExplanationEvent(
-                        (tick, tick), children, "rule:csp_generation", text
-                    )
-                )
-
-        # SIP recombination and failures
-        emergence_path = os.path.join(self.output_dir, "node_emergence_log.json")
-        if os.path.exists(emergence_path):
-            with open(emergence_path) as f:
-                for line in f:
-                    rec = json.loads(line)
-                    if (
-                        rec.get("origin_type") == "SIP_RECOMB"
-                        and len(rec.get("parents", [])) == 2
-                    ):
-                        c = rec.get("id")
-                        parents = rec.get("parents", [])
-                        tick = rec.get("tick", 0)
-                        bridge_state = self.logs.get("bridge_state", {}).get(tick, {})
-                        bridge = bridge_state.get(
-                            f"{parents[0]}->{parents[1]}"
-                        ) or bridge_state.get(f"{parents[1]}->{parents[0]}")
-                        trust = bridge.get("trust_score") if bridge else None
-                        freq = rec.get("sigma_phi")
-                        text = (
-                            f"Node {c} was generated by recombination between {parents[0]} and {parents[1]} "
-                            f"across a stable high-trust bridge. The resulting law-wave frequency is an adaptive blend "
-                            f"of its parents ({freq:.3f})."
-                        )
-                        self.explanations.append(
-                            ExplanationEvent((tick, tick), [c], "rule:sip_recomb", text)
-                        )
-                    elif rec.get("origin_type") == "CSP":
-                        c = rec.get("id")
-                        tick = rec.get("tick", 0)
-                        collapse_id = None
-                        collapse_log_path = os.path.join(
-                            self.output_dir, "collapse_chain_log.json"
-                        )
-                        if os.path.exists(collapse_log_path):
-                            with open(collapse_log_path) as cf:
-                                for ln in cf:
-                                    evt = json.loads(ln)
-                                    if c in evt.get("children_spawned", []):
-                                        collapse_id = evt.get(
-                                            "collapsed_entity"
-                                        ) or evt.get("source")
-                                        break
-                        text = (
-                            f"Node {c} condensed from chaotic causal potential released by the collapse of {collapse_id}. "
-                            "It was unstable at birth with high phase variance and low confidence."
-                        )
-                        self.explanations.append(
-                            ExplanationEvent(
-                                (tick, tick), [c], "rule:csp_generation", text
-                            )
-                        )
-
-        fail_path = os.path.join(self.output_dir, "propagation_failure_log.json")
-        if os.path.exists(fail_path):
-            with open(fail_path) as f:
-                for line in f:
-                    rec = json.loads(line)
-                    if rec.get("type") == "SIP_FAILURE":
-                        node = rec.get("child")
-                        parent = rec.get("parent")
-                        text = (
-                            f"Node {node} failed to stabilize after SIP attempt by {parent}. "
-                            "Its collapse increased local decoherence, weakening the surrounding structure."
-                        )
-                        self.explanations.append(
-                            ExplanationEvent(
-                                (rec.get("tick", 0), rec.get("tick", 0)),
-                                [node],
-                                "rule:sip_failure",
-                                text,
-                            )
-                        )
-                    elif rec.get("type") == "CSP_FAILURE":
-                        loc = rec.get("location")
-                        collapsed = rec.get("parent")
-                        text = (
-                            f"A condensation seed near collapse site {collapsed} failed to accumulate coherence and dissolved. "
-                            "The tick energy dissipated into ambient decoherence."
-                        )
-                        self.explanations.append(
-                            ExplanationEvent(
-                                (rec.get("tick", 0), rec.get("tick", 0)),
-                                [collapsed],
-                                "rule:csp_seed_dissolution",
-                                text,
-                            )
-                        )
+        matcher = ExplanationRuleMatcher(self)
+        matcher.run()
 
     # ------------------------------------------------------------
     def generate_explanation_log(self) -> List[Dict]:
@@ -469,7 +200,7 @@ class CausalAnalyst:
             }
             for e in self.explanations
         ]
-        path = os.path.join(self.output_dir, "causal_explanations.json")
+        path = self._path("causal_explanations.json")
         with open(path, "w") as f:
             json.dump(data, f, indent=2)
         return data
@@ -506,13 +237,13 @@ class CausalAnalyst:
                             f"    * Node {step['node']} collapsed at tick {step['tick']}."
                         )
         text = "\n".join(lines)
-        path = os.path.join(self.output_dir, "causal_summary.txt")
+        path = self._path("causal_summary.txt")
         with open(path, "w") as f:
             f.write(text)
         return text
 
     # ------------------------------------------------------------
-    def generate_explanation_graph(self) -> dict:
+    def generate_explanation_graph(self) -> Dict[str, List[Dict]]:
         """Export causal chains as a DAG for visualization."""
         nodes = []
         edges = []
@@ -552,7 +283,7 @@ class CausalAnalyst:
                 edges.append({"source": a, "target": b, "label": label})
 
         graph = {"nodes": nodes, "edges": edges}
-        path = os.path.join(self.output_dir, "explanation_graph.json")
+        path = self._path("explanation_graph.json")
         with open(path, "w") as f:
             json.dump(graph, f, indent=2)
         return graph
@@ -591,7 +322,7 @@ class CausalAnalyst:
                 )
 
         data = [{"tick": t, "events": timeline[t]} for t in sorted(timeline)]
-        path = os.path.join(self.output_dir, "causal_timeline.json")
+        path = self._path("causal_timeline.json")
         with open(path, "w") as f:
             json.dump(data, f, indent=2)
         return data
@@ -606,7 +337,7 @@ class CausalAnalyst:
                 to_layer = ev.get("to")
                 counts.setdefault(node, {}).setdefault(to_layer, 0)
                 counts[node][to_layer] += 1
-        path = os.path.join(self.output_dir, "layer_transition_events.json")
+        path = self._path("layer_transition_events.json")
         with open(path, "w") as f:
             json.dump(counts, f, indent=2)
         self.summary["layer_transition_events"] = counts

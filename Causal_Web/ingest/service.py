@@ -7,7 +7,7 @@ import io
 import json
 import os
 from datetime import datetime
-from typing import AsyncIterator, Dict, Iterable
+from typing import Any, Dict, Iterable
 
 import psycopg2
 import psycopg2.extras
@@ -46,7 +46,7 @@ LOG_TABLE_MAP = {
 }
 
 
-def _iter_json(path: str) -> Iterable[dict]:
+def _iter_json(path: str) -> Iterable[dict[str, Any]]:
     """Yield JSON objects from ``path`` supporting optional ``.zst`` compression."""
 
     if path.endswith(".zst"):
@@ -67,7 +67,7 @@ def _iter_json(path: str) -> Iterable[dict]:
 
 
 async def _write_records(
-    conn_params: Dict, table: str, records: Iterable[dict]
+    conn_params: Dict[str, Any], table: str, records: Iterable[dict[str, Any]]
 ) -> None:
     """Insert ``records`` into ``table`` using ``psycopg2``."""
 
@@ -87,14 +87,18 @@ async def _write_records(
     await asyncio.to_thread(_insert)
 
 
-def _load_manifest(path: str) -> Dict:
+def _load_manifest(path: str) -> Dict[str, Any]:
+    """Return the JSON manifest at ``path`` if it exists."""
+
     if not os.path.exists(path):
         return {}
     with open(path) as fh:
         return json.load(fh)
 
 
-def _save_manifest(path: str, data: Dict) -> None:
+def _save_manifest(path: str, data: Dict[str, Any]) -> None:
+    """Write ``data`` as JSON to ``path``."""
+
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w") as fh:
         json.dump(data, fh, indent=2)

@@ -20,7 +20,9 @@ Key modules include:
 - **`engine/graph.py`** – container for nodes, edges and bridges. Graphs can be loaded from or written to JSON files.
 - **`engine/node.py`** – implementation of `Node`, `Edge` and related logic.
 - **`engine/bridge.py`** – manages dynamic bridges between nodes.
-- **`engine/tick_engine.py`** – drives the discrete simulation and records metrics under `output/`.
+- Bridge behaviour and mediums are enumerated by `BridgeType` and `MediumType`.
+- **`engine/tick_engine/`** – modular package driving the simulation and logging metrics under `output/`.
+- **`engine/tick_engine/orchestrators.py`** – separates evaluation, mutation and I/O duties for the simulation loop.
 - **`engine/tick_router.py`** – moves ticks through LCCM layers and logs transitions.
 - **`engine/tick_seeder.py`** – seeds periodic ticks based on the configuration file.
 - **`engine/log_interpreter.py`** – parses the generated logs and aggregates statistics.
@@ -95,9 +97,14 @@ cluster. A value of `0` disables these limits. Both parameters are configurable
 via CLI flags or the Parameters window in the GUI.
 
 Cluster detection and bridge management are computationally heavy. The
-`cluster_interval` setting controls how often these operations run (default
-every 10 ticks). Node evaluation, meta-node updates and metric logging also
-run on this interval to reduce overhead.
+`cluster_interval` setting controls how often clustering occurs, while
+`bridge_interval` governs dynamic bridge formation. Both default to ten
+ticks. Metric logging frequency is determined separately by the `log_interval`
+setting.
+Node evaluation and meta-node updates still follow the clustering cadence to
+reduce overhead.
+Spatial queries are cached for the duration of each tick to avoid redundant
+lookups when clustering and managing bridges.
 
 The `propagation_control` section toggles node growth mechanisms. Set
 `enable_sip` or `enable_csp` to `false` to disable Stability-Induced or
@@ -271,7 +278,8 @@ directories for each run. A new run directory is created via
 `Config.new_run()` and has the form `runs/<timestamp>__<slug>`. The current
 `graph.json` and `config.json` files are copied into each run's `input/`
 subdirectory so every run has a frozen copy of its inputs. Basic metadata
-about the run is inserted into the PostgreSQL `runs` table automatically. The
+about the run, including timestamps generated in UTC to avoid timezone
+discrepancies, is inserted into the PostgreSQL `runs` table automatically. The
 location of `runs/` and other output folders can be customised using the
 `paths` section in `input/config.json`.
 Logging for each file can be enabled or disabled individually using
@@ -579,3 +587,45 @@ several node behaviours. Run them with:
 ```bash
 pytest
 ```
+
+## Service objects
+
+Large functions have been decomposed into reusable services. The `NodeTickService`
+encapsulates the tick emission lifecycle while `GraphLoadService` handles JSON
+graph loading. Metric collection is delegated to `NodeMetricsService` which
+replaced the bulky `log_metrics_per_tick` function. The `NodeTickDecisionService`
+isolates the tick decision logic from `Node.should_tick`. `EdgePropagationService`
+manages edge traversal, while serialization and narrative generation are now
+handled by `GraphSerializationService` and
+`NarrativeGeneratorService`. GUI setup moved to `ToolbarBuildService` and
+`NodePanelSetupService`. All
+services now live in `Causal_Web/engine/services/` or the GUI package.
+Recent refactors introduced `ConnectionDisplayService` for showing existing
+links, `GlobalDiagnosticsService` for exporting run metrics and
+`SIPRecombinationService` for recombination-based spawning. A lightweight
+`LoggingMixin` now centralises JSON logging for classes like `Node` and `Bridge`.
+`OutputDirMixin` adds a common `_path` helper used by the log interpreter and
+causal analyst. `PathLoggingMixin` offers direct logging to arbitrary file paths
+for utilities like the tick seeder.
+
+### Identified long functions
+
+- `main.py:main` – 66 lines
+- `graph/model.py:add_connection` – 56 lines
+- `engine/tick_engine/evaluator.py:_process_csp_seeds` – 83 lines
+- `engine/services/sim_services.py:NodeMetricsService.log_metrics` – 45 lines
+- `engine/tick_engine/core.py:simulation_loop` – 98 lines
+- `engine/tick_engine/core.py:SimulationRunner.run` – 93 lines
+- `engine/causal_analyst.py:infer_causal_chains` – 53 lines
+- `engine/bridge.py:apply` – 125 lines
+- `engine/node.py:__init__` – 97 lines
+- `engine/node.py:should_tick` – 111 lines
+- `engine/node.py:apply_tick` – 143 lines
+- `engine/graph.py:detect_clusters` – 55 lines
+- `engine/graph.py:load_from_file` – 138 lines
+- `engine/explanation_rules.py:_match_emergence_events` – 51 lines
+- `gui_pyside/toolbar_builder.py:ToolbarBuilder.__init__` – 57 lines
+- `gui_pyside/toolbar_builder.py:AnotherClass.__init__` – 101 lines
+- `gui_pyside/toolbar_builder.py:commit` – 99 lines
+- `gui_pyside/toolbar_builder.py:YetAnotherClass.__init__` – 68 lines
+
