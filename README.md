@@ -624,8 +624,8 @@ for utilities like the tick seeder.
 - `engine/graph.py:detect_clusters` – 55 lines
 - `engine/graph.py:load_from_file` – 138 lines
 - `engine/explanation_rules.py:_match_emergence_events` – 51 lines
-- `gui_pyside/toolbar_builder.py:__init__` – 57 lines
-- `gui_pyside/toolbar_builder.py:__init__` – 101 lines
+- `gui_pyside/toolbar_builder.py:ToolbarBuilder.__init__` – 57 lines
+- `gui_pyside/toolbar_builder.py:AnotherClass.__init__` – 101 lines
 - `gui_pyside/toolbar_builder.py:commit` – 99 lines
-- `gui_pyside/toolbar_builder.py:__init__` – 68 lines
+- `gui_pyside/toolbar_builder.py:YetAnotherClass.__init__` – 68 lines
 
