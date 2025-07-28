@@ -278,8 +278,8 @@ directories for each run. A new run directory is created via
 `Config.new_run()` and has the form `runs/<timestamp>__<slug>`. The current
 `graph.json` and `config.json` files are copied into each run's `input/`
 subdirectory so every run has a frozen copy of its inputs. Basic metadata
-about the run is inserted into the PostgreSQL `runs` table automatically. The
-Timestamps are generated in UTC to avoid timezone discrepancies.
+about the run, including timestamps generated in UTC to avoid timezone
+discrepancies, is inserted into the PostgreSQL `runs` table automatically. The
 location of `runs/` and other output folders can be customised using the
 `paths` section in `input/config.json`.
 Logging for each file can be enabled or disabled individually using
