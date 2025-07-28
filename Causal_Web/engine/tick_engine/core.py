@@ -131,6 +131,7 @@ class SimulationRunner:
         threading.Thread(target=self.run, daemon=True).start()
 
     def run(self) -> None:
+        """Main processing loop executed in a background thread."""
         global _stop_requested
         _stop_requested = False
         self._seed_random()
@@ -143,10 +144,6 @@ class SimulationRunner:
                 _update_simulation_state(False, True, self.global_tick, snapshot)
                 log_utils.write_output()
                 break
-            if not running:
-                time.sleep(0.1)
-                continue
-            self._process_tick()
             if limit and limit != -1 and self.global_tick >= limit:
                 with Config.state_lock:
                     Config.is_running = False
@@ -154,6 +151,10 @@ class SimulationRunner:
                 _update_simulation_state(False, True, self.global_tick, snapshot)
                 log_utils.write_output()
                 break
+            if not running:
+                time.sleep(0.1)
+                continue
+            self._process_tick()
             self.global_tick += 1
             time.sleep(rate)
 

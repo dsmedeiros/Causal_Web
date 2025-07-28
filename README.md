@@ -59,7 +59,8 @@ python -m Causal_Web.main --no-gui --max_ticks 20
 ```
 
 The `max_ticks` value takes effect when `allow_tick_override` is enabled in
-the configuration (the default behaviour).
+the configuration (the default behaviour). Headless runs terminate
+automatically once this limit is reached.
 
 Only keys matching attributes on `Causal_Web.config.Config` are applied. Nested
 dictionaries merge with the existing values.
