@@ -31,6 +31,30 @@ def _add_config_args(
             parser.add_argument(arg_name, type=arg_type, dest=dest)
 
 
+def _config_defaults() -> dict[str, Any]:
+    """Return a dictionary of all attributes defined on :class:`Config`."""
+    defaults: dict[str, Any] = {}
+    for key, value in Config.__dict__.items():
+        if key.startswith("_") or callable(value):
+            continue
+        defaults[key] = value
+    return defaults
+
+
+def _merge_configs(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
+    """Recursively merge ``override`` into ``base`` returning a new dict."""
+    result: dict[str, Any] = {}
+    keys = set(base) | set(override)
+    for key in keys:
+        if isinstance(base.get(key), dict) and isinstance(override.get(key), dict):
+            result[key] = _merge_configs(base[key], override[key])
+        elif key in override:
+            result[key] = override[key]
+        else:
+            result[key] = base[key]
+    return result
+
+
 def _apply_overrides(
     args: argparse.Namespace, data: dict[str, Any], prefix: str = ""
 ) -> None:
@@ -105,10 +129,11 @@ class MainService:
         parser = argparse.ArgumentParser(
             parents=[initial], description="Run Causal Web simulation"
         )
-        _add_config_args(parser, config_data)
+        defaults = _merge_configs(_config_defaults(), config_data)
+        _add_config_args(parser, defaults)
         args = parser.parse_args(self.argv)
         Config.graph_file = args.graph
-        return args, config_data
+        return args, defaults
 
     # ------------------------------------------------------------------
     def _init_db(self, cfg_path: str) -> None:

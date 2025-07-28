@@ -73,6 +73,8 @@ automatically once this limit is reached.
 
 Only keys matching attributes on `Causal_Web.config.Config` are applied. Nested
 dictionaries merge with the existing values.
+If a configuration file omits a key, the CLI still exposes a flag for it using
+the default defined on `Config`.
 
 To set up a PostgreSQL database using the credentials in the configuration file,
 invoke the module with the `--init-db` flag. The application will create the
