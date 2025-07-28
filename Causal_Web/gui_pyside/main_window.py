@@ -208,6 +208,7 @@ class MainWindow(QMainWindow):
 
         self.start_button = QPushButton("Start Simulation")
         self.start_button.clicked.connect(self.start_simulation)
+        self.start_button.setEnabled(get_active_file() is not None)
         layout.addRow(self.start_button)
 
         self.pause_button = QPushButton("Pause")
@@ -239,7 +240,7 @@ class MainWindow(QMainWindow):
         self.tick_label.setText(str(tick))
         self.sim_canvas.load_model(GraphModel.from_dict(model_dict))
         if not running:
-            self.start_button.setEnabled(True)
+            self.start_button.setEnabled(get_active_file() is not None)
             self.pause_button.setEnabled(False)
             self.pause_button.setText("Pause")
             self.stop_button.setEnabled(False)
@@ -308,7 +309,7 @@ class MainWindow(QMainWindow):
     def stop_simulation(self) -> None:
         """Stop the simulation immediately."""
         tick_engine.stop_simulation()
-        self.start_button.setEnabled(True)
+        self.start_button.setEnabled(get_active_file() is not None)
         self.pause_button.setEnabled(False)
         self.pause_button.setText("Pause")
         self.stop_button.setEnabled(False)
@@ -328,10 +329,12 @@ class MainWindow(QMainWindow):
         set_graph(graph)
         set_active_file(path)
         clear_graph_dirty()
+        self.start_button.setEnabled(True)
         self.sim_canvas.load_model(graph)
         # refresh editor if it is visible
         self.canvas.load_model(GraphModel.from_dict(graph.to_dict()))
         self.edit_action.setEnabled(True)
+        self.start_button.setEnabled(True)
 
     def save_graph(self) -> None:
         """Write the current graph to disk."""
@@ -357,6 +360,7 @@ class MainWindow(QMainWindow):
         self.sim_canvas.load_model(model)
         self.canvas.load_model(GraphModel.from_dict(model.to_dict()))
         self.edit_action.setEnabled(True)
+        self.start_button.setEnabled(False)
 
     def add_node(self) -> None:
         """Insert a new node and refresh the canvas."""
@@ -432,6 +436,7 @@ class MainWindow(QMainWindow):
                 print(f"Failed to save graph: {exc}")
             else:
                 clear_graph_dirty()
+        self.start_button.setEnabled(get_active_file() is not None)
         self.canvas_dock.hide()
 
 

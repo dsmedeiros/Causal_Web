@@ -242,6 +242,7 @@ include **Edit Graph...**, **Undo** and **Redo** in the **Edit** menu.
 The **Graph View** dock now embeds a small toolbar offering **Add Node**,
 **Add Connection**, **Add Observer**, **Auto Layout** and a **Load Graph** button for quick access.
 The **Auto Layout** action still arranges nodes using a spring layout.
+The **Start Simulation** button remains disabled until a graph file is loaded or saved.
 When you press **Start Simulation** the current graph is saved and also copied
 to the path specified by `Config.graph_file`. A new run directory is created via `Config.new_run()` and
 the graph file is copied into the run's `input/` folder. This preserves the
