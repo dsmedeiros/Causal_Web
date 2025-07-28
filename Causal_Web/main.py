@@ -100,6 +100,7 @@ class MainService:
             with open(known.config) as f:
                 config_data = json.load(f)
             Config.load_from_file(known.config)
+            initial.set_defaults(graph=Config.graph_file)
 
         parser = argparse.ArgumentParser(
             parents=[initial], description="Run Causal Web simulation"
