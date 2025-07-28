@@ -30,7 +30,12 @@ def log_curvature_per_tick(global_tick: int) -> None:
         if not src or not tgt:
             continue
         df = abs(src.law_wave_frequency - tgt.law_wave_frequency)
-        curved = edge.adjusted_delay(src.law_wave_frequency, tgt.law_wave_frequency)
+        curved = edge.adjusted_delay(
+            src.law_wave_frequency,
+            tgt.law_wave_frequency,
+            getattr(Config, "delay_density_scaling", 1.0),
+            graph=_graph,
+        )
         log[f"{edge.source}->{edge.target}"] = {
             "delta_f": round(df, 4),
             "curved_delay": round(curved, 4),

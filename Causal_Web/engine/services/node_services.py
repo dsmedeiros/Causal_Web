@@ -154,7 +154,10 @@ class EdgePropagationService:
     def _propagate_edge(self, edge: Edge, kappa: float) -> None:
         target = self.graph.get_node(edge.target)
         delay = edge.adjusted_delay(
-            self.node.law_wave_frequency, target.law_wave_frequency, kappa
+            self.node.law_wave_frequency,
+            target.law_wave_frequency,
+            kappa,
+            graph=self.graph,
         )
         shifted = self._shift_phase(edge)
         self._log_propagation(target, delay, shifted)
@@ -199,6 +202,7 @@ class EdgePropagationService:
             target.law_wave_frequency,
             alt_tgt.law_wave_frequency,
             kappa,
+            graph=self.graph,
         )
         alt_tgt.schedule_tick(
             self.tick_time + delay + alt_delay,

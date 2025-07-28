@@ -269,6 +269,8 @@ class GraphLoadService:
         self._load_bridges(data.get("bridges", []))
         self.graph.tick_sources.extend(data.get("tick_sources", []))
         self._load_meta_nodes(data.get("meta_nodes", {}))
+        if self.graph.edges:
+            self.graph.precompute_local_densities(getattr(Config, "density_radius", 1))
         self.graph.identify_boundaries()
 
     # ------------------------------------------------------------------
@@ -355,7 +357,7 @@ class GraphLoadService:
                 src,
                 tgt,
                 attenuation=edge.get("attenuation", 1.0),
-                density=edge.get("density", 0.0),
+                density=edge.get("density"),
                 delay=edge.get("delay", 1),
                 phase_shift=edge.get("phase_shift", 0.0),
                 weight=edge.get("weight"),
