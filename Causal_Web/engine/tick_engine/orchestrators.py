@@ -49,7 +49,12 @@ class MutationOrchestrator:
         self.graph.set_current_tick(tick)
         self.graph.detect_clusters()
         self.graph.update_meta_nodes(tick)
-        bridge_manager.dynamic_bridge_management(tick)
+        if (
+            tick
+            % getattr(Config, "bridge_interval", getattr(Config, "cluster_interval", 1))
+            == 0
+        ):
+            bridge_manager.dynamic_bridge_management(tick)
 
     def apply_bridges(self, tick: int) -> None:
         for bridge in self.graph.bridges:
@@ -71,6 +76,9 @@ class IOOrchestrator:
 
     def log_cluster_info(self, tick: int) -> None:
         if Config.headless:
+            return
+        interval = getattr(Config, "log_interval", 1)
+        if interval and tick % interval != 0:
             return
         log_utils.log_metrics_per_tick(tick)
         log_utils.log_bridge_states(tick)
