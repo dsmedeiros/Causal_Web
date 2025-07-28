@@ -425,6 +425,9 @@ class Node(LoggingMixin):
     ) -> None:
         """Store an incoming phase for future evaluation.
 
+        This method is thread-safe and may be called concurrently by
+        propagation workers.
+
         Parameters
         ----------
         tick_time : float
@@ -439,11 +442,12 @@ class Node(LoggingMixin):
             created_tick = Config.current_tick
 
         record = (incoming_phase, created_tick, cumulative_delay, tick_id, origin)
-        self.incoming_phase_queue[tick_time].append(record)
-        self.incoming_tick_counts[tick_time] += 1
-        self.pending_superpositions[tick_time].append(record)
-        self._coherence_cache.pop(tick_time, None)
-        self._decoherence_cache.pop(tick_time, None)
+        with self.lock:
+            self.incoming_phase_queue[tick_time].append(record)
+            self.incoming_tick_counts[tick_time] += 1
+            self.pending_superpositions[tick_time].append(record)
+            self._coherence_cache.pop(tick_time, None)
+            self._decoherence_cache.pop(tick_time, None)
         print(
             f"[{self.id}] Received tick at {tick_time} with phase {incoming_phase:.2f}"
         )

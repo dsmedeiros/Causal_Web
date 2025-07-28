@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections import defaultdict, deque
 from typing import Optional, List, Dict, Set, TYPE_CHECKING
+import threading
 
 
 from ..config import Config
@@ -69,6 +70,7 @@ class NodeInitializationService:
         n._phase_cache: Dict[int, float] = {}
         n._coherence_cache: Dict[int, float] = {}
         n._decoherence_cache: Dict[int, float] = {}
+        n.lock = threading.Lock()
         n.current_tick = 0
         n.subjective_ticks = 0
         n.last_emission_tick = None

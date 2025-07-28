@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Callable, List, Optional
+from concurrent.futures import ThreadPoolExecutor
 
 from ...config import Config
 from ..graph import CausalGraph
@@ -57,8 +58,12 @@ class MutationOrchestrator:
             bridge_manager.dynamic_bridge_management(tick)
 
     def apply_bridges(self, tick: int) -> None:
-        for bridge in self.graph.bridges:
-            bridge.apply(tick, self.graph)
+        """Activate all bridges concurrently for ``tick``."""
+
+        with ThreadPoolExecutor(
+            max_workers=getattr(Config, "thread_count", None)
+        ) as ex:
+            ex.map(lambda b: b.apply(tick, self.graph), self.graph.bridges)
 
 
 class IOOrchestrator:

@@ -7,6 +7,7 @@ import cmath
 import math
 from dataclasses import dataclass
 from typing import Any
+from concurrent.futures import ThreadPoolExecutor
 import numpy as np
 
 from ...config import Config
@@ -79,31 +80,34 @@ class NodeTickService:
         tick_obj.trace_id = trace_id
 
         n = self.node
-        n.current_tick += 1
-        n.subjective_ticks += 1
-        n.last_tick_time = self.tick_time
-        n.current_threshold = min(n.current_threshold + 0.05, 1.0)
-        n.phase = self.phase
-        n.tick_history.append(tick_obj)
+        with n.lock:
+            n.current_tick += 1
+            n.subjective_ticks += 1
+            n.last_tick_time = self.tick_time
+            n.current_threshold = min(n.current_threshold + 0.05, 1.0)
+            n.phase = self.phase
+            n.tick_history.append(tick_obj)
         log_json(
             Config.output_path("tick_emission_log.json"),
             {"node_id": n.id, "tick_time": self.tick_time, "phase": self.phase},
         )
-        if self.origin == "self":
-            n.emitted_tick_times.add(self.tick_time)
-        else:
-            n.received_tick_times.add(self.tick_time)
-        n._tick_phase_lookup[self.tick_time] = self.phase
+        with n.lock:
+            if self.origin == "self":
+                n.emitted_tick_times.add(self.tick_time)
+            else:
+                n.received_tick_times.add(self.tick_time)
+            n._tick_phase_lookup[self.tick_time] = self.phase
         from ..tick_router import TickRouter
 
         TickRouter.route_tick(n, tick_obj)
-        n.collapse_origin[self.tick_time] = self.origin
-        print(
-            f"[{n.id}] Tick at {self.tick_time} via {self.origin.upper()} | Phase: {self.phase:.2f}"
-        )
-        n._update_memory(self.tick_time, self.origin)
-        n._adapt_behavior()
-        n.update_node_type()
+        with n.lock:
+            n.collapse_origin[self.tick_time] = self.origin
+            print(
+                f"[{n.id}] Tick at {self.tick_time} via {self.origin.upper()} | Phase: {self.phase:.2f}"
+            )
+            n._update_memory(self.tick_time, self.origin)
+            n._adapt_behavior()
+            n.update_node_type()
         return tick_obj
 
     # ------------------------------------------------------------------
@@ -120,7 +124,10 @@ class NodeTickService:
 
 @dataclass
 class EdgePropagationService:
-    """Handle tick propagation across outgoing edges."""
+    """Handle tick propagation across outgoing edges.
+
+    Propagation runs in parallel across edges using a thread pool.
+    """
 
     node: Node
     tick_time: int
@@ -135,8 +142,11 @@ class EdgePropagationService:
         self._log_recursion()
         from ..tick_engine import kappa
 
-        for edge in self.node._fanout_edges(self.graph):
-            self._propagate_edge(edge, kappa)
+        edges = self.node._fanout_edges(self.graph)
+        with ThreadPoolExecutor(
+            max_workers=getattr(Config, "thread_count", None)
+        ) as ex:
+            ex.map(lambda e: self._propagate_edge(e, kappa), edges)
 
     # ------------------------------------------------------------------
     def _log_recursion(self) -> None:

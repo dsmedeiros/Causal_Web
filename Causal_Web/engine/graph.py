@@ -4,6 +4,7 @@ import cmath
 import math
 import random
 from collections import defaultdict, deque
+from concurrent.futures import ThreadPoolExecutor
 
 from .bridge import Bridge, BridgeType, MediumType
 from .node import Node, Edge, NodeType
@@ -309,11 +310,16 @@ class CausalGraph:
     def precompute_local_densities(self, radius: int = 1) -> None:
         """Populate dynamic density for all edges."""
 
-        for e in self.edges:
-            if not getattr(e, "density_specified", True) or getattr(
+        def _update(edge: Edge) -> None:
+            if not getattr(edge, "density_specified", True) or getattr(
                 Config, "use_dynamic_density", False
             ):
-                e.density = self.compute_local_density(e, radius)
+                edge.density = self.compute_local_density(edge, radius)
+
+        with ThreadPoolExecutor(
+            max_workers=getattr(Config, "thread_count", None)
+        ) as ex:
+            list(ex.map(_update, self.edges))
 
     # --- Bridge-aware connectivity helpers ---
     def get_bridge_neighbors(self, node_id: str, active_only: bool = True) -> list[str]:
