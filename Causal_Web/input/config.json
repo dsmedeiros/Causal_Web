@@ -7,6 +7,7 @@
     "analysis_dir": "./Causal_Web/output/analysis",
     "ingest_dir": "./Causal_Web/output/ingest"
   },
+  "graph_file": "./Causal_Web/input/graph.json",
   "tick_rate": 0.5,
   "max_ticks": 50,
   "seeding": {

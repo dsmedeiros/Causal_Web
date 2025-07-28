@@ -302,6 +302,8 @@ class Config:
         for key, value in data.items():
             if not hasattr(cls, key):
                 continue
+            if key == "graph_file" and not os.path.isabs(value):
+                value = os.path.join(base_dir, value)
             current = getattr(cls, key)
             if isinstance(current, dict) and isinstance(value, dict):
                 current.update(value)
