@@ -130,6 +130,11 @@ reduce overhead.
 Spatial queries are cached for the duration of each tick to avoid redundant
 lookups when clustering and managing bridges.
 
+Edge propagation, bridge activation and density calculations now run in parallel
+using a thread pool. Set the `thread_count` configuration value to control how
+many worker threads are spawned (default `1`). A value greater than one can
+significantly speed up large graphs on multi-core systems.
+
 The `propagation_control` section toggles node growth mechanisms. Set
 `enable_sip` or `enable_csp` to `false` to disable Stability-Induced or
 Collapse-Seeded Propagation. These options are also exposed as CLI flags and can
