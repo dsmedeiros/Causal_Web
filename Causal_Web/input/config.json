@@ -14,9 +14,12 @@
     "probability": 0.2
   },
   "snapshot_interval": 5,
+  "cluster_interval": 10,
+  "bridge_interval": 10,
   "random_seed": 42,
   "thread_count": 4,
   "log_verbosity": "info",
+  "log_interval": 1,
   "memory_window": 20,
   "initial_coherence_threshold": 0.6,
   "steady_coherence_threshold": 0.85,

@@ -45,10 +45,19 @@ class MutationOrchestrator:
         self._emit(tick)
         self._propagate(tick)
 
-    def cluster_ops(self, tick: int) -> None:
-        self.graph.detect_clusters()
-        self.graph.update_meta_nodes(tick)
-        bridge_manager.dynamic_bridge_management(tick)
+    def cluster_ops(
+        self,
+        tick: int,
+        *,
+        run_cluster: bool = True,
+        run_bridges: bool = True,
+    ) -> None:
+        """Run cluster detection and bridge management operations."""
+        if run_cluster:
+            self.graph.detect_clusters()
+            self.graph.update_meta_nodes(tick)
+        if run_bridges:
+            bridge_manager.dynamic_bridge_management(tick)
 
     def apply_bridges(self, tick: int) -> None:
         for bridge in self.graph.bridges:

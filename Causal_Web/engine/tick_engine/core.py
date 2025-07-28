@@ -181,9 +181,16 @@ class SimulationRunner:
         self.mutation.pre_process(self.global_tick)
 
         cluster_cycle = self.global_tick % getattr(Config, "cluster_interval", 1) == 0
-        if cluster_cycle:
-            self.mutation.cluster_ops(self.global_tick)
-            self.evaluation.evaluate(self.global_tick)
+        bridge_cycle = self.global_tick % getattr(Config, "bridge_interval", 1) == 0
+        log_cycle = self.global_tick % getattr(Config, "log_interval", 1) == 0
+
+        self.mutation.cluster_ops(
+            self.global_tick,
+            run_cluster=cluster_cycle,
+            run_bridges=bridge_cycle,
+        )
+        self.evaluation.evaluate(self.global_tick)
+        if log_cycle:
             self.io.log_cluster_info(self.global_tick)
 
         self.evaluation.finalize(self.global_tick)

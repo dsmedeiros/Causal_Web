@@ -15,6 +15,10 @@ class Config:
         toggle the two propagation mechanisms.
     log_interval:
         Number of ticks between metric log writes.
+    cluster_interval:
+        Number of ticks between cluster detection cycles.
+    bridge_interval:
+        Number of ticks between dynamic bridge management cycles.
     headless:
         When ``True`` disables observers and intermediate logging.
     """
@@ -131,8 +135,10 @@ class Config:
     forcing_ramp_ticks = 20
     # interval for saving runtime snapshots of the graph
     snapshot_interval = 10
-    # interval for expensive clustering and bridge management
+    # interval for expensive clustering operations
     cluster_interval = 10
+    # interval for dynamic bridge formation and decay checks
+    bridge_interval = 10
     random_seed: int | None = None
     thread_count = 1
     log_verbosity = "info"

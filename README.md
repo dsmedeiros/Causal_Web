@@ -95,10 +95,11 @@ single tick. Set `total_max_concurrent_firings` for a global limit or
 cluster. A value of `0` disables these limits. Both parameters are configurable
 via CLI flags or the Parameters window in the GUI.
 
-Cluster detection and bridge management are computationally heavy. The
-`cluster_interval` setting controls how often these operations run (default
-every 10 ticks). Node evaluation, meta-node updates and metric logging also
-run on this interval to reduce overhead.
+Cluster detection, bridge formation checks and metric logging can be heavy for
+large graphs. The `cluster_interval`, `bridge_interval` and `log_interval`
+settings control how often these operations run. By default clustering and
+bridge management occur every 10 ticks while logs flush every tick. Adjust
+these values in `input/config.json` to trade accuracy for performance.
 
 The `propagation_control` section toggles node growth mechanisms. Set
 `enable_sip` or `enable_csp` to `false` to disable Stability-Induced or
