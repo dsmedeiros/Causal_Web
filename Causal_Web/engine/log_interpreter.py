@@ -4,6 +4,7 @@ from typing import Dict, List
 
 from .causal_analyst import CausalAnalyst
 from .base import OutputDirMixin, JsonLinesMixin
+from ..config import Config
 
 
 class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
@@ -14,7 +15,7 @@ class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
     ) -> None:
         super().__init__(output_dir=output_dir)
         base = os.path.join(os.path.dirname(__file__), "..")
-        self.graph_path = graph_path or os.path.join(base, "input", "graph.json")
+        self.graph_path = graph_path or Config.graph_file
         self.graph = {}
         self.summary: Dict[str, Dict] = {}
 

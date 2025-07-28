@@ -58,7 +58,7 @@ def clear_output_directory() -> None:
 
 def build_graph() -> None:
     clear_output_directory()
-    graph.load_from_file(Config.input_path("graph.json"))
+    graph.load_from_file(Config.graph_file)
     global seeder
     seeder = TickSeeder(graph)
     _ensure_attached()

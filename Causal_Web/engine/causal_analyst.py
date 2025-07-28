@@ -15,6 +15,7 @@ class ExplanationEvent:
 
 
 from .base import OutputDirMixin, JsonLinesMixin
+from ..config import Config
 
 
 class CausalAnalyst(OutputDirMixin, JsonLinesMixin):
@@ -66,7 +67,7 @@ class CausalAnalyst(OutputDirMixin, JsonLinesMixin):
                     except json.JSONDecodeError:
                         self.logs[key] = {}
 
-        graph_path = os.path.join(self.input_dir, "graph.json")
+        graph_path = Config.graph_file
         if os.path.exists(graph_path):
             with open(graph_path) as f:
                 try:
