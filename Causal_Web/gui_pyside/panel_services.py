@@ -18,13 +18,8 @@ from PySide6.QtWidgets import (
     QListWidget,
 )
 
-from .toolbar_builder import (
-    TooltipLabel,
-    TOOLTIPS,
-    _FocusWatcher,
-    mark_graph_dirty,
-)
-from ..gui.state import get_graph
+from .shared import TooltipLabel, TOOLTIPS, _FocusWatcher
+from ..gui.state import get_graph, mark_graph_dirty
 
 
 @dataclass
