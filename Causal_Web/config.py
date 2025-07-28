@@ -274,7 +274,8 @@ class Config:
 
         Only keys that already exist as attributes on ``Config`` will be
         assigned. Nested dictionaries are merged recursively when the existing
-        attribute is also a ``dict``.
+        attribute is also a ``dict``. Relative paths under the ``paths`` section
+        are resolved relative to the directory containing ``path``.
 
         Parameters
         ----------
@@ -288,11 +289,14 @@ class Config:
         with open(path) as f:
             data = json.load(f)
         cls.config_file = os.path.abspath(path)
+        base_dir = os.path.dirname(cls.config_file)
 
         paths = data.get("paths")
         if isinstance(paths, dict):
             for key, value in paths.items():
                 if hasattr(cls, key):
+                    if not os.path.isabs(value):
+                        value = os.path.join(base_dir, value)
                     setattr(cls, key, os.path.abspath(value))
 
         for key, value in data.items():

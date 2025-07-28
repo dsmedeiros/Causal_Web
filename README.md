@@ -38,7 +38,11 @@ Key modules include:
 - **`gui_pyside/canvas_widget.py`** – reusable ``QGraphicsView`` for graph rendering.
 - **`main.py`** – simple entry point that launches the dashboard.
 
-Graphs are stored in `input/graph.json` by default. Use the `--graph` argument or `Config.graph_file` to load a different file. Paths are resolved relative to the package so the module can be run from any working directory. All output is written next to the code in the `output` directory.
+Graphs are stored in `input/graph.json` by default. Use the `--graph` argument or
+`Config.graph_file` to load a different file. Built-in paths resolve relative to
+the package so the module can be run from any working directory, while paths in a
+configuration file are resolved relative to that file's location. All output is
+written next to the code in the `output` directory.
 
 ## Configuration
 
@@ -282,7 +286,8 @@ subdirectory so every run has a frozen copy of its inputs. Basic metadata
 about the run, including timestamps generated in UTC to avoid timezone
 discrepancies, is inserted into the PostgreSQL `runs` table automatically. The
 location of `runs/` and other output folders can be customised using the
-`paths` section in `input/config.json`.
+`paths` section in `input/config.json`. Relative entries are resolved against
+the directory containing the configuration file.
 Logging for each file can be enabled or disabled individually using
 **Settings > Log Files...** in the GUI or via the `log_files` section of the
 configuration file.
