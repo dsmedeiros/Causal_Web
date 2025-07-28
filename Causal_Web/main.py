@@ -11,7 +11,26 @@ import time
 from dataclasses import dataclass
 from typing import Any
 
+# Internal Config attributes that should not be exposed as CLI flags
 from .config import Config, load_config
+
+
+_PRIVATE_KEYS = {
+    "base_dir",
+    "input_dir",
+    "config_file",
+    "graph_file",
+    "output_root",
+    "runs_dir",
+    "archive_dir",
+    "analysis_dir",
+    "ingest_dir",
+    "output_dir",
+    "state_lock",
+    "current_tick",
+    "is_running",
+    "TICK_POOL_SIZE",
+}
 
 
 def _add_config_args(
@@ -19,6 +38,8 @@ def _add_config_args(
 ) -> None:
     """Recursively add CLI flags based on ``data`` keys."""
     for key, value in data.items():
+        if key in _PRIVATE_KEYS:
+            continue
         arg_name = f"--{prefix}{key}"
         dest = f"{prefix}{key}".replace(".", "_")
         if isinstance(value, dict):
@@ -35,7 +56,7 @@ def _config_defaults() -> dict[str, Any]:
     """Return a dictionary of all attributes defined on :class:`Config`."""
     defaults: dict[str, Any] = {}
     for key, value in Config.__dict__.items():
-        if key.startswith("_") or callable(value):
+        if key.startswith("_") or callable(value) or key in _PRIVATE_KEYS:
             continue
         defaults[key] = value
     return defaults

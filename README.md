@@ -72,7 +72,9 @@ the configuration (the default behaviour). Headless runs terminate
 automatically once this limit is reached.
 
 Only keys matching attributes on `Causal_Web.config.Config` are applied. Nested
-dictionaries merge with the existing values.
+dictionaries merge with the existing values. Internal directories such as
+`runs_dir` or `archive_dir` are not exposed as CLI flags. Adjust them in
+`config.json` under the `paths` section if needed.
 If a configuration file omits a key, the CLI still exposes a flag for it using
 the default defined on `Config`.
 
