@@ -5,7 +5,7 @@ import math
 import random
 from collections import defaultdict, deque
 
-from .bridge import Bridge
+from .bridge import Bridge, BridgeType, MediumType
 from .node import Node, Edge, NodeType
 from .tick import GLOBAL_TICK_POOL
 from .meta_node import MetaNode
@@ -126,16 +126,20 @@ class CausalGraph:
         self,
         node_a_id: str,
         node_b_id: str,
-        bridge_type: str = "braided",
+        bridge_type: BridgeType | str = BridgeType.BRAIDED,
         phase_offset: float = 0.0,
         drift_tolerance: float | None = None,
         decoherence_limit: float | None = None,
         initial_strength: float = 1.0,
-        medium_type: str = "standard",
+        medium_type: MediumType | str = MediumType.STANDARD,
         mutable: bool = True,
         seeded: bool = True,
         formed_at_tick: int = 0,
     ) -> None:
+        if isinstance(bridge_type, str):
+            bridge_type = BridgeType(bridge_type)
+        if isinstance(medium_type, str):
+            medium_type = MediumType(medium_type)
         bridge = Bridge(
             node_a_id,
             node_b_id,

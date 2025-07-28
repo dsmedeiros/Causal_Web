@@ -20,6 +20,7 @@ Key modules include:
 - **`engine/graph.py`** – container for nodes, edges and bridges. Graphs can be loaded from or written to JSON files.
 - **`engine/node.py`** – implementation of `Node`, `Edge` and related logic.
 - **`engine/bridge.py`** – manages dynamic bridges between nodes.
+- Bridge behaviour and mediums are enumerated by `BridgeType` and `MediumType`.
 - **`engine/tick_engine/`** – modular package driving the simulation and logging metrics under `output/`.
 - **`engine/tick_engine/orchestrators.py`** – separates evaluation, mutation and I/O duties for the simulation loop.
 - **`engine/tick_router.py`** – moves ticks through LCCM layers and logs transitions.

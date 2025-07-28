@@ -14,6 +14,7 @@ from ...config import Config
 from ..logger import log_json
 from ..node import Node, NodeType, Edge
 from ..tick import GLOBAL_TICK_POOL  # only for typing, no direct use
+from ..bridge import BridgeType, MediumType
 from .. import tick_engine as te
 
 
@@ -351,12 +352,12 @@ class GraphLoadService:
             g.add_bridge(
                 src,
                 tgt,
-                bridge_type=bridge.get("bridge_type", "braided"),
+                bridge_type=bridge.get("bridge_type", BridgeType.BRAIDED),
                 phase_offset=bridge.get("phase_offset", 0.0),
                 drift_tolerance=bridge.get("drift_tolerance"),
                 decoherence_limit=bridge.get("decoherence_limit"),
                 initial_strength=bridge.get("initial_strength", 1.0),
-                medium_type=bridge.get("medium_type", "standard"),
+                medium_type=bridge.get("medium_type", MediumType.STANDARD),
                 mutable=bridge.get("mutable", True),
                 seeded=True,
                 formed_at_tick=0,
@@ -494,38 +495,49 @@ class BridgeApplyService:
 
     # ------------------------------------------------------------------
     def _propagate(self) -> None:
-        if self.bridge.bridge_type == "braided":
-            if self.a_collapsed:
-                phase = self.node_a.get_phase_at(self.tick_time)
-                self.node_b.apply_tick(
-                    self.tick_time,
-                    phase + self.bridge.phase_offset,
-                    self.graph,
-                    origin="bridge",
-                )
-                self.node_a.entangled_with.add(self.node_b.id)
-                self.node_b.entangled_with.add(self.node_a.id)
-            elif self.b_collapsed:
-                phase = self.node_b.get_phase_at(self.tick_time)
-                self.node_a.apply_tick(
-                    self.tick_time,
-                    phase + self.bridge.phase_offset,
-                    self.graph,
-                    origin="bridge",
-                )
-                self.node_a.entangled_with.add(self.node_b.id)
-                self.node_b.entangled_with.add(self.node_a.id)
-        elif self.bridge.bridge_type in {"unidirectional", "mirror"}:
-            if self.a_collapsed:
-                phase = self.node_a.get_phase_at(self.tick_time)
-                self.node_b.apply_tick(
-                    self.tick_time,
-                    phase + self.bridge.phase_offset,
-                    self.graph,
-                    origin="bridge",
-                )
-                self.node_a.entangled_with.add(self.node_b.id)
-                self.node_b.entangled_with.add(self.node_a.id)
+        strategy = {
+            BridgeType.BRAIDED: self._propagate_braided,
+            BridgeType.UNIDIRECTIONAL: self._propagate_unidirectional,
+            BridgeType.MIRROR: self._propagate_unidirectional,
+        }.get(self.bridge.bridge_type)
+        if strategy:
+            strategy()
+
+    # ------------------------------------------------------------------
+    def _propagate_braided(self) -> None:
+        if self.a_collapsed:
+            phase = self.node_a.get_phase_at(self.tick_time)
+            self.node_b.apply_tick(
+                self.tick_time,
+                phase + self.bridge.phase_offset,
+                self.graph,
+                origin="bridge",
+            )
+            self.node_a.entangled_with.add(self.node_b.id)
+            self.node_b.entangled_with.add(self.node_a.id)
+        elif self.b_collapsed:
+            phase = self.node_b.get_phase_at(self.tick_time)
+            self.node_a.apply_tick(
+                self.tick_time,
+                phase + self.bridge.phase_offset,
+                self.graph,
+                origin="bridge",
+            )
+            self.node_a.entangled_with.add(self.node_b.id)
+            self.node_b.entangled_with.add(self.node_a.id)
+
+    # ------------------------------------------------------------------
+    def _propagate_unidirectional(self) -> None:
+        if self.a_collapsed:
+            phase = self.node_a.get_phase_at(self.tick_time)
+            self.node_b.apply_tick(
+                self.tick_time,
+                phase + self.bridge.phase_offset,
+                self.graph,
+                origin="bridge",
+            )
+            self.node_a.entangled_with.add(self.node_b.id)
+            self.node_b.entangled_with.add(self.node_a.id)
 
     # ------------------------------------------------------------------
     def _record_metrics(self) -> None:
