@@ -31,6 +31,8 @@ class CausalGraph:
         self.spatial_index = defaultdict(set)
         self._cluster_cache: dict[int, tuple[int, list[list[str]]]] = {}
         self._cluster_version = 0
+        self._nearby_cache: dict[tuple[str, int], list[str]] = {}
+        self._nearby_cache_tick: int | None = None
 
     def add_node(
         self,
@@ -197,6 +199,12 @@ class CausalGraph:
         """Return outbound edges from ``node_id``."""
         return self.edges_from.get(node_id, [])
 
+    def set_current_tick(self, tick: int | None) -> None:
+        """Reset neighborhood cache for a new tick."""
+        if tick != self._nearby_cache_tick:
+            self._nearby_cache_tick = tick
+            self._nearby_cache.clear()
+
     def get_edges_to(self, node_id: str) -> list[Edge]:
         """Return inbound edges to ``node_id``."""
         return self.edges_to.get(node_id, [])
@@ -211,16 +219,23 @@ class CausalGraph:
 
     def nearby_nodes(self, node: Node, radius: int = 1) -> list[Node]:
         """Return nodes in adjacent spatial partitions."""
-        cells = [
-            (node.grid_x + dx, node.grid_y + dy)
-            for dx in range(-radius, radius + 1)
-            for dy in range(-radius, radius + 1)
-        ]
-        ids = set()
-        for c in cells:
-            ids.update(self.spatial_index.get(c, set()))
-        ids.discard(node.id)
-        return [self.nodes[i] for i in ids if i in self.nodes]
+
+        cache_key = (node.id, radius)
+        if cache_key in self._nearby_cache:
+            ids = self._nearby_cache[cache_key]
+        else:
+            cells = [
+                (node.grid_x + dx, node.grid_y + dy)
+                for dx in range(-radius, radius + 1)
+                for dy in range(-radius, radius + 1)
+            ]
+            ids = set()
+            for c in cells:
+                ids.update(self.spatial_index.get(c, set()))
+            ids.discard(node.id)
+            ids = [i for i in ids if i in self.nodes]
+            self._nearby_cache[cache_key] = ids
+        return [self.nodes[i] for i in ids]
 
     # --- Bridge-aware connectivity helpers ---
     def get_bridge_neighbors(self, node_id: str, active_only: bool = True) -> list[str]:
