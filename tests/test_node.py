@@ -106,3 +106,52 @@ def test_cluster_firing_limit_blocks_nodes():
     fired = sum(len(n.tick_history) for n in g.nodes.values())
     assert fired == 1
     Config.max_concurrent_firings_per_cluster = old_limit
+
+
+def test_event_horizon_drop(tmp_path):
+    old_dir = Config.output_dir
+    old_delay = getattr(Config, "max_cumulative_delay", 25)
+    old_coh = getattr(Config, "min_coherence_threshold", 0.2)
+    Config.output_dir = tmp_path
+    Config.max_cumulative_delay = 2
+    Config.min_coherence_threshold = 0.0
+
+    g = CausalGraph()
+    g.add_node("A")
+    g.add_node("B")
+    g.add_edge("A", "B", delay=3)
+    Config.current_tick = 0
+    g.nodes["A"].apply_tick(0, 0.0, g)
+    assert not g.nodes["B"].incoming_phase_queue
+
+    Config.max_cumulative_delay = old_delay
+    Config.min_coherence_threshold = old_coh
+    Config.output_dir = old_dir
+
+
+def test_decoherence_drop(tmp_path):
+    old_dir = Config.output_dir
+    old_delay = getattr(Config, "max_cumulative_delay", 25)
+    old_coh = getattr(Config, "min_coherence_threshold", 0.2)
+    Config.output_dir = tmp_path
+    Config.max_cumulative_delay = 10
+    Config.min_coherence_threshold = 0.9
+
+    g = CausalGraph()
+    g.add_node("A1")
+    g.add_node("A2")
+    g.add_node("B")
+    g.add_edge("A1", "B", delay=1)
+    g.add_edge("A2", "B", delay=1)
+    Config.current_tick = 0
+    g.nodes["A1"].apply_tick(0, 0.0, g)
+    g.nodes["A2"].apply_tick(0, math.pi, g)
+    Config.current_tick = 1
+    tick_engine.reset_firing_limits()
+    g.nodes["B"].maybe_tick(1, g)
+    assert len(g.nodes["B"].tick_history) == 0
+    assert g.nodes["B"].tick_drop_counts.get("decoherence", 0) == 2
+
+    Config.max_cumulative_delay = old_delay
+    Config.min_coherence_threshold = old_coh
+    Config.output_dir = old_dir

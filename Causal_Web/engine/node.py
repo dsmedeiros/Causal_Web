@@ -103,8 +103,9 @@ class Node(LoggingMixin):
         weights = []
         complex_vecs = []
         for item in phases:
-            if isinstance(item, (tuple, list)) and len(item) == 2:
-                ph, created = item
+            if isinstance(item, (tuple, list)):
+                ph = item[0]
+                created = item[1] if len(item) > 1 else Config.current_tick
                 decay = getattr(Config, "tick_decay_factor", 1.0) ** (
                     max(0, Config.current_tick - created)
                 )
@@ -145,8 +146,9 @@ class Node(LoggingMixin):
         norm = []
         weights = []
         for item in phases:
-            if isinstance(item, (tuple, list)) and len(item) == 2:
-                ph, created = item
+            if isinstance(item, (tuple, list)):
+                ph = item[0]
+                created = item[1] if len(item) > 1 else Config.current_tick
                 decay = getattr(Config, "tick_decay_factor", 1.0) ** (
                     max(0, Config.current_tick - created)
                 )
@@ -368,20 +370,45 @@ class Node(LoggingMixin):
             }
             self._log("propagation_failure_log.json", fail_rec)
 
-    def _log_tick_drop(self, tick_time: int, reason: str) -> None:
+    def _log_tick_drop(
+        self,
+        tick_time: int,
+        reason: str,
+        *,
+        tick_id: str | None = None,
+        source: str | None = None,
+        target: str | None = None,
+        cumulative_delay: float | None = None,
+        coherence: float | None = None,
+    ) -> None:
         record = {
             "tick": tick_time,
             "node": self.id,
             "reason": reason,
-            "coherence": round(getattr(self, "coherence", 0.0), 4),
+            "coherence": round(
+                coherence if coherence is not None else getattr(self, "coherence", 0.0),
+                4,
+            ),
             "node_type": self.node_type.value,
         }
+        if tick_id is not None:
+            record["tick_id"] = tick_id
+        if source is not None:
+            record["source"] = source
+        if target is not None:
+            record["target"] = target
+        if cumulative_delay is not None:
+            record["cumulative_delay"] = round(cumulative_delay, 4)
+        self.tick_drop_counts[reason] += 1
         self._log("tick_drop_log.json", record)
         fail_rec = {
             "tick": tick_time,
             "node": self.id,
             "threshold": round(self.current_threshold, 4),
-            "coherence": round(getattr(self, "coherence", 0.0), 4),
+            "coherence": round(
+                coherence if coherence is not None else getattr(self, "coherence", 0.0),
+                4,
+            ),
             "reason": reason,
         }
         self._log("propagation_failure_log.json", fail_rec)
@@ -392,6 +419,9 @@ class Node(LoggingMixin):
         incoming_phase: float,
         origin: str | None = None,
         created_tick: int | None = None,
+        *,
+        tick_id: str | None = None,
+        cumulative_delay: float = 0.0,
     ) -> None:
         """Store an incoming phase for future evaluation.
 
@@ -408,7 +438,7 @@ class Node(LoggingMixin):
         if created_tick is None:
             created_tick = Config.current_tick
 
-        record = (incoming_phase, created_tick)
+        record = (incoming_phase, created_tick, cumulative_delay, tick_id, origin)
         self.incoming_phase_queue[tick_time].append(record)
         self.incoming_tick_counts[tick_time] += 1
         self.pending_superpositions[tick_time].append(record)
@@ -453,6 +483,62 @@ class Node(LoggingMixin):
         from .services.node_services import NodeTickService
 
         NodeTickService(self, tick_time, phase, graph, origin).process()
+
+    def _apply_suppression(self, tick_time: float) -> bool:
+        items = list(self.incoming_phase_queue.get(tick_time, []))
+        if not items:
+            return False
+        max_delay = getattr(Config, "max_cumulative_delay", 0)
+        remaining = []
+        for item in items:
+            ph = item[0]
+            created = item[1] if len(item) > 1 else Config.current_tick
+            delay = item[2] if len(item) > 2 else 0.0
+            tid = item[3] if len(item) > 3 else None
+            src = item[4] if len(item) > 4 else None
+            if max_delay and delay > max_delay:
+                self._log_tick_drop(
+                    tick_time,
+                    "event_horizon",
+                    tick_id=tid,
+                    source=src,
+                    target=self.id,
+                    cumulative_delay=delay,
+                    coherence=self.compute_coherence_level(tick_time),
+                )
+                if tick_time in self.incoming_tick_counts:
+                    self.incoming_tick_counts[tick_time] -= 1
+                continue
+            remaining.append((ph, created, delay, tid, src))
+
+        if not remaining:
+            self.incoming_phase_queue.pop(tick_time, None)
+            self.pending_superpositions.pop(tick_time, None)
+            return False
+
+        self.incoming_phase_queue[tick_time] = remaining
+        self.pending_superpositions[tick_time] = remaining
+        coherence = self.compute_coherence_level(tick_time)
+        min_coh = getattr(Config, "min_coherence_threshold", 0.0)
+        if min_coh and coherence < min_coh:
+            for ph, created, delay, tid, src in remaining:
+                self._log_tick_drop(
+                    tick_time,
+                    "decoherence",
+                    tick_id=tid,
+                    source=src,
+                    target=self.id,
+                    cumulative_delay=delay,
+                    coherence=coherence,
+                )
+                if tick_time in self.incoming_tick_counts:
+                    self.incoming_tick_counts[tick_time] -= 1
+            self.incoming_phase_queue.pop(tick_time, None)
+            self.pending_superpositions.pop(tick_time, None)
+            self._coherence_cache.pop(tick_time, None)
+            self._decoherence_cache.pop(tick_time, None)
+            return False
+        return True
 
     def propagate_collapse(
         self,
@@ -513,6 +599,11 @@ class Node(LoggingMixin):
                     tick_key = k
                     break
         if tick_key in self.incoming_phase_queue:
+            if not self._apply_suppression(tick_key):
+                self.current_threshold = max(
+                    self.base_threshold, self.current_threshold - 0.01
+                )
+                return
             should_fire, phase, reason = self.should_tick(tick_key)
             if should_fire and not self.is_classical:
                 self.apply_tick(tick_key, phase, graph)

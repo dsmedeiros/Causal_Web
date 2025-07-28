@@ -15,6 +15,7 @@ class Tick:
     phase: float
     layer: str = "tick"
     trace_id: str = ""
+    cumulative_delay: float = 0.0
 
 
 class TickPool:
@@ -37,6 +38,7 @@ class TickPool:
         tick.phase = 0.0
         tick.layer = "tick"
         tick.trace_id = ""
+        tick.cumulative_delay = 0.0
         self._pool.append(tick)
 
 
