@@ -327,6 +327,7 @@ simplifying downstream analysis.
 - `observer_disagreement_log.json` – difference between observers and reality.
 - `observer_perceived_field.json` – tick counts inferred by observers.
 - `propagation_failure_log.json` – reasons tick propagation failed.
+- `proper_time_log.json` – cumulative subjective ticks per node.
 - `refraction_log.json` – rerouted ticks through alternative paths.
 - `regional_pressure_map.json` – decoherence pressure per region.
 - `should_tick_log.json` – results of tick emission checks.
@@ -498,6 +499,9 @@ The following lists describe the JSON keys recorded in each output file.
 #### `propagation_failure_log.json`
 - heterogeneous records describing why propagation failed. Common
   fields include `tick`, `node` or `parent`, failure `type` and `reason`.
+
+#### `proper_time_log.json`
+- keyed by tick with `{node: subjective_ticks}` values.
 
 #### `refraction_log.json`
 - rerouting information containing `tick` and either

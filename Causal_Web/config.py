@@ -82,6 +82,7 @@ class Config:
         "node_state_log.json": True,
         "observer_disagreement_log.json": True,
         "propagation_failure_log.json": True,
+        "proper_time_log.json": True,
         "refraction_log.json": True,
         "should_tick_log.json": True,
         "stable_frequency_log.json": True,

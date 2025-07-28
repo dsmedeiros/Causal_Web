@@ -48,6 +48,7 @@ class NodeMetricsResultService:
             "credit_log": {},
             "debt_log": {},
             "type_log": {},
+            "proper_time_log": {},
         }
 
     # ------------------------------------------------------------------
@@ -60,6 +61,7 @@ class NodeMetricsResultService:
         ntype: int,
         credit: float,
         debt: float,
+        proper_time: int,
     ) -> None:
         node = self.graph.get_node(node_id)
         prev = self.last_coherence.get(node_id, coh)
@@ -68,7 +70,18 @@ class NodeMetricsResultService:
         node.coherence_velocity = delta
         node.update_classical_state(deco, tick_time=self.tick, graph=self.graph)
         self._update_stability(node_id, node)
-        self._record_logs(node_id, deco, coh, inter, ntype, credit, debt, delta, node)
+        self._record_logs(
+            node_id,
+            deco,
+            coh,
+            inter,
+            ntype,
+            credit,
+            debt,
+            proper_time,
+            delta,
+            node,
+        )
 
     # ------------------------------------------------------------------
     def _update_stability(self, node_id: str, node: Node) -> None:
@@ -107,6 +120,7 @@ class NodeMetricsResultService:
         ntype: int,
         credit: float,
         debt: float,
+        proper_time: int,
         delta: float,
         node: Node,
     ) -> None:
@@ -119,6 +133,7 @@ class NodeMetricsResultService:
         self.logs["credit_log"][node_id] = round(credit, 3)
         self.logs["debt_log"][node_id] = round(debt, 3)
         self.logs["type_log"][node_id] = ntype
+        self.logs["proper_time_log"][node_id] = proper_time
 
 
 @dataclass
@@ -150,7 +165,7 @@ class NodeMetricsService:
     @staticmethod
     def _compute(
         node: Node, tick: int
-    ) -> tuple[str, float, float, int, str, float, float]:
+    ) -> tuple[str, float, float, int, str, float, float, int]:
         decoherence = node.compute_decoherence_field(tick)
         coherence = node.compute_coherence_level(tick)
         interference = len(node.pending_superpositions.get(tick, []))
@@ -162,6 +177,7 @@ class NodeMetricsService:
             node.node_type.value,
             node.coherence_credit,
             node.decoherence_debt,
+            node.subjective_ticks,
         )
 
     # ------------------------------------------------------------------
@@ -224,6 +240,10 @@ class NodeMetricsService:
                     "debt": logs["debt_log"],
                 }
             },
+        )
+        log_json(
+            Config.output_path("proper_time_log.json"),
+            {str(tick): logs["proper_time_log"]},
         )
 
 
