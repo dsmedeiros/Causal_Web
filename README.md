@@ -665,3 +665,19 @@ for utilities like the tick seeder.
 - `gui_pyside/toolbar_builder.py:commit` – 99 lines
 - `gui_pyside/toolbar_builder.py:YetAnotherClass.__init__` – 68 lines
 
+# Causal_Web
+
+**Causal_Web** is a Python-based simulation framework and GUI for modeling dynamic causal networks. Nodes emit phase-based “ticks” along directed edges with configurable delay, attenuation, and bridge structures.
+
+This project is ideal for researchers and developers exploring:
+- Emergent behavior in causal systems
+- Temporal interference patterns
+- Signal propagation and accumulation
+- Phase-based oscillator networks
+
+Features include:
+- PySide6 GUI with real-time graph manipulation
+- Observer tools for monitoring network dynamics
+- Modular engine design for simulation experimentation
+
+> Built to support theories like Causal Web Theory and dynamic information propagation systems.
