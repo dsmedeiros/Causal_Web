@@ -319,6 +319,7 @@ All log entries are buffered in memory and flushed periodically to minimise
 disk writes. The frequency of metric logging is controlled by the
 `log_interval` setting which defaults to `1` tick. This value can be adjusted
 in the **Log Files** window.
+Hovering over any log entry now shows a brief description of that log file.
 Each record now conforms to Pydantic models defined in
 `engine/logging_models.py`, ensuring consistent structure across files and
 simplifying downstream analysis.

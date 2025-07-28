@@ -7,7 +7,7 @@ import json
 from typing import Dict, Callable
 
 from PySide6.QtCore import QObject, QEvent, QTimer
-from PySide6.QtWidgets import QLabel
+from PySide6.QtWidgets import QLabel, QCheckBox
 
 # ---------------------------------------------------------------------------
 # Load tooltip text for GUI fields
@@ -37,6 +37,34 @@ class TooltipLabel(QLabel):
     def leaveEvent(self, event: QEvent) -> None:  # type: ignore[override]
         self._timer.stop()
         QLabel.setToolTip(self, "")
+        super().leaveEvent(event)
+
+    def _show_tooltip(self) -> None:
+        if self.tip:
+            from PySide6.QtWidgets import QToolTip
+
+            pos = self.mapToGlobal(self.rect().bottomRight())
+            QToolTip.showText(pos, self.tip, self)
+
+
+class TooltipCheckBox(QCheckBox):
+    """QCheckBox displaying a tooltip after 0.5s of hover."""
+
+    def __init__(self, text: str, tip: str | None = None) -> None:
+        super().__init__(text)
+        self.tip = tip or ""
+        self._timer = QTimer(self)
+        self._timer.setSingleShot(True)
+        self._timer.timeout.connect(self._show_tooltip)
+
+    def enterEvent(self, event: QEvent) -> None:  # type: ignore[override]
+        if self.tip:
+            self._timer.start(500)
+        super().enterEvent(event)
+
+    def leaveEvent(self, event: QEvent) -> None:  # type: ignore[override]
+        self._timer.stop()
+        QCheckBox.setToolTip(self, "")
         super().leaveEvent(event)
 
     def _show_tooltip(self) -> None:
