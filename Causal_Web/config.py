@@ -193,6 +193,11 @@ class Config:
     # Decay factor for stored tick energy per tick
     tick_decay_factor = 1.0
 
+    # Natural propagation limits
+    max_cumulative_delay = 25
+    min_coherence_threshold = 0.2
+    log_tick_drops = True
+
     # Concurrency limits
     total_max_concurrent_firings = 0  # 0 disables global limit
     max_concurrent_firings_per_cluster = 0  # 0 disables per-cluster limit

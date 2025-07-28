@@ -93,6 +93,7 @@ class NodeInitializationService:
         n.decoherence_debt = 0.0
         n.phase_lock = False
         n.collapse_pressure = 0.0
+        n.tick_drop_counts = defaultdict(int)
 
     # ------------------------------------------------------------------
     def _cluster_metadata(self) -> None:

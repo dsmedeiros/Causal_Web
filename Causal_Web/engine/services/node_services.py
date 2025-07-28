@@ -30,8 +30,8 @@ class NodeTickService:
 
         if not self._pre_check():
             return
-        self._register_tick()
-        self._propagate_edges()
+        tick_obj = self._register_tick()
+        self._propagate_edges(tick_obj)
         if self.origin == "self":
             collapsed = self.node.propagate_collapse(self.tick_time, self.graph)
             if collapsed:
@@ -107,13 +107,14 @@ class NodeTickService:
         return tick_obj
 
     # ------------------------------------------------------------------
-    def _propagate_edges(self) -> None:
+    def _propagate_edges(self, tick: Tick) -> None:
         EdgePropagationService(
             node=self.node,
             tick_time=self.tick_time,
             phase=self.phase,
             origin=self.origin,
             graph=self.graph,
+            tick=tick,
         ).propagate()
 
 
@@ -126,6 +127,7 @@ class EdgePropagationService:
     phase: float
     origin: str
     graph: Any
+    tick: Tick
 
     def propagate(self) -> None:
         """Propagate the tick across all outgoing edges."""
@@ -161,13 +163,30 @@ class EdgePropagationService:
         )
         shifted = self._shift_phase(edge)
         self._log_propagation(target, delay, shifted)
+        new_delay = self.tick.cumulative_delay + delay
+        max_delay = getattr(Config, "max_cumulative_delay", 0)
+        if max_delay and new_delay > max_delay:
+            if getattr(Config, "log_tick_drops", True):
+                target._log_tick_drop(
+                    self.tick_time,
+                    "event_horizon",
+                    tick_id=self.tick.trace_id,
+                    source=self.node.id,
+                    target=target.id,
+                    cumulative_delay=new_delay,
+                    coherence=target.compute_coherence_level(self.tick_time),
+                )
+            return
         if self._handle_refraction(target, delay, shifted, kappa):
             return
+        self.tick.cumulative_delay = new_delay
         target.schedule_tick(
             self.tick_time + delay,
             shifted,
             origin=self.node.id,
             created_tick=self.tick_time,
+            tick_id=self.tick.trace_id,
+            cumulative_delay=new_delay,
         )
 
     # ------------------------------------------------------------------
@@ -273,8 +292,9 @@ class NodeTickDecisionService:
         complex_phases = []
         weights = []
         for item in raw_items:
-            if isinstance(item, (tuple, list)) and len(item) == 2:
-                ph, created = item
+            if isinstance(item, (tuple, list)):
+                ph = item[0]
+                created = item[1] if len(item) > 1 else Config.current_tick
                 decay = getattr(Config, "tick_decay_factor", 1.0) ** (
                     max(0, Config.current_tick - created)
                 )

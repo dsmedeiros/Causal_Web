@@ -90,6 +90,12 @@ Tick energy can dissipate between scheduling and evaluation. The
 tick. A value of `1.0` disables decay while values below `1.0` gradually reduce
 the influence of older ticks. This setting is available via CLI and the GUI.
 
+Tick propagation may naturally cease when cumulative delay becomes too large or
+local coherence falls too low. Use `max_cumulative_delay` to cap the total
+delay a tick can accumulate before being dropped. The
+`min_coherence_threshold` parameter drops ticks when a node's coherence falls
+below this value. Enable detailed drop logs with `log_tick_drops`.
+
 Nodes also observe a **refractory period** after firing.  The global
 `refractory_period` setting determines how many ticks a node must wait before it
 may emit again, preventing rapid oscillation.  This value is applied when nodes
