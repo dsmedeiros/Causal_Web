@@ -1,6 +1,7 @@
 """Service modules for the engine package."""
 
 from .node_services import (
+    NodeInitializationService,
     NodeTickService,
     EdgePropagationService,
     NodeTickDecisionService,
@@ -14,6 +15,7 @@ from .sim_services import (
 )
 
 __all__ = [
+    "NodeInitializationService",
     "NodeTickService",
     "EdgePropagationService",
     "NodeTickDecisionService",
