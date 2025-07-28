@@ -179,7 +179,6 @@ class EdgePropagationService:
             return
         if self._handle_refraction(target, delay, shifted, kappa):
             return
-        self.tick.cumulative_delay = new_delay
         target.schedule_tick(
             self.tick_time + delay,
             shifted,
