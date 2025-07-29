@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from .node import Node
-from .tick import Tick
+from ..models.node import Node
+from ..models.tick import Tick
 
 
 class TickRouter:
@@ -30,8 +30,8 @@ class TickRouter:
     @classmethod
     def route_tick(cls, node: Node, tick: Tick) -> None:
         """Update ``tick`` to the next layer and record the transition."""
-        from ..config import Config
-        from .logger import log_json
+        from ...config import Config
+        from ..logging.logger import log_json
 
         new_layer = cls.next_layer(tick.layer)
         if new_layer != tick.layer:

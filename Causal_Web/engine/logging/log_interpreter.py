@@ -2,9 +2,9 @@ import json
 import os
 from typing import Dict, List
 
-from .causal_analyst import CausalAnalyst
-from .base import OutputDirMixin, JsonLinesMixin
-from ..config import Config
+from ..causal_analyst import CausalAnalyst
+from ..models.base import OutputDirMixin, JsonLinesMixin
+from ...config import Config
 
 
 class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):

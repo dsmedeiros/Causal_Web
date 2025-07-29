@@ -2,9 +2,9 @@ import json
 import random
 from typing import Dict, List, Optional
 
-from .graph import CausalGraph
-from ..config import Config
-from .base import PathLoggingMixin
+from ..models.graph import CausalGraph
+from ...config import Config
+from ..models.base import PathLoggingMixin
 
 
 class TickSeeder(PathLoggingMixin):

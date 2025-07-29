@@ -6,10 +6,11 @@ from typing import Callable, List, Optional
 from concurrent.futures import ThreadPoolExecutor
 
 from ...config import Config
-from ..graph import CausalGraph
-from ..observer import Observer
-from ..logger import log_json
-from . import bridge_manager, evaluator, log_utils
+from ..models.graph import CausalGraph
+from ..models.observer import Observer
+from ..logging.logger import log_json
+from . import bridge_manager, evaluator
+from ..logging import log_utils
 
 
 class EvaluationOrchestrator:

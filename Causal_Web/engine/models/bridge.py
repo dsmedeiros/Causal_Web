@@ -7,7 +7,7 @@ from typing import Optional, TYPE_CHECKING
 import json
 from enum import Enum
 
-from ..config import Config
+from ...config import Config
 from .base import LoggingMixin
 
 if TYPE_CHECKING:

@@ -1,6 +1,6 @@
 import math
-from Causal_Web.engine.graph import CausalGraph
-from Causal_Web.engine.node import Edge
+from Causal_Web.engine.models.graph import CausalGraph
+from Causal_Web.engine.models.node import Edge
 
 
 def test_compute_local_density():

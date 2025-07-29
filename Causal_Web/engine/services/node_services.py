@@ -18,9 +18,9 @@ from concurrent.futures import ThreadPoolExecutor
 import numpy as np
 
 from ...config import Config
-from ..logger import log_json
-from ..tick import Tick, GLOBAL_TICK_POOL
-from ..node import Node, NodeType, Edge
+from ..logging.logger import log_json
+from ..models.tick import Tick, GLOBAL_TICK_POOL
+from ..models.node import Node, NodeType, Edge
 
 
 class NodeInitializationService:
@@ -97,7 +97,7 @@ class NodeInitializationService:
         n.law_wave_frequency = 0.0
         n.entangled_with: Set[str] = set()
         n.coherence_velocity = 0.0
-        from ..node import NodeType
+        from ..models.node import NodeType
 
         n.node_type: NodeType = NodeType.NORMAL
         n.prev_node_type: NodeType = NodeType.NORMAL
@@ -235,7 +235,7 @@ class NodeTickService:
             else:
                 n.received_tick_times.add(self.tick_time)
             n._tick_phase_lookup[self.tick_time] = self.phase
-        from ..tick_router import TickRouter
+        from ..tick_engine.tick_router import TickRouter
 
         TickRouter.route_tick(n, tick_obj)
         with n.lock:

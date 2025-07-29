@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from collections import deque
 from typing import Deque
 
-from ..config import Config
+from ...config import Config
 
 
 @dataclass

@@ -1,7 +1,7 @@
 import math
-from Causal_Web.engine.graph import CausalGraph
-from Causal_Web.engine.node import Node
-from Causal_Web.engine.node import Edge
+from Causal_Web.engine.models.graph import CausalGraph
+from Causal_Web.engine.models.node import Node
+from Causal_Web.engine.models.node import Edge
 from Causal_Web.config import Config
 import json
 

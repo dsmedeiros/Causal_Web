@@ -7,7 +7,7 @@ import shutil
 import zipfile
 from datetime import datetime
 
-from Causal_Web.engine.log_interpreter import run_interpreter
+from Causal_Web.engine.logging.log_interpreter import run_interpreter
 from Causal_Web.config import Config
 
 
