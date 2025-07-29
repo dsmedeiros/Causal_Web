@@ -633,9 +633,9 @@ encapsulates the tick emission lifecycle while `GraphLoadService` handles JSON
 graph loading. Metric collection is delegated to `NodeMetricsService` which
 replaced the bulky `log_metrics_per_tick` function. The `NodeTickDecisionService`
 isolates the tick decision logic from `Node.should_tick`. `EdgePropagationService`
-manages edge traversal, while serialization and narrative generation are now
-handled by `GraphSerializationService` and
-`NarrativeGeneratorService`. GUI setup moved to `ToolbarBuildService` and
+manages edge traversal. Serialization and narrative generation are now handled
+by `GraphSerializationService` and `NarrativeGeneratorService` located under
+`engine/services/serialization_service.py`. GUI setup moved to `ToolbarBuildService` and
 `NodePanelSetupService`. All
 services now live in `Causal_Web/engine/services/` or the GUI package.
 Recent refactors introduced `ConnectionDisplayService` for showing existing

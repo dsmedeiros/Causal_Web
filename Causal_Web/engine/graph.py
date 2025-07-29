@@ -583,7 +583,7 @@ class CausalGraph:
     def to_dict(self) -> dict:
         """Return a JSON serializable representation of the graph."""
 
-        from .serialization_service import GraphSerializationService
+        from .services.serialization_service import GraphSerializationService
 
         return GraphSerializationService(self).as_dict()
 
