@@ -14,8 +14,8 @@ class ExplanationEvent:
     explanation_text: str
 
 
-from .models.base import OutputDirMixin, JsonLinesMixin
-from ..config import Config
+from ..models.base import OutputDirMixin, JsonLinesMixin
+from ...config import Config
 
 
 class CausalAnalyst(OutputDirMixin, JsonLinesMixin):
@@ -25,7 +25,7 @@ class CausalAnalyst(OutputDirMixin, JsonLinesMixin):
         self, output_dir: Optional[str] = None, input_dir: Optional[str] = None
     ) -> None:
         super().__init__(output_dir=output_dir)
-        base = os.path.join(os.path.dirname(__file__), "..")
+        base = os.path.join(os.path.dirname(__file__), "..", "..")
         self.input_dir = input_dir or os.path.join(base, "input")
         self.logs: Dict[str, Dict[int, Dict]] = {}
         self.graph: Dict = {}
