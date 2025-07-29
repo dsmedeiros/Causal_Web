@@ -11,10 +11,10 @@ from concurrent.futures import ThreadPoolExecutor
 import numpy as np
 
 from ...config import Config
-from ..logger import log_json
-from ..node import Node, NodeType, Edge
-from ..tick import GLOBAL_TICK_POOL  # only for typing, no direct use
-from ..bridge import BridgeType, MediumType
+from ..logging.logger import log_json
+from ..models.node import Node, NodeType, Edge
+from ..models.tick import GLOBAL_TICK_POOL  # only for typing, no direct use
+from ..models.bridge import BridgeType, MediumType
 from .. import tick_engine as te
 
 

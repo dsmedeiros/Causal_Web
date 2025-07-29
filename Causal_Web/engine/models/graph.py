@@ -9,10 +9,10 @@ from concurrent.futures import ThreadPoolExecutor
 from .bridge import Bridge, BridgeType, MediumType
 from .node import Node, Edge, NodeType
 from .tick import GLOBAL_TICK_POOL
-from .meta_node import MetaNode
-from ..config import Config
+from ..meta_node import MetaNode
+from ...config import Config
 import json
-from .logger import log_json
+from ..logging.logger import log_json
 
 
 class CausalGraph:
@@ -364,7 +364,7 @@ class CausalGraph:
 
         # ensure no stale update flags remain
         try:
-            from . import tick_engine as te
+            from .. import tick_engine as te
 
             te.nodes_to_update.clear()
         except Exception:
@@ -583,7 +583,7 @@ class CausalGraph:
     def to_dict(self) -> dict:
         """Return a JSON serializable representation of the graph."""
 
-        from .services.serialization_service import GraphSerializationService
+        from ..services.serialization_service import GraphSerializationService
 
         return GraphSerializationService(self).as_dict()
 
@@ -594,7 +594,7 @@ class CausalGraph:
     def load_from_file(self, path: str) -> None:
         """Populate the graph from a JSON file."""
 
-        from .services.sim_services import GraphLoadService
+        from ..services.sim_services import GraphLoadService
 
         GraphLoadService(self, path).load()
 

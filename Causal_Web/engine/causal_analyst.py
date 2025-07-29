@@ -14,7 +14,7 @@ class ExplanationEvent:
     explanation_text: str
 
 
-from .base import OutputDirMixin, JsonLinesMixin
+from .models.base import OutputDirMixin, JsonLinesMixin
 from ..config import Config
 
 

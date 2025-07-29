@@ -6,8 +6,8 @@ from typing import Any, DefaultDict, List
 
 from pydantic import BaseModel
 
-from ..config import Config
-from .logging_models import GenericLogEntry
+from ...config import Config
+from ..models.logging import GenericLogEntry
 
 
 class LogBuffer:

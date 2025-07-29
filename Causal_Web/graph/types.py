@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, TypedDict
 
-from ..engine.bridge import BridgeType, MediumType
+from ..engine.models.bridge import BridgeType, MediumType
 
 # Reusable typed mappings for graph JSON files
 

@@ -8,7 +8,7 @@ from typing import Set, List, Dict, Optional
 import numpy as np
 import json
 import uuid
-from ..config import Config
+from ...config import Config
 from .base import LoggingMixin
 from .tick import Tick, GLOBAL_TICK_POOL
 
@@ -41,7 +41,7 @@ class Node(LoggingMixin):
     ) -> None:
         """Create a new node and delegate attribute setup."""
 
-        from .services.node_services import NodeInitializationService
+        from ..services.node_services import NodeInitializationService
 
         NodeInitializationService(self).setup(
             node_id,
@@ -97,7 +97,7 @@ class Node(LoggingMixin):
             self.decoherence_debt = max(0.0, self.decoherence_debt - 0.1)
             new = self.coherence
             if abs(new - old) > 0.05:
-                from . import tick_engine as te
+                from .. import tick_engine as te
 
                 te.mark_for_update(self.id)
             return self.coherence
@@ -125,7 +125,7 @@ class Node(LoggingMixin):
             self.decoherence_debt += 0.1
         self._update_law_wave()
         if abs(self.coherence - old) > 0.05:
-            from . import tick_engine as te
+            from .. import tick_engine as te
 
             te.mark_for_update(self.id)
         self._coherence_cache[tick_time] = self.coherence
@@ -140,7 +140,7 @@ class Node(LoggingMixin):
             self.decoherence = 0.0
             self.decoherence_debt = max(0.0, self.decoherence_debt - 0.1)
             if abs(self.decoherence - old) > 0.05:
-                from . import tick_engine as te
+                from .. import tick_engine as te
 
                 te.mark_for_update(self.id)
             return self.decoherence
@@ -169,7 +169,7 @@ class Node(LoggingMixin):
         else:
             self.coherence_credit += 0.05
         if abs(self.decoherence - old) > 0.05:
-            from . import tick_engine as te
+            from .. import tick_engine as te
 
             te.mark_for_update(self.id)
         self._decoherence_cache[tick_time] = self.decoherence
@@ -223,7 +223,7 @@ class Node(LoggingMixin):
             self.goal_error["coherence"] = error
             self.current_threshold -= error * 0.05
         if abs(self.current_threshold - old_thresh) > 0.01:
-            from . import tick_engine as te
+            from .. import tick_engine as te
 
             te.mark_for_update(self.id)
 
@@ -462,14 +462,14 @@ class Node(LoggingMixin):
                     "stored_phase": incoming_phase,
                 },
             )
-        from . import tick_engine as te
+        from .. import tick_engine as te
 
         te.mark_for_update(self.id)
 
     def should_tick(self, tick_time: float) -> tuple[bool, float | None, str]:
         """Return whether the node should fire at ``tick_time``."""
 
-        from .services.node_services import NodeTickDecisionService
+        from ..services.node_services import NodeTickDecisionService
 
         return NodeTickDecisionService(self, tick_time).decide()
 
@@ -485,7 +485,7 @@ class Node(LoggingMixin):
     ) -> None:
         """Emit a tick and propagate resulting phases to neighbours."""
 
-        from .services.node_services import NodeTickService
+        from ..services.node_services import NodeTickService
 
         NodeTickService(self, tick_time, phase, graph, origin).process()
 
@@ -593,7 +593,7 @@ class Node(LoggingMixin):
     def maybe_tick(self, global_tick: int, graph: "CausalGraph") -> None:
         """Evaluate queued phases and emit a tick if conditions are met."""
         if self.tick_history:
-            from .tick_router import TickRouter
+            from ..tick_engine.tick_router import TickRouter
 
             TickRouter.route_tick(self, self.tick_history[-1])
 
@@ -691,7 +691,7 @@ class Edge:
         delay_int = max(1, int(round(adjusted)))
 
         if getattr(Config, "log_verbosity", "info") == "debug" and graph is not None:
-            from .logger import log_json
+            from ..logging.logger import log_json
 
             log_json(
                 Config.output_path("delay_density_log.json"),

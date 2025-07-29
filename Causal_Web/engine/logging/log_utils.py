@@ -7,10 +7,10 @@ import os
 from typing import Optional
 
 from ...config import Config
-from ..graph import CausalGraph
-from ..logger import log_json, logger, log_manager
+from ..models.graph import CausalGraph
+from .logger import log_json, logger, log_manager
 from ..services.sim_services import GlobalDiagnosticsService
-from ..logging_models import StructuralGrowthLog, StructuralGrowthPayload
+from ..models.logging import StructuralGrowthLog, StructuralGrowthPayload
 
 # The global graph instance is injected at runtime
 _graph: CausalGraph | None = None

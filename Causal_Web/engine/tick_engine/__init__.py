@@ -44,9 +44,10 @@ from .evaluator import (
     trigger_csp,
     check_propagation,
 )
-from . import bridge_manager, log_utils
+from . import bridge_manager
+from ..logging import log_utils
 from .bridge_manager import dynamic_bridge_management
-from .log_utils import (
+from ..logging.log_utils import (
     log_bridge_states,
     log_curvature_per_tick,
     log_meta_node_ticks,

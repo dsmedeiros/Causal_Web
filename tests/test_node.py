@@ -1,8 +1,8 @@
 import math
 import os
 import tempfile
-from Causal_Web.engine.node import Node
-from Causal_Web.engine.graph import CausalGraph
+from Causal_Web.engine.models.node import Node
+from Causal_Web.engine.models.graph import CausalGraph
 from Causal_Web.config import Config
 from Causal_Web.engine import tick_engine
 

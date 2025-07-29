@@ -5,8 +5,8 @@ from __future__ import annotations
 import os
 from typing import Any
 
-from ..config import Config
-from .logger import log_json
+from ...config import Config
+from ..logging.logger import log_json
 import json
 
 

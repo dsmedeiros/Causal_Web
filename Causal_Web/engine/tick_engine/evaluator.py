@@ -9,10 +9,10 @@ from collections import deque
 import numpy as np
 
 from ...config import Config
-from ..graph import CausalGraph
-from ..node import Node
-from ..logger import log_json, log_manager
-from ..logging_models import (
+from ..models.graph import CausalGraph
+from ..models.node import Node
+from ..logging.logger import log_json, log_manager
+from ..models.logging import (
     NodeEmergenceLog,
     NodeEmergencePayload,
     StructuralGrowthLog,

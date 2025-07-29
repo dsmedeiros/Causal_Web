@@ -17,22 +17,22 @@ option that removes the object and any associated links.
 
 Key modules include:
 
-- **`engine/graph.py`** – container for nodes, edges and bridges. Graphs can be loaded from or written to JSON files.
-- **`engine/node.py`** – implementation of `Node`, `Edge` and related logic.
-- **`engine/bridge.py`** – manages dynamic bridges between nodes.
+- **`engine/models/graph.py`** – container for nodes, edges and bridges. Graphs can be loaded from or written to JSON files.
+- **`engine/models/node.py`** – implementation of `Node`, `Edge` and related logic.
+- **`engine/models/bridge.py`** – manages dynamic bridges between nodes.
 - Bridge behaviour and mediums are enumerated by `BridgeType` and `MediumType`.
 - **`engine/tick_engine/`** – modular package driving the simulation and logging metrics under `output/`.
 - **`engine/tick_engine/orchestrators.py`** – separates evaluation, mutation and I/O duties for the simulation loop.
-- **`engine/tick_router.py`** – moves ticks through LCCM layers and logs transitions.
-- **`engine/tick_seeder.py`** – seeds periodic ticks based on the configuration file.
-- **`engine/log_interpreter.py`** – parses the generated logs and aggregates statistics.
+- **`engine/tick_engine/tick_router.py`** – moves ticks through LCCM layers and logs transitions.
+- **`engine/tick_engine/tick_seeder.py`** – seeds periodic ticks based on the configuration file.
+- **`engine/logging/log_interpreter.py`** – parses the generated logs and aggregates statistics.
 - **`engine/causal_analyst.py`** – infers causal chains and produces explanation files.
 - **`engine/meta_node.py`** – groups clusters of nodes into collapsed meta nodes.
-- **`engine/node_manager.py`** – NumPy-backed container for bulk node updates
+- **`engine/tick_engine/node_manager.py`** – NumPy-backed container for bulk node updates
   using dynamically resized pre-allocated arrays.
-- **`engine/observer.py`** – observers that infer hidden state from tick history.
-- **`engine/logger.py`** – centralized buffer that batches log writes to disk.
-- **`engine/tick.py`** – defines :class:`Tick` and the reusable object pool.
+- **`engine/models/observer.py`** – observers that infer hidden state from tick history.
+- **`engine/logging/logger.py`** – centralized buffer that batches log writes to disk.
+- **`engine/models/tick.py`** – defines :class:`Tick` and the reusable object pool.
 - **`gui_pyside/main_window.py`** – PySide6 dashboard with a dockable canvas and
   toolbar for interactive runs.
 - **`gui_pyside/canvas_widget.py`** – reusable ``QGraphicsView`` for graph rendering.
@@ -291,7 +291,7 @@ Graph editing panels are now docked within the Graph View window. They close aut
 Once a simulation has finished you can interpret the logs via:
 
 ```bash
-python -m Causal_Web.engine.log_interpreter
+python -m Causal_Web.engine.logging.log_interpreter
 ```
 
 This command loads the logs and generates several summary files:
@@ -322,7 +322,7 @@ disk writes. The frequency of metric logging is controlled by the
 in the **Log Files** window.
 Hovering over any log entry now shows a brief description of that log file.
 All records are wrapped by Pydantic models from
-`engine/logging_models.py`. Generic logs use ``GenericLogEntry`` while
+`engine/models/logging.py`. Generic logs use ``GenericLogEntry`` while
 specialised events such as ``NodeEmergenceLog`` retain their dedicated
 payloads. This provides consistent metadata across files and simplifies
 downstream analysis.
@@ -655,12 +655,12 @@ for utilities like the tick seeder.
 - `engine/tick_engine/core.py:simulation_loop` – 98 lines
 - `engine/tick_engine/core.py:SimulationRunner.run` – 93 lines
 - `engine/causal_analyst.py:infer_causal_chains` – 53 lines
-- `engine/bridge.py:apply` – 125 lines
-- `engine/node.py:__init__` – 97 lines
-- `engine/node.py:should_tick` – 111 lines
-- `engine/node.py:apply_tick` – 143 lines
-- `engine/graph.py:detect_clusters` – 55 lines
-- `engine/graph.py:load_from_file` – 138 lines
+- `engine/models/bridge.py:apply` – 125 lines
+- `engine/models/node.py:__init__` – 97 lines
+- `engine/models/node.py:should_tick` – 111 lines
+- `engine/models/node.py:apply_tick` – 143 lines
+- `engine/models/graph.py:detect_clusters` – 55 lines
+- `engine/models/graph.py:load_from_file` – 138 lines
 - `engine/explanation_rules.py:_match_emergence_events` – 51 lines
 - `gui_pyside/toolbar_builder.py:ToolbarBuilder.__init__` – 57 lines
 - `gui_pyside/toolbar_builder.py:AnotherClass.__init__` – 101 lines

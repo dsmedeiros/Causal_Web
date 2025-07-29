@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 
 from ...config import Config
-from ..graph import CausalGraph
+from ..models.graph import CausalGraph
 
 _graph: CausalGraph | None = None
 
