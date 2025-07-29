@@ -321,9 +321,11 @@ disk writes. The frequency of metric logging is controlled by the
 `log_interval` setting which defaults to `1` tick. This value can be adjusted
 in the **Log Files** window.
 Hovering over any log entry now shows a brief description of that log file.
-Each record now conforms to Pydantic models defined in
-`engine/logging_models.py`, ensuring consistent structure across files and
-simplifying downstream analysis.
+All records are wrapped by Pydantic models from
+`engine/logging_models.py`. Generic logs use ``GenericLogEntry`` while
+specialised events such as ``NodeEmergenceLog`` retain their dedicated
+payloads. This provides consistent metadata across files and simplifies
+downstream analysis.
 
 - `boundary_interaction_log.json` – interactions with void or boundary nodes.
 - `bridge_decay_log.json` – gradual weakening of inactive bridges.

@@ -1,4 +1,3 @@
-import json
 import os
 import threading
 import time
@@ -8,6 +7,7 @@ from typing import Any, DefaultDict, List
 from pydantic import BaseModel
 
 from ..config import Config
+from .logging_models import GenericLogEntry
 
 
 class LogBuffer:
@@ -73,6 +73,10 @@ def log_json(path: str, data: Any) -> None:
     if not Config.is_log_enabled(name):
         return
     if isinstance(data, BaseModel):
-        logger.log(path, data.model_dump_json() + "\n")
+        entry = data
     else:
-        logger.log(path, json.dumps(data) + "\n")
+        tick = data.get("tick", 0) if isinstance(data, dict) else 0
+        entry = GenericLogEntry(
+            event_type=name.replace(".json", ""), tick=tick, payload=data
+        )
+    log_manager.log(path, entry)

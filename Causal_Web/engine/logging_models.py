@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -41,3 +41,10 @@ class StructuralGrowthPayload(BaseModel):
 class StructuralGrowthLog(BaseLogEntry):
     event_type: str = "StructuralGrowthSnapshot"
     payload: StructuralGrowthPayload
+
+
+class GenericLogEntry(BaseLogEntry):
+    """Fallback model for logs without a dedicated payload class."""
+
+    event_type: str
+    payload: Any
