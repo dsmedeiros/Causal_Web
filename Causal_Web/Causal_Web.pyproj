@@ -28,12 +28,12 @@
     <Compile Include="database\__init__.py" />
     <Compile Include="engine\base.py" />
     <Compile Include="engine\models\bridge.py" />
-    <Compile Include="engine\causal_analyst.py" />
-    <Compile Include="engine\explanation_rules.py" />
+    <Compile Include="engine\logging\causal_analyst.py" />
+    <Compile Include="engine\logging\explanation_rules.py" />
     <Compile Include="engine\models\graph.py" />
     <Compile Include="engine\logging\logger.py" />
     <Compile Include="engine\models\logging.py" />
-    <Compile Include="engine\meta_node.py" />
+    <Compile Include="engine\models\meta_node.py" />
     <Compile Include="engine\models\node.py" />
     <Compile Include="engine\tick_engine\node_manager.py" />
     <Compile Include="engine\models\observer.py" />

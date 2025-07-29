@@ -26,8 +26,8 @@ Key modules include:
 - **`engine/tick_engine/tick_router.py`** – moves ticks through LCCM layers and logs transitions.
 - **`engine/tick_engine/tick_seeder.py`** – seeds periodic ticks based on the configuration file.
 - **`engine/logging/log_interpreter.py`** – parses the generated logs and aggregates statistics.
-- **`engine/causal_analyst.py`** – infers causal chains and produces explanation files.
-- **`engine/meta_node.py`** – groups clusters of nodes into collapsed meta nodes.
+ - **`engine/logging/causal_analyst.py`** – infers causal chains and produces explanation files.
+ - **`engine/models/meta_node.py`** – groups clusters of nodes into collapsed meta nodes.
 - **`engine/tick_engine/node_manager.py`** – NumPy-backed container for bulk node updates
   using dynamically resized pre-allocated arrays.
 - **`engine/models/observer.py`** – observers that infer hidden state from tick history.
@@ -654,14 +654,14 @@ for utilities like the tick seeder.
 - `engine/services/sim_services.py:NodeMetricsService.log_metrics` – 45 lines
 - `engine/tick_engine/core.py:simulation_loop` – 98 lines
 - `engine/tick_engine/core.py:SimulationRunner.run` – 93 lines
-- `engine/causal_analyst.py:infer_causal_chains` – 53 lines
+ - `engine/logging/causal_analyst.py:infer_causal_chains` – 53 lines
 - `engine/models/bridge.py:apply` – 125 lines
 - `engine/models/node.py:__init__` – 97 lines
 - `engine/models/node.py:should_tick` – 111 lines
 - `engine/models/node.py:apply_tick` – 143 lines
 - `engine/models/graph.py:detect_clusters` – 55 lines
 - `engine/models/graph.py:load_from_file` – 138 lines
-- `engine/explanation_rules.py:_match_emergence_events` – 51 lines
+ - `engine/logging/explanation_rules.py:_match_emergence_events` – 51 lines
 - `gui_pyside/toolbar_builder.py:ToolbarBuilder.__init__` – 57 lines
 - `gui_pyside/toolbar_builder.py:AnotherClass.__init__` – 101 lines
 - `gui_pyside/toolbar_builder.py:commit` – 99 lines

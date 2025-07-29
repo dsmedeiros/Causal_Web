@@ -9,7 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 from .bridge import Bridge, BridgeType, MediumType
 from .node import Node, Edge, NodeType
 from .tick import GLOBAL_TICK_POOL
-from ..meta_node import MetaNode
+from .meta_node import MetaNode
 from ...config import Config
 import json
 from ..logging.logger import log_json

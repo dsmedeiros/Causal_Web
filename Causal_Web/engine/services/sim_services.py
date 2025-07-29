@@ -388,7 +388,7 @@ class GraphLoadService:
     # ------------------------------------------------------------------
     def _load_meta_nodes(self, meta_nodes: dict) -> None:
         g = self.graph
-        from ..meta_node import MetaNode
+        from ..models.meta_node import MetaNode
 
         for mid, meta in meta_nodes.items():
             members = list(meta.get("members", []))
