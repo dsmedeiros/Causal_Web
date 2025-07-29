@@ -13,6 +13,10 @@ from .sim_services import (
     BridgeApplyService,
     GlobalDiagnosticsService,
 )
+from .serialization_service import (
+    GraphSerializationService,
+    NarrativeGeneratorService,
+)
 
 __all__ = [
     "NodeInitializationService",
@@ -24,4 +28,6 @@ __all__ = [
     "GraphLoadService",
     "BridgeApplyService",
     "GlobalDiagnosticsService",
+    "GraphSerializationService",
+    "NarrativeGeneratorService",
 ]

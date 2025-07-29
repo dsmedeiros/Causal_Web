@@ -21,7 +21,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="command_stack.py" />
+    <Compile Include="gui\command_stack.py" />
     <Compile Include="config.py" />
     <Compile Include="database\db_setup.py" />
     <Compile Include="database\run_meta.py" />
@@ -37,7 +37,7 @@
     <Compile Include="engine\node.py" />
     <Compile Include="engine\node_manager.py" />
     <Compile Include="engine\observer.py" />
-    <Compile Include="engine\serialization_service.py" />
+    <Compile Include="engine\services\serialization_service.py" />
     <Compile Include="engine\services\node_services.py" />
     <Compile Include="engine\services\sim_services.py" />
     <Compile Include="engine\services\__init__.py" />

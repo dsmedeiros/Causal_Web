@@ -34,7 +34,7 @@ from ..gui.state import (
 )
 from .canvas_widget import CanvasWidget
 from .toolbar_builder import build_toolbar
-from ..command_stack import AddNodeCommand, AddObserverCommand
+from ..gui.command_stack import AddNodeCommand, AddObserverCommand
 from ..engine import tick_engine
 
 
@@ -400,7 +400,7 @@ class MainWindow(QMainWindow):
             "x": 0.0,
             "y": 0.0,
         }
-        from ..command_stack import AddMetaNodeCommand
+        from ..gui.command_stack import AddMetaNodeCommand
 
         cmd = AddMetaNodeCommand(model, meta_id, data)
         self.canvas.command_stack.do(cmd)

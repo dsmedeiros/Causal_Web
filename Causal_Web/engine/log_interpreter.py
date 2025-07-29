@@ -356,7 +356,7 @@ class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
     def generate_narrative(self) -> str:
         """Return a textual summary of the collected metrics."""
 
-        from .serialization_service import NarrativeGeneratorService
+        from .services.serialization_service import NarrativeGeneratorService
 
         return NarrativeGeneratorService(self.summary).generate()
 
