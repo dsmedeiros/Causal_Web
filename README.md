@@ -220,7 +220,12 @@ Example:
 
 ## Running the simulation
 
-1. Install the dependencies (`pyside6` is required for the GUI).
+1. Install the dependencies (`numpy`, `networkx`, `pydantic`, `pytest` and `pyside6` for the GUI) using:
+
+   ```bash
+   pip install numpy networkx pydantic pytest pyside6
+   ```
+
    An X11-compatible display is needed to create the window. If running on a
    headless server consider using a virtual frame buffer such as Xvfb.
    The dashboard automatically designates the *Causal Graph* window as the

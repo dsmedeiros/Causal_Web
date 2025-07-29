@@ -7,7 +7,7 @@
 - **Docstrings**: Add or update docstrings when modifying or adding public functions or classes.
 - **README**: Update `README.md` to reflect any user-facing code changes or new features.
 - **Manual run**: The simulation GUI starts with `python -m Causal_Web.main`.
-- **Dependencies**: Install `numpy`, `networkx` and `pytest` with `pip install numpy networkx pytest` before running tests.
+- **Dependencies**: Install `numpy`, `networkx`, `pytest` and `pydantic` with `pip install numpy networkx pytest pydantic` before running tests.
 - **Testing**: Execute `pytest` after installing dependencies to verify core behaviour.
 - **Packaging**: Run `python bundle_run.py` after a simulation to archive the output logs.
 
