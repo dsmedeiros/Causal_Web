@@ -220,10 +220,17 @@ Example:
 
 ## Running the simulation
 
-1. Install the dependencies (`numpy`, `networkx`, `pydantic`, `pytest` and `pyside6` for the GUI) using:
+1. Install the dependencies. The core packages are listed in
+   `requirements.txt` and can be installed with:
 
    ```bash
-   pip install numpy networkx pydantic pytest pyside6
+   pip install -r requirements.txt
+   ```
+
+   For the GUI, also install `pyside6`:
+
+   ```bash
+   pip install pyside6
    ```
 
    An X11-compatible display is needed to create the window. If running on a
