@@ -21,12 +21,14 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="engine\logging\__init__.py" />
+    <Compile Include="engine\models\base.py" />
+    <Compile Include="engine\models\__init__.py" />
     <Compile Include="gui\command_stack.py" />
     <Compile Include="config.py" />
     <Compile Include="database\db_setup.py" />
     <Compile Include="database\run_meta.py" />
     <Compile Include="database\__init__.py" />
-    <Compile Include="engine\base.py" />
     <Compile Include="engine\models\bridge.py" />
     <Compile Include="engine\causal_analyst.py" />
     <Compile Include="engine\explanation_rules.py" />
@@ -76,6 +78,8 @@
     <Folder Include="assets\fonts\" />
     <Folder Include="database\" />
     <Folder Include="engine\" />
+    <Folder Include="engine\logging\" />
+    <Folder Include="engine\models\" />
     <Folder Include="engine\services\" />
     <Folder Include="engine\tick_engine\" />
     <Folder Include="graph\" />
