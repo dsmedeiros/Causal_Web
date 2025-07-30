@@ -87,6 +87,8 @@ class NodePanel(QDockWidget, PanelMixin):
         for key, spin in self.inputs.items():
             spin.setValue(float(data.get(key, 0.0)))
 
+        self.self_connect_cb.setChecked(bool(data.get("allow_self_connection", False)))
+
         # tick source info
         ts_rec = next(
             (s for s in model.tick_sources if s.get("node_id") == node_id),
@@ -115,6 +117,8 @@ class NodePanel(QDockWidget, PanelMixin):
             return
         for key, spin in self.inputs.items():
             node[key] = float(spin.value())
+
+        node["allow_self_connection"] = self.self_connect_cb.isChecked()
 
         # update tick source record
         ts_rec = next(

@@ -1,6 +1,7 @@
 # Graph Format
 
 Graphs are described using JSON files with top level keys for nodes, edges, optional bridges, tick_sources, observers and meta_nodes. Each node defines its position and simulation parameters. Edges specify delays and attenuation. Tick sources seed periodic activity while observers record metrics. Meta nodes group related nodes under additional constraints such as phase locking.
+Nodes can optionally set ``allow_self_connection`` to ``true`` to permit self-connected edges.
 
 ## Example
 ```json
@@ -16,7 +17,8 @@ Graphs are described using JSON files with top level keys for nodes, edges, opti
       "origin_type": "seed",
       "generation_tick": 0,
       "parent_ids": [],
-      "goals": {}
+      "goals": {},
+      "allow_self_connection": false
     },
     "B": {
       "x": 100,
