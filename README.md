@@ -521,7 +521,7 @@ The following lists describe the JSON keys recorded in each output file.
   `{node: {layer: count}}`.
 
 #### `magnitude_failure_log.json`
-- `tick`, `node`, `magnitude`, `threshold` and number of `phases` when a tick fails.
+- `node`, `magnitude`, `threshold` and number of `phases` when a tick fails.
 
 #### `meta_node_tick_log.json`
 - keyed by tick with `{meta_id: [member_nodes]}` entries.
@@ -547,7 +547,7 @@ The following lists describe the JSON keys recorded in each output file.
 
 #### `propagation_failure_log.json`
 - heterogeneous records describing why propagation failed. Common
-  fields include `tick`, `node` or `parent`, failure `type` and `reason`.
+  fields include `node` or `parent`, failure `type` and `reason`.
 
 #### `proper_time_log.json`
 - keyed by tick with `{node: subjective_ticks}` values.
@@ -560,35 +560,35 @@ The following lists describe the JSON keys recorded in each output file.
 - mapping of regions to averaged decoherence pressure.
 
 #### `should_tick_log.json`
-- decisions from `should_tick` with `tick`, `node` and `reason`.
+- decisions from `should_tick` with `node` and `reason`.
 
 #### `simulation_state.json`
-- `paused`, `stopped`, `current_tick` and optional `graph_snapshot` path.
+- `paused`, `stopped` and optional `graph_snapshot` path.
 
 #### `structural_growth_log.json`
 - per tick record of node counts and SIP/CSP success/failure totals.
 
 #### `tick_delivery_log.json`
-- `source`, `node_id`, `tick_time` and `stored_phase` for incoming ticks.
+- `source`, `node_id` and `stored_phase` for incoming ticks.
 
 #### `tick_density_map.json`
 - keyed by tick mirroring `interference_log` densities.
 
 #### `tick_drop_log.json`
-- dropped tick info: `tick`, `node`, `reason`, `coherence`, `node_type`.
+- dropped tick info: `node`, `reason`, `coherence`, `node_type`.
 
 #### `tick_emission_log.json`
-- emitted ticks with `node_id`, `tick_time` and `phase`.
+- emitted ticks with `node_id` and `phase`.
 
 #### `tick_evaluation_log.json`
 - evaluation outcome fields:
-  `tick`, `node`, `coherence`, `threshold`, `refractory`, `fired`, `reason`.
+  `node`, `coherence`, `threshold`, `refractory`, `fired`, `reason`.
 
 #### `tick_propagation_log.json`
-- `source`, `target`, `tick_time`, `arrival_time` and propagated `phase`.
+- `source`, `target`, `arrival_time` and propagated `phase`.
 
 #### `tick_seed_log.json`
-- seeder actions recording `tick`, `node`, `phase`, `strategy`,
+- seeder actions recording `node`, `phase`, `strategy`,
   `coherence`, `threshold`, `success` and optional `failure_reason`.
 
 #### `tick_trace.json`

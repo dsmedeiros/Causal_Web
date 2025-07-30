@@ -88,13 +88,13 @@ def _update_simulation_state(
     paused: bool, stopped: bool, tick: int, snapshot: str | None
 ) -> None:
     state = {
+        "tick": tick,
         "paused": paused,
         "stopped": stopped,
-        "current_tick": tick,
-        "graph_snapshot": snapshot,
     }
-    with open(Config.output_path("simulation_state.json"), "w") as f:
-        json.dump(state, f, indent=2)
+    if snapshot is not None:
+        state["graph_snapshot"] = snapshot
+    log_json(Config.output_path("simulation_state.json"), state)
 
 
 def pause_simulation() -> None:
