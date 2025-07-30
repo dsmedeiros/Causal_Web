@@ -200,11 +200,16 @@ class Config:
         return "diagnostic" in mode or category in mode
 
     @classmethod
-    def is_log_enabled(cls, name: str) -> bool:
-        """Return ``True`` if ``name`` should be written based on configuration."""
-        if not cls.log_files.get(name, True):
+    def is_log_enabled(
+        cls, name: str | None = None, category: str | None = None
+    ) -> bool:
+        """Return ``True`` if a log entry should be written."""
+        if name is not None and not cls.log_files.get(name, True):
             return False
-        category = cls.category_for_file(name)
+        if category is None:
+            if name is None:
+                return True
+            category = cls.category_for_file(name)
         return cls.is_category_enabled(category)
 
     @classmethod

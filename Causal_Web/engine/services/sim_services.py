@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 import numpy as np
 
 from ...config import Config
-from ..logging.logger import log_json
+from ..logging.logger import log_record
 from ..models.node import Node, NodeType, Edge
 from ..models.tick import GLOBAL_TICK_POOL  # only for typing, no direct use
 from ..models.bridge import BridgeType, MediumType
@@ -96,14 +96,14 @@ class NodeMetricsResultService:
                 record["stable"] = 0
         if record["stable"] >= 10:
             node.refractory_period = max(1.0, node.refractory_period - 0.1)
-            log_json(
-                "event",
-                "law_drift_log",
-                {
+            log_record(
+                category="event",
+                label="law_drift_log",
+                tick=self.tick,
+                value={
                     "node": node_id,
                     "new_refractory_period": node.refractory_period,
                 },
-                tick=self.tick,
             )
             record["stable"] = 0
         if record["stable"] >= 5:
@@ -197,36 +197,80 @@ class NodeMetricsService:
         clusters = self.graph.hierarchical_clusters()
         self.graph.create_meta_nodes(clusters.get(0, []))
         if tick % getattr(Config, "log_interval", 1) == 0:
-            log_json("tick", "cluster_log", clusters, tick=tick)
+            log_record(
+                category="tick",
+                label="cluster_log",
+                tick=tick,
+                value=clusters,
+            )
 
     # ------------------------------------------------------------------
     def _write_logs(self, tick: int, logs: dict) -> None:
-        log_json("tick", "law_wave_log", logs["law_wave_log"], tick=tick)
+        log_record(
+            category="tick",
+            label="law_wave_log",
+            tick=tick,
+            value=logs["law_wave_log"],
+        )
         if logs["stable_frequency_log"]:
-            log_json(
-                "tick", "stable_frequency_log", logs["stable_frequency_log"], tick=tick
+            log_record(
+                category="tick",
+                label="stable_frequency_log",
+                tick=tick,
+                value=logs["stable_frequency_log"],
             )
-        log_json("tick", "decoherence_log", logs["decoherence_log"], tick=tick)
-        log_json("tick", "coherence_log", logs["coherence_log"], tick=tick)
-        log_json(
-            "tick", "coherence_velocity_log", logs["coherence_velocity"], tick=tick
+        log_record(
+            category="tick",
+            label="decoherence_log",
+            tick=tick,
+            value=logs["decoherence_log"],
         )
-        log_json(
-            "phenomena", "classicalization_map", logs["classical_state"], tick=tick
+        log_record(
+            category="tick",
+            label="coherence_log",
+            tick=tick,
+            value=logs["coherence_log"],
         )
-        log_json("tick", "interference_log", logs["interference_log"], tick=tick)
-        log_json("tick", "tick_density_map", logs["interference_log"], tick=tick)
-        log_json(
-            "tick",
-            "node_state_log",
-            {
+        log_record(
+            category="tick",
+            label="coherence_velocity_log",
+            tick=tick,
+            value=logs["coherence_velocity"],
+        )
+        log_record(
+            category="phenomena",
+            label="classicalization_map",
+            tick=tick,
+            value=logs["classical_state"],
+        )
+        log_record(
+            category="tick",
+            label="interference_log",
+            tick=tick,
+            value=logs["interference_log"],
+        )
+        log_record(
+            category="tick",
+            label="tick_density_map",
+            tick=tick,
+            value=logs["interference_log"],
+        )
+        log_record(
+            category="tick",
+            label="node_state_log",
+            tick=tick,
+            value={
                 "type": logs["type_log"],
                 "credit": logs["credit_log"],
                 "debt": logs["debt_log"],
             },
-            tick=tick,
         )
-        log_json("tick", "proper_time_log", logs["proper_time_log"], tick=tick)
+        log_record(
+            category="tick",
+            label="proper_time_log",
+            tick=tick,
+            value=logs["proper_time_log"],
+        )
 
 
 @dataclass

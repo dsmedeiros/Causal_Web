@@ -59,7 +59,8 @@ class LogManager:
     def log(self, path: str, entry: BaseModel) -> None:
         """Serialize ``entry`` and buffer it for ``path``."""
         name = os.path.basename(path)
-        if not Config.is_log_enabled(name):
+        category = getattr(entry, "metadata", {}).get("category")
+        if not Config.is_log_enabled(name, category):
             return
         logger.log(path, entry.model_dump_json() + "\n")
 
@@ -67,15 +68,42 @@ class LogManager:
 log_manager = LogManager()
 
 
-def log_json(
+def log_record(
     category: str,
     label: str,
-    value: Any,
     tick: int | None = None,
+    value: Any | None = None,
     mode: str | None = None,
+    correlation_id: str | None = None,
+    metadata: dict | None = None,
 ) -> None:
-    """Buffer a structured log entry under ``category`` with ``label``."""
-    if not Config.is_category_enabled(category):
+    """Serialize ``value`` as a log entry under ``category``.
+
+    Parameters
+    ----------
+    category:
+        Output category (``tick``, ``phenomena`` or ``event``).
+    label:
+        Logical name for the record.
+    tick:
+        Simulation tick associated with the record.
+    value:
+        Structured payload to persist.
+    mode:
+        Optional mode identifier stored with the record.
+    correlation_id:
+        Identifier linking this record to another event.
+    metadata:
+        Additional metadata to merge with default values.
+    """
+
+    meta = {"category": category}
+    if mode is not None:
+        meta["mode"] = mode
+    if metadata:
+        meta.update(metadata)
+
+    if not Config.is_log_enabled(f"{label}.json", category):
         return
 
     path_map = {
@@ -85,15 +113,32 @@ def log_json(
     }
     path = path_map.get(category, Config.output_path(f"{category}_log.jsonl"))
 
-    meta = {"category": category}
-    if mode is not None:
-        meta["mode"] = mode
-
     if category in {"tick", "phenomena"}:
         entry = PeriodicLogEntry(tick=tick, label=label, value=value, metadata=meta)
     else:
         entry = GenericLogEntry(
-            event_type=label, tick=tick or 0, payload=value, metadata=meta
+            event_type=label,
+            tick=tick or 0,
+            payload=value,
+            metadata=meta,
+            correlation_id=correlation_id,
         )
 
     log_manager.log(path, entry)
+
+
+def log_json(
+    category: str,
+    label: str,
+    value: Any,
+    tick: int | None = None,
+    mode: str | None = None,
+) -> None:
+    """Backward compatible wrapper around :func:`log_record`."""
+    log_record(
+        category=category,
+        label=label,
+        tick=tick,
+        value=value,
+        mode=mode,
+    )

@@ -8,7 +8,7 @@ from typing import Optional
 
 from ...config import Config
 from ..models.graph import CausalGraph
-from .logger import log_json, logger, log_manager
+from .logger import log_record, log_json, logger, log_manager
 from ..services.sim_services import GlobalDiagnosticsService
 from ..models.logging import StructuralGrowthLog, StructuralGrowthPayload
 
@@ -40,7 +40,12 @@ def log_curvature_per_tick(global_tick: int) -> None:
             "delta_f": round(df, 4),
             "curved_delay": round(curved, 4),
         }
-    log_json("tick", "curvature_log", log, tick=global_tick)
+    log_record(
+        category="tick",
+        label="curvature_log",
+        tick=global_tick,
+        value=log,
+    )
 
 
 def log_bridge_states(global_tick: int) -> None:
@@ -57,7 +62,12 @@ def log_bridge_states(global_tick: int) -> None:
         }
         for b in _graph.bridges
     }
-    log_json("tick", "bridge_state_log", snapshot, tick=global_tick)
+    log_record(
+        category="phenomena",
+        label="bridge_state",
+        tick=global_tick,
+        value=snapshot,
+    )
 
 
 def log_meta_node_ticks(global_tick: int) -> None:
@@ -74,7 +84,12 @@ def log_meta_node_ticks(global_tick: int) -> None:
         if member_ticks:
             events[meta_id] = member_ticks
         if events:
-            log_json("tick", "meta_node_tick_log", events, tick=global_tick)
+            log_record(
+                category="phenomena",
+                label="meta_node_ticks",
+                tick=global_tick,
+                value=events,
+            )
 
 
 def snapshot_graph(global_tick: int) -> Optional[str]:
