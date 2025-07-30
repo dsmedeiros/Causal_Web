@@ -158,6 +158,8 @@ class Config:
         "explanation_graph.json",
         "causal_chains.json",
         "causal_timeline.json",
+        "connectivity_log.json",
+        "classicalization_map.json",
         "interpretation_log.json",
         "inspection_log.json",
     }
@@ -183,23 +185,27 @@ class Config:
     }
 
     @classmethod
+    def category_for_file(cls, name: str) -> str:
+        """Return the logging category for *name*."""
+        if name in cls.TICK_FILES:
+            return "tick"
+        if name in cls.PHENOMENA_FILES:
+            return "phenomena"
+        return "event"
+
+    @classmethod
+    def is_category_enabled(cls, category: str) -> bool:
+        """Return ``True`` if ``category`` should be written based on mode."""
+        mode = set(getattr(cls, "logging_mode", ["diagnostic"]))
+        return "diagnostic" in mode or category in mode
+
+    @classmethod
     def is_log_enabled(cls, name: str) -> bool:
         """Return ``True`` if ``name`` should be written based on configuration."""
         if not cls.log_files.get(name, True):
             return False
-
-        mode = set(getattr(cls, "logging_mode", ["diagnostic"]))
-        if "diagnostic" in mode:
-            return True
-
-        if name in cls.TICK_FILES:
-            category = "tick"
-        elif name in cls.PHENOMENA_FILES:
-            category = "phenomena"
-        else:
-            category = "events"
-
-        return category in mode
+        category = cls.category_for_file(name)
+        return cls.is_category_enabled(category)
 
     @classmethod
     def save_log_files(cls, path: str | None = None) -> None:

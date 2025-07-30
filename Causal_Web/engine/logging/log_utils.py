@@ -40,7 +40,7 @@ def log_curvature_per_tick(global_tick: int) -> None:
             "delta_f": round(df, 4),
             "curved_delay": round(curved, 4),
         }
-    log_json(Config.output_path("curvature_log.json"), {str(global_tick): log})
+    log_json("tick", "curvature_log", log, tick=global_tick)
 
 
 def log_bridge_states(global_tick: int) -> None:
@@ -57,7 +57,7 @@ def log_bridge_states(global_tick: int) -> None:
         }
         for b in _graph.bridges
     }
-    log_json(Config.output_path("bridge_state_log.json"), {str(global_tick): snapshot})
+    log_json("tick", "bridge_state_log", snapshot, tick=global_tick)
 
 
 def log_meta_node_ticks(global_tick: int) -> None:
@@ -74,10 +74,7 @@ def log_meta_node_ticks(global_tick: int) -> None:
         if member_ticks:
             events[meta_id] = member_ticks
         if events:
-            log_json(
-                Config.output_path("meta_node_tick_log.json"),
-                {str(global_tick): events},
-            )
+            log_json("tick", "meta_node_tick_log", events, tick=global_tick)
 
 
 def snapshot_graph(global_tick: int) -> Optional[str]:

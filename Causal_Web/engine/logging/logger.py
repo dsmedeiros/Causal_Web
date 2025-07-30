@@ -67,39 +67,33 @@ class LogManager:
 log_manager = LogManager()
 
 
-def log_json(path: str, data: Any) -> None:
-    """Buffer a JSON serialisable object as a newline delimited record."""
-    name = os.path.basename(path)
-    if not Config.is_log_enabled(name):
+def log_json(
+    category: str,
+    label: str,
+    value: Any,
+    tick: int | None = None,
+    mode: str | None = None,
+) -> None:
+    """Buffer a structured log entry under ``category`` with ``label``."""
+    if not Config.is_category_enabled(category):
         return
-    PERIODIC_FILES = Config.PERIODIC_FILES
 
-    if isinstance(data, BaseModel):
-        entry = data
+    path_map = {
+        "tick": Config.output_path("ticks_log.jsonl"),
+        "phenomena": Config.output_path("phenomena_log.jsonl"),
+        "event": Config.output_path("events_log.jsonl"),
+    }
+    path = path_map.get(category, Config.output_path(f"{category}_log.jsonl"))
+
+    meta = {"category": category}
+    if mode is not None:
+        meta["mode"] = mode
+
+    if category in {"tick", "phenomena"}:
+        entry = PeriodicLogEntry(tick=tick, label=label, value=value, metadata=meta)
     else:
-        if name in PERIODIC_FILES:
-            if isinstance(data, dict):
-                tick = data.pop("tick", None)
-                if len(data) == 1 and next(iter(data)).isdigit():
-                    k = next(iter(data))
-                    tick = int(k)
-                    value = data[k]
-                else:
-                    value = data
-            else:
-                tick = None
-                value = data
-            entry = PeriodicLogEntry(
-                tick=tick, label=name.replace(".json", ""), value=value
-            )
-        else:
-            if isinstance(data, dict):
-                tick = data.get("tick", 0)
-                payload = {k: v for k, v in data.items() if k != "tick"}
-            else:
-                tick = 0
-                payload = data
-            entry = GenericLogEntry(
-                event_type=name.replace(".json", ""), tick=tick, payload=payload
-            )
+        entry = GenericLogEntry(
+            event_type=label, tick=tick or 0, payload=value, metadata=meta
+        )
+
     log_manager.log(path, entry)

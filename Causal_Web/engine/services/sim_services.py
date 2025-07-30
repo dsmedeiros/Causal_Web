@@ -97,12 +97,13 @@ class NodeMetricsResultService:
         if record["stable"] >= 10:
             node.refractory_period = max(1.0, node.refractory_period - 0.1)
             log_json(
-                Config.output_path("law_drift_log.json"),
+                "event",
+                "law_drift_log",
                 {
-                    "tick": self.tick,
                     "node": node_id,
                     "new_refractory_period": node.refractory_period,
                 },
+                tick=self.tick,
             )
             record["stable"] = 0
         if record["stable"] >= 5:
@@ -196,55 +197,36 @@ class NodeMetricsService:
         clusters = self.graph.hierarchical_clusters()
         self.graph.create_meta_nodes(clusters.get(0, []))
         if tick % getattr(Config, "log_interval", 1) == 0:
-            log_json(Config.output_path("cluster_log.json"), {str(tick): clusters})
+            log_json("tick", "cluster_log", clusters, tick=tick)
 
     # ------------------------------------------------------------------
     def _write_logs(self, tick: int, logs: dict) -> None:
-        log_json(
-            Config.output_path("law_wave_log.json"), {str(tick): logs["law_wave_log"]}
-        )
+        log_json("tick", "law_wave_log", logs["law_wave_log"], tick=tick)
         if logs["stable_frequency_log"]:
             log_json(
-                Config.output_path("stable_frequency_log.json"),
-                {str(tick): logs["stable_frequency_log"]},
+                "tick", "stable_frequency_log", logs["stable_frequency_log"], tick=tick
             )
+        log_json("tick", "decoherence_log", logs["decoherence_log"], tick=tick)
+        log_json("tick", "coherence_log", logs["coherence_log"], tick=tick)
         log_json(
-            Config.output_path("decoherence_log.json"),
-            {str(tick): logs["decoherence_log"]},
+            "tick", "coherence_velocity_log", logs["coherence_velocity"], tick=tick
         )
         log_json(
-            Config.output_path("coherence_log.json"), {str(tick): logs["coherence_log"]}
+            "phenomena", "classicalization_map", logs["classical_state"], tick=tick
         )
+        log_json("tick", "interference_log", logs["interference_log"], tick=tick)
+        log_json("tick", "tick_density_map", logs["interference_log"], tick=tick)
         log_json(
-            Config.output_path("coherence_velocity_log.json"),
-            {str(tick): logs["coherence_velocity"]},
-        )
-        log_json(
-            Config.output_path("classicalization_map.json"),
-            {str(tick): logs["classical_state"]},
-        )
-        log_json(
-            Config.output_path("interference_log.json"),
-            {str(tick): logs["interference_log"]},
-        )
-        log_json(
-            Config.output_path("tick_density_map.json"),
-            {str(tick): logs["interference_log"]},
-        )
-        log_json(
-            Config.output_path("node_state_log.json"),
+            "tick",
+            "node_state_log",
             {
-                str(tick): {
-                    "type": logs["type_log"],
-                    "credit": logs["credit_log"],
-                    "debt": logs["debt_log"],
-                }
+                "type": logs["type_log"],
+                "credit": logs["credit_log"],
+                "debt": logs["debt_log"],
             },
+            tick=tick,
         )
-        log_json(
-            Config.output_path("proper_time_log.json"),
-            {str(tick): logs["proper_time_log"]},
-        )
+        log_json("tick", "proper_time_log", logs["proper_time_log"], tick=tick)
 
 
 @dataclass

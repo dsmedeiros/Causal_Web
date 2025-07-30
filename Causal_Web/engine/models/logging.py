@@ -61,3 +61,4 @@ class GenericLogEntry(BaseLogEntry):
 
     event_type: str
     payload: Any
+    metadata: Dict[str, Any] | None = None

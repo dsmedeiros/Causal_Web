@@ -182,8 +182,10 @@ class NodeTickService:
 
         if self.node.node_type == NodeType.NULL:
             log_json(
-                Config.output_path("boundary_interaction_log.json"),
-                {"tick": self.tick_time, "void": self.node.id, "origin": self.origin},
+                "event",
+                "boundary_interaction_log",
+                {"void": self.node.id, "origin": self.origin},
+                tick=self.tick_time,
             )
             te.void_absorption_events += 1
             self.node._log_tick_drop(self.tick_time, "void_node")
@@ -194,8 +196,10 @@ class NodeTickService:
             return False
         if getattr(self.node, "boundary", False):
             log_json(
-                Config.output_path("boundary_interaction_log.json"),
-                {"tick": self.tick_time, "node": self.node.id, "origin": self.origin},
+                "event",
+                "boundary_interaction_log",
+                {"node": self.node.id, "origin": self.origin},
+                tick=self.tick_time,
             )
             te.boundary_interactions_count += 1
         if not te.register_firing(self.node):
@@ -226,8 +230,10 @@ class NodeTickService:
             n.phase = self.phase
             n.tick_history.append(tick_obj)
         log_json(
-            Config.output_path("tick_emission_log.json"),
-            {"tick": self.tick_time, "node_id": n.id, "phase": self.phase},
+            "event",
+            "tick_emission_log",
+            {"node_id": n.id, "phase": self.phase},
+            tick=self.tick_time,
         )
         with n.lock:
             if self.origin == "self":
@@ -292,12 +298,10 @@ class EdgePropagationService:
             e.target == self.origin for e in self.graph.get_edges_from(self.node.id)
         ):
             log_json(
-                Config.output_path("refraction_log.json"),
-                {
-                    "tick": self.tick_time,
-                    "recursion_from": self.origin,
-                    "node": self.node.id,
-                },
+                "event",
+                "refraction_log",
+                {"recursion_from": self.origin, "node": self.node.id},
+                tick=self.tick_time,
             )
 
     # ------------------------------------------------------------------
@@ -343,14 +347,15 @@ class EdgePropagationService:
     # ------------------------------------------------------------------
     def _log_propagation(self, target: Node, delay: float, shifted: float) -> None:
         log_json(
-            Config.output_path("tick_propagation_log.json"),
+            "event",
+            "tick_propagation_log",
             {
-                "tick": self.tick_time,
                 "source": self.node.id,
                 "target": target.id,
                 "arrival_time": self.tick_time + delay,
                 "phase": shifted,
             },
+            tick=self.tick_time,
         )
 
     # ------------------------------------------------------------------
@@ -378,13 +383,10 @@ class EdgePropagationService:
         )
         target.node_type = NodeType.REFRACTIVE
         log_json(
-            Config.output_path("refraction_log.json"),
-            {
-                "tick": self.tick_time,
-                "from": self.node.id,
-                "via": target.id,
-                "to": alt_tgt.id,
-            },
+            "event",
+            "refraction_log",
+            {"from": self.node.id, "via": target.id, "to": alt_tgt.id},
+            tick=self.tick_time,
         )
         return True
 
@@ -474,8 +476,10 @@ class NodeTickDecisionService:
     def _below_count(self, coherence: float) -> tuple[bool, None, str]:
         self._log_eval(coherence, False, False, "below_count")
         log_json(
-            Config.output_path("should_tick_log.json"),
-            {"tick": self.tick_time, "node": self.node.id, "reason": "below_count"},
+            "event",
+            "should_tick_log",
+            {"node": self.node.id, "reason": "below_count"},
+            tick=self.tick_time,
         )
         return False, None, "count_threshold"
 
@@ -492,8 +496,10 @@ class NodeTickDecisionService:
         resultant_phase = cmath.phase(vector_sum)
         self._log_eval(coherence, False, True)
         log_json(
-            Config.output_path("should_tick_log.json"),
-            {"tick": self.tick_time, "node": self.node.id, "reason": "threshold"},
+            "event",
+            "should_tick_log",
+            {"node": self.node.id, "reason": "threshold"},
+            tick=self.tick_time,
         )
         return True, resultant_phase, "threshold"
 
@@ -501,8 +507,10 @@ class NodeTickDecisionService:
     def _fire_by_merge(self, coherence: float, phase: float) -> tuple[bool, float, str]:
         self._log_eval(coherence, False, True, "merged")
         log_json(
-            Config.output_path("should_tick_log.json"),
-            {"tick": self.tick_time, "node": self.node.id, "reason": "merged"},
+            "event",
+            "should_tick_log",
+            {"node": self.node.id, "reason": "merged"},
+            tick=self.tick_time,
         )
         return True, phase, "merged"
 
@@ -512,13 +520,14 @@ class NodeTickDecisionService:
     ) -> tuple[bool, None, str]:
         self._log_eval(coherence, False, False, "below_threshold")
         log_json(
-            Config.output_path("magnitude_failure_log.json"),
+            "event",
+            "magnitude_failure_log",
             {
-                "tick": self.tick_time,
                 "node": self.node.id,
                 "magnitude": round(magnitude, 4),
                 "threshold": round(self.node.current_threshold, 4),
                 "phases": len(raw_items),
             },
+            tick=self.tick_time,
         )
         return False, None, "below_threshold"

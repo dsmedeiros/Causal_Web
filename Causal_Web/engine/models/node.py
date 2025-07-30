@@ -694,14 +694,15 @@ class Edge:
             from ..logging.logger import log_json
 
             log_json(
-                Config.output_path("delay_density_log.json"),
+                "event",
+                "delay_density_log",
                 {
-                    "tick": getattr(Config, "current_tick", 0),
                     "edge": f"{self.source}->{self.target}",
                     "rho": rho,
                     "base": self.delay,
                     "result": delay_int,
                 },
+                tick=getattr(Config, "current_tick", 0),
             )
 
         return delay_int
