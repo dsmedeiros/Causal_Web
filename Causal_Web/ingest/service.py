@@ -19,30 +19,29 @@ MANIFEST_NAME = "ingestion_manifest.json"
 
 LOG_TABLE_MAP = {
     # --- Events Table ---
-    "event_log.jsonl": "events",
-    "node_emergence_log.jsonl": "events",
-    "collapse_chain_log.jsonl": "events",
-    "bridge_rupture_log.jsonl": "events",
-    "bridge_reformation_log.jsonl": "events",
-    "law_drift_log.jsonl": "events",
+    "event_log": "events",
+    "node_emergence_log": "events",
+    "collapse_chain_log": "events",
+    "bridge_rupture_log": "events",
+    "bridge_reformation_log": "events",
+    "law_drift_log": "events",
     # --- Tick Events Table ---
-    "tick_emission_log.jsonl": "tick_events",
-    "tick_propagation_log.jsonl": "tick_events",
-    "tick_delivery_log.jsonl": "tick_events",
-    "tick_drop_log.jsonl": "tick_events",
-    "propagation_failure_log.jsonl": "tick_events",
+    "tick_emission_log": "tick_events",
+    "tick_propagation_log": "tick_events",
+    "tick_delivery_log": "tick_events",
+    "tick_drop_log": "tick_events",
+    "propagation_failure_log": "tick_events",
     # --- Node State History Table ---
-    "node_state_log.jsonl": "node_state_history",
-    "coherence_log.jsonl": "node_state_history",
-    "decoherence_log.jsonl": "node_state_history",
-    "law_wave_log.jsonl": "node_state_history",
-    "classicalization_map.jsonl": "node_state_history",
+    "node_state_log": "node_state_history",
+    "coherence_log": "node_state_history",
+    "decoherence_log": "node_state_history",
+    "law_wave_log": "node_state_history",
+    "classicalization_map": "node_state_history",
     # --- Bridge State History Table ---
-    "bridge_state_log.jsonl": "bridge_state_history",
-    "bridge_decay_log.jsonl": "bridge_state_history",
+    "bridge_state": "bridge_state_history",
+    "bridge_decay_log": "bridge_state_history",
     # --- System State History Table ---
-    # Assuming "system_state_log.jsonl" is the new name for "structural_growth_log.jsonl"
-    "system_state_log.jsonl": "system_state_history",
+    "structural_growth_log": "system_state_history",
 }
 
 
@@ -64,6 +63,20 @@ def _iter_json(path: str) -> Iterable[dict[str, Any]]:
                 line = line.strip()
                 if line:
                     yield json.loads(line)
+
+
+def _group_records(path: str, field: str) -> Dict[str, list[dict[str, Any]]]:
+    """Return records from ``path`` grouped by ``field``."""
+
+    grouped: Dict[str, list[dict[str, Any]]] = {}
+    if not os.path.exists(path):
+        return grouped
+    for rec in _iter_json(path):
+        key = rec.get(field)
+        if key is None:
+            continue
+        grouped.setdefault(key, []).append(rec)
+    return grouped
 
 
 async def _write_records(
@@ -118,12 +131,14 @@ async def ingest_run(run_dir: str) -> None:
         return
 
     tasks = []
-    for name in os.listdir(log_dir):
-        table = LOG_TABLE_MAP.get(name.replace(".zst", ""))
-        if not table:
-            continue
-        records = list(_iter_json(os.path.join(log_dir, name)))
-        if not records:
+
+    events = _group_records(os.path.join(log_dir, "events_log.jsonl"), "event_type")
+    ticks = _group_records(os.path.join(log_dir, "ticks_log.jsonl"), "label")
+    phen = _group_records(os.path.join(log_dir, "phenomena_log.jsonl"), "label")
+
+    for key, records in {**events, **ticks, **phen}.items():
+        table = LOG_TABLE_MAP.get(key)
+        if not table or not records:
             continue
         tasks.append(_write_records(Config.database, table, records))
 
