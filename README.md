@@ -395,6 +395,9 @@ downstream analysis.
 - `causal_chains.json` and `causal_timeline.json` – ordered causal events.
 - `cwt_console.txt` – copy of console output.
 
+See **docs/log_schemas.md** for canonical schemas describing how diagnostic
+and event-driven records are structured across these files.
+
 ### Log file fields
 The following lists describe the JSON keys recorded in each output file.
 
