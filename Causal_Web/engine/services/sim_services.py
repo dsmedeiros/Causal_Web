@@ -601,7 +601,9 @@ class GlobalDiagnosticsService:
             "network_adaptivity_index": round(adaptivity, 3),
         }
         with open(Config.output_path("global_diagnostics.json"), "w") as f:
-            json.dump(diagnostics, f, indent=2)
+            json.dump(
+                {"label": "global_diagnostics", "value": diagnostics}, f, indent=2
+            )
         print("✅ Global diagnostics exported")
 
     # ------------------------------------------------------------------

@@ -19,15 +19,26 @@ class BaseLogEntry(BaseModel):
     correlation_id: Optional[str] = None
 
 
+class PeriodicLogEntry(BaseModel):
+    """Simpler schema for periodic or summary records."""
+
+    tick: int | None = None
+    label: str
+    value: Any
+    metadata: Dict[str, Any] | None = None
+
+
 class NodeEmergencePayload(BaseModel):
     node_id: str
     origin_type: str
     parents: List[str]
 
 
-class NodeEmergenceLog(BaseLogEntry):
-    event_type: str = "NodeEmerged"
-    payload: NodeEmergencePayload
+class NodeEmergenceLog(PeriodicLogEntry):
+    """Record the appearance of a new node."""
+
+    label: str = "node_emergence"
+    value: NodeEmergencePayload
 
 
 class StructuralGrowthPayload(BaseModel):
@@ -38,9 +49,11 @@ class StructuralGrowthPayload(BaseModel):
     avg_coherence: float
 
 
-class StructuralGrowthLog(BaseLogEntry):
-    event_type: str = "StructuralGrowthSnapshot"
-    payload: StructuralGrowthPayload
+class StructuralGrowthLog(PeriodicLogEntry):
+    """Snapshot of overall network growth metrics."""
+
+    label: str = "structural_growth"
+    value: StructuralGrowthPayload
 
 
 class GenericLogEntry(BaseLogEntry):

@@ -116,7 +116,13 @@ def export_curvature_map() -> None:
                     }
                     for k, v in edges.items()
                 ]
-                grid.append({"tick": int(tick), "edges": records})
+                grid.append(
+                    {
+                        "tick": int(tick),
+                        "label": "curvature_map",
+                        "value": records,
+                    }
+                )
     except FileNotFoundError:
         return
 
@@ -150,9 +156,23 @@ def export_regional_maps() -> None:
         matrix[key] = matrix.get(key, 0) + 1
 
     with open(Config.output_path("regional_pressure_map.json"), "w") as f:
-        json.dump(regional_pressure, f, indent=2)
+        json.dump(
+            {
+                "label": "regional_pressure_map",
+                "value": regional_pressure,
+            },
+            f,
+            indent=2,
+        )
     with open(Config.output_path("cluster_influence_matrix.json"), "w") as f:
-        json.dump(matrix, f, indent=2)
+        json.dump(
+            {
+                "label": "cluster_influence_matrix",
+                "value": matrix,
+            },
+            f,
+            indent=2,
+        )
     print("✅ Regional influence maps exported")
 
 
