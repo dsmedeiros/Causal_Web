@@ -51,6 +51,7 @@ Logs are consolidated by category into `ticks_log.jsonl`, `phenomena_log.jsonl` 
 Individual files can still be toggled via `log_files` for advanced filtering.
 Law-wave propagation events now appear as `law_wave_event` records in the `events` log.
 The interpreter provides `records_for_tick()` and `assemble_timeline()` helpers to query these consolidated logs.
+The ingestion service also consumes these unified files, routing records to database tables based on their `label` or `event_type`.
 
 ## Contributing
 Unit tests live under `tests/` and can be run with `pytest`. Coding guidelines and packaging instructions are documented in [AGENTS.md](AGENTS.md) and [docs/developer_guide.md](docs/developer_guide.md).
