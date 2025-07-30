@@ -69,6 +69,7 @@ class GraphModel:
                 "origin_type": "seed",
                 "generation_tick": 0,
                 "parent_ids": [],
+                "allow_self_connection": False,
             }
         model.meta_nodes = {}
         return model
@@ -89,6 +90,7 @@ class GraphModel:
         frequency: float = 1.0,
         refractory_period: float = 2.0,
         base_threshold: float = 0.5,
+        allow_self_connection: bool = False,
     ) -> None:
         """Insert a new node into the model."""
 
@@ -103,6 +105,7 @@ class GraphModel:
             origin_type="seed",
             generation_tick=0,
             parent_ids=[],
+            allow_self_connection=allow_self_connection,
         )
 
     def get_edges(self) -> List[EdgeData]:
@@ -143,7 +146,10 @@ class GraphModel:
         if source not in self.nodes or target not in self.nodes:
             raise ValueError("source and target must exist in the graph")
         if source == target:
-            raise ValueError("self-loops are not allowed")
+            if connection_type != "edge" or not self.nodes[source].get(
+                "allow_self_connection", False
+            ):
+                raise ValueError("self-loops are not allowed")
 
         if connection_type == "edge":
             if any(e["from"] == source and e["to"] == target for e in self.edges):

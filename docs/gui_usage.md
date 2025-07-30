@@ -9,6 +9,7 @@ The PySide6 dashboard provides an interactive editor for building and running gr
 - The toolbar offers quick actions for adding nodes, connections, observers and for triggering auto layout.
 
 When a node or edge is selected a panel appears allowing its parameters to be edited. The panel updates live while dragging and changes are applied with the **Apply** button. Observers and meta nodes use similar panels and remember their targeted nodes when reopened.
+New nodes include a *Self Connect* checkbox. When enabled, dragging from a node back onto itself creates a curved self-connecting edge.
 
 The **Control Panel** window lets you start, pause or stop the simulation and set the tick limit and rate. A tick counter shows the current tick. Window resizing keeps the graph responsive and rendering updates only when the graph changes to reduce idle CPU usage.
 

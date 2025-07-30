@@ -20,6 +20,7 @@ NodeData = TypedDict(
         "generation_tick": int,
         "parent_ids": List[str],
         "goals": Dict[str, Any],
+        "allow_self_connection": bool,
     },
     total=False,
 )

@@ -67,6 +67,10 @@ class NodePanelSetupService:
             self.panel.inputs[field] = spin
             spin.valueChanged.connect(self.panel._mark_dirty)
 
+        self.panel.self_connect_cb = QCheckBox()
+        layout.addRow(TooltipLabel("Self Connect"), self.panel.self_connect_cb)
+        self.panel.self_connect_cb.toggled.connect(self.panel._mark_dirty)
+
     # ------------------------------------------------------------------
     def _build_tick_source(self, layout) -> None:
         p = self.panel

@@ -16,11 +16,14 @@ def test_add_edge():
     assert model.edges[0]["delay"] == 2
 
 
-def test_no_self_loop():
+def test_self_loop_controlled():
     model = GraphModel.blank()
     _sample_nodes(model)
     with pytest.raises(ValueError):
         model.add_connection("A", "A")
+    model.nodes["A"]["allow_self_connection"] = True
+    model.add_connection("A", "A")
+    assert model.edges[0]["from"] == "A" and model.edges[0]["to"] == "A"
 
 
 def test_duplicate_edge_disallowed():

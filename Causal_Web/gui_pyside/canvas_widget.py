@@ -4,13 +4,14 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional, Tuple
 
-from PySide6.QtCore import QPoint, QPointF, Qt, Signal
+from PySide6.QtCore import QPoint, QPointF, Qt, Signal, QTimer
 from PySide6.QtGui import (
     QBrush,
     QMouseEvent,
     QPen,
     QWheelEvent,
     QPainter,
+    QPainterPath,
     QContextMenuEvent,
 )
 from PySide6.QtWidgets import (
@@ -18,8 +19,10 @@ from PySide6.QtWidgets import (
     QGraphicsRectItem,
     QGraphicsItem,
     QGraphicsLineItem,
+    QGraphicsPathItem,
     QGraphicsScene,
     QGraphicsView,
+    QGraphicsSimpleTextItem,
     QMenu,
 )
 
@@ -150,6 +153,42 @@ class EdgeItem(QGraphicsLineItem):
 
     def update_position(self) -> None:
         self.setLine(self.source.x(), self.source.y(), self.target.x(), self.target.y())
+
+
+class SelfEdgeItem(QGraphicsPathItem):
+    """Curved edge originating and ending on the same node."""
+
+    def __init__(self, node: NodeItem, canvas: "CanvasWidget", index: int) -> None:
+        super().__init__()
+        self.node = node
+        self.canvas = canvas
+        self.index = index
+        pen = QPen(Qt.darkGray)
+        pen.setWidth(2)
+        self.setPen(pen)
+        self.setZValue(0)
+        if canvas.editable:
+            self.setFlag(QGraphicsItem.ItemIsSelectable)
+        node.edges.append(self)
+        self.update_position()
+
+    def mousePressEvent(self, event: QMouseEvent) -> None:  # type: ignore[override]
+        if event.button() == Qt.LeftButton:
+            set_selected_connection(("edge", self.index))
+            self.canvas.connection_selected.emit("edge", self.index)
+        super().mousePressEvent(event)
+
+    def update_position(self) -> None:
+        radius = self.node.rect().width() / 2
+        path = QPainterPath()
+        start = QPointF(self.node.x() + radius, self.node.y())
+        end = QPointF(self.node.x() - radius, self.node.y())
+        offset = radius * 2
+        ctrl1 = QPointF(self.node.x() + offset, self.node.y() - offset)
+        ctrl2 = QPointF(self.node.x() - offset, self.node.y() - offset)
+        path.moveTo(start)
+        path.cubicTo(ctrl1, ctrl2, end)
+        self.setPath(path)
 
 
 class MetaNodeItem(QGraphicsEllipseItem):
@@ -350,7 +389,10 @@ class CanvasWidget(QGraphicsView):
             src = self.nodes.get(edge.get("from"))
             dst = self.nodes.get(edge.get("to"))
             if src and dst:
-                scene.addItem(EdgeItem(src, dst, self, idx, "edge"))
+                if src is dst:
+                    scene.addItem(SelfEdgeItem(src, self, idx))
+                else:
+                    scene.addItem(EdgeItem(src, dst, self, idx, "edge"))
 
         for meta_id, data in model.meta_nodes.items():
             x, y = data.get("x", 0.0), data.get("y", 0.0)
@@ -428,10 +470,19 @@ class CanvasWidget(QGraphicsView):
         else:
             if self.editable and self._connect_start:
                 item = self.itemAt(event.pos())
-                if isinstance(item, NodeItem) and item is not self._connect_start:
-                    self.connection_request.emit(
-                        self._connect_start.node_id, item.node_id
-                    )
+                if isinstance(item, NodeItem):
+                    if item is self._connect_start:
+                        data = self.model.nodes.get(item.node_id, {})
+                        if data.get("allow_self_connection", False):
+                            self.connection_request.emit(item.node_id, item.node_id)
+                        else:
+                            self._show_status_message(
+                                "Self-connection disabled", event.pos()
+                            )
+                    else:
+                        self.connection_request.emit(
+                            self._connect_start.node_id, item.node_id
+                        )
                 if self._temp_edge and self.scene():
                     self.scene().removeItem(self._temp_edge)
                 self._temp_edge = None
@@ -451,6 +502,16 @@ class CanvasWidget(QGraphicsView):
                 scene_pos.x(),
                 scene_pos.y(),
             )
+
+    def _show_status_message(self, text: str, view_pos: QPoint) -> None:
+        if scene := self.scene():
+            item = QGraphicsSimpleTextItem(text)
+            item.setBrush(QBrush(Qt.red))
+            item.setZValue(2)
+            scene_pos = self.mapToScene(view_pos)
+            item.setPos(scene_pos)
+            scene.addItem(item)
+            QTimer.singleShot(1500, lambda: scene.removeItem(item))
 
     def enable_connection_mode(self) -> None:
         """Begin interactive connection creation."""
