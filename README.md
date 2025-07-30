@@ -66,5 +66,9 @@ Per-tick law-wave frequencies are still written under the `law_wave_log` label i
 The interpreter provides `records_for_tick()` and `assemble_timeline()` helpers to query these consolidated logs.
 The ingestion service also consumes these unified files, routing records to database tables based on their `label` or `event_type`.
 
+### Phase smoothing
+
+The `smooth_phase` option applies exponential decay to each node's internal oscillator phase. Enable it from the GUI control panel or set `"smooth_phase": true` in `input/config.json`.
+
 ## Contributing
 Unit tests live under `tests/` and can be run with `pytest`. Coding guidelines and packaging instructions are documented in [AGENTS.md](AGENTS.md) and [docs/developer_guide.md](docs/developer_guide.md).

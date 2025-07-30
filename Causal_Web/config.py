@@ -329,6 +329,10 @@ class Config:
     # Decay factor for stored tick energy per tick
     tick_decay_factor = 1.0
 
+    # Phase smoothing
+    smooth_phase = False
+    phase_smoothing_alpha = 0.1
+
     # Natural propagation limits
     max_cumulative_delay = 25
     min_coherence_threshold = 0.2

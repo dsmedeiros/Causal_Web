@@ -62,6 +62,7 @@ class NodeInitializationService:
         n.y = y
         n.frequency = frequency
         n.phase = phase
+        n.internal_phase = phase
         n.coherence = 1.0
         n.decoherence = 0.0
 
@@ -106,6 +107,8 @@ class NodeInitializationService:
         n.phase_lock = False
         n.collapse_pressure = 0.0
         n.tick_drop_counts = defaultdict(int)
+        n.internal_phase = n.phase
+        n._last_phase_update = 0.0
 
     # ------------------------------------------------------------------
     def _cluster_metadata(self) -> None:
@@ -465,7 +468,7 @@ class NodeTickDecisionService:
                 amp = 1.0
                 decay = 1.0
             weight = amp * decay
-            complex_phases.append(weight * cmath.rect(1.0, ph % (2 * math.pi)))
+            complex_phases.append(weight * cmath.exp(1j * (ph % (2 * math.pi))))
             weights.append(weight)
         vector_sum = sum(complex_phases)
         magnitude = abs(vector_sum)

@@ -56,21 +56,35 @@ class Node(LoggingMixin):
             parent_ids=parent_ids,
         )
 
-    def compute_phase(self, tick_time: float) -> float:
-        """Return phase value incorporating time-dependent global jitter."""
-        if tick_time in self._phase_cache:
-            return self._phase_cache[tick_time]
-        base = 2 * math.pi * self.frequency * tick_time
-        jitter = Config.phase_jitter
-        if jitter["amplitude"] and jitter.get("period", 0):
-            ramp = min(tick_time / max(1, Config.forcing_ramp_ticks), 1.0)
-            base += (
-                ramp
-                * jitter["amplitude"]
-                * math.sin(2 * math.pi * tick_time / jitter["period"])
+    def _advance_internal_phase(self, tick_time: float) -> None:
+        """Update :attr:`internal_phase` using entrainment from ticks."""
+
+        dt = tick_time - getattr(self, "_last_phase_update", 0.0)
+        base = self.internal_phase + self.frequency * dt
+        items = self.incoming_phase_queue.get(tick_time, [])
+        vector = 0j
+        for item in items:
+            ph = item[0]
+            amp = item[1] if len(item) > 1 else 1.0
+            created = item[2] if len(item) > 2 else Config.current_tick
+            decay = getattr(Config, "tick_decay_factor", 1.0) ** (
+                max(0, Config.current_tick - created)
             )
-        self._phase_cache[tick_time] = base
-        return base
+            vector += amp * decay * cmath.exp(1j * ph)
+        contribution = cmath.phase(vector) if items else 0.0
+        new_phase = base + contribution
+        if getattr(Config, "smooth_phase", False):
+            alpha = getattr(Config, "phase_smoothing_alpha", 0.1)
+            self.internal_phase = self.internal_phase * (1 - alpha) + new_phase * alpha
+        else:
+            self.internal_phase = new_phase
+        self._last_phase_update = tick_time
+
+    def compute_phase(self, tick_time: float) -> float:
+        """Return the oscillator phase after applying entrainment."""
+
+        self._advance_internal_phase(tick_time)
+        return self.internal_phase
 
     def _coherence_threshold(self) -> float:
         """Return dynamic coherence acceptance threshold."""
@@ -116,7 +130,7 @@ class Node(LoggingMixin):
                 amp = 1.0
                 decay = 1.0
             weight = amp * decay
-            complex_vecs.append(weight * cmath.rect(1.0, ph % (2 * math.pi)))
+            complex_vecs.append(weight * cmath.exp(1j * (ph % (2 * math.pi))))
             weights.append(weight)
         vector_sum = sum(complex_vecs)
         total_weight = sum(weights) if weights else 1.0
@@ -618,6 +632,10 @@ class Node(LoggingMixin):
                 if math.isclose(k, global_tick, abs_tol=1e-6):
                     tick_key = k
                     break
+        self._advance_internal_phase(tick_key)
+        incoming = self.incoming_phase_queue.get(tick_key, [])
+        if incoming:
+            self.subjective_ticks += len(incoming)
         if tick_key in self.incoming_phase_queue:
             if not self._apply_suppression(tick_key):
                 self.current_threshold = max(
