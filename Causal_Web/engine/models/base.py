@@ -15,7 +15,11 @@ class LoggingMixin:
 
     def _log(self, name: str, record: dict[str, Any]) -> None:
         """Write ``record`` to the configured log ``name``."""
-        log_json(Config.output_path(name), record)
+        category = Config.category_for_file(name)
+        label = name.replace(".json", "")
+        tick = record.get("tick")
+        payload = {k: v for k, v in record.items() if k != "tick"}
+        log_json(category, label, payload, tick=tick)
 
 
 class PathLoggingMixin:
@@ -23,7 +27,12 @@ class PathLoggingMixin:
 
     def _log_path(self, path: str, record: dict[str, Any]) -> None:
         """Write ``record`` directly to ``path``."""
-        log_json(path, record)
+        name = os.path.basename(path)
+        category = Config.category_for_file(name)
+        label = name.replace(".json", "")
+        tick = record.get("tick")
+        payload = {k: v for k, v in record.items() if k != "tick"}
+        log_json(category, label, payload, tick=tick)
 
 
 class OutputDirMixin:

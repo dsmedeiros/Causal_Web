@@ -42,5 +42,15 @@ class TickRouter:
                 "to": new_layer,
                 "trace_id": tick.trace_id,
             }
-            log_json(Config.output_path("layer_transition_log.json"), record)
+            log_json(
+                "event",
+                "layer_transition_log",
+                {
+                    "node": node.id,
+                    "from": tick.layer,
+                    "to": new_layer,
+                    "trace_id": tick.trace_id,
+                },
+                tick=tick.time,
+            )
             tick.layer = new_layer

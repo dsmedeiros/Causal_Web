@@ -189,13 +189,14 @@ class CSPSeedService:
                 ):
                     if Config.is_log_enabled("propagation_failure_log.json"):
                         log_json(
-                            Config.output_path("propagation_failure_log.json"),
+                            "event",
+                            "propagation_failure_log",
                             {
-                                "tick": tick,
                                 "type": "SPAWN_LIMIT",
                                 "parent": seed["parent"],
                                 "origin_type": "CSP",
                             },
+                            tick=tick,
                         )
                     continue
                 self._spawn_node(seed, tick)
@@ -228,14 +229,12 @@ class CSPSeedService:
             parents=[seed["parent"]],
         )
         entry = NodeEmergenceLog(tick=tick, payload=payload)
-        log_manager.log(Config.output_path("node_emergence_log.json"), entry)
+        log_json("event", "node_emergence_log", entry.model_dump(), tick=tick)
         log_json(
-            Config.output_path("collapse_chain_log.json"),
-            {
-                "tick": tick,
-                "source": seed["parent"],
-                "children_spawned": [node_id],
-            },
+            "event",
+            "collapse_chain_log",
+            {"source": seed["parent"], "children_spawned": [node_id]},
+            tick=tick,
         )
         self.success += 1
         _spawn_counts[seed["parent"]] = _spawn_counts.get(seed["parent"], 0) + 1
@@ -245,9 +244,9 @@ class CSPSeedService:
         if parent:
             parent.decoherence_debt += Config.CSP_ENTROPY_INJECTION
         log_json(
-            Config.output_path("propagation_failure_log.json"),
+            "event",
+            "propagation_failure_log",
             {
-                "tick": tick,
                 "type": "CSP_FAILURE",
                 "parent": seed["parent"],
                 "reason": "Seed failed to cohere",
@@ -255,6 +254,7 @@ class CSPSeedService:
                 "origin_type": "CSP",
                 "location": [seed["x"], seed["y"]],
             },
+            tick=tick,
         )
         self.failure += 1
 
@@ -276,13 +276,14 @@ class SIPRecombinationService:
     def _log_limit(parent_a, parent_b, tick: int) -> None:
         if Config.is_log_enabled("propagation_failure_log.json"):
             log_json(
-                Config.output_path("propagation_failure_log.json"),
+                "event",
+                "propagation_failure_log",
                 {
-                    "tick": tick,
                     "type": "SPAWN_LIMIT",
                     "parent": f"{parent_a.id},{parent_b.id}",
                     "origin_type": "SIP_RECOMB",
                 },
+                tick=tick,
             )
 
     @staticmethod
@@ -293,7 +294,7 @@ class SIPRecombinationService:
             parents=[a_id, b_id],
         )
         entry = NodeEmergenceLog(tick=tick, payload=payload)
-        log_manager.log(Config.output_path("node_emergence_log.json"), entry)
+        log_json("event", "node_emergence_log", entry.model_dump(), tick=tick)
 
     @staticmethod
     def _register_pending(child_id: str, a_id: str, b_id: str, tick: int) -> None:
@@ -343,13 +344,14 @@ def _spawn_sip_child(parent, tick: int) -> None:
     if _spawn_counts.get(parent.id, 0) >= Config.max_children_per_node > 0:
         if Config.is_log_enabled("propagation_failure_log.json"):
             log_json(
-                Config.output_path("propagation_failure_log.json"),
+                "event",
+                "propagation_failure_log",
                 {
-                    "tick": tick,
                     "type": "SPAWN_LIMIT",
                     "parent": parent.id,
                     "origin_type": "SIP_BUD",
                 },
+                tick=tick,
             )
         return
     child_id = f"{parent.id}_S{tick}"
@@ -371,7 +373,7 @@ def _spawn_sip_child(parent, tick: int) -> None:
         parents=[parent.id],
     )
     entry = NodeEmergenceLog(tick=tick, payload=payload)
-    log_manager.log(Config.output_path("node_emergence_log.json"), entry)
+    log_json("event", "node_emergence_log", entry.model_dump(), tick=tick)
     _update_growth_log(tick)
     _sip_pending.append((child_id, [parent.id], tick, "SIP_BUD"))
     global _sip_success_count
@@ -398,9 +400,9 @@ def _check_sip_failures(tick: int) -> None:
                 if p:
                     p.decoherence_debt += Config.SIP_FAILURE_ENTROPY_INJECTION
             log_json(
-                Config.output_path("propagation_failure_log.json"),
+                "event",
+                "propagation_failure_log",
                 {
-                    "tick": tick,
                     "type": "SIP_FAILURE",
                     "parent": parents[0],
                     "child": child_id,
@@ -411,6 +413,7 @@ def _check_sip_failures(tick: int) -> None:
                     "entropy_injected": Config.SIP_FAILURE_ENTROPY_INJECTION,
                     "origin_type": otype,
                 },
+                tick=tick,
             )
             _sip_failure_count += 1
         _sip_pending.remove((child_id, parents, start, otype))
@@ -460,7 +463,7 @@ def _update_growth_log(tick: int) -> None:
         avg_coherence=round(avg_coh, 4),
     )
     entry = StructuralGrowthLog(tick=tick, payload=payload)
-    log_manager.log(Config.output_path("structural_growth_log.json"), entry)
+    log_json("tick", "structural_growth_log", payload.model_dump(), tick=tick)
     _sip_success_count = 0
     _sip_failure_count = 0
     _csp_success_count = 0

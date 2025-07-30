@@ -625,9 +625,9 @@ class CausalGraph:
                 if other and other.node_type == NodeType.NULL:
                     print(f"[WARNING] Bridge {nid}<->{b} connected to NULL node")
         if self.void_nodes:
-            log_json(Config.output_path("void_node_map.json"), self.void_nodes)
+            log_json("phenomena", "void_node_map", self.void_nodes)
         if Config.is_log_enabled("connectivity_log.json"):
-            log_json(Config.output_path("connectivity_log.json"), connectivity_log)
+            log_json("phenomena", "connectivity_log", connectivity_log)
 
     # ------------------------------------------------------------
     def emit_law_wave(self, origin_id: str, tick: int, radius: int = 2) -> None:
@@ -650,6 +650,8 @@ class CausalGraph:
                     frontier.append((edge.target, dist + 1))
         if affected:
             log_json(
-                Config.output_path("law_wave_log.json"),
-                {"tick": tick, "origin": origin_id, "affected": affected},
+                "tick",
+                "law_wave_log",
+                {"origin": origin_id, "affected": affected},
+                tick=tick,
             )

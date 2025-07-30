@@ -94,7 +94,7 @@ def _update_simulation_state(
     }
     if snapshot is not None:
         state["graph_snapshot"] = snapshot
-    log_json(Config.output_path("simulation_state.json"), state)
+    log_json("event", "simulation_state", state, tick=tick)
 
 
 def pause_simulation() -> None:

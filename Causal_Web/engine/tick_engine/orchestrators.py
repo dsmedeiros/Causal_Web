@@ -108,8 +108,10 @@ class IOOrchestrator:
             obs.observe(self.graph, tick)
             inferred = obs.infer_field_state()
             log_json(
-                Config.output_path("observer_perceived_field.json"),
-                {"tick": tick, "observer": obs.id, "state": inferred},
+                "event",
+                "observer_perceived_field",
+                {"observer": obs.id, "state": inferred},
+                tick=tick,
             )
             actual = {n.id: len(n.tick_history) for n in self.graph.nodes.values()}
             diff = {
@@ -119,6 +121,8 @@ class IOOrchestrator:
             }
             if diff:
                 log_json(
-                    Config.output_path("observer_disagreement_log.json"),
-                    {"tick": tick, "observer": obs.id, "diff": diff},
+                    "event",
+                    "observer_disagreement_log",
+                    {"observer": obs.id, "diff": diff},
+                    tick=tick,
                 )
