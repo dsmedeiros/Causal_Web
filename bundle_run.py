@@ -27,7 +27,6 @@ DEFAULT_KEEP_FILES = [
     "explanation_graph.json",
     "manifest.json",
     "interference_log.json",
-    "tick_density_map.json",
     "tick_seed_log.json",
     "tick_delivery_log.json",
     "refraction_log.json",
@@ -54,10 +53,38 @@ def _create_manifest(out_dir: str, run_id: str, timestamp: str) -> None:
     manifest = {"run_id": run_id, "timestamp": timestamp}
 
     def _load_lines(path):
-        if not os.path.exists(path):
+        """Return JSON lines from ``path`` or the unified log for that label."""
+        if os.path.exists(path):
+            with open(path) as f:
+                return [json.loads(line) for line in f if line.strip()]
+
+        name = os.path.basename(path)
+        label = name.replace(".json", "")
+        category = Config.category_for_file(name)
+        if category == "event":
+            base = os.path.join(out_dir, "events_log.jsonl")
+            if not os.path.exists(base):
+                return []
+            result = []
+            with open(base) as f:
+                for line in f:
+                    obj = json.loads(line)
+                    if obj.get("event_type") == label:
+                        result.append(obj)
+            return result
+        base = os.path.join(
+            out_dir,
+            "ticks_log.jsonl" if category == "tick" else "phenomena_log.jsonl",
+        )
+        if not os.path.exists(base):
             return []
-        with open(path) as f:
-            return [json.loads(line) for line in f if line.strip()]
+        data = []
+        with open(base) as f:
+            for line in f:
+                obj = json.loads(line)
+                if obj.get("label") == label:
+                    data.append({obj.get("tick"): obj.get("value")})
+        return data
 
     deco_lines = _load_lines(os.path.join(out_dir, "decoherence_log.json"))
     manifest["total_ticks"] = len(deco_lines)
@@ -78,7 +105,7 @@ def _create_manifest(out_dir: str, run_id: str, timestamp: str) -> None:
         manifest["bridge_count"] = 0
 
     # meta nodes formed
-    meta_lines = _load_lines(os.path.join(out_dir, "meta_node_tick_log.json"))
+    meta_lines = _load_lines(os.path.join(out_dir, "meta_node_ticks.json"))
     metas = set()
     for entry in meta_lines:
         tick, events = next(iter(entry.items()))
@@ -201,7 +228,7 @@ def _create_manifest(out_dir: str, run_id: str, timestamp: str) -> None:
         manifest["mean_bridge_lifetime"] = 0
 
     # law wave propagation
-    law_wave_events = _load_lines(os.path.join(out_dir, "law_wave_log.json"))
+    law_wave_events = _load_lines(os.path.join(out_dir, "law_wave_event.json"))
     manifest["law_waves_emitted"] = sum(1 for e in law_wave_events if e.get("origin"))
     manifest["collapse_pressure_events"] = sum(
         len(e.get("affected", [])) for e in law_wave_events

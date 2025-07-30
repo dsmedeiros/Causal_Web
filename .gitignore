@@ -380,10 +380,11 @@ FodyWeavers.xsd
 /Causal_Web/output/interpretation_summary.txt
 /Causal_Web/output/law_drift_log.json
 /Causal_Web/output/law_wave_log.json
+/Causal_Web/output/law_wave_event.json
 /Causal_Web/output/layer_transition_events.json
 /Causal_Web/output/layer_transition_log.json
 /Causal_Web/output/manifest.json
-/Causal_Web/output/meta_node_tick_log.json
+/Causal_Web/output/meta_node_ticks.json
 /Causal_Web/output/node_emergence_log.json
 /Causal_Web/output/node_state_log.json
 /Causal_Web/output/node_state_map.json
@@ -392,7 +393,6 @@ FodyWeavers.xsd
 /Causal_Web/output/simulation_state.json
 /Causal_Web/output/structural_growth_log.json
 /Causal_Web/output/tick_delivery_log.json
-/Causal_Web/output/tick_density_map.json
 /Causal_Web/output/tick_drop_log.json
 /Causal_Web/output/tick_emission_log.json
 /Causal_Web/output/tick_evaluation_log.json
