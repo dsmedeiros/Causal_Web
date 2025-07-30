@@ -43,7 +43,7 @@ def _add_config_args(
         arg_name = f"--{prefix}{key}"
         dest = f"{prefix}{key}".replace(".", "_")
         if isinstance(value, dict):
-            _add_config_args(parser, value, prefix=f"{key}.")
+            _add_config_args(parser, value, prefix=f"{prefix}{key}.")
             continue
         arg_type = type(value)
         if isinstance(value, bool):
