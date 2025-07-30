@@ -4,10 +4,10 @@ from typing import Dict, List, Optional
 
 from ..models.graph import CausalGraph
 from ...config import Config
-from ..models.base import PathLoggingMixin
+from ..logging.logger import log_record
 
 
-class TickSeeder(PathLoggingMixin):
+class TickSeeder:
     """Injects ticks into the graph under configurable strategies."""
 
     def __init__(
@@ -19,7 +19,6 @@ class TickSeeder(PathLoggingMixin):
         """Create a new seeder for *graph* with optional configuration."""
         self.graph = graph
         self.config = config or getattr(Config, "seeding", {"strategy": "static"})
-        self.log_path = log_path or Config.output_path("tick_seed_log.json")
         self.seed_count = 0
 
     # ------------------------------------------------------------
@@ -32,7 +31,12 @@ class TickSeeder(PathLoggingMixin):
 
     # ------------------------------------------------------------
     def _log(self, record: Dict) -> None:
-        self._log_path(self.log_path, record)
+        log_record(
+            category="event",
+            label="tick_seed_log",
+            tick=record.get("tick"),
+            value={k: v for k, v in record.items() if k != "tick"},
+        )
         self.seed_count += 1
 
     # ------------------------------------------------------------

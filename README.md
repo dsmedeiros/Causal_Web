@@ -49,6 +49,7 @@ Use `--init-db` to create PostgreSQL tables defined in the configuration and exi
 Each run creates a timestamped directory under `output/runs` containing the graph, configuration and logs. Logging can be enabled or disabled via the GUI **Log Files** window or the `log_files` section of `config.json`. The `logging_mode` option selects which categories are written: `diagnostic` (all logs), `tick`, `phenomena` and `events`.
 Logs are consolidated by category into `ticks_log.jsonl`, `phenomena_log.jsonl` and `events_log.jsonl`.
 Individual files can still be toggled via `log_files` for advanced filtering.
+Law-wave propagation events now appear as `law_wave_event` records in the `events` log.
 The interpreter provides `records_for_tick()` and `assemble_timeline()` helpers to query these consolidated logs.
 
 ## Contributing

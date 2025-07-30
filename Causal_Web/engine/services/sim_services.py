@@ -12,6 +12,7 @@ import numpy as np
 
 from ...config import Config
 from ..logging.logger import log_record
+from ..models.base import JsonLinesMixin
 from ..models.node import Node, NodeType, Edge
 from ..models.tick import GLOBAL_TICK_POOL  # only for typing, no direct use
 from ..models.bridge import BridgeType, MediumType
@@ -246,12 +247,6 @@ class NodeMetricsService:
         log_record(
             category="tick",
             label="interference_log",
-            tick=tick,
-            value=logs["interference_log"],
-        )
-        log_record(
-            category="tick",
-            label="tick_density_map",
             tick=tick,
             value=logs["interference_log"],
         )
@@ -634,14 +629,17 @@ class GlobalDiagnosticsService:
 
     # ------------------------------------------------------------------
     def _load_log(self, name: str) -> list:
-        lines = []
-        try:
-            with open(Config.output_path(name)) as f:
-                for line in f:
-                    lines.append(json.loads(line))
-        except FileNotFoundError:
-            pass
-        return lines
+        """Return periodic records for ``name`` from consolidated logs."""
+        label = name.replace(".json", "")
+        category = Config.category_for_file(name)
+        path = Config.output_path(
+            "ticks_log.jsonl" if category == "tick" else "phenomena_log.jsonl"
+        )
+        records = JsonLinesMixin.filter_periodic_log(path, label)
+        return [
+            {tick: val}
+            for tick, val in sorted(records.items(), key=lambda x: int(x[0]))
+        ]
 
     # ------------------------------------------------------------------
     @staticmethod
@@ -662,21 +660,15 @@ class GlobalDiagnosticsService:
     @staticmethod
     def _resilience_index() -> float:
         collapse_events = 0
-        try:
-            with open(Config.output_path("classicalization_map.json")) as f:
-                for line in f:
-                    states = json.loads(line)
-                    collapse_events += sum(
-                        1 for v in next(iter(states.values())).values() if v
-                    )
-        except FileNotFoundError:
-            pass
-        resilience = 0
-        try:
-            with open(Config.output_path("law_wave_log.json")) as f:
-                resilience = sum(1 for _ in f)
-        except FileNotFoundError:
-            pass
+        phen = Config.output_path("phenomena_log.jsonl")
+        records = JsonLinesMixin.filter_periodic_log(phen, "classicalization_map")
+        for val in records.values():
+            collapse_events += sum(1 for v in val.values() if v)
+
+        events = JsonLinesMixin.filter_event_log(
+            Config.output_path("events_log.jsonl"), "law_wave_event"
+        )
+        resilience = sum(len(lst) for lst in events.values())
         return round(resilience / (collapse_events or 1), 3)
 
     # ------------------------------------------------------------------

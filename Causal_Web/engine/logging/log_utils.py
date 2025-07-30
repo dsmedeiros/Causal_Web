@@ -11,6 +11,7 @@ from ..models.graph import CausalGraph
 from .logger import log_record, log_json, logger, log_manager
 from ..services.sim_services import GlobalDiagnosticsService
 from ..models.logging import StructuralGrowthLog, StructuralGrowthPayload
+from ..models.base import JsonLinesMixin
 
 # The global graph instance is injected at runtime
 _graph: CausalGraph | None = None
@@ -115,27 +116,20 @@ def log_metrics_per_tick(global_tick: int) -> None:
 def export_curvature_map() -> None:
     assert _graph is not None
     grid = []
-    try:
-        with open(Config.output_path("curvature_log.json")) as f:
-            for line in f:
-                data = json.loads(line.strip())
-                tick, edges = next(iter(data.items()))
-                records = [
-                    {
-                        "source": k.split("->")[0],
-                        "target": k.split("->")[1],
-                        "delay": v["curved_delay"],
-                    }
-                    for k, v in edges.items()
-                ]
-                grid.append(
-                    {
-                        "tick": int(tick),
-                        "label": "curvature_map",
-                        "value": records,
-                    }
-                )
-    except FileNotFoundError:
+    records = JsonLinesMixin.filter_periodic_log(
+        Config.output_path("ticks_log.jsonl"), "curvature_log"
+    )
+    for tick, edges in sorted(records.items(), key=lambda x: int(x[0])):
+        entries = [
+            {
+                "source": k.split("->")[0],
+                "target": k.split("->")[1],
+                "delay": v["curved_delay"],
+            }
+            for k, v in edges.items()
+        ]
+        grid.append({"tick": int(tick), "label": "curvature_map", "value": entries})
+    if not grid:
         return
 
     with open(Config.output_path("curvature_map.json"), "w") as f:

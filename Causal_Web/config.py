@@ -63,7 +63,7 @@ class Config:
         "bridge_dynamics_log.json": True,
         "bridge_reformation_log.json": True,
         "bridge_rupture_log.json": True,
-        "bridge_state_log.json": True,
+        "bridge_state.json": True,
         "cluster_log.json": True,
         "coherence_log.json": True,
         "coherence_velocity_log.json": True,
@@ -78,9 +78,10 @@ class Config:
         "interpretation_log.json": True,
         "law_drift_log.json": True,
         "law_wave_log.json": True,
+        "law_wave_event.json": True,
         "layer_transition_log.json": True,
         "magnitude_failure_log.json": True,
-        "meta_node_tick_log.json": True,
+        "meta_node_ticks.json": True,
         "node_emergence_log.json": True,
         "node_state_log.json": True,
         "observer_disagreement_log.json": True,
@@ -118,7 +119,7 @@ class Config:
         "bridge_dynamics_log.json",
         "bridge_reformation_log.json",
         "bridge_rupture_log.json",
-        "bridge_state_log.json",
+        "bridge_state.json",
         "classicalization_map.json",
         "cluster_log.json",
         "coherence_log.json",
@@ -136,7 +137,7 @@ class Config:
         "stable_frequency_log.json",
         "layer_transition_log.json",
         "layer_transition_events.json",
-        "meta_node_tick_log.json",
+        "meta_node_ticks.json",
         "node_emergence_log.json",
         "node_state_log.json",
         "node_state_map.json",
@@ -145,7 +146,6 @@ class Config:
         "proper_time_log.json",
         "refraction_log.json",
         "structural_growth_log.json",
-        "tick_density_map.json",
     }
 
     #: Files summarising emergent behaviour rather than raw events.
@@ -166,7 +166,7 @@ class Config:
 
     #: Files generated each tick or at regular intervals.
     TICK_FILES = {
-        "bridge_state_log.json",
+        "bridge_state.json",
         "cluster_log.json",
         "coherence_log.json",
         "coherence_velocity_log.json",
@@ -174,7 +174,7 @@ class Config:
         "decoherence_log.json",
         "interference_log.json",
         "law_wave_log.json",
-        "meta_node_tick_log.json",
+        "meta_node_ticks.json",
         "node_state_log.json",
         "proper_time_log.json",
         "structural_growth_log.json",

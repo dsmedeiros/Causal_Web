@@ -12,7 +12,7 @@ from .tick import GLOBAL_TICK_POOL
 from .meta_node import MetaNode
 from ...config import Config
 import json
-from ..logging.logger import log_json
+from ..logging.logger import log_json, log_record
 
 
 class CausalGraph:
@@ -649,9 +649,9 @@ class CausalGraph:
                     visited.add(edge.target)
                     frontier.append((edge.target, dist + 1))
         if affected:
-            log_json(
-                "tick",
-                "law_wave_log",
-                {"origin": origin_id, "affected": affected},
+            log_record(
+                category="event",
+                label="law_wave_event",
                 tick=tick,
+                value={"origin": origin_id, "affected": affected},
             )

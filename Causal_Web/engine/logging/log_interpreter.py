@@ -302,7 +302,7 @@ class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
 
     # ------------------------------------------------------------
     def interpret_meta_nodes(self) -> None:
-        lines = self._periodic_by_label("meta_node_tick_log")
+        lines = self._periodic_by_label("meta_node_ticks")
         if not lines:
             return
         counts: Dict[str, int] = {}

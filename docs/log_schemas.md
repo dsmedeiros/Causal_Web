@@ -198,8 +198,10 @@ The following lists describe the JSON keys recorded in each output file.
 - `tick`, `node` and the updated `new_refractory_period`.
 
 #### `law_wave_log.json`
-- entries either keyed by tick with `{node: frequency}` or
-  `{tick, origin, affected}` when a law wave is emitted.
+- keyed by tick with `{node: frequency}` values.
+
+#### `law_wave_event`
+- emitted when a law wave propagates with `{origin, affected}`.
 
 #### `stable_frequency_log.json`
 - keyed by tick mapping nodes to stabilised law-wave frequencies.
@@ -214,7 +216,7 @@ The following lists describe the JSON keys recorded in each output file.
 #### `magnitude_failure_log.json`
 - `node`, `magnitude`, `threshold` and number of `phases` when a tick fails.
 
-#### `meta_node_tick_log.json`
+#### `meta_node_ticks.json`
 - keyed by tick with `{meta_id: [member_nodes]}` entries.
 
 #### `node_emergence_log.json`
@@ -263,8 +265,6 @@ The following lists describe the JSON keys recorded in each output file.
 #### `tick_delivery_log.json`
 - `source`, `node_id` and `stored_phase` for incoming ticks.
 
-#### `tick_density_map.json`
-- keyed by tick mirroring `interference_log` densities.
 
 #### `tick_drop_log.json`
 - dropped tick info: `node`, `reason`, `coherence`, `node_type`.

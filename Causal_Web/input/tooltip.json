@@ -51,7 +51,7 @@
   "law_wave_log.json": "Node law-wave frequencies",
   "layer_transition_log.json": "Tick transitions between LCCM layers",
   "magnitude_failure_log.json": "Ticks rejected for low magnitude",
-  "meta_node_tick_log.json": "Ticks emitted by meta nodes",
+  "meta_node_ticks.json": "Ticks emitted by meta nodes",
   "node_emergence_log.json": "New nodes created via propagation",
   "node_state_log.json": "Node type, credit and debt metrics",
   "observer_disagreement_log.json": "Difference between observers and reality",
