@@ -34,7 +34,7 @@ Clone the repository and install the packages listed in `requirements.txt`. The 
 ## Usage
 Graphs are stored as JSON files under `input/`. Each file defines `nodes`, `edges`, optional `bridges`, `tick_sources`, `observers` and `meta_nodes`. See [docs/graph_format.md](docs/graph_format.md) for the complete schema and an example.
 
-The GUI allows interactive editing of graphs. Drag nodes to reposition them and use the toolbar to add connections or observers. Details on all GUI actions are provided in [docs/gui_usage.md](docs/gui_usage.md).
+The GUI allows interactive editing of graphs. Drag nodes to reposition them and use the toolbar to add connections or observers. After editing, click **Apply Changes** in the Graph View to update the simulation and save the file. Details on all GUI actions are provided in [docs/gui_usage.md](docs/gui_usage.md).
 
 Runs produce a set of JSON logs in `output/`. The script `bundle_run.py` can be used after a simulation to archive the results. Full descriptions of each log file and their fields are available in [docs/log_schemas.md](docs/log_schemas.md).
 

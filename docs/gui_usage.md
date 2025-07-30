@@ -13,3 +13,5 @@ When a node or edge is selected a panel appears allowing its parameters to be ed
 The **Control Panel** window lets you start, pause or stop the simulation and set the tick limit and rate. A tick counter shows the current tick. Window resizing keeps the graph responsive and rendering updates only when the graph changes to reduce idle CPU usage.
 
 Saved graphs are copied into each run directory when the simulation starts so the exact input is preserved. The GUI also exposes a **Log Files** window to enable or disable specific logs.
+
+Changes made in the Graph View are applied back to the main window using the **Apply Changes** button. This action also writes the current graph to disk when a file is loaded.
