@@ -39,33 +39,57 @@ class CausalAnalyst(OutputDirMixin, JsonLinesMixin):
         """Load all required logs into memory."""
         paths = {
             "tick_trace": self._path("tick_trace.json"),
-            "coherence": self._path("coherence_log.json"),
-            "decoherence": self._path("decoherence_log.json"),
-            "law_wave": self._path("law_wave_log.json"),
-            "bridge_state": self._path("bridge_state_log.json"),
-            "classicalization": self._path("classicalization_map.json"),
-            "collapse_front": self._path("collapse_front_log.json"),
-            "collapse_chain": self._path("collapse_chain_log.json"),
+            "coherence": "coherence_log",
+            "decoherence": "decoherence_log",
+            "law_wave": "law_wave_log",
+            "bridge_state": "bridge_state_log",
+            "classicalization": "classicalization_map",
+            "collapse_front": "collapse_front_log",
+            "collapse_chain": "collapse_chain_log",
             "observer": self._path("observer_perceived_field.json"),
-            "cluster": self._path("cluster_log.json"),
-            "law_drift": self._path("law_drift_log.json"),
-            "event": self._path("event_log.json"),
-            "layer_transitions": self._path("layer_transition_log.json"),
-            "refraction": self._path("refraction_log.json"),
-            "node_state_map": self._path("node_state_map.json"),
+            "cluster": "cluster_log",
+            "law_drift": "law_drift_log",
+            "event": "event_log",
+            "layer_transitions": "layer_transition_log",
+            "refraction": "refraction_log",
+            "node_state_map": "node_state_map",
         }
 
-        for key, path in paths.items():
-            if key in ("event", "layer_transitions"):
-                self.logs[key] = self.load_event_log(path, int_keys=True)
-            elif path.endswith(".json") and not path.endswith("tick_trace.json"):
-                self.logs[key] = self.load_json_lines(path, int_keys=True)
-            elif key == "tick_trace" and os.path.exists(path):
-                with open(path) as f:
-                    try:
-                        self.logs[key] = json.load(f)
-                    except json.JSONDecodeError:
-                        self.logs[key] = {}
+        phenomena_labels = {"classicalization_map"}
+        for key, spec in paths.items():
+            if key == "tick_trace":
+                path = spec
+                if os.path.exists(path):
+                    with open(path) as f:
+                        try:
+                            self.logs[key] = json.load(f)
+                        except json.JSONDecodeError:
+                            self.logs[key] = {}
+                continue
+
+            if key in (
+                "event",
+                "layer_transitions",
+                "refraction",
+                "node_state_map",
+                "collapse_front",
+                "collapse_chain",
+                "law_drift",
+            ):
+                self.logs[key] = self.filter_event_log(
+                    self._path("events_log.jsonl"), spec, int_keys=True
+                )
+            else:
+                path = (
+                    self._path("phenomena_log.jsonl")
+                    if spec in phenomena_labels
+                    else self._path("ticks_log.jsonl")
+                )
+                self.logs[key] = self.filter_periodic_log(
+                    path,
+                    spec,
+                    int_keys=True,
+                )
 
         graph_path = Config.graph_file
         if os.path.exists(graph_path):
