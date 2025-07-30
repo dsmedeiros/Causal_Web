@@ -5,8 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import List, Tuple
 
-from .graph.model import GraphModel
-from .gui.state import mark_graph_dirty
+from ..graph.model import GraphModel
+from .state import mark_graph_dirty
 
 
 class Command:
