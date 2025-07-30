@@ -35,21 +35,13 @@ class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
         """Return periodic records filtered by ``label``."""
 
         path = self.tick_log if category == "tick" else self.phenomena_log
-        records = self.filter_periodic_log(path, label, int_keys=True)
-        if not records:
-            fallback = self._path(f"{label}.json")
-            records = self.load_json_lines(fallback, int_keys=True)
-        return records
+        return self.filter_periodic_log(path, label, int_keys=True)
 
     # ------------------------------------------------------------
     def _events_by_type(self, event_type: str) -> dict:
         """Return events filtered by ``event_type`` keyed by tick."""
 
-        records = self.filter_event_log(self.event_log, event_type, int_keys=True)
-        if not records:
-            fallback = self._path(f"{event_type}.json")
-            records = self.load_event_log(fallback, int_keys=True)
-        return records
+        return self.filter_event_log(self.event_log, event_type, int_keys=True)
 
     # ------------------------------------------------------------
     def records_for_tick(self, tick: int) -> Dict[str, List[dict]]:
@@ -283,7 +275,7 @@ class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
 
     # ------------------------------------------------------------
     def interpret_bridge_state(self) -> None:
-        lines = self._periodic_by_label("bridge_state_log")
+        lines = self._periodic_by_label("bridge_state")
         if not lines:
             return
         last_tick = max(int(t) for t in lines)

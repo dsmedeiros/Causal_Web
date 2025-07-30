@@ -123,8 +123,8 @@ The following lists describe the JSON keys recorded in each output file.
 - `coherence` – coherence value at failure.
 - `fatigue` – accumulated fatigue level.
 
-#### `bridge_state_log.json`
-- keyed by tick with nested bridge entries:
+#### `bridge_state`
+- periodic entries labeled `bridge_state` with nested bridge information:
   - `active` – whether the bridge is enabled.
   - `last_activation` – most recent activation tick.
   - `last_rupture_tick` – tick of the last rupture or `null`.
@@ -176,8 +176,8 @@ The following lists describe the JSON keys recorded in each output file.
 #### `decoherence_log.json`
 - keyed by tick with `{node: decoherence}` values.
 
-#### `event_log.json`
-- records bridge events with fields:
+#### `events_log.jsonl`
+- raw event log where each line is a JSON object with:
   - `tick`, `event_type`, `bridge_id`, `source`, `target`,
     `coherence_at_event`.
 
@@ -324,4 +324,4 @@ The following lists describe the JSON keys recorded in each output file.
 #### `cwt_console.txt`
 - captured console output from the run.
 
-The raw logs (`tick_trace.json`, `coherence_log.json`, `event_log.json`, etc.) remain in `output/` for detailed inspection. For convenience, running `bundle_run.py` packages the important files with a manifest describing the run.
+The raw logs (`tick_trace.json`, `coherence_log.json`, `events_log.jsonl`, etc.) remain in `output/` for detailed inspection. For convenience, running `bundle_run.py` packages the important files with a manifest describing the run.

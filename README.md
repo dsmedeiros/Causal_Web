@@ -57,6 +57,7 @@ Each run creates a timestamped directory under `output/runs` containing the grap
 Logs are consolidated by category into `ticks_log.jsonl`, `phenomena_log.jsonl` and `events_log.jsonl`.
 Individual files can still be toggled via `log_files` for advanced filtering.
 Law-wave propagation events now appear as `law_wave_event` records in the `events` log.
+Per-tick law-wave frequencies are still written under the `law_wave_log` label in `ticks_log.jsonl`.
 The interpreter provides `records_for_tick()` and `assemble_timeline()` helpers to query these consolidated logs.
 The ingestion service also consumes these unified files, routing records to database tables based on their `label` or `event_type`.
 

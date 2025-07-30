@@ -228,7 +228,7 @@ class CSPSeedService:
             origin_type="CSP",
             parents=[seed["parent"]],
         )
-        entry = NodeEmergenceLog(tick=tick, payload=payload)
+        entry = NodeEmergenceLog(tick=tick, value=payload)
         log_json("event", "node_emergence_log", entry.model_dump(), tick=tick)
         log_json(
             "event",
@@ -293,7 +293,7 @@ class SIPRecombinationService:
             origin_type="SIP_RECOMB",
             parents=[a_id, b_id],
         )
-        entry = NodeEmergenceLog(tick=tick, payload=payload)
+        entry = NodeEmergenceLog(tick=tick, value=payload)
         log_json("event", "node_emergence_log", entry.model_dump(), tick=tick)
 
     @staticmethod
@@ -372,7 +372,7 @@ def _spawn_sip_child(parent, tick: int) -> None:
         origin_type="SIP_BUD",
         parents=[parent.id],
     )
-    entry = NodeEmergenceLog(tick=tick, payload=payload)
+    entry = NodeEmergenceLog(tick=tick, value=payload)
     log_json("event", "node_emergence_log", entry.model_dump(), tick=tick)
     _update_growth_log(tick)
     _sip_pending.append((child_id, [parent.id], tick, "SIP_BUD"))
