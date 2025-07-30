@@ -215,7 +215,7 @@ class Config:
         The provided ``name`` may include a ``.json`` extension which will be
         stripped before lookup."""
 
-        base = name.replace(".json", "")
+        base = name.removesuffix(".json")
         if base in cls.TICK_FILES:
             return "tick"
         if base in cls.PHENOMENA_FILES:
