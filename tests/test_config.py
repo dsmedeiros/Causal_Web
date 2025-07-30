@@ -25,6 +25,8 @@ def test_logging_mode_filters_categories():
         }
         assert Config.is_log_enabled("coherence_log.json")
         assert not Config.is_log_enabled("event_log.json")
+        assert Config.is_log_enabled(category="tick")
+        assert not Config.is_log_enabled(category="event")
     finally:
         Config.logging_mode = original_mode
         Config.log_files = original_files
