@@ -227,7 +227,7 @@ class NodeTickService:
             n.tick_history.append(tick_obj)
         log_json(
             Config.output_path("tick_emission_log.json"),
-            {"node_id": n.id, "tick_time": self.tick_time, "phase": self.phase},
+            {"tick": self.tick_time, "node_id": n.id, "phase": self.phase},
         )
         with n.lock:
             if self.origin == "self":
@@ -345,9 +345,9 @@ class EdgePropagationService:
         log_json(
             Config.output_path("tick_propagation_log.json"),
             {
+                "tick": self.tick_time,
                 "source": self.node.id,
                 "target": target.id,
-                "tick_time": self.tick_time,
                 "arrival_time": self.tick_time + delay,
                 "phase": shifted,
             },

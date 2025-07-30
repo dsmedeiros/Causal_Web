@@ -26,7 +26,7 @@ unless nested structures are required for clarity. Example entries:
   "tick": 42,
   "timestamp": "2024-05-01T12:00:00Z",
   "event_type": "tick_emission_log",
-  "payload": {"node_id": "n1", "tick_time": 42, "phase": 1.57}
+  "payload": {"node_id": "n1", "phase": 1.57}
 }
 ```
 

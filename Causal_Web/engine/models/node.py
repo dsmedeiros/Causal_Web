@@ -456,9 +456,9 @@ class Node(LoggingMixin):
             self._log(
                 "tick_delivery_log.json",
                 {
+                    "tick": tick_time,
                     "source": origin,
                     "node_id": self.id,
-                    "tick_time": tick_time,
                     "stored_phase": incoming_phase,
                 },
             )
@@ -696,6 +696,7 @@ class Edge:
             log_json(
                 Config.output_path("delay_density_log.json"),
                 {
+                    "tick": getattr(Config, "current_tick", 0),
                     "edge": f"{self.source}->{self.target}",
                     "rho": rho,
                     "base": self.delay,

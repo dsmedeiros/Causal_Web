@@ -75,8 +75,13 @@ def log_json(path: str, data: Any) -> None:
     if isinstance(data, BaseModel):
         entry = data
     else:
-        tick = data.get("tick", 0) if isinstance(data, dict) else 0
+        if isinstance(data, dict):
+            tick = data.get("tick", 0)
+            payload = {k: v for k, v in data.items() if k != "tick"}
+        else:
+            tick = 0
+            payload = data
         entry = GenericLogEntry(
-            event_type=name.replace(".json", ""), tick=tick, payload=data
+            event_type=name.replace(".json", ""), tick=tick, payload=payload
         )
     log_manager.log(path, entry)
