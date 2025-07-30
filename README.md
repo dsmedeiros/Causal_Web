@@ -44,9 +44,16 @@ Runtime parameters are loaded from `input/config.json`. Any value can be overrid
 python -m Causal_Web.main --no-gui --max_ticks 20
 ```
 Use `--init-db` to create PostgreSQL tables defined in the configuration and exit.
+Additional flags allow enabling or disabling specific logs without editing
+`config.json`:
+
+```bash
+python -m Causal_Web.main --disable-tick=coherence_log,interference_log \
+    --enable-events=bridge_rupture_log
+```
 
 ## Output Logs
-Each run creates a timestamped directory under `output/runs` containing the graph, configuration and logs. Logging can be enabled or disabled via the GUI **Log Files** window or the `log_files` section of `config.json`. The `logging_mode` option selects which categories are written: `diagnostic` (all logs), `tick`, `phenomena` and `events`.
+Each run creates a timestamped directory under `output/runs` containing the graph, configuration and logs. Logging can be enabled or disabled via the GUI **Log Files** window or the `log_files` section of `config.json`. In `config.json` the keys are the categories (`tick`, `phenomena`, `event`) containing individual label flags. The `logging_mode` option selects which categories are written: `diagnostic` (all logs), `tick`, `phenomena` and `events`.
 Logs are consolidated by category into `ticks_log.jsonl`, `phenomena_log.jsonl` and `events_log.jsonl`.
 Individual files can still be toggled via `log_files` for advanced filtering.
 Law-wave propagation events now appear as `law_wave_event` records in the `events` log.

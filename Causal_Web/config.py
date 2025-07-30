@@ -55,49 +55,73 @@ class Config:
     # Preallocated ticks for object pool
     TICK_POOL_SIZE = 10000
 
-    # Per-log enable flags. Keys correspond to log file names under
-    # ``output`` and values determine whether the file should be written.
-    log_files = {
-        "boundary_interaction_log.json": True,
-        "bridge_decay_log.json": True,
-        "bridge_dynamics_log.json": True,
-        "bridge_reformation_log.json": True,
-        "bridge_rupture_log.json": True,
-        "bridge_state.json": True,
-        "cluster_log.json": True,
-        "coherence_log.json": True,
-        "coherence_velocity_log.json": True,
-        "collapse_chain_log.json": True,
-        "collapse_front_log.json": True,
-        "connectivity_log.json": True,
-        "curvature_log.json": True,
-        "decoherence_log.json": True,
-        "event_log.json": True,
-        "inspection_log.json": True,
-        "interference_log.json": True,
-        "interpretation_log.json": True,
-        "law_drift_log.json": True,
-        "law_wave_log.json": True,
-        "law_wave_event.json": True,
-        "layer_transition_log.json": True,
-        "magnitude_failure_log.json": True,
-        "meta_node_ticks.json": True,
-        "node_emergence_log.json": True,
-        "node_state_log.json": True,
-        "observer_disagreement_log.json": True,
-        "propagation_failure_log.json": True,
-        "proper_time_log.json": True,
-        "refraction_log.json": True,
-        "should_tick_log.json": True,
-        "stable_frequency_log.json": True,
-        "structural_growth_log.json": True,
-        "tick_delivery_log.json": True,
-        "tick_drop_log.json": True,
-        "tick_emission_log.json": True,
-        "tick_evaluation_log.json": True,
-        "tick_propagation_log.json": True,
-        "tick_seed_log.json": True,
+    # Mapping of ``category`` -> {``label``: bool} controlling which logs are
+    # written. Categories correspond to consolidated output files and the labels
+    # are used as ``label`` or ``event_type`` within those files.
+
+    DEFAULT_LOG_FILES = {
+        "tick": {
+            "coherence_log": True,
+            "decoherence_log": True,
+            "coherence_velocity_log": True,
+            "law_wave_log": True,
+            "stable_frequency_log": True,
+            "proper_time_log": True,
+            "interference_log": True,
+            "curvature_log": True,
+            "node_state_log": True,
+            "tick_emission_log": True,
+            "tick_propagation_log": True,
+            "tick_delivery_log": True,
+            "tick_seed_log": True,
+            "tick_drop_log": True,
+            "should_tick_log": True,
+            "magnitude_failure_log": True,
+            "cluster_log": True,
+            "classicalization_map": True,
+            "structural_growth_log": True,
+            "bridge_state": True,
+        },
+        "phenomena": {
+            "bridge_state": True,
+            "connectivity_log": True,
+            "void_node_map": True,
+            "curvature_map": True,
+            "regional_pressure_map": True,
+            "meta_node_ticks": True,
+            "global_diagnostics": True,
+            "cluster_influence_matrix": True,
+        },
+        "event": {
+            "bridge_rupture_log": True,
+            "bridge_reformation_log": True,
+            "bridge_decay_log": True,
+            "bridge_dynamics_log": True,
+            "bridge_ruptured": True,
+            "bridge_reformed": True,
+            "collapse_front_log": True,
+            "collapse_chain_log": True,
+            "propagation_failure_log": True,
+            "tick_drop_log": True,
+            "layer_transition_log": True,
+            "refraction_log": True,
+            "node_emergence_log": True,
+            "law_drift_log": True,
+            "law_wave_event": True,
+            "observer_perceived_field": True,
+            "observer_disagreement_log": True,
+            "boundary_interaction_log": True,
+            "simulation_state": True,
+            "tick_emission_log": True,
+            "tick_propagation_log": True,
+            "tick_delivery_log": True,
+            "tick_seed_log": True,
+            "event_log": True,
+        },
     }
+
+    # Default runtime copy
+    log_files = {k: dict(v) for k, v in DEFAULT_LOG_FILES.items()}
 
     #: Allowed logging modes. ``diagnostic`` enables all logs. ``tick`` enables
     #: per-tick metrics, ``phenomena`` enables aggregated summaries and
@@ -106,90 +130,95 @@ class Config:
 
     #: Files written on a per-tick basis. Derived from :mod:`logger`.
     PERIODIC_FILES = {
-        "cluster_influence_matrix.json",
-        "curvature_map.json",
-        "global_diagnostics.json",
-        "regional_pressure_map.json",
-        "void_node_map.json",
-        "explanation_graph.json",
-        "causal_chains.json",
-        "causal_timeline.json",
-        "boundary_interaction_log.json",
-        "bridge_decay_log.json",
-        "bridge_dynamics_log.json",
-        "bridge_reformation_log.json",
-        "bridge_rupture_log.json",
-        "bridge_state.json",
-        "classicalization_map.json",
-        "cluster_log.json",
-        "coherence_log.json",
-        "coherence_velocity_log.json",
-        "collapse_chain_log.json",
-        "collapse_front_log.json",
-        "connectivity_log.json",
-        "curvature_log.json",
-        "decoherence_log.json",
-        "event_log.json",
-        "inspection_log.json",
-        "interference_log.json",
-        "law_drift_log.json",
-        "law_wave_log.json",
-        "stable_frequency_log.json",
-        "layer_transition_log.json",
-        "layer_transition_events.json",
-        "meta_node_ticks.json",
-        "node_emergence_log.json",
-        "node_state_log.json",
-        "node_state_map.json",
-        "observer_disagreement_log.json",
-        "observer_perceived_field.json",
-        "proper_time_log.json",
-        "refraction_log.json",
-        "structural_growth_log.json",
+        "cluster_influence_matrix",
+        "curvature_map",
+        "global_diagnostics",
+        "regional_pressure_map",
+        "void_node_map",
+        "explanation_graph",
+        "causal_chains",
+        "causal_timeline",
+        "boundary_interaction_log",
+        "bridge_decay_log",
+        "bridge_dynamics_log",
+        "bridge_reformation_log",
+        "bridge_rupture_log",
+        "bridge_state",
+        "classicalization_map",
+        "cluster_log",
+        "coherence_log",
+        "coherence_velocity_log",
+        "collapse_chain_log",
+        "collapse_front_log",
+        "connectivity_log",
+        "curvature_log",
+        "decoherence_log",
+        "event_log",
+        "inspection_log",
+        "interference_log",
+        "law_drift_log",
+        "law_wave_log",
+        "stable_frequency_log",
+        "layer_transition_log",
+        "layer_transition_events",
+        "meta_node_ticks",
+        "node_emergence_log",
+        "node_state_log",
+        "node_state_map",
+        "observer_disagreement_log",
+        "observer_perceived_field",
+        "proper_time_log",
+        "refraction_log",
+        "structural_growth_log",
     }
 
     #: Files summarising emergent behaviour rather than raw events.
     PHENOMENA_FILES = {
-        "cluster_influence_matrix.json",
-        "curvature_map.json",
-        "global_diagnostics.json",
-        "regional_pressure_map.json",
-        "void_node_map.json",
-        "explanation_graph.json",
-        "causal_chains.json",
-        "causal_timeline.json",
-        "connectivity_log.json",
-        "classicalization_map.json",
-        "interpretation_log.json",
-        "inspection_log.json",
+        "cluster_influence_matrix",
+        "curvature_map",
+        "global_diagnostics",
+        "regional_pressure_map",
+        "void_node_map",
+        "explanation_graph",
+        "causal_chains",
+        "causal_timeline",
+        "connectivity_log",
+        "classicalization_map",
+        "interpretation_log",
+        "inspection_log",
     }
 
     #: Files generated each tick or at regular intervals.
     TICK_FILES = {
-        "bridge_state.json",
-        "cluster_log.json",
-        "coherence_log.json",
-        "coherence_velocity_log.json",
-        "curvature_log.json",
-        "decoherence_log.json",
-        "interference_log.json",
-        "law_wave_log.json",
-        "meta_node_ticks.json",
-        "node_state_log.json",
-        "proper_time_log.json",
-        "structural_growth_log.json",
-        "tick_delivery_log.json",
-        "tick_evaluation_log.json",
-        "tick_seed_log.json",
-        "stable_frequency_log.json",
+        "bridge_state",
+        "cluster_log",
+        "coherence_log",
+        "coherence_velocity_log",
+        "curvature_log",
+        "decoherence_log",
+        "interference_log",
+        "law_wave_log",
+        "meta_node_ticks",
+        "node_state_log",
+        "proper_time_log",
+        "structural_growth_log",
+        "tick_delivery_log",
+        "tick_evaluation_log",
+        "tick_seed_log",
+        "stable_frequency_log",
     }
 
     @classmethod
     def category_for_file(cls, name: str) -> str:
-        """Return the logging category for *name*."""
-        if name in cls.TICK_FILES:
+        """Return the logging category for *name*.
+
+        The provided ``name`` may include a ``.json`` extension which will be
+        stripped before lookup."""
+
+        base = name.replace(".json", "")
+        if base in cls.TICK_FILES:
             return "tick"
-        if name in cls.PHENOMENA_FILES:
+        if base in cls.PHENOMENA_FILES:
             return "phenomena"
         return "event"
 
@@ -200,16 +229,12 @@ class Config:
         return "diagnostic" in mode or category in mode
 
     @classmethod
-    def is_log_enabled(
-        cls, name: str | None = None, category: str | None = None
-    ) -> bool:
+    def is_log_enabled(cls, category: str, label: str | None = None) -> bool:
         """Return ``True`` if a log entry should be written."""
-        if name is not None and not cls.log_files.get(name, True):
+
+        cfg = cls.log_files.get(category, {})
+        if label is not None and not cfg.get(label.replace(".json", ""), True):
             return False
-        if category is None:
-            if name is None:
-                return True
-            category = cls.category_for_file(name)
         return cls.is_category_enabled(category)
 
     @classmethod
@@ -232,7 +257,9 @@ class Config:
         else:
             data = {}
         data.setdefault("log_files", {})
-        data["log_files"].update(cls.log_files)
+        for cat, mapping in cls.log_files.items():
+            data["log_files"].setdefault(cat, {})
+            data["log_files"][cat].update(mapping)
         data["log_interval"] = getattr(cls, "log_interval", 1)
         with open(path, "w") as f:
             json.dump(data, f, indent=2)

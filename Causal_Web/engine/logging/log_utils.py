@@ -190,7 +190,7 @@ def write_output() -> None:
     print(f"✅ Tick trace saved to {Config.output_path('tick_trace.json')}")
 
     inspection = _graph.inspect_superpositions()
-    if Config.is_log_enabled("inspection_log.json"):
+    if Config.is_log_enabled("phenomena", "inspection_log"):
         with open(Config.output_path("inspection_log.json"), "w") as f:
             json.dump(inspection, f, indent=2)
         print(

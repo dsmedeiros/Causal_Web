@@ -626,7 +626,7 @@ class CausalGraph:
                     print(f"[WARNING] Bridge {nid}<->{b} connected to NULL node")
         if self.void_nodes:
             log_json("phenomena", "void_node_map", self.void_nodes)
-        if Config.is_log_enabled("connectivity_log.json"):
+        if Config.is_log_enabled("phenomena", "connectivity_log"):
             log_json("phenomena", "connectivity_log", connectivity_log)
 
     # ------------------------------------------------------------
