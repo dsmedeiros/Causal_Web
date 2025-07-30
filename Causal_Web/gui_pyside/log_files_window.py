@@ -95,12 +95,31 @@ class LogFilesWindow(QMainWindow):
         container = QWidget()
         checks = QVBoxLayout(container)
 
-        for name in sorted(Config.log_files):
-            desc = LOG_TIPS.get(name, "")
-            cb = TooltipCheckBox(name, desc)
-            cb.setChecked(Config.log_files.get(name, True))
-            self._checkboxes[name] = cb
-            checks.addWidget(cb)
+        tick_logs = sorted(n for n in Config.log_files if n in Config.TICK_FILES)
+        phen_logs = sorted(n for n in Config.log_files if n in Config.PHENOMENA_FILES)
+        event_logs = sorted(
+            n
+            for n in Config.log_files
+            if n not in Config.TICK_FILES and n not in Config.PHENOMENA_FILES
+        )
+
+        for title, names in [
+            ("Tick", tick_logs),
+            ("Phenomena", phen_logs),
+            ("Events", event_logs),
+        ]:
+            if not names:
+                continue
+            header = QLabel(title)
+            header.setStyleSheet("font-weight: bold")
+            checks.addWidget(header)
+            for name in names:
+                desc = LOG_TIPS.get(name, "")
+                cb = TooltipCheckBox(name, desc)
+                cb.setChecked(Config.log_files.get(name, True))
+                self._checkboxes[name] = cb
+                checks.addWidget(cb)
+            checks.addSpacing(10)
         checks.addStretch()
 
         scroll.setWidget(container)
