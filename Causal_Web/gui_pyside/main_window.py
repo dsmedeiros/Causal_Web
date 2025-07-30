@@ -114,9 +114,9 @@ class MainWindow(QMainWindow):
         layout.setSpacing(0)
         layout.addWidget(toolbar)
         layout.addWidget(self.canvas)
-        load_btn = QPushButton("Load Graph")
-        load_btn.clicked.connect(self._load_into_main)
-        layout.addWidget(load_btn)
+        apply_btn = QPushButton("Apply Changes")
+        apply_btn.clicked.connect(self._load_into_main)
+        layout.addWidget(apply_btn)
 
         self.graph_window.setCentralWidget(central)
 
@@ -324,7 +324,9 @@ class MainWindow(QMainWindow):
         try:
             graph = load_graph(path)
         except Exception as exc:
-            print(f"Failed to load graph: {exc}")
+            from PySide6.QtWidgets import QMessageBox
+
+            QMessageBox.warning(self, "Load Failed", str(exc))
             return
         set_graph(graph)
         set_active_file(path)
@@ -346,7 +348,9 @@ class MainWindow(QMainWindow):
         try:
             save_graph(path, get_graph())
         except Exception as exc:
-            print(f"Failed to save graph: {exc}")
+            from PySide6.QtWidgets import QMessageBox
+
+            QMessageBox.warning(self, "Save Failed", str(exc))
             return
         set_active_file(path)
         clear_graph_dirty()
@@ -433,7 +437,9 @@ class MainWindow(QMainWindow):
             try:
                 save_graph(path, model)
             except Exception as exc:
-                print(f"Failed to save graph: {exc}")
+                from PySide6.QtWidgets import QMessageBox
+
+                QMessageBox.warning(self, "Save Failed", str(exc))
             else:
                 clear_graph_dirty()
         self.start_button.setEnabled(get_active_file() is not None)
