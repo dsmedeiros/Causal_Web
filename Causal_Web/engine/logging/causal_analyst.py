@@ -179,7 +179,7 @@ class CausalAnalyst(OutputDirMixin, JsonLinesMixin):
 
         path = self._path("causal_chains.json")
         with open(path, "w") as f:
-            json.dump(chains, f, indent=2)
+            json.dump({"label": "causal_chains", "value": chains}, f, indent=2)
         return chains
 
     # ------------------------------------------------------------
@@ -286,7 +286,7 @@ class CausalAnalyst(OutputDirMixin, JsonLinesMixin):
         graph = {"nodes": nodes, "edges": edges}
         path = self._path("explanation_graph.json")
         with open(path, "w") as f:
-            json.dump(graph, f, indent=2)
+            json.dump({"label": "explanation_graph", "value": graph}, f, indent=2)
         return graph
 
     # ------------------------------------------------------------
@@ -325,7 +325,7 @@ class CausalAnalyst(OutputDirMixin, JsonLinesMixin):
         data = [{"tick": t, "events": timeline[t]} for t in sorted(timeline)]
         path = self._path("causal_timeline.json")
         with open(path, "w") as f:
-            json.dump(data, f, indent=2)
+            json.dump({"label": "causal_timeline", "value": data}, f, indent=2)
         return data
 
     # ------------------------------------------------------------
@@ -340,7 +340,9 @@ class CausalAnalyst(OutputDirMixin, JsonLinesMixin):
                 counts[node][to_layer] += 1
         path = self._path("layer_transition_events.json")
         with open(path, "w") as f:
-            json.dump(counts, f, indent=2)
+            json.dump(
+                {"label": "layer_transition_events", "value": counts}, f, indent=2
+            )
         self.summary["layer_transition_events"] = counts
 
     # ------------------------------------------------------------

@@ -334,10 +334,10 @@ disk writes. The frequency of metric logging is controlled by the
 in the **Log Files** window.
 Hovering over any log entry now shows a brief description of that log file.
 All records are wrapped by Pydantic models from
-`engine/models/logging.py`. Generic logs use ``GenericLogEntry`` while
-specialised events such as ``NodeEmergenceLog`` retain their dedicated
-payloads. This provides consistent metadata across files and simplifies
-downstream analysis.
+`engine/models/logging.py`. Diagnostic entries use ``GenericLogEntry``
+while higher level summaries rely on ``PeriodicLogEntry`` (e.g.
+``NodeEmergenceLog`` or structural growth snapshots). This provides
+consistent metadata across files and simplifies downstream analysis.
 
 - `boundary_interaction_log.json` – interactions with void or boundary nodes.
 - `bridge_decay_log.json` – gradual weakening of inactive bridges.
@@ -402,9 +402,8 @@ and event-driven records are structured across these files.
 The following lists describe the JSON keys recorded in each output file.
 
 #### `boundary_interaction_log.json`
-- `tick` – simulation tick of the event.
-- `origin` – node that emitted the triggering tick.
-- `node`/`void` – identifier of the boundary or void node affected.
+- event-driven record with `tick`, `label` as the affected node and
+  `value` containing the tick `origin`.
 
 #### `bridge_decay_log.json`
 - `tick` – tick when decay occurred.
@@ -449,7 +448,8 @@ The following lists describe the JSON keys recorded in each output file.
 - keyed by tick with `{node: bool}` indicating if a node is classicalised.
 
 #### `cluster_influence_matrix.json`
-- `{ "regionA->regionB": count }` mapping between regions based on edges.
+- periodic entry labelled `cluster_influence_matrix` mapping
+  `{ "regionA->regionB": count }` between regions based on edges.
 
 #### `cluster_log.json`
 - keyed by tick with hierarchical cluster assignments per level.
@@ -480,7 +480,9 @@ The following lists describe the JSON keys recorded in each output file.
   - `curved_delay` – resulting delay value.
 
 #### `curvature_map.json`
-- list of `{tick, edges:[{source, target, delay}]}` for visualisation.
+- list of periodic records using `tick`, `label` set to
+  `curvature_map` and `value` containing `{source, target, delay}`
+  entries for visualisation.
 
 #### `decoherence_log.json`
 - keyed by tick with `{node: decoherence}` values.
@@ -491,9 +493,9 @@ The following lists describe the JSON keys recorded in each output file.
     `coherence_at_event`.
 
 #### `global_diagnostics.json`
-- run-level metrics:
-  - `coherence_stability_score`, `entropy_delta`,
-    `collapse_resilience_index`, `network_adaptivity_index`.
+- event-driven entry labelled `global_diagnostics` containing
+  `coherence_stability_score`, `entropy_delta`,
+  `collapse_resilience_index` and `network_adaptivity_index`.
 
 #### `inspection_log.json`
 - list of superposition inspections with keys:
@@ -557,7 +559,8 @@ The following lists describe the JSON keys recorded in each output file.
   `recursion_from` or `from`/`via`/`to` paths.
 
 #### `regional_pressure_map.json`
-- mapping of regions to averaged decoherence pressure.
+- periodic entry labelled `regional_pressure_map` with averaged
+  decoherence pressure per region.
 
 #### `should_tick_log.json`
 - decisions from `should_tick` with `node` and `reason`.
@@ -595,7 +598,8 @@ The following lists describe the JSON keys recorded in each output file.
 - complete graph snapshot including nodes, edges, bridges and tick history.
 
 #### `void_node_map.json`
-- list of node ids with no connections.
+- periodic entry labelled `void_node_map` listing node ids with no
+  connections.
 
 #### `manifest.json`
 - summary produced by `bundle_run.py` containing run metadata such as
@@ -616,15 +620,17 @@ The following lists describe the JSON keys recorded in each output file.
 - human readable narrative of the explanation events.
 
 #### `explanation_graph.json`
-- DAG describing causal chains with nodes (`id`, `tick`, `type`, `node`, `description`)
-  and edges (`source`, `target`, `label`).
+- periodic record labelled `explanation_graph` containing a DAG with
+  nodes (`id`, `tick`, `type`, `node`, `description`) and edges
+  (`source`, `target`, `label`).
 
 #### `causal_chains.json`
-- list of causal chains each containing `root_event`, `chain` steps
-  and overall `confidence`.
+- event-driven entry labelled `causal_chains` containing each chain's
+  `root_event`, `chain` steps and overall `confidence`.
 
 #### `causal_timeline.json`
-- ordered list of `{tick, events}` where each event notes a `type` and involved nodes.
+- periodic log labelled `causal_timeline` where each item stores
+  `tick` and a list of event descriptors.
 
 #### `cwt_console.txt`
 - captured console output from the run.
