@@ -98,10 +98,108 @@ class Config:
         "tick_seed_log.json": True,
     }
 
+    #: Allowed logging modes. ``diagnostic`` enables all logs. ``tick`` enables
+    #: per-tick metrics, ``phenomena`` enables aggregated summaries and
+    #: ``events`` enables event driven logs.
+    logging_mode = ["diagnostic"]
+
+    #: Files written on a per-tick basis. Derived from :mod:`logger`.
+    PERIODIC_FILES = {
+        "cluster_influence_matrix.json",
+        "curvature_map.json",
+        "global_diagnostics.json",
+        "regional_pressure_map.json",
+        "void_node_map.json",
+        "explanation_graph.json",
+        "causal_chains.json",
+        "causal_timeline.json",
+        "boundary_interaction_log.json",
+        "bridge_decay_log.json",
+        "bridge_dynamics_log.json",
+        "bridge_reformation_log.json",
+        "bridge_rupture_log.json",
+        "bridge_state_log.json",
+        "classicalization_map.json",
+        "cluster_log.json",
+        "coherence_log.json",
+        "coherence_velocity_log.json",
+        "collapse_chain_log.json",
+        "collapse_front_log.json",
+        "connectivity_log.json",
+        "curvature_log.json",
+        "decoherence_log.json",
+        "event_log.json",
+        "inspection_log.json",
+        "interference_log.json",
+        "law_drift_log.json",
+        "law_wave_log.json",
+        "stable_frequency_log.json",
+        "layer_transition_log.json",
+        "layer_transition_events.json",
+        "meta_node_tick_log.json",
+        "node_emergence_log.json",
+        "node_state_log.json",
+        "node_state_map.json",
+        "observer_disagreement_log.json",
+        "observer_perceived_field.json",
+        "proper_time_log.json",
+        "refraction_log.json",
+        "structural_growth_log.json",
+        "tick_density_map.json",
+    }
+
+    #: Files summarising emergent behaviour rather than raw events.
+    PHENOMENA_FILES = {
+        "cluster_influence_matrix.json",
+        "curvature_map.json",
+        "global_diagnostics.json",
+        "regional_pressure_map.json",
+        "void_node_map.json",
+        "explanation_graph.json",
+        "causal_chains.json",
+        "causal_timeline.json",
+        "interpretation_log.json",
+        "inspection_log.json",
+    }
+
+    #: Files generated each tick or at regular intervals.
+    TICK_FILES = {
+        "bridge_state_log.json",
+        "cluster_log.json",
+        "coherence_log.json",
+        "coherence_velocity_log.json",
+        "curvature_log.json",
+        "decoherence_log.json",
+        "interference_log.json",
+        "law_wave_log.json",
+        "meta_node_tick_log.json",
+        "node_state_log.json",
+        "proper_time_log.json",
+        "structural_growth_log.json",
+        "tick_delivery_log.json",
+        "tick_evaluation_log.json",
+        "tick_seed_log.json",
+        "stable_frequency_log.json",
+    }
+
     @classmethod
     def is_log_enabled(cls, name: str) -> bool:
-        """Return ``True`` if the given log file should be written."""
-        return cls.log_files.get(name, True)
+        """Return ``True`` if ``name`` should be written based on configuration."""
+        if not cls.log_files.get(name, True):
+            return False
+
+        mode = set(getattr(cls, "logging_mode", ["diagnostic"]))
+        if "diagnostic" in mode:
+            return True
+
+        if name in cls.TICK_FILES:
+            category = "tick"
+        elif name in cls.PHENOMENA_FILES:
+            category = "phenomena"
+        else:
+            category = "events"
+
+        return category in mode
 
     @classmethod
     def save_log_files(cls, path: str | None = None) -> None:

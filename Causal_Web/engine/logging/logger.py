@@ -72,49 +72,7 @@ def log_json(path: str, data: Any) -> None:
     name = os.path.basename(path)
     if not Config.is_log_enabled(name):
         return
-    PERIODIC_FILES = {
-        "cluster_influence_matrix.json",
-        "curvature_map.json",
-        "global_diagnostics.json",
-        "regional_pressure_map.json",
-        "void_node_map.json",
-        "explanation_graph.json",
-        "causal_chains.json",
-        "causal_timeline.json",
-        "boundary_interaction_log.json",
-        "bridge_decay_log.json",
-        "bridge_dynamics_log.json",
-        "bridge_reformation_log.json",
-        "bridge_rupture_log.json",
-        "bridge_state_log.json",
-        "classicalization_map.json",
-        "cluster_log.json",
-        "coherence_log.json",
-        "coherence_velocity_log.json",
-        "collapse_chain_log.json",
-        "collapse_front_log.json",
-        "connectivity_log.json",
-        "curvature_log.json",
-        "decoherence_log.json",
-        "event_log.json",
-        "inspection_log.json",
-        "interference_log.json",
-        "law_drift_log.json",
-        "law_wave_log.json",
-        "stable_frequency_log.json",
-        "layer_transition_log.json",
-        "layer_transition_events.json",
-        "meta_node_tick_log.json",
-        "node_emergence_log.json",
-        "node_state_log.json",
-        "node_state_map.json",
-        "observer_disagreement_log.json",
-        "observer_perceived_field.json",
-        "proper_time_log.json",
-        "refraction_log.json",
-        "structural_growth_log.json",
-        "tick_density_map.json",
-    }
+    PERIODIC_FILES = Config.PERIODIC_FILES
 
     if isinstance(data, BaseModel):
         entry = data
