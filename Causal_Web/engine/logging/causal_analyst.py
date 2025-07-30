@@ -42,7 +42,7 @@ class CausalAnalyst(OutputDirMixin, JsonLinesMixin):
             "coherence": "coherence_log",
             "decoherence": "decoherence_log",
             "law_wave": "law_wave_log",
-            "bridge_state": "bridge_state_log",
+            "bridge_state": "bridge_state",
             "classicalization": "classicalization_map",
             "collapse_front": "collapse_front_log",
             "collapse_chain": "collapse_chain_log",
@@ -318,7 +318,7 @@ class CausalAnalyst(OutputDirMixin, JsonLinesMixin):
         """Generate a simple tick-ordered timeline of notable events."""
         timeline: Dict[int, List[Dict]] = {}
 
-        # Raw events from event_log.json
+        # Events grouped by tick
         for tick, events in self.logs.get("event", {}).items():
             for ev in events:
                 entry = {

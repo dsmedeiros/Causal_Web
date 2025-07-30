@@ -15,7 +15,7 @@ DEFAULT_KEEP_FILES = [
     "tick_trace.json",
     "coherence_log.json",
     "decoherence_log.json",
-    "bridge_state_log.json",
+    "bridge_state.json",
     "cluster_log.json",
     "classicalization_map.json",
     "law_wave_log.json",

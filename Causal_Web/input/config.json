@@ -57,7 +57,6 @@
     "connectivity_log.json": true,
     "curvature_log.json": true,
     "decoherence_log.json": true,
-    "event_log.json": true,
     "inspection_log.json": true,
     "interference_log.json": true,
     "interpretation_log.json": true,
