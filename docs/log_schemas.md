@@ -10,14 +10,15 @@ Diagnostic logs capture granular tick flow, emission decisions and failures. Des
 log_id: str            # unique entry id
 tick: int              # simulation tick
 timestamp: datetime    # creation time in UTC
-correlation_id: str?   # optional grouping identifier
+correlation_id: str?   # optional grouping identifier used to group related events from the same causal thread
 event_type: str        # name of the log file or event
 payload: object        # log specific fields
 ```
 
 Fields within `payload` differ per file (e.g. `node`, `phase`, `source`, `target`,
 `reason`, `coherence`). Any information not covered by the common fields should
-be stored inside this metadata object. Example entries:
+be stored inside this metadata object. Prefer flat key‑value pairs for `payload`
+unless nested structures are required for clarity. Example entries:
 
 ```json
 {
@@ -29,6 +30,24 @@ be stored inside this metadata object. Example entries:
 }
 ```
 
+A failure case may look like this:
+
+```json
+{
+  "log_id": "log_42",
+  "tick": 105,
+  "timestamp": "2024-05-01T12:10:00Z",
+  "event_type": "tick_drop_log",
+  "payload": {
+    "source_id": "n5",
+    "target_id": "n8",
+    "reason": "magnitude_below_threshold",
+    "magnitude": 0.003,
+    "status": "dropped"
+  }
+}
+```
+
 ## Event-Driven/Periodic Schema
 
 Summary and phenomenon logs record higher level events or periodic metrics. They
@@ -36,15 +55,34 @@ follow a lighter structure:
 
 ```
 tick: int?             # tick associated with the record when relevant
-label: str             # short identifier of the event or metric
+label: str             # identifier for the node, metric name or category
 value: object          # measurement, list or mapping
 metadata: object?      # optional additional context
 ```
 
-`tick` is omitted for pure summaries like `manifest.json`. `label` might refer to
-a node, region or metric name. `value` contains the main data such as counts,
-state maps or diagnostics. Extra fields (e.g. `origin`, `affected_nodes` or
-`confidence`) reside under `metadata`.
+`tick` is optional and omitted for pure summaries like `manifest.json` or other
+records that are not tied to a specific simulation tick. `label` may indicate a
+node id, metric name or categorical tag. If its meaning becomes ambiguous,
+separate the label from the metric name using additional fields. `value`
+contains the main data such as counts, state maps or diagnostics. Extra fields
+(e.g. `origin`, `affected_nodes` or `confidence`) reside under `metadata`.
+
+An example periodic log entry might look like:
+
+```json
+{
+  "tick": 150,
+  "label": "coherence_drift",
+  "value": {
+    "R1": 0.84,
+    "R2": 0.29
+  },
+  "metadata": {
+    "threshold": 0.2,
+    "layer": 2
+  }
+}
+```
 
 These schemas unify log processing by distinguishing fine-grained diagnostic
 records from coarser periodic summaries.
