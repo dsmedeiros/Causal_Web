@@ -167,3 +167,15 @@ def test_generation_tick_recorded():
     ticks = g.nodes["A"].tick_history
     assert ticks[0].generation_tick == 1
     assert ticks[1].generation_tick == 2
+
+
+def test_subjective_time_tracks_incoming_ticks():
+    g = CausalGraph()
+    g.add_node("A")
+    node = g.nodes["A"]
+    node.schedule_tick(1, 0.0)
+    node.schedule_tick(1, math.pi / 2)
+    Config.current_tick = 1
+    tick_engine.reset_firing_limits()
+    node.maybe_tick(1, g)
+    assert node.subjective_ticks == 3

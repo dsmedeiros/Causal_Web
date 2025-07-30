@@ -20,7 +20,10 @@ def test_logging_mode_filters_categories():
     original_files = deepcopy(Config.log_files)
     try:
         Config.logging_mode = ["tick"]
-        Config.log_files = {"tick": {"coherence_log": True}, "event": {"event_log": True}}
+        Config.log_files = {
+            "tick": {"coherence_log": True},
+            "event": {"event_log": True},
+        }
         assert Config.is_log_enabled("tick", "coherence_log")
         assert not Config.is_log_enabled("event", "event_log")
         assert Config.is_log_enabled("tick")
@@ -29,3 +32,13 @@ def test_logging_mode_filters_categories():
         Config.logging_mode = original_mode
         Config.log_files = original_files
 
+
+def test_load_smooth_phase_flag(tmp_path):
+    cfg = tmp_path / "config.json"
+    cfg.write_text(json.dumps({"smooth_phase": True}))
+    original = getattr(Config, "smooth_phase", False)
+    Config.load_from_file(str(cfg))
+    try:
+        assert Config.smooth_phase is True
+    finally:
+        Config.smooth_phase = original

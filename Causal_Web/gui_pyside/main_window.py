@@ -206,6 +206,12 @@ class MainWindow(QMainWindow):
         self.limit_spin.setValue(Config.max_ticks)
         layout.addRow("Tick Limit", self.limit_spin)
 
+        self.smooth_phase_cb = TooltipCheckBox(
+            "Smooth Phase", TOOLTIPS.get("smooth_phase")
+        )
+        self.smooth_phase_cb.setChecked(getattr(Config, "smooth_phase", False))
+        layout.addRow(self.smooth_phase_cb)
+
         self.start_button = QPushButton("Start Simulation")
         self.start_button.clicked.connect(self.start_simulation)
         self.start_button.setEnabled(get_active_file() is not None)
@@ -282,6 +288,7 @@ class MainWindow(QMainWindow):
         clear_graph_dirty()
         mark_graph_dirty()
         Config.new_run()
+        Config.smooth_phase = self.smooth_phase_cb.isChecked()
         Config.max_ticks = self.limit_spin.value()
         tick_engine.build_graph()
         with Config.state_lock:
