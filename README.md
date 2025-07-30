@@ -2,6 +2,8 @@
 
 Causal Web is a simulation engine and GUI for experimenting with causal graphs. Nodes emit ticks that propagate through edges with delay and attenuation while observers infer hidden state from the resulting activity. The project is written in Python and uses [PySide6](https://doc.qt.io/qtforpython/) for the graphical interface.
 
+Ticks carry both phase and amplitude. Their influence on interference and coherence is weighted by amplitude and each tick records the local `generation_tick` at which it was emitted.
+
 ## Table of Contents
 - [Quick Start](#quick-start)
 - [Installation](#installation)

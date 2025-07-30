@@ -155,3 +155,15 @@ def test_decoherence_drop(tmp_path):
     Config.max_cumulative_delay = old_delay
     Config.min_coherence_threshold = old_coh
     Config.output_dir = old_dir
+
+
+def test_generation_tick_recorded():
+    g = CausalGraph()
+    g.add_node("A")
+    Config.current_tick = 0
+    g.nodes["A"].apply_tick(0, 0.0, g)
+    Config.current_tick = 1
+    g.nodes["A"].apply_tick(1, 0.0, g)
+    ticks = g.nodes["A"].tick_history
+    assert ticks[0].generation_tick == 1
+    assert ticks[1].generation_tick == 2

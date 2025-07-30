@@ -35,7 +35,9 @@ class GraphSerializationService:
                     "ticks": [
                         {
                             "time": t.time,
+                            "amplitude": t.amplitude,
                             "phase": t.phase,
+                            "generation_tick": getattr(t, "generation_tick", 0),
                             "origin": t.origin,
                             "layer": getattr(t, "layer", "tick"),
                             "trace_id": getattr(t, "trace_id", ""),

@@ -106,15 +106,18 @@ class Node(LoggingMixin):
         for item in phases:
             if isinstance(item, (tuple, list)):
                 ph = item[0]
-                created = item[1] if len(item) > 1 else Config.current_tick
+                amp = item[1] if len(item) > 1 else 1.0
+                created = item[2] if len(item) > 2 else Config.current_tick
                 decay = getattr(Config, "tick_decay_factor", 1.0) ** (
                     max(0, Config.current_tick - created)
                 )
             else:
                 ph = item
+                amp = 1.0
                 decay = 1.0
-            complex_vecs.append(decay * cmath.rect(1.0, ph % (2 * math.pi)))
-            weights.append(decay)
+            weight = amp * decay
+            complex_vecs.append(weight * cmath.rect(1.0, ph % (2 * math.pi)))
+            weights.append(weight)
         vector_sum = sum(complex_vecs)
         total_weight = sum(weights) if weights else 1.0
         self.coherence = abs(vector_sum) / total_weight
@@ -149,15 +152,18 @@ class Node(LoggingMixin):
         for item in phases:
             if isinstance(item, (tuple, list)):
                 ph = item[0]
-                created = item[1] if len(item) > 1 else Config.current_tick
+                amp = item[1] if len(item) > 1 else 1.0
+                created = item[2] if len(item) > 2 else Config.current_tick
                 decay = getattr(Config, "tick_decay_factor", 1.0) ** (
                     max(0, Config.current_tick - created)
                 )
             else:
                 ph = item
+                amp = 1.0
                 decay = 1.0
+            weight = amp * decay
             norm.append(ph % (2 * math.pi))
-            weights.append(decay)
+            weights.append(weight)
         total_weight = sum(weights) if weights else 1.0
         mean_phase = sum(w * p for w, p in zip(weights, norm)) / total_weight
         variance = (
@@ -421,6 +427,7 @@ class Node(LoggingMixin):
         origin: str | None = None,
         created_tick: int | None = None,
         *,
+        amplitude: float = 1.0,
         tick_id: str | None = None,
         cumulative_delay: float = 0.0,
     ) -> None:
@@ -442,7 +449,14 @@ class Node(LoggingMixin):
         if created_tick is None:
             created_tick = Config.current_tick
 
-        record = (incoming_phase, created_tick, cumulative_delay, tick_id, origin)
+        record = (
+            incoming_phase,
+            amplitude,
+            created_tick,
+            cumulative_delay,
+            tick_id,
+            origin,
+        )
         with self.lock:
             self.incoming_phase_queue[tick_time].append(record)
             self.incoming_tick_counts[tick_time] += 1
@@ -497,10 +511,11 @@ class Node(LoggingMixin):
         remaining = []
         for item in items:
             ph = item[0]
-            created = item[1] if len(item) > 1 else Config.current_tick
-            delay = item[2] if len(item) > 2 else 0.0
-            tid = item[3] if len(item) > 3 else None
-            src = item[4] if len(item) > 4 else None
+            amp = item[1] if len(item) > 1 else 1.0
+            created = item[2] if len(item) > 2 else Config.current_tick
+            delay = item[3] if len(item) > 3 else 0.0
+            tid = item[4] if len(item) > 4 else None
+            src = item[5] if len(item) > 5 else None
             if max_delay and delay > max_delay:
                 self._log_tick_drop(
                     tick_time,
@@ -514,7 +529,7 @@ class Node(LoggingMixin):
                 if tick_time in self.incoming_tick_counts:
                     self.incoming_tick_counts[tick_time] -= 1
                 continue
-            remaining.append((ph, created, delay, tid, src))
+            remaining.append((ph, amp, created, delay, tid, src))
 
         if not remaining:
             self.incoming_phase_queue.pop(tick_time, None)
@@ -526,7 +541,7 @@ class Node(LoggingMixin):
         coherence = self.compute_coherence_level(tick_time)
         min_coh = getattr(Config, "min_coherence_threshold", 0.0)
         if min_coh and coherence < min_coh:
-            for ph, created, delay, tid, src in remaining:
+            for ph, amp, created, delay, tid, src in remaining:
                 self._log_tick_drop(
                     tick_time,
                     "decoherence",
@@ -731,7 +746,7 @@ class Edge:
             drift_phase = self.phase_shift  # static phase shift
 
         shifted_phase = phase + drift_phase
-        attenuated_phase = shifted_phase * self.attenuation / self.weight
+        attenuated_amp = self.attenuation / self.weight
         scheduled_tick = global_tick + self.adjusted_delay(
             (
                 graph.get_node(self.source).law_wave_frequency
@@ -744,7 +759,8 @@ class Edge:
         )
         target_node.schedule_tick(
             scheduled_tick,
-            attenuated_phase,
+            shifted_phase,
             origin=self.source,
             created_tick=global_tick,
+            amplitude=attenuated_amp,
         )

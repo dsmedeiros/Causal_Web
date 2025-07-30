@@ -225,6 +225,7 @@ class NodeTickService:
         with n.lock:
             n.current_tick += 1
             n.subjective_ticks += 1
+            tick_obj.generation_tick = n.subjective_ticks
             n.last_tick_time = self.tick_time
             n.current_threshold = min(n.current_threshold + 0.05, 1.0)
             n.phase = self.phase
@@ -331,18 +332,29 @@ class EdgePropagationService:
             return
         if self._handle_refraction(target, delay, shifted, kappa):
             return
+        new_tick = GLOBAL_TICK_POOL.acquire()
+        new_tick.origin = self.tick.origin
+        new_tick.time = self.tick.time
+        new_tick.amplitude = self.tick.amplitude * edge.attenuation
+        new_tick.phase = shifted
+        new_tick.layer = self.tick.layer
+        new_tick.trace_id = self.tick.trace_id
+        new_tick.generation_tick = self.tick.generation_tick
+        new_tick.cumulative_delay = new_delay
         target.schedule_tick(
             self.tick_time + delay,
             shifted,
             origin=self.node.id,
             created_tick=self.tick_time,
-            tick_id=self.tick.trace_id,
+            amplitude=new_tick.amplitude,
+            tick_id=new_tick.trace_id,
             cumulative_delay=new_delay,
         )
+        GLOBAL_TICK_POOL.release(new_tick)
 
     # ------------------------------------------------------------------
     def _shift_phase(self, edge: Edge) -> float:
-        return self.phase * edge.attenuation + edge.phase_shift
+        return self.phase + edge.phase_shift
 
     # ------------------------------------------------------------------
     def _log_propagation(self, target: Node, delay: float, shifted: float) -> None:
@@ -443,15 +455,18 @@ class NodeTickDecisionService:
         for item in raw_items:
             if isinstance(item, (tuple, list)):
                 ph = item[0]
-                created = item[1] if len(item) > 1 else Config.current_tick
+                amp = item[1] if len(item) > 1 else 1.0
+                created = item[2] if len(item) > 2 else Config.current_tick
                 decay = getattr(Config, "tick_decay_factor", 1.0) ** (
                     max(0, Config.current_tick - created)
                 )
             else:
                 ph = item
+                amp = 1.0
                 decay = 1.0
-            complex_phases.append(decay * cmath.rect(1.0, ph % (2 * math.pi)))
-            weights.append(decay)
+            weight = amp * decay
+            complex_phases.append(weight * cmath.rect(1.0, ph % (2 * math.pi)))
+            weights.append(weight)
         vector_sum = sum(complex_phases)
         magnitude = abs(vector_sum)
         total_weight = sum(weights) if weights else 0.0
