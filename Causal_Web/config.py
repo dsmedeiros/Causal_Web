@@ -233,7 +233,7 @@ class Config:
         """Return ``True`` if a log entry should be written."""
 
         cfg = cls.log_files.get(category, {})
-        if label is not None and not cfg.get(label.replace(".json", ""), True):
+        if label is not None and not cfg.get(label.removesuffix(".json"), True):
             return False
         return cls.is_category_enabled(category)
 
