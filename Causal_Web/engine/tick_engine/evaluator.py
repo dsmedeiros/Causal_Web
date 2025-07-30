@@ -187,7 +187,7 @@ class CSPSeedService:
                     >= Config.max_children_per_node
                     > 0
                 ):
-                    if Config.is_log_enabled("propagation_failure_log.json"):
+                    if Config.is_log_enabled("event", "propagation_failure_log"):
                         log_json(
                             "event",
                             "propagation_failure_log",
@@ -274,7 +274,7 @@ class SIPRecombinationService:
 
     @staticmethod
     def _log_limit(parent_a, parent_b, tick: int) -> None:
-        if Config.is_log_enabled("propagation_failure_log.json"):
+        if Config.is_log_enabled("event", "propagation_failure_log"):
             log_json(
                 "event",
                 "propagation_failure_log",
@@ -342,7 +342,7 @@ def _spawn_sip_child(parent, tick: int) -> None:
     if not Config.propagation_control.get("enable_sip", True):
         return
     if _spawn_counts.get(parent.id, 0) >= Config.max_children_per_node > 0:
-        if Config.is_log_enabled("propagation_failure_log.json"):
+        if Config.is_log_enabled("event", "propagation_failure_log"):
             log_json(
                 "event",
                 "propagation_failure_log",

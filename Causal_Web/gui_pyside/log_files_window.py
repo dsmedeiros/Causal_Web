@@ -67,7 +67,7 @@ class LogFilesWindow(QMainWindow):
         self.setWindowTitle("Log Files")
         self.resize(300, 400)
 
-        self._checkboxes: dict[str, TooltipCheckBox] = {}
+        self._checkboxes: dict[tuple[str, str], TooltipCheckBox] = {}
 
         central = QWidget()
         layout = QVBoxLayout(central)
@@ -94,13 +94,9 @@ class LogFilesWindow(QMainWindow):
         container = QWidget()
         checks = QVBoxLayout(container)
 
-        tick_logs = sorted(n for n in Config.log_files if n in Config.TICK_FILES)
-        phen_logs = sorted(n for n in Config.log_files if n in Config.PHENOMENA_FILES)
-        event_logs = sorted(
-            n
-            for n in Config.log_files
-            if n not in Config.TICK_FILES and n not in Config.PHENOMENA_FILES
-        )
+        tick_logs = sorted(Config.log_files.get("tick", {}))
+        phen_logs = sorted(Config.log_files.get("phenomena", {}))
+        event_logs = sorted(Config.log_files.get("event", {}))
 
         for title, names in [
             ("Tick", tick_logs),
@@ -113,10 +109,12 @@ class LogFilesWindow(QMainWindow):
             header.setStyleSheet("font-weight: bold")
             checks.addWidget(header)
             for name in names:
-                desc = LOG_TIPS.get(name, "")
+                desc = LOG_TIPS.get(f"{name}.json", "")
                 cb = TooltipCheckBox(name, desc)
-                cb.setChecked(Config.log_files.get(name, True))
-                self._checkboxes[name] = cb
+                category = "event" if title == "Events" else title.lower()
+                checked = Config.log_files.get(category, {}).get(name, True)
+                cb.setChecked(checked)
+                self._checkboxes[(category, name)] = cb
                 checks.addWidget(cb)
             checks.addSpacing(10)
         checks.addStretch()
@@ -127,7 +125,7 @@ class LogFilesWindow(QMainWindow):
 
     def apply_changes(self) -> None:
         """Update :class:`Config.log_files` and write to ``config.json``."""
-        for name, cb in self._checkboxes.items():
-            Config.log_files[name] = cb.isChecked()
+        for (category, label), cb in self._checkboxes.items():
+            Config.log_files[category][label] = cb.isChecked()
         Config.log_interval = int(self.interval_spin.value())
         Config.save_log_files()

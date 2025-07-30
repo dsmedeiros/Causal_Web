@@ -60,7 +60,8 @@ class LogManager:
         """Serialize ``entry`` and buffer it for ``path``."""
         name = os.path.basename(path)
         category = getattr(entry, "metadata", {}).get("category")
-        if not Config.is_log_enabled(name, category):
+        label = name.replace(".jsonl", "").replace(".json", "")
+        if not Config.is_log_enabled(category, label):
             return
         logger.log(path, entry.model_dump_json() + "\n")
 
@@ -103,7 +104,7 @@ def log_record(
     if metadata:
         meta.update(metadata)
 
-    if not Config.is_log_enabled(f"{label}.json", category):
+    if not Config.is_log_enabled(category, label):
         return
 
     path_map = {

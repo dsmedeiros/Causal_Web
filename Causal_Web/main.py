@@ -106,6 +106,7 @@ class MainService:
     def run(self) -> None:
         args, cfg = self._parse_args()
         _apply_overrides(args, cfg)
+        self._apply_log_overrides(args)
         if args.init_db:
             self._init_db(args.config)
             return
@@ -113,6 +114,29 @@ class MainService:
             self._run_headless()
         else:
             self._launch_gui()
+
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _apply_log_overrides(args: argparse.Namespace) -> None:
+        """Update :class:`Config.log_files` based on CLI flags."""
+
+        mappings = {
+            "tick": (args.enable_tick, args.disable_tick),
+            "phenomena": (args.enable_phenomena, args.disable_phenomena),
+            "event": (args.enable_events, args.disable_events),
+        }
+        for cat, (en, dis) in mappings.items():
+            cfg = Config.log_files.setdefault(cat, {})
+            if en:
+                for label in en.split(","):
+                    label = label.strip()
+                    if label:
+                        cfg[label] = True
+            if dis:
+                for label in dis.split(","):
+                    label = label.strip()
+                    if label:
+                        cfg[label] = False
 
     # ------------------------------------------------------------------
     def _parse_args(self) -> tuple[argparse.Namespace, dict[str, Any]]:
@@ -152,6 +176,30 @@ class MainService:
         )
         defaults = _merge_configs(_config_defaults(), config_data)
         _add_config_args(parser, defaults)
+        parser.add_argument(
+            "--enable-tick", default="", help="Comma-separated tick labels to enable"
+        )
+        parser.add_argument(
+            "--disable-tick", default="", help="Comma-separated tick labels to disable"
+        )
+        parser.add_argument(
+            "--enable-phenomena",
+            default="",
+            help="Comma-separated phenomena labels to enable",
+        )
+        parser.add_argument(
+            "--disable-phenomena",
+            default="",
+            help="Comma-separated phenomena labels to disable",
+        )
+        parser.add_argument(
+            "--enable-events", default="", help="Comma-separated event types to enable"
+        )
+        parser.add_argument(
+            "--disable-events",
+            default="",
+            help="Comma-separated event types to disable",
+        )
         args = parser.parse_args(self.argv)
         Config.graph_file = args.graph
         return args, defaults
