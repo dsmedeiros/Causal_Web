@@ -43,6 +43,8 @@ Runtime parameters are loaded from `input/config.json`. Any value can be overrid
 ```bash
 python -m Causal_Web.main --no-gui --max_ticks 20
 ```
+CLI flags for nested `log_files` entries now include the full path prefix to avoid duplicate
+argument names. For example, use `--log_files.tick.coherence_log false` to disable a single tick log.
 Use `--init-db` to create PostgreSQL tables defined in the configuration and exit.
 Additional flags allow enabling or disabling specific logs without editing
 `config.json`:
