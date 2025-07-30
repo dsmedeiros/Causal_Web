@@ -49,6 +49,7 @@ Use `--init-db` to create PostgreSQL tables defined in the configuration and exi
 Each run creates a timestamped directory under `output/runs` containing the graph, configuration and logs. Logging can be enabled or disabled via the GUI **Log Files** window or the `log_files` section of `config.json`. The `logging_mode` option selects which categories are written: `diagnostic` (all logs), `tick`, `phenomena` and `events`.
 Logs are consolidated by category into `ticks_log.jsonl`, `phenomena_log.jsonl` and `events_log.jsonl`.
 Individual files can still be toggled via `log_files` for advanced filtering.
+The interpreter provides `records_for_tick()` and `assemble_timeline()` helpers to query these consolidated logs.
 
 ## Contributing
 Unit tests live under `tests/` and can be run with `pytest`. Coding guidelines and packaging instructions are documented in [AGENTS.md](AGENTS.md) and [docs/developer_guide.md](docs/developer_guide.md).

@@ -18,6 +18,9 @@ class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
         self.graph_path = graph_path or Config.graph_file
         self.graph = {}
         self.summary: Dict[str, Dict] = {}
+        self.tick_log = self._path("ticks_log.jsonl")
+        self.phenomena_log = self._path("phenomena_log.jsonl")
+        self.event_log = self._path("events_log.jsonl")
 
     # ------------------------------------------------------------
     def load_graph(self) -> None:
@@ -26,6 +29,69 @@ class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
                 self.graph = json.load(f)
         else:
             self.graph = {}
+
+    # ------------------------------------------------------------
+    def _periodic_by_label(self, label: str, category: str = "tick") -> dict:
+        """Return periodic records filtered by ``label``."""
+
+        path = self.tick_log if category == "tick" else self.phenomena_log
+        records = self.filter_periodic_log(path, label, int_keys=True)
+        if not records:
+            fallback = self._path(f"{label}.json")
+            records = self.load_json_lines(fallback, int_keys=True)
+        return records
+
+    # ------------------------------------------------------------
+    def _events_by_type(self, event_type: str) -> dict:
+        """Return events filtered by ``event_type`` keyed by tick."""
+
+        records = self.filter_event_log(self.event_log, event_type, int_keys=True)
+        if not records:
+            fallback = self._path(f"{event_type}.json")
+            records = self.load_event_log(fallback, int_keys=True)
+        return records
+
+    # ------------------------------------------------------------
+    def records_for_tick(self, tick: int) -> Dict[str, List[dict]]:
+        """Return all periodic and event records for ``tick``."""
+
+        result = {"tick": [], "phenomena": [], "event": []}
+        for cat, path in (
+            ("tick", self.tick_log),
+            ("phenomena", self.phenomena_log),
+            ("event", self.event_log),
+        ):
+            if not os.path.exists(path):
+                continue
+            with open(path) as fh:
+                for line in fh:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        obj = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+                    if obj.get("tick") == tick:
+                        result[cat].append(obj)
+        return result
+
+    # ------------------------------------------------------------
+    def assemble_timeline(self, start: int = 0, end: int | None = None) -> List[Dict]:
+        """Return combined timeline of events and phenomena."""
+
+        events = self.load_event_log(self.event_log, int_keys=True)
+        phen = self.group_periodic_log(self.phenomena_log, int_keys=True)
+        timeline: Dict[int, List[dict]] = {}
+        for tick, items in events.items():
+            if tick < start or (end is not None and tick > end):
+                continue
+            timeline.setdefault(tick, []).extend(items)
+        for tick, items in phen.items():
+            if tick < start or (end is not None and tick > end):
+                continue
+            timeline.setdefault(tick, []).extend(items)
+        return [{"tick": t, "records": timeline[t]} for t in sorted(timeline)]
 
     # ------------------------------------------------------------
     def interpret_curvature(self) -> None:
@@ -54,8 +120,7 @@ class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
 
     # ------------------------------------------------------------
     def interpret_collapse(self) -> None:
-        path = self._path("classicalization_map.json")
-        lines = self.load_json_lines(path)
+        lines = self._periodic_by_label("classicalization_map", category="phenomena")
         if not lines:
             return
         collapse: Dict[str, int] = {}
@@ -71,8 +136,7 @@ class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
 
     # ------------------------------------------------------------
     def interpret_coherence(self) -> None:
-        path = self._path("coherence_log.json")
-        lines = self.load_json_lines(path)
+        lines = self._periodic_by_label("coherence_log")
         if not lines:
             return
         summary: Dict[str, Dict[str, float]] = {}
@@ -87,8 +151,7 @@ class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
 
     # ------------------------------------------------------------
     def interpret_law_wave(self) -> None:
-        path = self._path("law_wave_log.json")
-        lines = self.load_json_lines(path)
+        lines = self._periodic_by_label("law_wave_log")
         if not lines:
             return
         freqs: Dict[str, List[float]] = {}
@@ -107,20 +170,10 @@ class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
     # ------------------------------------------------------------
     def interpret_collapse_origins(self) -> None:
         """Summarize where collapses were first triggered."""
-        path = self._path("collapse_front_log.json")
-        if not os.path.exists(path):
-            return
+        events = self._events_by_type("collapse_front_log")
         origins: Dict[str, int] = {}
-        with open(path) as f:
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    rec = json.loads(line)
-                except json.JSONDecodeError:
-                    continue
-                tick = rec.get("tick")
+        for tick, lst in events.items():
+            for rec in lst:
                 if rec.get("event") == "collapse_start":
                     node = rec.get("node")
                     if node and node not in origins:
@@ -131,19 +184,10 @@ class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
     # ------------------------------------------------------------
     def interpret_collapse_chains(self) -> None:
         """Summarize lengths of collapse propagation chains."""
-        path = self._path("collapse_chain_log.json")
-        if not os.path.exists(path):
-            return
+        events = self._events_by_type("collapse_chain_log")
         chains: Dict[str, int] = {}
-        with open(path) as f:
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    rec = json.loads(line)
-                except json.JSONDecodeError:
-                    continue
+        for lst in events.values():
+            for rec in lst:
                 src = rec.get("source")
                 length = len(rec.get("collapsed", []))
                 chains[src] = max(chains.get(src, 0), length)
@@ -153,20 +197,11 @@ class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
     # ------------------------------------------------------------
     def interpret_layer_transitions(self) -> None:
         """Aggregate layer transition counts per node."""
-        path = self._path("layer_transition_log.json")
-        if not os.path.exists(path):
-            return
+        events = self._events_by_type("layer_transition_log")
         totals: Dict[str, int] = {}
         by_node: Dict[str, Dict[str, int]] = {}
-        with open(path) as f:
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    rec = json.loads(line)
-                except json.JSONDecodeError:
-                    continue
+        for lst in events.values():
+            for rec in lst:
                 frm = rec.get("from")
                 to = rec.get("to")
                 node = rec.get("node")
@@ -185,19 +220,10 @@ class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
     # ------------------------------------------------------------
     def interpret_rerouting(self) -> None:
         """Count tick rerouting events due to refraction."""
-        path = self._path("refraction_log.json")
-        if not os.path.exists(path):
-            return
+        events = self._events_by_type("refraction_log")
         counts = {"recursive": 0, "alt_path": 0}
-        with open(path) as f:
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    rec = json.loads(line)
-                except json.JSONDecodeError:
-                    continue
+        for lst in events.values():
+            for rec in lst:
                 if rec.get("recursion_from"):
                     counts["recursive"] += 1
                 if rec.get("via"):
@@ -208,19 +234,10 @@ class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
     # ------------------------------------------------------------
     def interpret_node_state_map(self) -> None:
         """Summarize node state transitions."""
-        path = self._path("node_state_map.json")
-        if not os.path.exists(path):
-            return
+        events = self._events_by_type("node_state_map")
         transitions: Dict[str, Dict[str, int]] = {}
-        with open(path) as f:
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    rec = json.loads(line)
-                except json.JSONDecodeError:
-                    continue
+        for lst in events.values():
+            for rec in lst:
                 node = rec.get("node")
                 frm = rec.get("from")
                 to = rec.get("to")
@@ -234,8 +251,7 @@ class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
 
     # ------------------------------------------------------------
     def interpret_decoherence(self) -> None:
-        path = self._path("decoherence_log.json")
-        lines = self.load_json_lines(path)
+        lines = self._periodic_by_label("decoherence_log")
         if not lines:
             return
         stats: Dict[str, Dict[str, float]] = {}
@@ -250,8 +266,7 @@ class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
 
     # ------------------------------------------------------------
     def interpret_clusters(self) -> None:
-        path = self._path("cluster_log.json")
-        lines = self.load_json_lines(path)
+        lines = self._periodic_by_label("cluster_log")
         if not lines:
             return
         first = None
@@ -268,8 +283,7 @@ class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
 
     # ------------------------------------------------------------
     def interpret_bridge_state(self) -> None:
-        path = self._path("bridge_state_log.json")
-        lines = self.load_json_lines(path)
+        lines = self._periodic_by_label("bridge_state_log")
         if not lines:
             return
         last_tick = max(int(t) for t in lines)
@@ -277,18 +291,10 @@ class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
 
     # ------------------------------------------------------------
     def interpret_law_drift(self) -> None:
-        path = self._path("law_drift_log.json")
-        if not os.path.exists(path):
-            return
+        events = self._events_by_type("law_drift_log")
         counts: Dict[str, int] = {}
-        with open(path) as f:
-            for line in f:
-                if not line.strip():
-                    continue
-                try:
-                    rec = json.loads(line)
-                except json.JSONDecodeError:
-                    continue
+        for lst in events.values():
+            for rec in lst:
                 node = rec.get("node")
                 counts[node] = counts.get(node, 0) + 1
         if counts:
@@ -296,8 +302,7 @@ class CWTLogInterpreter(OutputDirMixin, JsonLinesMixin):
 
     # ------------------------------------------------------------
     def interpret_meta_nodes(self) -> None:
-        path = self._path("meta_node_tick_log.json")
-        lines = self.load_json_lines(path)
+        lines = self._periodic_by_label("meta_node_tick_log")
         if not lines:
             return
         counts: Dict[str, int] = {}

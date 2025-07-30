@@ -109,3 +109,63 @@ class JsonLinesMixin:
                 key = int(tick) if int_keys else str(tick)
                 records.setdefault(key, []).append(obj)
         return records
+
+    @staticmethod
+    def filter_periodic_log(path: str, label: str, int_keys: bool = False) -> dict:
+        """Return records with ``label`` from ``path`` keyed by tick."""
+
+        result: dict = {}
+        if not os.path.exists(path):
+            return result
+        with open(path) as fh:
+            for line in fh:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    obj = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if obj.get("label") != label:
+                    continue
+                tick = obj.get("tick")
+                if tick is None:
+                    continue
+                key = int(tick) if int_keys else str(tick)
+                result[key] = obj.get("value")
+        return result
+
+    @staticmethod
+    def filter_event_log(path: str, event_type: str, int_keys: bool = False) -> dict:
+        """Return events of ``event_type`` from ``path`` keyed by tick."""
+
+        events = JsonLinesMixin.load_event_log(path, int_keys=int_keys)
+        filtered: dict = {}
+        for tick, lst in events.items():
+            matches = [e for e in lst if e.get("event_type") == event_type]
+            if matches:
+                filtered[tick] = matches
+        return filtered
+
+    @staticmethod
+    def group_periodic_log(path: str, int_keys: bool = False) -> dict:
+        """Return all periodic records from ``path`` grouped by tick."""
+
+        grouped: dict = {}
+        if not os.path.exists(path):
+            return grouped
+        with open(path) as fh:
+            for line in fh:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    obj = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                tick = obj.get("tick")
+                if tick is None:
+                    continue
+                key = int(tick) if int_keys else str(tick)
+                grouped.setdefault(key, []).append(obj)
+        return grouped
