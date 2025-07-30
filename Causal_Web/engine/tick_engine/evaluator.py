@@ -462,7 +462,7 @@ def _update_growth_log(tick: int) -> None:
         csp_success_total=_csp_success_count,
         avg_coherence=round(avg_coh, 4),
     )
-    entry = StructuralGrowthLog(tick=tick, payload=payload)
+    entry = StructuralGrowthLog(tick=tick, value=payload)
     log_json("tick", "structural_growth_log", payload.model_dump(), tick=tick)
     _sip_success_count = 0
     _sip_failure_count = 0
