@@ -21,10 +21,10 @@ def test_logging_mode_filters_categories():
         Config.logging_mode = ["tick"]
         Config.log_files = {
             "coherence_log.json": True,
-            "event_log.json": True,
+            "bridge_rupture_log.json": True,
         }
         assert Config.is_log_enabled("coherence_log.json")
-        assert not Config.is_log_enabled("event_log.json")
+        assert not Config.is_log_enabled("bridge_rupture_log.json")
         assert Config.is_log_enabled(category="tick")
         assert not Config.is_log_enabled(category="event")
     finally:
