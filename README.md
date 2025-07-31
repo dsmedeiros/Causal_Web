@@ -41,6 +41,8 @@ Nodes can optionally enable self-connections via a checkbox in the node panel. W
 Bridges now support an `Entanglement Enabled` option. When selected, the bridge
 is tagged with an `entangled_id` used by observers to generate deterministic
 measurement outcomes for Bell-type experiments.
+Observers can enable a *Detector Mode* that records a binary outcome whenever a
+tick from an entangled bridge is detected.
 
 Runs produce a set of JSON logs in `output/`. The script `bundle_run.py` can be used after a simulation to archive the results. Full descriptions of each log file and their fields are available in [docs/log_schemas.md](docs/log_schemas.md).
 

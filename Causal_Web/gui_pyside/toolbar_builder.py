@@ -310,6 +310,20 @@ class ObserverPanel(QDockWidget, PanelMixin):
             self.freq_spin,
         )
 
+        self.detector_check = QCheckBox()
+        self.detector_check.toggled.connect(self._mark_dirty)
+        layout.addRow(
+            TooltipLabel("Enable Detector Mode", TOOLTIPS.get("detector_mode")),
+            self.detector_check,
+        )
+
+        self.settings_edit = QLineEdit()
+        self.settings_edit.textChanged.connect(self._mark_dirty)
+        layout.addRow(
+            TooltipLabel("Measurement Settings", TOOLTIPS.get("measurement_settings")),
+            self.settings_edit,
+        )
+
         self.node_list = QListWidget()
         self.node_list.setSelectionMode(QListWidget.MultiSelection)
         layout.addRow(
@@ -351,6 +365,12 @@ class ObserverPanel(QDockWidget, PanelMixin):
         for ev, cb in self.monitor_checks.items():
             cb.setChecked(ev in data.get("monitors", []))
         self.freq_spin.setValue(float(data.get("frequency", 1.0)))
+        self.detector_check.setChecked(bool(data.get("detector_mode", False)))
+        settings = data.get("measurement_settings")
+        if settings:
+            self.settings_edit.setText(",".join(str(s) for s in settings))
+        else:
+            self.settings_edit.setText("")
         self.node_list.clear()
         for nid in model.nodes:
             item = QListWidgetItem(nid)
@@ -379,6 +399,8 @@ class ObserverPanel(QDockWidget, PanelMixin):
         for cb in self.monitor_checks.values():
             cb.setChecked(False)
         self.freq_spin.setValue(1.0)
+        self.detector_check.setChecked(False)
+        self.settings_edit.setText("")
         self.node_list.clear()
         for nid in get_graph().nodes:
             self.node_list.addItem(QListWidgetItem(nid))
@@ -402,7 +424,16 @@ class ObserverPanel(QDockWidget, PanelMixin):
             "frequency": float(self.freq_spin.value()),
             "x": float(existing.get("x", 0.0)),
             "y": float(existing.get("y", 0.0)),
+            "detector_mode": self.detector_check.isChecked(),
         }
+        settings_text = self.settings_edit.text().strip()
+        if settings_text:
+            try:
+                data["measurement_settings"] = [
+                    float(s) for s in settings_text.split(",")
+                ]
+            except ValueError:
+                pass
         targets = [item.text() for item in self.node_list.selectedItems()]
         if targets:
             data["target_nodes"] = targets
