@@ -467,8 +467,14 @@ class BridgeApplyService:
         self.node_b = self.graph.get_node(self.bridge.node_b_id)
         self.phase_a = self.node_a.get_phase_at(self.tick_time)
         self.phase_b = self.node_b.get_phase_at(self.tick_time)
-        self.a_collapsed = self.node_a.collapse_origin.get(self.tick_time) == "self"
-        self.b_collapsed = self.node_b.collapse_origin.get(self.tick_time) == "self"
+        self.a_collapsed = self.node_a.collapse_origin.get(self.tick_time) in {
+            "self",
+            "seed",
+        }
+        self.b_collapsed = self.node_b.collapse_origin.get(self.tick_time) in {
+            "self",
+            "seed",
+        }
 
     # ------------------------------------------------------------------
     def _validate_collapse(self) -> bool:
@@ -552,6 +558,10 @@ class BridgeApplyService:
     def _propagate_braided(self) -> None:
         if self.a_collapsed:
             phase = self.node_a.get_phase_at(self.tick_time)
+            if self.bridge.is_entangled and self.node_a.tick_history:
+                last = self.node_a.tick_history[-1]
+                if last.time == self.tick_time:
+                    last.entangled_id = self.bridge.entangled_id
             self.node_b.apply_tick(
                 self.tick_time,
                 phase + self.bridge.phase_offset,
@@ -565,6 +575,10 @@ class BridgeApplyService:
             self.node_b.entangled_with.add(self.node_a.id)
         elif self.b_collapsed:
             phase = self.node_b.get_phase_at(self.tick_time)
+            if self.bridge.is_entangled and self.node_b.tick_history:
+                last = self.node_b.tick_history[-1]
+                if last.time == self.tick_time:
+                    last.entangled_id = self.bridge.entangled_id
             self.node_a.apply_tick(
                 self.tick_time,
                 phase + self.bridge.phase_offset,
@@ -581,6 +595,10 @@ class BridgeApplyService:
     def _propagate_unidirectional(self) -> None:
         if self.a_collapsed:
             phase = self.node_a.get_phase_at(self.tick_time)
+            if self.bridge.is_entangled and self.node_a.tick_history:
+                last = self.node_a.tick_history[-1]
+                if last.time == self.tick_time:
+                    last.entangled_id = self.bridge.entangled_id
             self.node_b.apply_tick(
                 self.tick_time,
                 phase + self.bridge.phase_offset,
