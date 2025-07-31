@@ -299,8 +299,8 @@ class Bridge(LoggingMixin):
             self._log_dynamics(tick_time, "recovered", {"coherence": coherence})
 
     def apply(self, tick_time: int, graph: "CausalGraph") -> None:
-        """Apply the bridge logic for ``tick_time``."""
-        from .services.sim_services import BridgeApplyService
+        """Activate the bridge for ``tick_time`` using ``BridgeApplyService``."""
+        from ..services.sim_services import BridgeApplyService
 
         BridgeApplyService(self, tick_time, graph).process()
 

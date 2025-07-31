@@ -194,8 +194,8 @@ class SimulationRunner:
         self.evaluation.finalize(self.global_tick)
         snapshot_path = self.io.snapshot_state(self.global_tick)
         self.io.update_state(self.global_tick, False, False, snapshot_path)
-        self.io.handle_observers(self.global_tick)
         self.mutation.apply_bridges(self.global_tick)
+        self.io.handle_observers(self.global_tick)
 
 
 # ---------------------------------------------------------------------------

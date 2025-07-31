@@ -43,6 +43,8 @@ is tagged with an `entangled_id` used by observers to generate deterministic
 measurement outcomes for Bell-type experiments.
 Observers can enable a *Detector Mode* that records a binary outcome whenever a
 tick from an entangled bridge is detected.
+Bridge propagation now occurs before observers handle a tick so detector events
+reflect entangled activity in the same cycle.
 These detector events are additionally written to `entangled_log.jsonl` for
 Bell inequality analysis.
 The GUI now includes an **Analysis** menu with a *Bell Inequality Analysis...*
