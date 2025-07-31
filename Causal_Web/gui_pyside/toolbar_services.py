@@ -40,6 +40,7 @@ class ToolbarBuildService:
         add_conn_action = QAction("Add Connection", mw)
         add_conn_action.triggered.connect(mw.start_add_connection)
         toolbar.addAction(add_conn_action)
+        mw.add_conn_action = add_conn_action
 
         add_obs_action = QAction("Add Observer", mw)
         add_obs_action.triggered.connect(mw.add_observer)

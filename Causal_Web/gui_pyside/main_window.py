@@ -108,6 +108,7 @@ class MainWindow(QMainWindow):
         # ``self.graph_window`` to be available.
         self.graph_window = QMainWindow()
 
+        self.adding_connection = False
         toolbar = build_toolbar(self)
 
         central = QWidget()
@@ -478,8 +479,23 @@ class MainWindow(QMainWindow):
         self.meta_node_panel.open_new(meta_id)
 
     def start_add_connection(self) -> None:
-        """Enable interactive connection mode."""
-        self.canvas.enable_connection_mode()
+        """Toggle interactive connection mode for adding edges."""
+        if self.adding_connection:
+            self.canvas.cancel_connection_mode()
+            if hasattr(self, "add_conn_action"):
+                self.add_conn_action.setText("Add Connection")
+            self.adding_connection = False
+        else:
+            self.canvas.enable_connection_mode()
+            if hasattr(self, "add_conn_action"):
+                self.add_conn_action.setText("Cancel Connection")
+            self.adding_connection = True
+
+    def finish_add_connection(self) -> None:
+        """Reset the Add Connection button after a connection is created."""
+        if hasattr(self, "add_conn_action"):
+            self.add_conn_action.setText("Add Connection")
+        self.adding_connection = False
 
     def _show_graph_editor(self) -> None:
         """Display the graph editor window."""

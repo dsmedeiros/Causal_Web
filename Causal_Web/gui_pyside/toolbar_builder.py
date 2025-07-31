@@ -246,6 +246,7 @@ class ConnectionPanel(QDockWidget, PanelMixin):
         model = get_graph()
         ConnectionCommitService(self, model).commit()
         self.hide()
+        self.main_window.finish_add_connection()
         self.source = self.target = None
         self.current_index = None
         self.dirty = False
