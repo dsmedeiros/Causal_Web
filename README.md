@@ -57,6 +57,16 @@ python -m Causal_Web.main --disable-tick=coherence_log,interference_log \
     --enable-events=bridge_rupture_log
 ```
 
+The `density_calc` option controls how edge density is computed. Set one of:
+
+- `local_tick_saturation` (default) – density increases with recent traffic
+- `modular-<mode>` – use a registered modular function (`tick_history`,
+  `node_coherence`, `spatial_field`, `bridge_saturation`)
+- `manual_overlay` – sample values from an external overlay file defined by
+  `density_overlay_file`.
+
+`density_calc` can also be specified via `--density-calc` on the command line.
+
 ## Output Logs
 Each run creates a timestamped directory under `output/runs` containing the graph, configuration and logs. Logging can be enabled or disabled via the GUI **Log Files** window or the `log_files` section of `config.json`. In `config.json` the keys are the categories (`tick`, `phenomena`, `event`) containing individual label flags. The `logging_mode` option selects which categories are written: `diagnostic` (all logs), `tick`, `phenomena` and `events`.
 Logs are consolidated by category into `ticks_log.jsonl`, `phenomena_log.jsonl` and `events_log.jsonl`.

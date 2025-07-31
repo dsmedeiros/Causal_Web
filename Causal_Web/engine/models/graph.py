@@ -12,6 +12,7 @@ from .tick import GLOBAL_TICK_POOL
 from .meta_node import MetaNode
 from ...config import Config
 import json
+import os
 from ..logging.logger import log_json, log_record
 
 
@@ -37,6 +38,9 @@ class CausalGraph:
         self._density_cache_version = 0
         self._edge_density_cache: dict[tuple[int, int, int], float] = {}
         self._node_density_cache: dict[tuple[str, int, int], dict[int, float]] = {}
+        self.density_overlay: list[dict] | None = None
+        self._modular_density_funcs: dict[str, callable] = {}
+        self._register_default_density_funcs()
 
     def _invalidate_density_cache(self) -> None:
         """Clear cached density values after topology changes."""
@@ -307,6 +311,42 @@ class CausalGraph:
         self._edge_density_cache[key] = density
         return density
 
+    # ------------------------------------------------------------------
+    def _overlay_density(self, edge: Edge) -> float:
+        """Return density sampled from ``density_overlay`` for ``edge``."""
+        if not self.density_overlay:
+            return 0.0
+        src = self.get_node(edge.source)
+        tgt = self.get_node(edge.target)
+        if not src or not tgt:
+            return 0.0
+        x = (src.x + tgt.x) / 2
+        y = (src.y + tgt.y) / 2
+        for field in self.density_overlay:
+            if field.get("x1", 0) <= x <= field.get("x2", 0) and field.get(
+                "y1", 0
+            ) <= y <= field.get("y2", 0):
+                return float(field.get("value", 0.0))
+        return 0.0
+
+    # ------------------------------------------------------------------
+    def compute_edge_density(self, edge: Edge, radius: int = 1) -> float:
+        """Return the density value for ``edge`` using the configured strategy."""
+
+        strategy = getattr(Config, "density_calc", "local_tick_saturation")
+        if strategy == "manual_overlay":
+            return self._overlay_density(edge)
+        if strategy.startswith("modular-"):
+            mode = strategy.split("-", 1)[1]
+            func = self._modular_density_funcs.get(mode)
+            if func:
+                try:
+                    return float(func(self, edge, radius))
+                except Exception:
+                    return 0.0
+        base = self.compute_local_density(edge, radius)
+        return base + getattr(Config, "traffic_weight", 0.1) * edge.tick_traffic
+
     def precompute_local_densities(self, radius: int = 1) -> None:
         """Populate dynamic density for all edges."""
 
@@ -320,6 +360,51 @@ class CausalGraph:
             max_workers=getattr(Config, "thread_count", None)
         ) as ex:
             list(ex.map(_update, self.edges))
+
+    # ------------------------------------------------------------------
+    def load_density_overlay(self, path: str) -> None:
+        """Load manual density overlay from ``path`` if it exists."""
+        if not os.path.exists(path):
+            self.density_overlay = None
+            return
+        with open(path) as f:
+            data = json.load(f)
+        self.density_overlay = list(data.get("fields", []))
+
+    # ------------------------------------------------------------------
+    def register_density_function(self, name: str, func: callable) -> None:
+        """Register a modular density calculation function."""
+        self._modular_density_funcs[name] = func
+
+    # ------------------------------------------------------------------
+    def _register_default_density_funcs(self) -> None:
+        """Install built-in modular density calculation strategies."""
+
+        def tick_history(graph: "CausalGraph", edge: Edge, radius: int) -> float:
+            src = graph.get_node(edge.source)
+            tgt = graph.get_node(edge.target)
+            if not src or not tgt:
+                return 0.0
+            return (len(src.tick_history) + len(tgt.tick_history)) / 10.0
+
+        def node_coherence(graph: "CausalGraph", edge: Edge, radius: int) -> float:
+            src = graph.get_node(edge.source)
+            tgt = graph.get_node(edge.target)
+            if not src or not tgt:
+                return 0.0
+            return (src.coherence + tgt.coherence) / 2.0
+
+        def spatial_field(graph: "CausalGraph", edge: Edge, radius: int) -> float:
+            return graph.compute_local_density(edge, radius)
+
+        def bridge_saturation(graph: "CausalGraph", edge: Edge, radius: int) -> float:
+            active = sum(1 for b in graph.bridges if b.active)
+            return active / max(1, len(graph.nodes))
+
+        self.register_density_function("tick_history", tick_history)
+        self.register_density_function("node_coherence", node_coherence)
+        self.register_density_function("spatial_field", spatial_field)
+        self.register_density_function("bridge_saturation", bridge_saturation)
 
     # --- Bridge-aware connectivity helpers ---
     def get_bridge_neighbors(self, node_id: str, active_only: bool = True) -> list[str]:

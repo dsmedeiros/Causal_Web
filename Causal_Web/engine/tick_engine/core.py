@@ -60,6 +60,9 @@ def clear_output_directory() -> None:
 def build_graph() -> None:
     clear_output_directory()
     graph.load_from_file(Config.graph_file)
+    overlay = getattr(Config, "density_overlay_file", None)
+    if overlay:
+        graph.load_density_overlay(overlay)
     global seeder
     seeder = TickSeeder(graph)
     _ensure_attached()

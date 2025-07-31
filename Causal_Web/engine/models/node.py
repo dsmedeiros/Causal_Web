@@ -701,6 +701,8 @@ class Edge:
         self.delay = delay
         self.phase_shift = phase_shift
         self.weight = weight
+        self.tick_traffic = 0.0
+        self._last_tick = 0
 
     def adjusted_delay(
         self,
@@ -718,7 +720,7 @@ class Edge:
             getattr(Config, "use_dynamic_density", False) or not self.density_specified
         ):
             rad = radius if radius is not None else getattr(Config, "density_radius", 1)
-            rho = graph.compute_local_density(self, radius=rad)
+            rho = graph.compute_edge_density(self, radius=rad)
 
         adjusted = self.delay * (1 + kappa * rho) * self.weight
         delay_int = max(1, int(round(adjusted)))
@@ -747,6 +749,10 @@ class Edge:
         graph: "CausalGraph",
     ) -> None:
         target_node = graph.get_node(self.target)
+        dt = global_tick - self._last_tick
+        decay = getattr(Config, "traffic_decay", 0.9) ** max(1, dt)
+        self.tick_traffic = self.tick_traffic * decay + 1
+        self._last_tick = global_tick
 
         drift_phase = 0.0
         if isinstance(self.phase_shift, dict):
