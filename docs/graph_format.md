@@ -71,3 +71,6 @@ Nodes can optionally set ``allow_self_connection`` to ``true`` to permit self-co
 ```
 
 Observers may include optional `x` and `y` fields storing their position on the canvas. Emergent meta nodes discovered at runtime are logged for analysis but do not affect behaviour unless declared in the file.
+
+Bridges can optionally enable entanglement using `"is_entangled": true`. When
+set, an `entangled_id` is generated and saved alongside the bridge metadata.

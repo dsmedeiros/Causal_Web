@@ -192,6 +192,9 @@ class ConnectionPanelSetupService:
         p.initial_strength_spin = QDoubleSpinBox()
         p.medium_type_edit = QLineEdit()
         p.mutable_check = QCheckBox()
+        p.entangled_check = QCheckBox()
+        p.entangled_id_label = QLineEdit()
+        p.entangled_id_label.setReadOnly(True)
 
         p.bridge_widgets = [
             (TooltipLabel("Node A ID"), p.nodea_edit),
@@ -220,6 +223,14 @@ class ConnectionPanelSetupService:
             (
                 TooltipLabel("Mutable", TOOLTIPS.get("mutable")),
                 p.mutable_check,
+            ),
+            (
+                TooltipLabel("Entanglement Enabled"),
+                p.entangled_check,
+            ),
+            (
+                TooltipLabel("Entangled ID"),
+                p.entangled_id_label,
             ),
         ]
         for lbl, w in p.bridge_widgets:
@@ -379,6 +390,8 @@ class ConnectionCommitService:
                 initial_strength=float(self.panel.initial_strength_spin.value()),
                 medium_type=self.panel.medium_type_edit.text(),
                 mutable=self.panel.mutable_check.isChecked(),
+                is_entangled=self.panel.entangled_check.isChecked(),
+                entangled_id=self.panel.entangled_id_label.text() or None,
             )
 
     # ------------------------------------------------------------------
@@ -418,6 +431,8 @@ class ConnectionCommitService:
                 initial_strength=float(self.panel.initial_strength_spin.value()),
                 medium_type=self.panel.medium_type_edit.text(),
                 mutable=self.panel.mutable_check.isChecked(),
+                is_entangled=self.panel.entangled_check.isChecked(),
+                entangled_id=self.panel.entangled_id_label.text() or None,
             )
 
 
@@ -486,6 +501,8 @@ class ConnectionDisplayService:
             p.initial_strength_spin.setValue(float(data.get("initial_strength", 0.0)))
             p.medium_type_edit.setText(data.get("medium_type", ""))
             p.mutable_check.setChecked(bool(data.get("mutable", False)))
+            p.entangled_check.setChecked(bool(data.get("is_entangled", False)))
+            p.entangled_id_label.setText(str(data.get("entangled_id", "")))
 
     # ------------------------------------------------------------------
     def _finish(self) -> None:

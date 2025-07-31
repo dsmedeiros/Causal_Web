@@ -51,6 +51,8 @@ BridgeData = TypedDict(
         "initial_strength": float,
         "medium_type": MediumType | str,
         "mutable": bool,
+        "is_entangled": bool,
+        "entangled_id": str,
     },
     total=False,
 )

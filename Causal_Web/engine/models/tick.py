@@ -17,6 +17,7 @@ class Tick:
     layer: str = "tick"
     trace_id: str = ""
     cumulative_delay: float = 0.0
+    entangled_id: str | None = None
 
 
 class TickPool:
@@ -41,6 +42,7 @@ class TickPool:
         tick.layer = "tick"
         tick.trace_id = ""
         tick.cumulative_delay = 0.0
+        tick.entangled_id = None
         self._pool.append(tick)
 
 

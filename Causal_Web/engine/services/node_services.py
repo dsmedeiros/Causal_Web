@@ -166,6 +166,7 @@ class NodeTickService:
     phase: float
     graph: Any
     origin: str = "self"
+    entangled_id: str | None = None
 
     def process(self) -> None:
         """Execute the node tick lifecycle for ``tick_time``."""
@@ -223,6 +224,7 @@ class NodeTickService:
         tick_obj.phase = self.phase
         tick_obj.layer = "tick"
         tick_obj.trace_id = trace_id
+        tick_obj.entangled_id = self.entangled_id
 
         n = self.node
         with n.lock:
@@ -344,6 +346,7 @@ class EdgePropagationService:
         new_tick.trace_id = self.tick.trace_id
         new_tick.generation_tick = self.tick.generation_tick
         new_tick.cumulative_delay = new_delay
+        new_tick.entangled_id = self.tick.entangled_id
         target.schedule_tick(
             self.tick_time + delay,
             shifted,
@@ -352,6 +355,7 @@ class EdgePropagationService:
             amplitude=new_tick.amplitude,
             tick_id=new_tick.trace_id,
             cumulative_delay=new_delay,
+            entangled_id=new_tick.entangled_id,
         )
         GLOBAL_TICK_POOL.release(new_tick)
 
@@ -395,6 +399,7 @@ class EdgePropagationService:
             shifted,
             origin=self.node.id,
             created_tick=self.tick_time,
+            entangled_id=self.tick.entangled_id,
         )
         target.node_type = NodeType.REFRACTIVE
         log_json(

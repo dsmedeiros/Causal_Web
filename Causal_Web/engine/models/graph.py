@@ -155,6 +155,9 @@ class CausalGraph:
         mutable: bool = True,
         seeded: bool = True,
         formed_at_tick: int = 0,
+        *,
+        is_entangled: bool = False,
+        entangled_id: str | None = None,
     ) -> None:
         if isinstance(bridge_type, str):
             bridge_type = BridgeType(bridge_type)
@@ -172,6 +175,8 @@ class CausalGraph:
             mutable,
             seeded,
             formed_at_tick,
+            is_entangled=is_entangled,
+            entangled_id=entangled_id,
         )
         self.bridges.append(bridge)
         self.bridges_by_node[node_a_id].add(bridge)
