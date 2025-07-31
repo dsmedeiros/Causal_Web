@@ -365,6 +365,7 @@ class CanvasWidget(QGraphicsView):
         self.command_stack = CommandStack()
         self._connect_mode: bool = False
         self._connect_start: Optional[NodeItem] = None
+        self._connect_dragged: bool = False
         self._temp_edge: Optional[QGraphicsLineItem] = None
 
     def load_model(self, model: GraphModel) -> None:
@@ -428,19 +429,19 @@ class CanvasWidget(QGraphicsView):
                 super().mousePressEvent(event)
                 return
             item = self.itemAt(event.pos())
-            if (
-                self._connect_mode
-                and self._connect_start is None
-                and isinstance(item, NodeItem)
-            ):
-                self._connect_start = item
-                if scene := self.scene():
-                    pen = QPen(Qt.darkGray)
-                    pen.setStyle(Qt.DashLine)
-                    self._temp_edge = QGraphicsLineItem()
-                    self._temp_edge.setPen(pen)
-                    scene.addItem(self._temp_edge)
-                    self._update_temp_edge(event.pos())
+            if self._connect_mode and isinstance(item, NodeItem):
+                if self._connect_start is None:
+                    self._connect_start = item
+                    self._connect_dragged = False
+                    if scene := self.scene():
+                        pen = QPen(Qt.darkGray)
+                        pen.setStyle(Qt.DashLine)
+                        self._temp_edge = QGraphicsLineItem()
+                        self._temp_edge.setPen(pen)
+                        scene.addItem(self._temp_edge)
+                        self._update_temp_edge(event.pos())
+                else:
+                    self._finalize_connection(item, event.pos())
             else:
                 super().mousePressEvent(event)
 
@@ -456,6 +457,8 @@ class CanvasWidget(QGraphicsView):
             )
         else:
             if self.editable and self._connect_start and self._temp_edge is not None:
+                if event.buttons() & Qt.LeftButton:
+                    self._connect_dragged = True
                 self._update_temp_edge(event.pos())
             else:
                 super().mouseMoveEvent(event)
@@ -470,24 +473,8 @@ class CanvasWidget(QGraphicsView):
         else:
             if self.editable and self._connect_start:
                 item = self.itemAt(event.pos())
-                if isinstance(item, NodeItem):
-                    if item is self._connect_start:
-                        data = self.model.nodes.get(item.node_id, {})
-                        if data.get("allow_self_connection", False):
-                            self.connection_request.emit(item.node_id, item.node_id)
-                        else:
-                            self._show_status_message(
-                                "Self-connection disabled", event.pos()
-                            )
-                    else:
-                        self.connection_request.emit(
-                            self._connect_start.node_id, item.node_id
-                        )
-                if self._temp_edge and self.scene():
-                    self.scene().removeItem(self._temp_edge)
-                self._temp_edge = None
-                self._connect_start = None
-                self._connect_mode = False
+                if self._connect_dragged and isinstance(item, NodeItem):
+                    self._finalize_connection(item, event.pos())
             else:
                 super().mouseReleaseEvent(event)
 
@@ -502,6 +489,23 @@ class CanvasWidget(QGraphicsView):
                 scene_pos.x(),
                 scene_pos.y(),
             )
+
+    def _finalize_connection(self, item: NodeItem, view_pos: QPoint) -> None:
+        """Create a connection from ``_connect_start`` to ``item`` if allowed."""
+        if item is self._connect_start:
+            data = self.model.nodes.get(item.node_id, {})
+            if data.get("allow_self_connection", False):
+                self.connection_request.emit(item.node_id, item.node_id)
+            else:
+                self._show_status_message("Self-connection disabled", view_pos)
+        else:
+            self.connection_request.emit(self._connect_start.node_id, item.node_id)
+        if self._temp_edge and self.scene():
+            self.scene().removeItem(self._temp_edge)
+        self._temp_edge = None
+        self._connect_start = None
+        self._connect_mode = False
+        self._connect_dragged = False
 
     def _show_status_message(self, text: str, view_pos: QPoint) -> None:
         if scene := self.scene():
@@ -519,6 +523,7 @@ class CanvasWidget(QGraphicsView):
             return
         self._connect_mode = True
         self._connect_start = None
+        self._connect_dragged = False
         if self._temp_edge and self.scene():
             self.scene().removeItem(self._temp_edge)
         self._temp_edge = None
