@@ -655,8 +655,13 @@ class Node(LoggingMixin):
                 )
                 return
             should_fire, phase, reason = self.should_tick(tick_key)
+            entangled_id = None
+            for item in self.incoming_phase_queue.get(tick_key, []):
+                if len(item) > 6 and item[6] is not None:
+                    entangled_id = item[6]
+                    break
             if should_fire and not self.is_classical:
-                self.apply_tick(tick_key, phase, graph)
+                self.apply_tick(tick_key, phase, graph, entangled_id=entangled_id)
             else:
                 drop_reason = "classical" if self.is_classical else reason
                 self._log_tick_drop(tick_key, drop_reason)

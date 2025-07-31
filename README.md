@@ -43,6 +43,8 @@ is tagged with an `entangled_id` used by observers to generate deterministic
 measurement outcomes for Bell-type experiments.
 Observers can enable a *Detector Mode* that records a binary outcome whenever a
 tick from an entangled bridge is detected.
+These detector events are additionally written to `entangled_log.jsonl` for
+Bell inequality analysis.
 
 Runs produce a set of JSON logs in `output/`. The script `bundle_run.py` can be used after a simulation to archive the results. Full descriptions of each log file and their fields are available in [docs/log_schemas.md](docs/log_schemas.md).
 
@@ -76,6 +78,8 @@ The `density_calc` option controls how edge density is computed. Set one of:
 Each run creates a timestamped directory under `output/runs` containing the graph, configuration and logs. Logging can be enabled or disabled via the GUI **Log Files** window or the `log_files` section of `config.json`. In `config.json` the keys are the categories (`tick`, `phenomena`, `event`) containing individual label flags. The `logging_mode` option selects which categories are written: `diagnostic` (all logs), `tick`, `phenomena` and `events`.
 Logs are consolidated by category into `ticks_log.jsonl`, `phenomena_log.jsonl` and `events_log.jsonl`.
 Individual files can still be toggled via `log_files` for advanced filtering.
+Entangled tick metadata and detector outcomes are stored separately in
+`entangled_log.jsonl`.
 Law-wave propagation events now appear as `law_wave_event` records in the `events` log.
 Per-tick law-wave frequencies are still written under the `law_wave_log` label in `ticks_log.jsonl`.
 The interpreter provides `records_for_tick()` and `assemble_timeline()` helpers to query these consolidated logs.

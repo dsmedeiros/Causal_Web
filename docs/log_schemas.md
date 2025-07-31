@@ -242,6 +242,12 @@ The following lists describe the JSON keys recorded in each output file.
 - event-driven record with `tick_id`, `observer_id`, `entangled_id`,
   `measurement_setting` and `binary_outcome` for each detected entangled tick.
 
+#### `entangled_log.jsonl`
+- JSON lines file capturing entangled tick activity. `label` values include
+  `entangled_tick` when a node emits a tick with an `entangled_id` and
+  `measurement` for observer outcomes. Each entry stores `tick`, `tick_id`,
+  `entangled_id` and related metadata for Bell analysis.
+
 #### `propagation_failure_log.json`
 - heterogeneous records describing why propagation failed. Common
   fields include `node` or `parent`, failure `type` and `reason`.
