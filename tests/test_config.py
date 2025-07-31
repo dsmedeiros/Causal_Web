@@ -42,3 +42,14 @@ def test_load_smooth_phase_flag(tmp_path):
         assert Config.smooth_phase is True
     finally:
         Config.smooth_phase = original
+
+
+def test_load_propagation_flags(tmp_path):
+    cfg = tmp_path / "config.json"
+    cfg.write_text(json.dumps({"propagation_control": {"enable_sip_child": False}}))
+    original = Config.propagation_control.copy()
+    Config.load_from_file(str(cfg))
+    try:
+        assert Config.propagation_control["enable_sip_child"] is False
+    finally:
+        Config.propagation_control = original

@@ -65,7 +65,9 @@
   "tick_emission_log.json": "Ticks emitted by nodes",
   "tick_evaluation_log.json": "Evaluation results for each potential tick",
   "tick_propagation_log.json": "Ticks travelling across edges",
-  "tick_seed_log.json": "Activity injected by the seeder"
- ,
-  "smooth_phase": "Apply exponential smoothing to oscillator phases"
- }
+  "tick_seed_log.json": "Activity injected by the seeder",
+  "smooth_phase": "Apply exponential smoothing to oscillator phases",
+  "enable_sip_child": "Enable SIP budding propagation",
+  "enable_sip_recomb": "Enable SIP recombination propagation",
+  "enable_csp": "Enable collapse seeded propagation"
+}

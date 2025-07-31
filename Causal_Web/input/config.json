@@ -38,7 +38,8 @@
   "traffic_weight": 0.1,
   "density_overlay_file": null,
   "propagation_control": {
-    "enable_sip": true,
+    "enable_sip_child": true,
+    "enable_sip_recomb": true,
     "enable_csp": true
   },
   "database": {
