@@ -241,6 +241,18 @@ class NodeTickService:
             {"node_id": n.id, "phase": self.phase},
             tick=self.tick_time,
         )
+        if tick_obj.entangled_id is not None:
+            log_json(
+                "entangled",
+                "entangled_tick",
+                {
+                    "node_id": n.id,
+                    "tick_id": tick_obj.trace_id,
+                    "entangled_id": tick_obj.entangled_id,
+                    "origin": self.origin,
+                },
+                tick=self.tick_time,
+            )
         with n.lock:
             if self.origin == "self":
                 n.emitted_tick_times.add(self.tick_time)

@@ -118,6 +118,10 @@ class Config:
             "tick_seed_log": True,
             "event_log": True,
         },
+        "entangled": {
+            "entangled_tick": True,
+            "measurement": True,
+        },
     }
 
     # Default runtime copy

@@ -98,6 +98,18 @@ class Observer:
                     },
                     tick=tick_time,
                 )
+                log_json(
+                    "entangled",
+                    "measurement",
+                    {
+                        "tick_id": ev["tick_id"],
+                        "observer_id": self.id,
+                        "entangled_id": ent_id,
+                        "measurement_setting": setting,
+                        "binary_outcome": outcome,
+                    },
+                    tick=tick_time,
+                )
         self.memory.append({"tick": tick_time, "events": events})
         if len(self.memory) > self.window:
             self.memory.pop(0)
