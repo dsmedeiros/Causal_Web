@@ -33,6 +33,7 @@ from .core import (
     resume_simulation,
     stop_simulation,
     simulation_loop,
+    _update_simulation_state,
 )
 from .orchestrators import EvaluationOrchestrator, MutationOrchestrator, IOOrchestrator
 from .evaluator import (
@@ -76,6 +77,7 @@ __all__ = [
     "resume_simulation",
     "stop_simulation",
     "simulation_loop",
+    "_update_simulation_state",
     "evaluate_nodes",
     "mark_for_update",
     "register_firing",
