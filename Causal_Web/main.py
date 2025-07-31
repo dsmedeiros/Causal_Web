@@ -112,6 +112,7 @@ class MainService:
         args, cfg = self._parse_args()
         _apply_overrides(args, cfg)
         self._apply_log_overrides(args)
+        self._apply_propagation_overrides(args)
         if args.init_db:
             self._init_db(args.config)
             return
@@ -142,6 +143,18 @@ class MainService:
                     label = label.strip()
                     if label:
                         cfg[label] = False
+
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _apply_propagation_overrides(args: argparse.Namespace) -> None:
+        """Update propagation control flags from CLI."""
+
+        if getattr(args, "disable_sip_child", False):
+            Config.propagation_control["enable_sip_child"] = False
+        if getattr(args, "disable_sip_recomb", False):
+            Config.propagation_control["enable_sip_recomb"] = False
+        if getattr(args, "disable_csp", False):
+            Config.propagation_control["enable_csp"] = False
 
     # ------------------------------------------------------------------
     def _parse_args(self) -> tuple[argparse.Namespace, dict[str, Any]]:
@@ -204,6 +217,21 @@ class MainService:
             "--disable-events",
             default="",
             help="Comma-separated event types to disable",
+        )
+        parser.add_argument(
+            "--disable-sip-child",
+            action="store_true",
+            help="Disable SIP budding propagation",
+        )
+        parser.add_argument(
+            "--disable-sip-recomb",
+            action="store_true",
+            help="Disable SIP recombination propagation",
+        )
+        parser.add_argument(
+            "--disable-csp",
+            action="store_true",
+            help="Disable collapse seeded propagation",
         )
         args = parser.parse_args(self.argv)
         Config.graph_file = args.graph

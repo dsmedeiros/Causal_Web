@@ -80,5 +80,9 @@ The ingestion service also consumes these unified files, routing records to data
 
 The `smooth_phase` option applies exponential decay to each node's internal oscillator phase. Enable it from the GUI control panel or set `"smooth_phase": true` in `input/config.json`.
 
+### Propagation control
+
+Check boxes on the control panel allow SIP budding, SIP recombination and collapse seeded propagation to be disabled independently. The `propagation_control` section of `input/config.json` contains `enable_sip_child`, `enable_sip_recomb` and `enable_csp` flags. These can also be toggled via the CLI using `--disable-sip-child`, `--disable-sip-recomb` and `--disable-csp`.
+
 ## Contributing
 Unit tests live under `tests/` and can be run with `pytest`. Coding guidelines and packaging instructions are documented in [AGENTS.md](AGENTS.md) and [docs/developer_guide.md](docs/developer_guide.md).

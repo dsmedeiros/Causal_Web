@@ -360,7 +360,11 @@ class Config:
     edge_weight_range = [1.0, 1.0]
 
     # Toggle propagation mechanisms
-    propagation_control = {"enable_sip": True, "enable_csp": True}
+    propagation_control = {
+        "enable_sip_child": True,
+        "enable_sip_recomb": True,
+        "enable_csp": True,
+    }
 
     # Database connection details
     database = {

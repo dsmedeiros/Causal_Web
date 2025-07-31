@@ -306,7 +306,7 @@ class SIPRecombinationService:
 
     def spawn_child(self, parent_a: Node, parent_b: Node, tick: int) -> None:
         """Spawn a recombination child node from ``parent_a`` and ``parent_b``."""
-        if not Config.propagation_control.get("enable_sip", True):
+        if not Config.propagation_control.get("enable_sip_recomb", True):
             return
         if self._limit_reached(parent_a.id, parent_b.id):
             self._log_limit(parent_a, parent_b, tick)
@@ -339,7 +339,7 @@ SIP_DECOHERENCE_THRESHOLD = 0.5
 
 
 def _spawn_sip_child(parent, tick: int) -> None:
-    if not Config.propagation_control.get("enable_sip", True):
+    if not Config.propagation_control.get("enable_sip_child", True):
         return
     if _spawn_counts.get(parent.id, 0) >= Config.max_children_per_node > 0:
         if Config.is_log_enabled("event", "propagation_failure_log"):
@@ -477,7 +477,7 @@ def check_propagation(tick: int) -> None:
         _spawn_tick = tick
     _check_sip_failures(tick)
     _process_csp_seeds(tick)
-    if Config.propagation_control.get("enable_sip", True):
+    if Config.propagation_control.get("enable_sip_child", True):
         for node in list(graph.nodes.values()):
             if (
                 node.sip_streak >= SIP_COHERENCE_DURATION
@@ -486,7 +486,7 @@ def check_propagation(tick: int) -> None:
                 _spawn_sip_child(node, tick)
                 node.sip_streak = 0
 
-    if Config.propagation_control.get("enable_sip", True):
+    if Config.propagation_control.get("enable_sip_recomb", True):
         for bridge in graph.bridges:
             if not bridge.active or bridge.state.name != "STABLE":
                 continue

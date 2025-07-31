@@ -215,6 +215,26 @@ class MainWindow(QMainWindow):
         self.smooth_phase_cb.setChecked(getattr(Config, "smooth_phase", False))
         layout.addRow(self.smooth_phase_cb)
 
+        self.sip_child_cb = TooltipCheckBox(
+            "SIP Budding", TOOLTIPS.get("enable_sip_child")
+        )
+        self.sip_child_cb.setChecked(
+            Config.propagation_control.get("enable_sip_child", True)
+        )
+        layout.addRow(self.sip_child_cb)
+
+        self.sip_recomb_cb = TooltipCheckBox(
+            "SIP Recombination", TOOLTIPS.get("enable_sip_recomb")
+        )
+        self.sip_recomb_cb.setChecked(
+            Config.propagation_control.get("enable_sip_recomb", True)
+        )
+        layout.addRow(self.sip_recomb_cb)
+
+        self.csp_cb = TooltipCheckBox("CSP", TOOLTIPS.get("enable_csp"))
+        self.csp_cb.setChecked(Config.propagation_control.get("enable_csp", True))
+        layout.addRow(self.csp_cb)
+
         self.density_combo = QComboBox()
         self.density_combo.addItems(
             [
@@ -322,6 +342,9 @@ class MainWindow(QMainWindow):
         mark_graph_dirty()
         Config.new_run()
         Config.smooth_phase = self.smooth_phase_cb.isChecked()
+        Config.propagation_control["enable_sip_child"] = self.sip_child_cb.isChecked()
+        Config.propagation_control["enable_sip_recomb"] = self.sip_recomb_cb.isChecked()
+        Config.propagation_control["enable_csp"] = self.csp_cb.isChecked()
         strategy = self.density_combo.currentText()
         if strategy == "modular":
             strategy = f"modular-{self.modular_combo.currentText()}"
