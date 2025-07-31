@@ -69,5 +69,7 @@
   "smooth_phase": "Apply exponential smoothing to oscillator phases",
   "enable_sip_child": "Enable SIP budding propagation",
   "enable_sip_recomb": "Enable SIP recombination propagation",
-  "enable_csp": "Enable collapse seeded propagation"
+  "enable_csp": "Enable collapse seeded propagation",
+  "detector_mode": "Perform binary measurements on entangled ticks",
+  "measurement_settings": "Comma separated list of measurement angles"
 }

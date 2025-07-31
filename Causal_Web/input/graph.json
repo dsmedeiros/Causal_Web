@@ -182,13 +182,15 @@
     {
       "id": "GLOBAL_OBS",
       "monitors": [ "collapse", "law_wave", "emergence" ],
-      "frequency": 1
+      "frequency": 1,
+      "detector_mode": false
     },
     {
       "id": "HUB_OBS",
       "monitors": [ "coherence", "phase" ],
       "target_nodes": [ "N1_HUB", "N2_HUB", "N3_HUB" ],
-      "frequency": 2
+      "frequency": 2,
+      "detector_mode": false
     }
   ]
 }

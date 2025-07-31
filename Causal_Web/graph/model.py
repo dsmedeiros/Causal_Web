@@ -51,6 +51,12 @@ class GraphModel:
         for obs in model.observers:
             obs.setdefault("x", 0.0)
             obs.setdefault("y", 0.0)
+            obs.setdefault("detector_mode", False)
+            if (
+                "measurement_settings" in obs
+                and obs["measurement_settings"] is not None
+            ):
+                obs["measurement_settings"] = list(obs["measurement_settings"])
         model.meta_nodes = dict(data.get("meta_nodes", {}))
         return model
 
@@ -237,6 +243,8 @@ class GraphModel:
         target_nodes: List[str] | None = None,
         x: float = 0.0,
         y: float = 0.0,
+        detector_mode: bool = False,
+        measurement_settings: List[float] | None = None,
     ) -> None:
         """Insert a new observer definition with optional position."""
 
@@ -246,7 +254,10 @@ class GraphModel:
             "frequency": frequency,
             "x": x,
             "y": y,
+            "detector_mode": detector_mode,
         }
+        if measurement_settings is not None:
+            data["measurement_settings"] = list(measurement_settings)
         if target_nodes:
             data["target_nodes"] = list(target_nodes)
         self.observers.append(data)

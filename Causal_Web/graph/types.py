@@ -80,6 +80,8 @@ ObserverData = TypedDict(
         "target_nodes": List[str],
         "x": float,
         "y": float,
+        "detector_mode": bool,
+        "measurement_settings": List[float],
     },
     total=False,
 )

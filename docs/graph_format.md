@@ -70,7 +70,7 @@ Nodes can optionally set ``allow_self_connection`` to ``true`` to permit self-co
 }
 ```
 
-Observers may include optional `x` and `y` fields storing their position on the canvas. Emergent meta nodes discovered at runtime are logged for analysis but do not affect behaviour unless declared in the file.
+Observers may include optional `x` and `y` fields storing their position on the canvas. Set `detector_mode` to `true` to perform binary measurements on ticks that arrive via entangled bridges. Measurement angles can be overridden with `measurement_settings`, a list of float values. Emergent meta nodes discovered at runtime are logged for analysis but do not affect behaviour unless declared in the file.
 
 Bridges can optionally enable entanglement using `"is_entangled": true`. When
 set, an `entangled_id` is generated and saved alongside the bridge metadata.
