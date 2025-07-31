@@ -238,6 +238,10 @@ The following lists describe the JSON keys recorded in each output file.
 #### `observer_perceived_field.json`
 - `tick`, `observer` and the inferred `state` per node.
 
+#### `entangled_measurement.json`
+- event-driven record with `tick_id`, `observer_id`, `entangled_id`,
+  `measurement_setting` and `binary_outcome` for each detected entangled tick.
+
 #### `propagation_failure_log.json`
 - heterogeneous records describing why propagation failed. Common
   fields include `node` or `parent`, failure `type` and `reason`.

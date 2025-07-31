@@ -171,6 +171,9 @@ class GraphModel:
                 "attenuation": attenuation,
                 "status": "active",
             }
+            if "is_entangled" in props and props["is_entangled"]:
+                record["is_entangled"] = True
+                record["entangled_id"] = props.get("entangled_id")
             record.update(props)
             self.bridges.append(record)
 

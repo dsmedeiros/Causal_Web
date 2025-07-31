@@ -404,6 +404,8 @@ class GraphLoadService:
                 mutable=bridge.get("mutable", True),
                 seeded=True,
                 formed_at_tick=0,
+                is_entangled=bridge.get("is_entangled", False),
+                entangled_id=bridge.get("entangled_id"),
             )
 
     # ------------------------------------------------------------------
@@ -555,6 +557,9 @@ class BridgeApplyService:
                 phase + self.bridge.phase_offset,
                 self.graph,
                 origin="bridge",
+                entangled_id=(
+                    self.bridge.entangled_id if self.bridge.is_entangled else None
+                ),
             )
             self.node_a.entangled_with.add(self.node_b.id)
             self.node_b.entangled_with.add(self.node_a.id)
@@ -565,6 +570,9 @@ class BridgeApplyService:
                 phase + self.bridge.phase_offset,
                 self.graph,
                 origin="bridge",
+                entangled_id=(
+                    self.bridge.entangled_id if self.bridge.is_entangled else None
+                ),
             )
             self.node_a.entangled_with.add(self.node_b.id)
             self.node_b.entangled_with.add(self.node_a.id)
@@ -578,6 +586,9 @@ class BridgeApplyService:
                 phase + self.bridge.phase_offset,
                 self.graph,
                 origin="bridge",
+                entangled_id=(
+                    self.bridge.entangled_id if self.bridge.is_entangled else None
+                ),
             )
             self.node_a.entangled_with.add(self.node_b.id)
             self.node_b.entangled_with.add(self.node_a.id)

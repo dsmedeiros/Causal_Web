@@ -1,4 +1,8 @@
 from typing import Any, Dict, List
+import random
+import math
+
+from ..logging.logger import log_json
 
 
 class Observer:
@@ -24,6 +28,10 @@ class Observer:
                     {
                         "node": node.id,
                         "phase": node.tick_history[-1].phase,
+                        "tick_id": node.tick_history[-1].trace_id,
+                        "entangled_id": getattr(
+                            node.tick_history[-1], "entangled_id", None
+                        ),
                         "time": tick_time,
                         "inferred": False,
                     }
@@ -44,6 +52,24 @@ class Observer:
         for ev in events:
             self.belief_state[tick_time].setdefault(ev["node"], 0)
             self.belief_state[tick_time][ev["node"]] += 1
+            ent_id = ev.get("entangled_id")
+            if ent_id:
+                seed = f"{ent_id}-{self.id}-{ev['tick_id']}"
+                rng = random.Random(seed)
+                setting = rng.random()
+                outcome = 1 if math.cos(ev["phase"] + setting) >= 0 else -1
+                log_json(
+                    "event",
+                    "entangled_measurement",
+                    {
+                        "tick_id": ev["tick_id"],
+                        "observer_id": self.id,
+                        "entangled_id": ent_id,
+                        "measurement_setting": setting,
+                        "binary_outcome": outcome,
+                    },
+                    tick=tick_time,
+                )
         self.memory.append({"tick": tick_time, "events": events})
         if len(self.memory) > self.window:
             self.memory.pop(0)

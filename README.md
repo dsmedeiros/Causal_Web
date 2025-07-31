@@ -38,6 +38,9 @@ Graphs are stored as JSON files under `input/`. Each file defines `nodes`, `edge
 
 The GUI allows interactive editing of graphs. Drag nodes to reposition them and use the toolbar to add connections or observers. After editing, click **Apply Changes** in the Graph View to update the simulation and save the file. Details on all GUI actions are provided in [docs/gui_usage.md](docs/gui_usage.md).
 Nodes can optionally enable self-connections via a checkbox in the node panel. When enabled, dragging from a node back onto itself creates a curved edge.
+Bridges now support an `Entanglement Enabled` option. When selected, the bridge
+is tagged with an `entangled_id` used by observers to generate deterministic
+measurement outcomes for Bell-type experiments.
 
 Runs produce a set of JSON logs in `output/`. The script `bundle_run.py` can be used after a simulation to archive the results. Full descriptions of each log file and their fields are available in [docs/log_schemas.md](docs/log_schemas.md).
 

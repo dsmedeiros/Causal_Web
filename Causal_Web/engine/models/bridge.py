@@ -6,6 +6,7 @@ from random import random
 from typing import Optional, TYPE_CHECKING
 import json
 from enum import Enum
+import uuid
 
 from ...config import Config
 from .base import LoggingMixin
@@ -64,6 +65,9 @@ class Bridge(LoggingMixin):
         mutable: bool = True,
         seeded: bool = True,
         formed_at_tick: int = 0,
+        *,
+        is_entangled: bool = False,
+        entangled_id: str | None = None,
     ) -> None:
         """Create a new bridge between two node identifiers."""
         self.node_a_id = node_a_id
@@ -104,6 +108,12 @@ class Bridge(LoggingMixin):
         self.last_active_tick = formed_at_tick
         self.reformable = True
         self.memory_weight = 0.5
+
+        self.is_entangled = is_entangled
+        if is_entangled:
+            self.entangled_id = entangled_id or str(uuid.uuid4())
+        else:
+            self.entangled_id = None
 
     def _fatigue_multiplier(self, tick: int) -> float:
         """Return dynamic fatigue scaling factor during early stabilization."""
@@ -319,6 +329,8 @@ class Bridge(LoggingMixin):
             "last_active_tick": self.last_active_tick,
             "reformable": self.reformable,
             "memory_weight": self.memory_weight,
+            "is_entangled": self.is_entangled,
+            "entangled_id": self.entangled_id,
             "avg_decoherence": (
                 sum(self.decoherence_exposure) / len(self.decoherence_exposure)
                 if self.decoherence_exposure

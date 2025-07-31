@@ -444,6 +444,7 @@ class Node(LoggingMixin):
         amplitude: float = 1.0,
         tick_id: str | None = None,
         cumulative_delay: float = 0.0,
+        entangled_id: str | None = None,
     ) -> None:
         """Store an incoming phase for future evaluation.
 
@@ -470,6 +471,7 @@ class Node(LoggingMixin):
             cumulative_delay,
             tick_id,
             origin,
+            entangled_id,
         )
         with self.lock:
             self.incoming_phase_queue[tick_time].append(record)
@@ -510,12 +512,21 @@ class Node(LoggingMixin):
         phase: float,
         graph: "CausalGraph",
         origin: str = "self",
+        *,
+        entangled_id: str | None = None,
     ) -> None:
         """Emit a tick and propagate resulting phases to neighbours."""
 
         from ..services.node_services import NodeTickService
 
-        NodeTickService(self, tick_time, phase, graph, origin).process()
+        NodeTickService(
+            self,
+            tick_time,
+            phase,
+            graph,
+            origin,
+            entangled_id=entangled_id,
+        ).process()
 
     def _apply_suppression(self, tick_time: float) -> bool:
         items = list(self.incoming_phase_queue.get(tick_time, []))
@@ -530,6 +541,7 @@ class Node(LoggingMixin):
             delay = item[3] if len(item) > 3 else 0.0
             tid = item[4] if len(item) > 4 else None
             src = item[5] if len(item) > 5 else None
+            ent_id = item[6] if len(item) > 6 else None
             if max_delay and delay > max_delay:
                 self._log_tick_drop(
                     tick_time,
@@ -543,7 +555,7 @@ class Node(LoggingMixin):
                 if tick_time in self.incoming_tick_counts:
                     self.incoming_tick_counts[tick_time] -= 1
                 continue
-            remaining.append((ph, amp, created, delay, tid, src))
+            remaining.append((ph, amp, created, delay, tid, src, ent_id))
 
         if not remaining:
             self.incoming_phase_queue.pop(tick_time, None)
@@ -555,7 +567,7 @@ class Node(LoggingMixin):
         coherence = self.compute_coherence_level(tick_time)
         min_coh = getattr(Config, "min_coherence_threshold", 0.0)
         if min_coh and coherence < min_coh:
-            for ph, amp, created, delay, tid, src in remaining:
+            for ph, amp, created, delay, tid, src, ent_id in remaining:
                 self._log_tick_drop(
                     tick_time,
                     "decoherence",
