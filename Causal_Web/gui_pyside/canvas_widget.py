@@ -100,10 +100,13 @@ class NodeItem(QGraphicsEllipseItem):
 
     def mousePressEvent(self, event: QMouseEvent) -> None:  # type: ignore[override]
         if event.button() == Qt.LeftButton:
-            set_selected_node(self.node_id)
-            self.canvas.node_selected.emit(self.node_id)
-            if self.canvas.editable:
-                self._drag_start = self.pos()
+            if not self.canvas._connect_mode:
+                set_selected_node(self.node_id)
+                self.canvas.node_selected.emit(self.node_id)
+                if self.canvas.editable:
+                    self._drag_start = self.pos()
+            else:
+                self._drag_start = None
         super().mousePressEvent(event)
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:  # type: ignore[override]
@@ -527,6 +530,15 @@ class CanvasWidget(QGraphicsView):
         if self._temp_edge and self.scene():
             self.scene().removeItem(self._temp_edge)
         self._temp_edge = None
+
+    def cancel_connection_mode(self) -> None:
+        """Abort interactive connection mode and clear temporary state."""
+        if self._temp_edge and self.scene():
+            self.scene().removeItem(self._temp_edge)
+        self._temp_edge = None
+        self._connect_start = None
+        self._connect_dragged = False
+        self._connect_mode = False
 
     def node_moved(self, node_id: str, start: QPointF, end: QPointF) -> None:
         if not self.editable:
