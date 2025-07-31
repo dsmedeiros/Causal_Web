@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QWidget,
     QVBoxLayout,
+    QComboBox,
 )
 
 from ..config import Config
