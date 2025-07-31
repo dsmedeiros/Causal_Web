@@ -33,6 +33,10 @@
   "use_dynamic_density": false,
   "density_radius": 1,
   "delay_density_scaling": 1.0,
+  "density_calc": "local_tick_saturation",
+  "traffic_decay": 0.9,
+  "traffic_weight": 0.1,
+  "density_overlay_file": null,
   "propagation_control": {
     "enable_sip": true,
     "enable_csp": true

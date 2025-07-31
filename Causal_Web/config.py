@@ -281,6 +281,10 @@ class Config:
     use_dynamic_density = False
     density_radius = 1
     delay_density_scaling = 1.0
+    density_calc = "local_tick_saturation"
+    traffic_decay = 0.9
+    traffic_weight = 0.1
+    density_overlay_file: str | None = None
     # interval between metric logs
     log_interval = 1
     # disable observers and intermediate logging when True

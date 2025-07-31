@@ -46,6 +46,11 @@ def _add_config_args(
             _add_config_args(parser, value, prefix=f"{prefix}{key}.")
             continue
         arg_type = type(value)
+        if dest == "density_calc":
+            parser.add_argument(
+                "--density-calc", f"--{prefix}{key}", type=arg_type, dest=dest
+            )
+            continue
         if isinstance(value, bool):
             parser.add_argument(arg_name, type=lambda x: x.lower() == "true", dest=dest)
         else:
