@@ -36,6 +36,7 @@ from .canvas_widget import CanvasWidget
 from .toolbar_builder import build_toolbar
 from ..gui.command_stack import AddNodeCommand, AddObserverCommand
 from ..engine import tick_engine
+from .shared import TooltipCheckBox, TOOLTIPS
 
 
 class GraphDockWidget(QDockWidget):
@@ -175,6 +176,7 @@ class MainWindow(QMainWindow):
         settings_menu.addAction(log_action)
 
     def _create_docks(self) -> None:
+        """Create and populate the control panel dock widgets."""
         dock = QDockWidget("Control Panel", self)
         dock.setFeatures(QDockWidget.NoDockWidgetFeatures)
         panel = QWidget()
