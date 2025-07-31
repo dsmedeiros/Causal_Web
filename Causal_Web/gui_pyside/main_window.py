@@ -177,6 +177,11 @@ class MainWindow(QMainWindow):
         log_action.triggered.connect(self._show_log_files_window)
         settings_menu.addAction(log_action)
 
+        analysis_menu = menubar.addMenu("Analysis")
+        bell_action = QAction("Bell Inequality Analysis...", self)
+        bell_action.triggered.connect(self._show_bell_analysis)
+        analysis_menu.addAction(bell_action)
+
     def _create_docks(self) -> None:
         """Create and populate the control panel dock widgets."""
         dock = QDockWidget("Control Panel", self)
@@ -509,6 +514,16 @@ class MainWindow(QMainWindow):
 
             self.log_files_window = LogFilesWindow(self)
         self.log_files_window.show()
+
+    def _show_bell_analysis(self) -> None:
+        """Run Bell analysis and display the results."""
+        if not hasattr(self, "bell_window"):
+            from .bell_window import BellAnalysisWindow
+
+            self.bell_window = BellAnalysisWindow(self)
+        else:
+            self.bell_window._run_analysis()  # refresh on repeat
+        self.bell_window.show()
 
     def _load_into_main(self) -> None:
         """Apply the edited graph to the main simulation view and disk."""

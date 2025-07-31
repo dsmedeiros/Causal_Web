@@ -45,6 +45,9 @@ Observers can enable a *Detector Mode* that records a binary outcome whenever a
 tick from an entangled bridge is detected.
 These detector events are additionally written to `entangled_log.jsonl` for
 Bell inequality analysis.
+The GUI now includes an **Analysis** menu with a *Bell Inequality Analysis...*
+action that opens a window showing CHSH statistics and a histogram of
+expectation values.
 
 Runs produce a set of JSON logs in `output/`. The script `bundle_run.py` can be used after a simulation to archive the results. Full descriptions of each log file and their fields are available in [docs/log_schemas.md](docs/log_schemas.md).
 
