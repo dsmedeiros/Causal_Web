@@ -80,7 +80,7 @@ The `density_calc` option controls how edge density is computed. Set one of:
 `density_calc` can also be specified via `--density-calc` on the command line.
 
 ## Output Logs
-Each run creates a timestamped directory under `output/runs` containing the graph, configuration and logs. Logging can be enabled or disabled via the GUI **Log Files** window or the `log_files` section of `config.json`. In `config.json` the keys are the categories (`tick`, `phenomena`, `event`) containing individual label flags. The `logging_mode` option selects which categories are written: `diagnostic` (all logs), `tick`, `phenomena` and `events`.
+Each run creates a timestamped directory under `output/runs` containing the graph, configuration and logs. Logging can be enabled or disabled via the GUI **Log Files** window or the `log_files` section of `config.json`. In `config.json` the keys are the categories (`tick`, `phenomena`, `event`) containing individual label flags. The `log_interval` option controls how often metrics and graph snapshots are written, while `logging_mode` selects which categories are written: `diagnostic` (all logs), `tick`, `phenomena` and `events`.
 Logs are consolidated by category into `ticks_log.jsonl`, `phenomena_log.jsonl` and `events_log.jsonl`.
 Individual files can still be toggled via `log_files` for advanced filtering.
 Entangled tick metadata and detector outcomes are stored separately in
