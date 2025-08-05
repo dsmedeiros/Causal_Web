@@ -135,32 +135,47 @@ class SimulationRunner:
         threading.Thread(target=self.run, daemon=True).start()
 
     def run(self) -> None:
-        """Main processing loop executed in a background thread."""
+        """Main processing loop executed in a background thread.
+
+        When :data:`Config.profile_output` is set, profiling statistics are
+        written to that path using :mod:`cProfile`.
+        """
         global _stop_requested
+        profiler = None
+        if getattr(Config, "profile_output", None):
+            import cProfile
+
+            profiler = cProfile.Profile()
+            profiler.enable()
         _stop_requested = False
         self._seed_random()
         _ensure_attached()
         _update_simulation_state(False, False, self.global_tick, None)
-        while True:
-            running, stop, rate, limit = self._read_state()
-            if stop:
-                snapshot = log_utils.snapshot_graph(self.global_tick)
-                _update_simulation_state(False, True, self.global_tick, snapshot)
-                log_utils.write_output()
-                break
-            if limit and limit != -1 and self.global_tick >= limit:
-                with Config.state_lock:
-                    Config.is_running = False
-                snapshot = log_utils.snapshot_graph(self.global_tick)
-                _update_simulation_state(False, True, self.global_tick, snapshot)
-                log_utils.write_output()
-                break
-            if not running:
-                time.sleep(0.1)
-                continue
-            self._process_tick()
-            self.global_tick += 1
-            time.sleep(rate)
+        try:
+            while True:
+                running, stop, rate, limit = self._read_state()
+                if stop:
+                    snapshot = log_utils.snapshot_graph(self.global_tick)
+                    _update_simulation_state(False, True, self.global_tick, snapshot)
+                    log_utils.write_output()
+                    break
+                if limit and limit != -1 and self.global_tick >= limit:
+                    with Config.state_lock:
+                        Config.is_running = False
+                    snapshot = log_utils.snapshot_graph(self.global_tick)
+                    _update_simulation_state(False, True, self.global_tick, snapshot)
+                    log_utils.write_output()
+                    break
+                if not running:
+                    time.sleep(0.1)
+                    continue
+                self._process_tick()
+                self.global_tick += 1
+                time.sleep(rate)
+        finally:
+            if profiler:
+                profiler.disable()
+                profiler.dump_stats(Config.profile_output)
 
     def _seed_random(self) -> None:
         if getattr(Config, "random_seed", None) is not None:
