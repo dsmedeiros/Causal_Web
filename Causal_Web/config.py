@@ -19,6 +19,9 @@ class Config:
         When ``True`` disables observers and intermediate logging.
     graph_file:
         Path to the current graph JSON file used by the engine.
+    profile_output:
+        Optional path to write ``cProfile`` statistics when profiling is
+        enabled.
     """
 
     # Base directories for package resources
@@ -32,6 +35,7 @@ class Config:
     analysis_dir = os.path.join(output_root, "analysis")
     ingest_dir = os.path.join(output_root, "ingest")
     output_dir = output_root
+    profile_output: str | None = None
 
     @staticmethod
     def input_path(*parts: str) -> str:
