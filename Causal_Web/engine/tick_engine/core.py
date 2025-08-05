@@ -151,11 +151,12 @@ class SimulationRunner:
         self._seed_random()
         _ensure_attached()
         _update_simulation_state(False, False, self.global_tick, None)
+
         try:
             while True:
                 running, stop, rate, limit = self._read_state()
                 if stop:
-                    snapshot = log_utils.snapshot_graph(self.global_tick)
+                    snapshot = self.io.snapshot_state(self.global_tick)
                     _update_simulation_state(False, True, self.global_tick, snapshot)
                     log_utils.write_output()
                     break

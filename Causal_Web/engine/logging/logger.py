@@ -96,6 +96,8 @@ def log_record(
         Identifier linking this record to another event.
     metadata:
         Additional metadata to merge with default values.
+    Records are skipped when ``tick`` is provided and not a multiple of
+    :attr:`Config.log_interval`.
     """
 
     meta = {"category": category}
@@ -105,6 +107,10 @@ def log_record(
         meta.update(metadata)
 
     if not Config.is_log_enabled(category, label):
+        return
+
+    interval = getattr(Config, "log_interval", 1)
+    if tick is not None and interval and tick % interval != 0:
         return
 
     path_map = {
