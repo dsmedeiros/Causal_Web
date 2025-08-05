@@ -144,14 +144,14 @@ class SimulationRunner:
         while True:
             running, stop, rate, limit = self._read_state()
             if stop:
-                snapshot = log_utils.snapshot_graph(self.global_tick)
+                snapshot = self.io.snapshot_state(self.global_tick)
                 _update_simulation_state(False, True, self.global_tick, snapshot)
                 log_utils.write_output()
                 break
             if limit and limit != -1 and self.global_tick >= limit:
                 with Config.state_lock:
                     Config.is_running = False
-                snapshot = log_utils.snapshot_graph(self.global_tick)
+                snapshot = self.io.snapshot_state(self.global_tick)
                 _update_simulation_state(False, True, self.global_tick, snapshot)
                 log_utils.write_output()
                 break

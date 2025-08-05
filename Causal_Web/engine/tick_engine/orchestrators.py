@@ -92,7 +92,11 @@ class IOOrchestrator:
         log_utils.log_curvature_per_tick(tick)
 
     def snapshot_state(self, tick: int) -> Optional[str]:
+        """Return a graph snapshot path when logging is due."""
         if Config.headless:
+            return None
+        interval = getattr(Config, "log_interval", 1)
+        if interval and tick % interval != 0:
             return None
         return log_utils.snapshot_graph(tick)
 
@@ -102,7 +106,11 @@ class IOOrchestrator:
         self._update_state(paused, stopped, tick, snapshot)
 
     def handle_observers(self, tick: int) -> None:
+        """Invoke observers and log disagreements at the configured interval."""
         if Config.headless:
+            return
+        interval = getattr(Config, "log_interval", 1)
+        if interval and tick % interval != 0:
             return
         for obs in self.observers:
             obs.observe(self.graph, tick)
