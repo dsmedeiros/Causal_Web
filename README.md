@@ -29,6 +29,7 @@ Ticks carry both phase and amplitude. Their influence on interference and cohere
 3. Optional flags:
    - `--config <path>` to use a custom configuration file.
    - `--graph <path>` to load a different graph.
+   - `--profile <file>` to write `cProfile` stats to the given path.
 
 ## Installation
 Clone the repository and install the packages listed in `requirements.txt`. The GUI requires PySide6 and an X11 compatible display.

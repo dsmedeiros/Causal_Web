@@ -26,6 +26,7 @@ _PRIVATE_KEYS = {
     "analysis_dir",
     "ingest_dir",
     "output_dir",
+    "profile_output",
     "state_lock",
     "current_tick",
     "is_running",
@@ -113,6 +114,7 @@ class MainService:
         _apply_overrides(args, cfg)
         self._apply_log_overrides(args)
         self._apply_propagation_overrides(args)
+        Config.profile_output = getattr(args, "profile_output", None)
         if args.init_db:
             self._init_db(args.config)
             return
@@ -194,6 +196,12 @@ class MainService:
         )
         defaults = _merge_configs(_config_defaults(), config_data)
         _add_config_args(parser, defaults)
+        parser.add_argument(
+            "--profile",
+            dest="profile_output",
+            default=None,
+            help="Write cProfile statistics to the given file",
+        )
         parser.add_argument(
             "--enable-tick", default="", help="Comma-separated tick labels to enable"
         )
