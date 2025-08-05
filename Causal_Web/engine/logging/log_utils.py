@@ -94,8 +94,21 @@ def log_meta_node_ticks(global_tick: int) -> None:
 
 
 def snapshot_graph(global_tick: int) -> Optional[str]:
+    """Serialize the graph to disk at the configured interval.
+
+    Parameters
+    ----------
+    global_tick:
+        Current simulation tick.
+
+    Returns
+    -------
+    Optional[str]
+        Path to the snapshot file if one was written, otherwise ``None``.
+    """
+
     assert _graph is not None
-    interval = getattr(Config, "snapshot_interval", 0)
+    interval = getattr(Config, "log_interval", 1)
     if interval and global_tick % interval == 0:
         path_dir = os.path.join(Config.output_dir, "runtime_graph_snapshots")
         os.makedirs(path_dir, exist_ok=True)

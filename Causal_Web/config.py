@@ -14,7 +14,7 @@ class Config:
         Dictionary containing ``enable_sip`` and ``enable_csp`` flags used to
         toggle the two propagation mechanisms.
     log_interval:
-        Number of ticks between metric log writes.
+        Number of ticks between metric log writes and graph snapshots.
     headless:
         When ``True`` disables observers and intermediate logging.
     graph_file:
@@ -277,8 +277,6 @@ class Config:
     coherence_wave = {"amplitude": 0.0, "period": 30}  # threshold modulation
     # ticks over which to ramp up global forcing effects
     forcing_ramp_ticks = 20
-    # interval for saving runtime snapshots of the graph
-    snapshot_interval = 10
     # interval for expensive clustering operations
     cluster_interval = 10
     # interval for dynamic bridge management
