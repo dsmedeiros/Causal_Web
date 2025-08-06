@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ..models.node import Node
+from ..models.node import Node, NodeType
 from ..models.tick import Tick
 import numpy as np
 from ...config import Config
@@ -31,21 +31,26 @@ class TickRouter:
 
     @classmethod
     def record_fanin(cls, node: Node, tick_time: int, graph=None) -> None:
-        """Increment fan-in counts and collapse via Born rule.
+        """Increment fan-in counts and trigger layer transitions.
 
         ``graph`` is optionally supplied so that entanglement constraints can
         propagate collapses across ``\u03b5`` edges.
         """
         count = node.incoming_tick_counts[tick_time]
-        if count == getattr(Config, "N_DECOH", 0):
+        n_decoh = getattr(Config, "N_DECOH", 0)
+        n_class = getattr(Config, "N_CLASS", n_decoh)
+
+        if count >= n_class:
             probs = np.abs(node.psi) ** 2
             if probs.sum() == 0:
                 return
-            outcome = np.random.choice(2, p=probs / probs.sum())
+            outcome = int(np.argmax(probs))
             if outcome == 0:
                 node.psi = np.array([1 + 0j, 0 + 0j], np.complex128)
             else:
                 node.psi = np.array([0 + 0j, 1 + 0j], np.complex128)
+            node.is_classical = True
+            node.node_type = NodeType.CLASSICALIZED
             node.collapse_origin[tick_time] = node.collapse_origin.get(
                 tick_time, "self"
             )
@@ -54,6 +59,20 @@ class TickRouter:
 
                 EntanglementService.collapse_epsilon(graph, node, tick_time)
             node.incoming_tick_counts[tick_time] = 0
+            return
+
+        if count >= n_decoh:
+            probs = np.abs(node.psi) ** 2
+            total = probs.sum()
+            if total:
+                node.psi = np.array(
+                    [
+                        probs[0] / total,
+                        probs[1] / total,
+                    ],
+                    np.complex128,
+                )
+            node.node_type = NodeType.DECOHERENT
 
     @classmethod
     def route_tick(cls, node: Node, tick: Tick) -> None:

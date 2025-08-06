@@ -58,7 +58,8 @@ class Config:
     current_tick = 0  # Counter to display progress
     # Preallocated ticks for object pool
     TICK_POOL_SIZE = 10000
-    N_DECOH = 3  # Fan-in threshold for Born-rule collapse
+    N_DECOH = 3  # Fan-in threshold for thermodynamic behaviour
+    N_CLASS = 6  # Fan-in threshold for classical fallback
 
     # Mapping of ``category`` -> {``label``: bool} controlling which logs are
     # written. Categories correspond to consolidated output files and the labels
