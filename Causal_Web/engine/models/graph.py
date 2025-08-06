@@ -62,6 +62,7 @@ class CausalGraph:
         origin_type: str = "seed",
         generation_tick: int = 0,
         parent_ids: list[str] | None = None,
+        cnot_source: bool = False,
     ) -> None:
         x, y = self._non_overlapping_position(x, y)
         if refractory_period is None:
@@ -77,6 +78,7 @@ class CausalGraph:
             origin_type=origin_type,
             generation_tick=generation_tick,
             parent_ids=parent_ids,
+            cnot_source=cnot_source,
         )
         node = self.nodes[node_id]
         self.spatial_index[(node.grid_x, node.grid_y)].add(node_id)
@@ -123,6 +125,7 @@ class CausalGraph:
         weight: float | None = None,
         u_id: int = 0,
         *,
+        A_phase: float = 0.0,
         epsilon: bool = False,
         partner_id: str | None = None,
     ) -> None:
@@ -132,6 +135,8 @@ class CausalGraph:
         ----------
         source_id, target_id:
             Node identifiers for the edge endpoints.
+        A_phase:
+            Gauge phase applied to ticks traversing this link.
         epsilon:
             When ``True`` the edge participates in an ``\u03b5`` pair whose
             partner is identified by ``partner_id``. Collapses of one node
@@ -153,6 +158,7 @@ class CausalGraph:
             density,
             delay,
             phase_shift,
+            A_phase,
             weight,
             density_specified=density_specified,
             u_id=u_id,

@@ -383,6 +383,7 @@ class GraphLoadService:
                 delay=edge.get("delay", 1),
                 phase_shift=edge.get("phase_shift", 0.0),
                 weight=edge.get("weight"),
+                A_phase=edge.get("A_phase", 0.0),
                 epsilon=edge.get("epsilon", False),
                 partner_id=edge.get("partner_id"),
             )

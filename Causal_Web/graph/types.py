@@ -34,6 +34,7 @@ EdgeData = TypedDict(
         "attenuation": float,
         "density": float,
         "phase_shift": float,
+        "A_phase": float,
         "weight": float,
         "u_id": int,
         "epsilon": bool,
