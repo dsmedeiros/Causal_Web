@@ -57,6 +57,7 @@ class TickRouter:
                 node.psi = np.array([0 + 0j, 1 + 0j], np.complex128)
                 node.probabilities = np.array([0.0, 1.0])
             node.is_classical = True
+            node.locked_phase = node.compute_phase(tick_time)
             node.phase_lock = True
             node.node_type = NodeType.CLASSICALIZED
             node.collapse_origin[tick_time] = node.collapse_origin.get(
@@ -74,6 +75,7 @@ class TickRouter:
             total = probs.sum()
             if total:
                 node.probabilities = probs / total
+            node.locked_phase = node.compute_phase(tick_time)
             node.phase_lock = True
             node.node_type = NodeType.DECOHERENT
             node.incoming_tick_counts[tick_time] = 0

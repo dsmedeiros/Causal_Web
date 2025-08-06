@@ -26,7 +26,9 @@ class Node(LoggingMixin):
     """Represents a single oscillator in the causal graph.
 
     Nodes maintain a ``tau`` attribute representing accumulated proper-time.
-    ``tau`` is advanced externally based on local velocity and density.
+    ``tau`` is advanced externally based on local velocity and density. When a
+    node's phase becomes locked its value at lock-time is stored in
+    :attr:`locked_phase`.
     """
 
     def __init__(
@@ -357,9 +359,13 @@ class Node(LoggingMixin):
         old = self.node_type
         if self.is_classical:
             self.node_type = NodeType.CLASSICALIZED
+            if self.locked_phase is None:
+                self.locked_phase = self.phase
             self.phase_lock = True
         elif self.decoherence_debt > 3.0:
             self.node_type = NodeType.DECOHERENT
+            if self.phase_lock and self.locked_phase is None:
+                self.locked_phase = self.phase
         elif self.entangled_with:
             self.node_type = NodeType.ENTANGLED
         else:
@@ -621,7 +627,12 @@ class Node(LoggingMixin):
                 continue
             deco = other.compute_decoherence_field(tick_time)
             if deco > threshold:
-                other.apply_tick(tick_time, self.phase, graph, origin="entanglement")
+                phase = (
+                    self.locked_phase
+                    if self.phase_lock and self.locked_phase is not None
+                    else self.phase
+                )
+                other.apply_tick(tick_time, phase, graph, origin="entanglement")
                 chain.append({"node": nid, "depth": depth})
                 chain.extend(
                     other.propagate_collapse(
