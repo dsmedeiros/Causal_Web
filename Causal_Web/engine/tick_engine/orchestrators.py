@@ -95,9 +95,6 @@ class IOOrchestrator:
         """Return a graph snapshot path when logging is due."""
         if Config.headless:
             return None
-        interval = getattr(Config, "log_interval", 1)
-        if interval and tick % interval != 0:
-            return None
         return log_utils.snapshot_graph(tick)
 
     def update_state(
