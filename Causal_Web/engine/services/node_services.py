@@ -360,7 +360,7 @@ class EdgePropagationService:
         from ..fields.density import get_field
 
         rho = get_field().get(edge)
-        delay = max(1, int(round(delay * (1 + kappa * rho))))
+        delay = max(1.0, delay * (1 + kappa * rho))
         if self.node.node_type == NodeType.DECOHERENT:
             shifted = (
                 (self.node.locked_phase if self.node.locked_phase is not None else 0.0)

@@ -16,7 +16,7 @@ def test_density_increases_delay():
     kappa = 1.0
     base = edge.adjusted_delay(1.0, 1.0, kappa, graph=g)
     rho = field.get(edge)
-    delay = int(round(base * (1 + kappa * rho)))
+    delay = base * (1 + kappa * rho)
     assert delay == 2
 
 

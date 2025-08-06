@@ -760,7 +760,7 @@ class Edge:
         target: str,
         attenuation: float,
         density: float,
-        delay: int = 1,
+        delay: float = 1.0,
         phase_shift: float = 0.0,
         A_phase: float = 0.0,
         weight: float = 1.0,
@@ -794,8 +794,12 @@ class Edge:
         *,
         graph: "CausalGraph | None" = None,
         radius: int | None = None,
-    ) -> int:
-        """Return delay modified by local density."""
+    ) -> float:
+        """Return delay modified by local density without quantisation.
+
+        The returned value preserves sub-tick precision; any rounding to
+        whole ticks is deferred to the scheduler.
+        """
 
         rho = self.density
         if graph is not None and (
@@ -805,7 +809,7 @@ class Edge:
             rho = graph.compute_edge_density(self, radius=rad)
 
         adjusted = self.delay * (1 + kappa * rho) * self.weight
-        delay_int = max(1, int(round(adjusted)))
+        delay_val = max(1.0, adjusted)
 
         if getattr(Config, "log_verbosity", "info") == "debug" and graph is not None:
             from ..logging.logger import log_json
@@ -817,12 +821,12 @@ class Edge:
                     "edge": f"{self.source}->{self.target}",
                     "rho": rho,
                     "base": self.delay,
-                    "result": delay_int,
+                    "result": delay_val,
                 },
                 tick=getattr(Config, "current_tick", 0),
             )
 
-        return delay_int
+        return delay_val
 
     def propagate_phase(
         self,

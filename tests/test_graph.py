@@ -37,7 +37,7 @@ def test_detect_clusters():
 def test_edge_adjusted_delay():
     edge = Edge("A", "B", attenuation=1.0, density=0.5, delay=2)
     delay = edge.adjusted_delay(1.0, 1.0, kappa=1.0)
-    assert delay == int(2 * (1 + 0.5))
+    assert delay == 2 * (1 + 0.5)
 
 
 def test_remove_node_cleans_references():
