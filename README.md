@@ -94,6 +94,10 @@ python -m Causal_Web.main --disable-tick=coherence_log,interference_log \
     --enable-events=bridge_rupture_log
 ```
 
+The `chi_max` option caps the bond dimension used when compressing linear
+chains into Matrix Product States. Raising it reduces truncation error at the
+cost of memory.
+
 The `density_calc` option controls how edge density is computed. Set one of:
 
 - `local_tick_saturation` (default) – density increases with recent traffic

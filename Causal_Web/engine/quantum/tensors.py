@@ -49,6 +49,9 @@ class MatrixProductState:
         u = u[:, :chi]
         s = s[:chi]
         vh = vh[:chi, :]
+        norm = np.linalg.norm(s)
+        if norm:
+            s = s / norm
         self.tensors[site] = u.reshape(l, p, chi)
         right = np.tensordot(np.diag(s) @ vh, self.tensors[site + 1], axes=[1, 0])
         self.tensors[site + 1] = right

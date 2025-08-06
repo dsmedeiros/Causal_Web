@@ -400,12 +400,17 @@ class EdgePropagationService:
     def _collect_chain(self, edge: Edge) -> List[Edge]:
         chain = [edge]
         current = self.graph.get_node(edge.target)
+        visited = {edge.source, edge.target}
         while True:
             edges = self.graph.get_edges_from(current.id)
             if len(edges) != 1:
                 break
-            chain.append(edges[0])
-            current = self.graph.get_node(edges[0].target)
+            nxt = edges[0]
+            if nxt.target in visited:
+                break
+            chain.append(nxt)
+            visited.add(nxt.target)
+            current = self.graph.get_node(nxt.target)
         return chain
 
     # ------------------------------------------------------------------
@@ -436,7 +441,7 @@ class EdgePropagationService:
         psi_contrib, _ = propagate_chain(
             unitaries, self.node.psi, chi_max=getattr(Config, "chi_max", 16)
         )
-        psi_contrib = ei_phi * psi_contrib * attenuation
+        psi_contrib = ei_phi * psi_contrib.reshape(-1) * attenuation
         target.psi += psi_contrib
         self._log_propagation(target, total_delay, shifted)
         new_delay = self.tick.cumulative_delay + total_delay
