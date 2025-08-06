@@ -25,11 +25,15 @@ class NodeType(Enum):
 class Node(LoggingMixin):
     """Represents a single oscillator in the causal graph.
 
+    Each node tracks ``x`` and ``y`` coordinates used by geometry helpers.
     Nodes maintain a ``tau`` attribute representing accumulated proper-time.
     ``tau`` is advanced externally based on local velocity and density. When a
     node's phase becomes locked its value at lock-time is stored in
     :attr:`locked_phase`.
     """
+
+    x: float
+    y: float
 
     def __init__(
         self,
