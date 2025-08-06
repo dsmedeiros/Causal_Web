@@ -163,7 +163,7 @@ class SimulationRunner:
                 if limit and limit != -1 and self.global_tick >= limit:
                     with Config.state_lock:
                         Config.is_running = False
-                    snapshot = log_utils.snapshot_graph(self.global_tick)
+                    snapshot = self.io.snapshot_state(self.global_tick)
                     _update_simulation_state(False, True, self.global_tick, snapshot)
                     log_utils.write_output()
                     break
@@ -208,11 +208,7 @@ class SimulationRunner:
             self.io.log_cluster_info(self.global_tick)
 
         self.evaluation.finalize(self.global_tick)
-        interval = getattr(Config, "log_interval", 1)
-        if interval and self.global_tick % interval == 0:
-            snapshot_path = self.io.snapshot_state(self.global_tick)
-        else:
-            snapshot_path = None
+        snapshot_path = self.io.snapshot_state(self.global_tick)
         self.io.update_state(self.global_tick, False, False, snapshot_path)
         self.mutation.apply_bridges(self.global_tick)
         self.io.handle_observers(self.global_tick)
