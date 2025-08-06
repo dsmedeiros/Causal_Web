@@ -13,6 +13,12 @@ collapses a node to an eigenstate using the Born rule, while the decoherence
 threshold preserves ``psi`` but freezes unitary evolution and records only the
 resulting probability distribution.
 
+To cap memory growth for long coherent lines, the engine detects tensor clusters
+and represents them as Matrix Product States. Local edge unitaries contract with
+these tensors and singular values beyond ``Config.chi_max`` are truncated. A
+chain of one hundred Hadamards now consumes less than 50 MB with under one
+percent numerical error.
+
 Each node also accumulates a proper-time `tau` that accounts for local velocity
 and density effects. Run `analysis/twin.py` for a simple twin-paradox
 demonstration showcasing this time dilation.
