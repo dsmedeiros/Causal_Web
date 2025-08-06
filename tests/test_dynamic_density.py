@@ -23,4 +23,4 @@ def test_dynamic_delay_uses_computed_density():
     g.precompute_local_densities(radius=1)
     edge = g.get_edges_from("A")[0]
     delay = edge.adjusted_delay(1.0, 1.0, kappa=1.0, graph=g)
-    assert delay == int(2 * (1 + 2))
+    assert delay == 2 * (1 + 2)

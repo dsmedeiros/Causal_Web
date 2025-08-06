@@ -33,6 +33,13 @@ class DensityField:
             Edge receiving the energy contribution.
         amplitude:
             Complex amplitude whose squared magnitude represents energy.
+
+        Note
+        ----
+        Access to the internal density map is protected by the GIL in
+        CPython but is not inherently thread-safe. Alternative interpreters
+        or accelerator backends may require atomic updates or per-thread
+        accumulation.
         """
 
         energy = float(np.sum(np.abs(amplitude) ** 2))
@@ -61,10 +68,10 @@ class DensityField:
         new_rho: Dict[Tuple[str, str], float] = defaultdict(float, self._rho)
         for edge in graph.edges:
             key = (edge.source, edge.target)
-            neighbours = []
+            neighbours: set[Edge] = set()
             for nid in (edge.source, edge.target):
-                neighbours.extend(graph.get_edges_from(nid))
-                neighbours.extend(graph.get_edges_to(nid))
+                neighbours.update(graph.get_edges_from(nid))
+                neighbours.update(graph.get_edges_to(nid))
             if not neighbours:
                 continue
             mean = sum(
