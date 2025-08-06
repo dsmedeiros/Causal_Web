@@ -48,8 +48,17 @@ class Node(LoggingMixin):
         origin_type: str = "seed",
         generation_tick: int = 0,
         parent_ids: Optional[List[str]] = None,
+        cnot_source: bool = False,
     ) -> None:
-        """Create a new node and delegate attribute setup."""
+        """Create a new node and delegate attribute setup.
+
+        Parameters
+        ----------
+        cnot_source:
+            When ``True`` the node marks two outbound edges as an
+            ``epsilon`` pair each time it fires, enabling dynamic
+            entanglement generation.
+        """
 
         from ..services.node_services import NodeInitializationService
 
@@ -64,6 +73,7 @@ class Node(LoggingMixin):
             origin_type=origin_type,
             generation_tick=generation_tick,
             parent_ids=parent_ids,
+            cnot_source=cnot_source,
         )
 
         # Proper-time and previous position tracking
@@ -732,6 +742,8 @@ class Edge:
         Node identifiers at each end of the edge.
     attenuation, density, delay, phase_shift, weight:
         Standard edge parameters influencing propagation.
+    A_phase:
+        Link-based gauge phase applied during propagation.
     epsilon:
         When ``True`` the edge participates in an ``\u03b5``-pair enforcing
         a singlet-state relationship between its incident nodes.
@@ -750,6 +762,7 @@ class Edge:
         density: float,
         delay: int = 1,
         phase_shift: float = 0.0,
+        A_phase: float = 0.0,
         weight: float = 1.0,
         *,
         density_specified: bool = True,
@@ -764,6 +777,7 @@ class Edge:
         self.density_specified = density_specified
         self.delay = delay
         self.phase_shift = phase_shift
+        self.A_phase = A_phase
         self.weight = weight
         self.u_id = u_id
         self.tick_traffic = 0.0
@@ -837,7 +851,7 @@ class Edge:
         else:
             drift_phase = self.phase_shift  # static phase shift
 
-        shifted_phase = phase + drift_phase
+        shifted_phase = phase + drift_phase + self.A_phase
         attenuated_amp = self.attenuation / self.weight
         scheduled_tick = global_tick + self.adjusted_delay(
             (

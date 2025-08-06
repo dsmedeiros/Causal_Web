@@ -74,6 +74,10 @@ When one node collapses, its ``epsilon`` partner is projected onto the opposite
 eigenvector, enabling Bell-test correlations without a bridge. Collapse now
 propagates regardless of edge direction so even a single directed ``epsilon``
 edge enforces the pairing.
+Nodes flagged with ``cnot_source`` dynamically convert their first two outgoing
+edges into such an ``epsilon`` pair whenever they fire. Each edge additionally
+supports an ``A_phase`` parameter representing a U(1) gauge potential; ticks
+traversing the edge accumulate this phase shift.
 The GUI now includes an **Analysis** menu with a *Bell Inequality Analysis...*
 action that opens a window showing CHSH statistics and a histogram of
 expectation values.

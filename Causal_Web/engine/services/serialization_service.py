@@ -96,6 +96,7 @@ class GraphSerializationService:
                 "attenuation": e.attenuation,
                 "density": e.density,
                 "phase_shift": e.phase_shift,
+                "A_phase": getattr(e, "A_phase", 0.0),
                 "epsilon": getattr(e, "epsilon", False),
                 "partner_id": getattr(e, "partner_id", None),
             }

@@ -46,6 +46,7 @@ class NodeInitializationService:
         origin_type: str = "seed",
         generation_tick: int = 0,
         parent_ids: Optional[List[str]] = None,
+        cnot_source: bool = False,
     ) -> None:
         self._basic(node_id, x, y, frequency, phase)
         self._runtime_state(refractory_period, base_threshold)
@@ -54,6 +55,7 @@ class NodeInitializationService:
         self._phase_four()
         self._threshold_params()
         self._spatial_index()
+        self.node.cnot_source = cnot_source
 
     # ------------------------------------------------------------------
     def _basic(
@@ -280,6 +282,17 @@ class NodeTickService:
 
     # ------------------------------------------------------------------
     def _propagate_edges(self, tick: Tick) -> None:
+        if self.node.cnot_source:
+            edges = self.graph.get_edges_from(self.node.id)
+            if len(edges) >= 2:
+                e1, e2 = edges[:2]
+                if not getattr(e1, "epsilon", False) or not getattr(
+                    e2, "epsilon", False
+                ):
+                    e1.epsilon = True
+                    e2.epsilon = True
+                    e1.partner = e2
+                    e2.partner = e1
         EdgePropagationService(
             node=self.node,
             tick_time=self.tick_time,
@@ -343,7 +356,9 @@ class EdgePropagationService:
         )
         if self.node.node_type == NodeType.DECOHERENT:
             shifted = (
-                self.node.locked_phase if self.node.locked_phase is not None else 0.0
+                (self.node.locked_phase if self.node.locked_phase is not None else 0.0)
+                + edge.phase_shift
+                + edge.A_phase
             )
             psi_contrib = self.node.probabilities * edge.attenuation
         else:
@@ -436,7 +451,7 @@ class EdgePropagationService:
                 HADAMARD if e.u_id == 1 else np.eye(2, dtype=np.complex128)
             )
             attenuation *= e.attenuation
-            shifted += e.phase_shift
+            shifted += e.phase_shift + e.A_phase
         ei_phi = np.exp(1j * shifted)
         psi_contrib, _ = propagate_chain(
             unitaries, self.node.psi, chi_max=getattr(Config, "chi_max", 16)
@@ -485,7 +500,7 @@ class EdgePropagationService:
 
     # ------------------------------------------------------------------
     def _shift_phase(self, edge: Edge) -> float:
-        return self.phase + edge.phase_shift
+        return self.phase + edge.phase_shift + edge.A_phase
 
     # ------------------------------------------------------------------
     def _log_propagation(self, target: Node, delay: float, shifted: float) -> None:
