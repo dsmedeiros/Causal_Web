@@ -67,6 +67,7 @@ class GraphSerializationService:
                     "decoherence_debt": n.decoherence_debt,
                     "phase_lock": n.phase_lock,
                     "locked_phase": n.locked_phase,
+                    "cnot_source": n.cnot_source,
                 }
             )
         return nodes
