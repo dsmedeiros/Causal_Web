@@ -109,6 +109,7 @@ class NodeInitializationService:
         n.coherence_credit = 0.0
         n.decoherence_debt = 0.0
         n.phase_lock = False
+        n.locked_phase = None
         n.collapse_pressure = 0.0
         n.tick_drop_counts = defaultdict(int)
         n.internal_phase = n.phase
@@ -336,7 +337,9 @@ class EdgePropagationService:
             graph=self.graph,
         )
         if self.node.node_type == NodeType.DECOHERENT:
-            shifted = self.phase
+            shifted = (
+                self.node.locked_phase if self.node.locked_phase is not None else 0.0
+            )
             psi_contrib = self.node.probabilities * edge.attenuation
         else:
             shifted = self._shift_phase(edge)
