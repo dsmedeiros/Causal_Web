@@ -17,6 +17,7 @@ from .serialization_service import (
     GraphSerializationService,
     NarrativeGeneratorService,
 )
+from .entanglement_service import EntanglementService
 
 __all__ = [
     "NodeInitializationService",
@@ -30,4 +31,5 @@ __all__ = [
     "GlobalDiagnosticsService",
     "GraphSerializationService",
     "NarrativeGeneratorService",
+    "EntanglementService",
 ]

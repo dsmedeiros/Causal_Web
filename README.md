@@ -53,6 +53,9 @@ Bridge propagation now occurs before observers handle a tick so detector events
 reflect entangled activity in the same cycle.
 These detector events are additionally written to `entangled_log.jsonl` for
 Bell inequality analysis.
+Graphs may also define ``epsilon`` edges linking two nodes in a singlet state.
+When one node collapses, its ``epsilon`` partner is projected onto the opposite
+eigenvector, enabling Bell-test correlations without a bridge.
 The GUI now includes an **Analysis** menu with a *Bell Inequality Analysis...*
 action that opens a window showing CHSH statistics and a histogram of
 expectation values.

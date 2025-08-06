@@ -95,6 +95,8 @@ class GraphSerializationService:
                 "attenuation": e.attenuation,
                 "density": e.density,
                 "phase_shift": e.phase_shift,
+                "epsilon": getattr(e, "epsilon", False),
+                "partner_id": getattr(e, "partner_id", None),
             }
             for e in self.graph.edges
         ]

@@ -445,6 +445,7 @@ class Node(LoggingMixin):
         tick_id: str | None = None,
         cumulative_delay: float = 0.0,
         entangled_id: str | None = None,
+        graph: "CausalGraph | None" = None,
     ) -> None:
         """Store an incoming phase for future evaluation.
 
@@ -481,7 +482,7 @@ class Node(LoggingMixin):
             self._decoherence_cache.pop(tick_time, None)
         from ..tick_engine.tick_router import TickRouter
 
-        TickRouter.record_fanin(self, tick_time)
+        TickRouter.record_fanin(self, tick_time, graph)
         print(
             f"[{self.id}] Received tick at {tick_time} with phase {incoming_phase:.2f}"
         )
@@ -699,7 +700,23 @@ class Node(LoggingMixin):
 
 
 class Edge:
-    """Directional connection carrying phase between nodes."""
+    """Directional connection carrying phase between nodes.
+
+    Parameters
+    ----------
+    source, target:
+        Node identifiers at each end of the edge.
+    attenuation, density, delay, phase_shift, weight:
+        Standard edge parameters influencing propagation.
+    epsilon:
+        When ``True`` the edge participates in an ``\u03b5``-pair enforcing
+        a singlet-state relationship between its incident nodes.
+    partner_id:
+        Optional identifier linking this edge to its entangled partner.
+    partner:
+        Reference to the opposite edge in the pair, populated during graph
+        construction.
+    """
 
     def __init__(
         self,
@@ -713,6 +730,8 @@ class Edge:
         *,
         density_specified: bool = True,
         u_id: int = 0,
+        epsilon: bool = False,
+        partner_id: str | None = None,
     ) -> None:
         self.source = source
         self.target = target
@@ -725,6 +744,9 @@ class Edge:
         self.u_id = u_id
         self.tick_traffic = 0.0
         self._last_tick = 0
+        self.epsilon = epsilon
+        self.partner_id = partner_id
+        self.partner: "Edge | None" = None
 
     def adjusted_delay(
         self,
@@ -809,4 +831,5 @@ class Edge:
             origin=self.source,
             created_tick=global_tick,
             amplitude=attenuated_amp,
+            graph=graph,
         )
