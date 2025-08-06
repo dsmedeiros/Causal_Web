@@ -165,6 +165,7 @@ class GraphModel:
                 "to": target,
                 "delay": delay,
                 "attenuation": attenuation,
+                "u_id": props.pop("u_id", 0),
             }
             record.update(props)
             self.edges.append(record)

@@ -479,6 +479,9 @@ class Node(LoggingMixin):
             self.pending_superpositions[tick_time].append(record)
             self._coherence_cache.pop(tick_time, None)
             self._decoherence_cache.pop(tick_time, None)
+        from ..tick_engine.tick_router import TickRouter
+
+        TickRouter.record_fanin(self, tick_time)
         print(
             f"[{self.id}] Received tick at {tick_time} with phase {incoming_phase:.2f}"
         )
@@ -709,6 +712,7 @@ class Edge:
         weight: float = 1.0,
         *,
         density_specified: bool = True,
+        u_id: int = 0,
     ) -> None:
         self.source = source
         self.target = target
@@ -718,6 +722,7 @@ class Edge:
         self.delay = delay
         self.phase_shift = phase_shift
         self.weight = weight
+        self.u_id = u_id
         self.tick_traffic = 0.0
         self._last_tick = 0
 

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from ..models.node import Node
 from ..models.tick import Tick
+import numpy as np
+from ...config import Config
 
 
 class TickRouter:
@@ -28,9 +30,23 @@ class TickRouter:
         return cls.LAYERS[-1]
 
     @classmethod
+    def record_fanin(cls, node: Node, tick_time: int) -> None:
+        """Increment fan-in counts and collapse via Born rule."""
+        count = node.incoming_tick_counts[tick_time]
+        if count == getattr(Config, "N_DECOH", 0):
+            probs = np.abs(node.psi) ** 2
+            if probs.sum() == 0:
+                return
+            outcome = np.random.choice(2, p=probs / probs.sum())
+            if outcome == 0:
+                node.psi = np.array([1 + 0j, 0 + 0j], np.complex128)
+            else:
+                node.psi = np.array([0 + 0j, 1 + 0j], np.complex128)
+            node.incoming_tick_counts[tick_time] = 0
+
+    @classmethod
     def route_tick(cls, node: Node, tick: Tick) -> None:
         """Update ``tick`` to the next layer and record the transition."""
-        from ...config import Config
         from ..logging.logger import log_json
 
         new_layer = cls.next_layer(tick.layer)
