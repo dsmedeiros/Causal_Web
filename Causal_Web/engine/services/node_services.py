@@ -66,6 +66,7 @@ class NodeInitializationService:
         n.phase = phase
         n.internal_phase = phase
         n.psi = np.array([1 + 0j, 0 + 0j], np.complex128)
+        n.probabilities = np.array([1.0, 0.0])
         n.coherence = 1.0
         n.decoherence = 0.0
 
@@ -334,14 +335,18 @@ class EdgePropagationService:
             kappa,
             graph=self.graph,
         )
-        shifted = self._shift_phase(edge)
-        ei_phi = np.exp(1j * shifted)
-        source_psi = self.node.psi
-        if edge.u_id == 1:
-            psi_contrib = ei_phi * (HADAMARD @ source_psi)
+        if self.node.node_type == NodeType.DECOHERENT:
+            shifted = self.phase
+            psi_contrib = self.node.probabilities * edge.attenuation
         else:
-            psi_contrib = ei_phi * source_psi
-        psi_contrib *= edge.attenuation
+            shifted = self._shift_phase(edge)
+            ei_phi = np.exp(1j * shifted)
+            source_psi = self.node.psi
+            if edge.u_id == 1:
+                psi_contrib = ei_phi * (HADAMARD @ source_psi)
+            else:
+                psi_contrib = ei_phi * source_psi
+            psi_contrib *= edge.attenuation
         target.psi += psi_contrib
         self._log_propagation(target, delay, shifted)
         new_delay = self.tick.cumulative_delay + delay

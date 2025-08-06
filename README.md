@@ -8,7 +8,10 @@ The engine now includes a lightweight quantum upgrade. Each node maintains a
 two-component complex state vector `psi` instead of a single phase, edges can
 optionally apply a Hadamard transform (`u_id=1`), and fan-in thresholds
 `Config.N_DECOH` and `Config.N_CLASS` switch nodes between quantum,
-thermodynamic, and classical behaviour.
+thermodynamic, and classical behaviour. Hitting the classical threshold now
+collapses a node to an eigenstate using the Born rule, while the decoherence
+threshold preserves ``psi`` but freezes unitary evolution and records only the
+resulting probability distribution.
 
 Each node also accumulates a proper-time `tau` that accounts for local velocity
 and density effects. Run `analysis/twin.py` for a simple twin-paradox
