@@ -6,8 +6,9 @@ Ticks carry both phase and amplitude. Their influence on interference and cohere
 
 The engine now includes a lightweight quantum upgrade. Each node maintains a
 two-component complex state vector `psi` instead of a single phase, edges can
-optionally apply a Hadamard transform (`u_id=1`), and a global
-`Config.N_DECOH` controls when accumulated fan-in triggers Born-rule collapse.
+optionally apply a Hadamard transform (`u_id=1`), and fan-in thresholds
+`Config.N_DECOH` and `Config.N_CLASS` switch nodes between quantum,
+thermodynamic, and classical behaviour.
 
 Each node also accumulates a proper-time `tau` that accounts for local velocity
 and density effects. Run `analysis/twin.py` for a simple twin-paradox
