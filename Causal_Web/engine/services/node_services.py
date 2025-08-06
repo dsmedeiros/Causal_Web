@@ -357,6 +357,10 @@ class EdgePropagationService:
             kappa,
             graph=self.graph,
         )
+        from ..fields.density import get_field
+
+        rho = get_field().get(edge)
+        delay = max(1, int(round(delay * (1 + kappa * rho))))
         if self.node.node_type == NodeType.DECOHERENT:
             shifted = (
                 (self.node.locked_phase if self.node.locked_phase is not None else 0.0)
@@ -374,6 +378,7 @@ class EdgePropagationService:
                 psi_contrib = ei_phi * source_psi
             psi_contrib *= edge.attenuation
         target.psi += psi_contrib
+        get_field().deposit(edge, psi_contrib)
         self._log_propagation(target, delay, shifted)
         new_delay = self.tick.cumulative_delay + delay
         max_delay = getattr(Config, "max_cumulative_delay", 0)
@@ -440,6 +445,9 @@ class EdgePropagationService:
         shifted = self.phase
         source_freq = self.node.law_wave_frequency
         current_freq = source_freq
+        from ..fields.density import get_field
+
+        field = get_field()
         for e in chain:
             tgt = self.graph.get_node(e.target)
             delay = e.adjusted_delay(
@@ -448,6 +456,8 @@ class EdgePropagationService:
                 kappa,
                 graph=self.graph,
             )
+            rho = field.get(e)
+            delay = delay * (1 + kappa * rho)
             total_delay += delay
             current_freq = tgt.law_wave_frequency
             unitaries.append(
@@ -461,6 +471,8 @@ class EdgePropagationService:
         )
         psi_contrib = ei_phi * psi_contrib.reshape(-1) * attenuation
         target.psi += psi_contrib
+        for e in chain:
+            field.deposit(e, psi_contrib)
         self._log_propagation(target, total_delay, shifted)
         new_delay = self.tick.cumulative_delay + total_delay
         max_delay = getattr(Config, "max_cumulative_delay", 0)
