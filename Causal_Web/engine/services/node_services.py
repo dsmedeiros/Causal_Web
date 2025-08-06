@@ -21,6 +21,7 @@ from ...config import Config
 from ..logging.logger import log_json
 from ..models.tick import Tick, GLOBAL_TICK_POOL
 from ..models.node import Node, NodeType, Edge
+from ..quantum.tensors import propagate_chain
 
 HADAMARD = np.array([[1, 1], [1, -1]], dtype=np.complex128) / np.sqrt(2)
 
@@ -329,6 +330,10 @@ class EdgePropagationService:
 
     # ------------------------------------------------------------------
     def _propagate_edge(self, edge: Edge, kappa: float) -> None:
+        chain = self._collect_chain(edge)
+        if len(chain) > 4:
+            self._propagate_chain_mps(chain, kappa)
+            return
         target = self.graph.get_node(edge.target)
         delay = edge.adjusted_delay(
             self.node.law_wave_frequency,
@@ -380,6 +385,88 @@ class EdgePropagationService:
         new_tick.entangled_id = self.tick.entangled_id
         target.schedule_tick(
             self.tick_time + delay,
+            shifted,
+            origin=self.node.id,
+            created_tick=self.tick_time,
+            amplitude=new_tick.amplitude,
+            tick_id=new_tick.trace_id,
+            cumulative_delay=new_delay,
+            entangled_id=new_tick.entangled_id,
+            graph=self.graph,
+        )
+        GLOBAL_TICK_POOL.release(new_tick)
+
+    # ------------------------------------------------------------------
+    def _collect_chain(self, edge: Edge) -> List[Edge]:
+        chain = [edge]
+        current = self.graph.get_node(edge.target)
+        while True:
+            edges = self.graph.get_edges_from(current.id)
+            if len(edges) != 1:
+                break
+            chain.append(edges[0])
+            current = self.graph.get_node(edges[0].target)
+        return chain
+
+    # ------------------------------------------------------------------
+    def _propagate_chain_mps(self, chain: List[Edge], kappa: float) -> None:
+        target = self.graph.get_node(chain[-1].target)
+        total_delay = 0.0
+        unitaries: List[np.ndarray] = []
+        attenuation = 1.0
+        shifted = self.phase
+        source_freq = self.node.law_wave_frequency
+        current_freq = source_freq
+        for e in chain:
+            tgt = self.graph.get_node(e.target)
+            delay = e.adjusted_delay(
+                current_freq,
+                tgt.law_wave_frequency,
+                kappa,
+                graph=self.graph,
+            )
+            total_delay += delay
+            current_freq = tgt.law_wave_frequency
+            unitaries.append(
+                HADAMARD if e.u_id == 1 else np.eye(2, dtype=np.complex128)
+            )
+            attenuation *= e.attenuation
+            shifted += e.phase_shift
+        ei_phi = np.exp(1j * shifted)
+        psi_contrib, _ = propagate_chain(
+            unitaries, self.node.psi, chi_max=getattr(Config, "chi_max", 16)
+        )
+        psi_contrib = ei_phi * psi_contrib * attenuation
+        target.psi += psi_contrib
+        self._log_propagation(target, total_delay, shifted)
+        new_delay = self.tick.cumulative_delay + total_delay
+        max_delay = getattr(Config, "max_cumulative_delay", 0)
+        if max_delay and new_delay > max_delay:
+            if getattr(Config, "log_tick_drops", True):
+                target._log_tick_drop(
+                    self.tick_time,
+                    "event_horizon",
+                    tick_id=self.tick.trace_id,
+                    source=self.node.id,
+                    target=target.id,
+                    cumulative_delay=new_delay,
+                    coherence=target.compute_coherence_level(self.tick_time),
+                )
+            return
+        if self._handle_refraction(target, total_delay, shifted, kappa):
+            return
+        new_tick = GLOBAL_TICK_POOL.acquire()
+        new_tick.origin = self.tick.origin
+        new_tick.time = self.tick.time
+        new_tick.amplitude = self.tick.amplitude * attenuation
+        new_tick.phase = shifted
+        new_tick.layer = self.tick.layer
+        new_tick.trace_id = self.tick.trace_id
+        new_tick.generation_tick = self.tick.generation_tick
+        new_tick.cumulative_delay = new_delay
+        new_tick.entangled_id = self.tick.entangled_id
+        target.schedule_tick(
+            self.tick_time + total_delay,
             shifted,
             origin=self.node.id,
             created_tick=self.tick_time,
