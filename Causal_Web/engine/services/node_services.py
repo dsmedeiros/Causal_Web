@@ -22,6 +22,8 @@ from ..logging.logger import log_json
 from ..models.tick import Tick, GLOBAL_TICK_POOL
 from ..models.node import Node, NodeType, Edge
 
+HADAMARD = np.array([[1, 1], [1, -1]], dtype=np.complex128) / np.sqrt(2)
+
 
 class NodeInitializationService:
     """Initialize a :class:`~Causal_Web.engine.node.Node` instance."""
@@ -63,6 +65,7 @@ class NodeInitializationService:
         n.frequency = frequency
         n.phase = phase
         n.internal_phase = phase
+        n.psi = np.array([1 + 0j, 0 + 0j], np.complex128)
         n.coherence = 1.0
         n.decoherence = 0.0
 
@@ -332,6 +335,14 @@ class EdgePropagationService:
             graph=self.graph,
         )
         shifted = self._shift_phase(edge)
+        ei_phi = np.exp(1j * shifted)
+        source_psi = self.node.psi
+        if edge.u_id == 1:
+            psi_contrib = ei_phi * (HADAMARD @ source_psi)
+        else:
+            psi_contrib = ei_phi * source_psi
+        psi_contrib *= edge.attenuation
+        target.psi += psi_contrib
         self._log_propagation(target, delay, shifted)
         new_delay = self.tick.cumulative_delay + delay
         max_delay = getattr(Config, "max_cumulative_delay", 0)

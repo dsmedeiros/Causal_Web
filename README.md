@@ -4,6 +4,11 @@ Causal Web is a simulation engine and GUI for experimenting with causal graphs. 
 
 Ticks carry both phase and amplitude. Their influence on interference and coherence is weighted by amplitude and each tick records the local `generation_tick` at which it was emitted.
 
+The engine now includes a lightweight quantum upgrade. Each node maintains a
+two-component complex state vector `psi` instead of a single phase, edges can
+optionally apply a Hadamard transform (`u_id=1`), and a global
+`Config.N_DECOH` controls when accumulated fan-in triggers Born-rule collapse.
+
 ## Table of Contents
 - [Quick Start](#quick-start)
 - [Installation](#installation)

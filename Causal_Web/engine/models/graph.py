@@ -120,6 +120,7 @@ class CausalGraph:
         delay: int = 1,
         phase_shift: float = 0.0,
         weight: float | None = None,
+        u_id: int = 0,
     ) -> None:
         if weight is None:
             low, high = getattr(Config, "edge_weight_range", [1.0, 1.0])
@@ -136,6 +137,7 @@ class CausalGraph:
             phase_shift,
             weight,
             density_specified=density_specified,
+            u_id=u_id,
         )
         self.edges.append(edge)
         self.edges_from[source_id].append(edge)
