@@ -34,7 +34,11 @@ class TickRouter:
         """Increment fan-in counts and trigger layer transitions.
 
         ``graph`` is optionally supplied so that entanglement constraints can
-        propagate collapses across ``\u03b5`` edges.
+        propagate collapses across ``\u03b5`` edges. When the classical
+        threshold is reached the node collapses to an eigenstate sampled via
+        the Born rule. Crossing only the decoherence threshold preserves
+        :attr:`~Causal_Web.engine.models.node.Node.psi` but records a
+        probability distribution and halts further unitary updates.
         """
         count = node.incoming_tick_counts[tick_time]
         n_decoh = getattr(Config, "N_DECOH", 0)
@@ -42,14 +46,18 @@ class TickRouter:
 
         if count >= n_class:
             probs = np.abs(node.psi) ** 2
-            if probs.sum() == 0:
+            total = probs.sum()
+            if total == 0:
                 return
-            outcome = int(np.argmax(probs))
+            outcome = int(np.random.choice([0, 1], p=probs / total))
             if outcome == 0:
                 node.psi = np.array([1 + 0j, 0 + 0j], np.complex128)
+                node.probabilities = np.array([1.0, 0.0])
             else:
                 node.psi = np.array([0 + 0j, 1 + 0j], np.complex128)
+                node.probabilities = np.array([0.0, 1.0])
             node.is_classical = True
+            node.phase_lock = True
             node.node_type = NodeType.CLASSICALIZED
             node.collapse_origin[tick_time] = node.collapse_origin.get(
                 tick_time, "self"
@@ -65,14 +73,10 @@ class TickRouter:
             probs = np.abs(node.psi) ** 2
             total = probs.sum()
             if total:
-                node.psi = np.array(
-                    [
-                        probs[0] / total,
-                        probs[1] / total,
-                    ],
-                    np.complex128,
-                )
+                node.probabilities = probs / total
+            node.phase_lock = True
             node.node_type = NodeType.DECOHERENT
+            node.incoming_tick_counts[tick_time] = 0
 
     @classmethod
     def route_tick(cls, node: Node, tick: Tick) -> None:
