@@ -9,6 +9,10 @@ two-component complex state vector `psi` instead of a single phase, edges can
 optionally apply a Hadamard transform (`u_id=1`), and a global
 `Config.N_DECOH` controls when accumulated fan-in triggers Born-rule collapse.
 
+Each node also accumulates a proper-time `tau` that accounts for local velocity
+and density effects. Run `analysis/twin.py` for a simple twin-paradox
+demonstration showcasing this time dilation.
+
 ## Table of Contents
 - [Quick Start](#quick-start)
 - [Installation](#installation)

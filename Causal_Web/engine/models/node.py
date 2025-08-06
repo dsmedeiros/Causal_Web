@@ -23,7 +23,11 @@ class NodeType(Enum):
 
 
 class Node(LoggingMixin):
-    """Represents a single oscillator in the causal graph."""
+    """Represents a single oscillator in the causal graph.
+
+    Nodes maintain a ``tau`` attribute representing accumulated proper-time.
+    ``tau`` is advanced externally based on local velocity and density.
+    """
 
     def __init__(
         self,
@@ -55,6 +59,11 @@ class Node(LoggingMixin):
             generation_tick=generation_tick,
             parent_ids=parent_ids,
         )
+
+        # Proper-time and previous position tracking
+        self.tau = 0.0
+        self.prev_x = x
+        self.prev_y = y
 
     def _advance_internal_phase(self, tick_time: float) -> None:
         """Update :attr:`internal_phase` using entrainment from ticks."""
