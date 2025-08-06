@@ -291,8 +291,11 @@ class NodeTickService:
                 ):
                     e1.epsilon = True
                     e2.epsilon = True
+                    pair_id = str(uuid.uuid4())
                     e1.partner = e2
                     e2.partner = e1
+                    e1.partner_id = pair_id
+                    e2.partner_id = pair_id
         EdgePropagationService(
             node=self.node,
             tick_time=self.tick_time,

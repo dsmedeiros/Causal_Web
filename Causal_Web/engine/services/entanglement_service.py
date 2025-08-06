@@ -13,7 +13,8 @@ class EntanglementService:
         """Collapse epsilon-linked partners to the opposite eigenstate.
 
         Both incoming and outgoing ``\u03b5`` edges are inspected so collapse
-        propagates even when only a single directed edge exists.
+        propagates even when only a single directed edge exists. The partner's
+        classical probabilities are mirrored to maintain coherent statistics.
 
         Parameters
         ----------
@@ -38,6 +39,7 @@ class EntanglementService:
             if partner is None or partner.collapse_origin.get(tick_time) is not None:
                 continue
             partner.psi = np.array([node.psi[1], node.psi[0]], np.complex128)
+            partner.probabilities = node.probabilities[::-1]
             partner.collapse_origin[tick_time] = "epsilon"
             partner.incoming_tick_counts[tick_time] = 0
             visited.add(partner_id)

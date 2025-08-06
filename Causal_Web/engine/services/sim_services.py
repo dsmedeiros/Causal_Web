@@ -333,6 +333,7 @@ class GraphLoadService:
                 origin_type=node_data.get("origin_type", "seed"),
                 generation_tick=node_data.get("generation_tick", 0),
                 parent_ids=node_data.get("parent_ids"),
+                cnot_source=node_data.get("cnot_source", False),
             )
             goals = node_data.get("goals")
             if goals is not None:
