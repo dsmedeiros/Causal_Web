@@ -22,6 +22,8 @@ percent numerical error.
 Each node also accumulates a proper-time `tau` that accounts for local velocity
 and density effects. Run `analysis/twin.py` for a simple twin-paradox
 demonstration showcasing this time dilation.
+Run `analysis/lensing.py` to approximate lensing wedge amplitudes via a
+Monte-Carlo path sampler over the graph's causal structure.
 
 ## Table of Contents
 - [Quick Start](#quick-start)
