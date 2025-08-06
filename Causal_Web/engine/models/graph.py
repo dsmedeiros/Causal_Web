@@ -30,6 +30,7 @@ class CausalGraph:
         self.bridges_by_node = defaultdict(set)
         self.tick_sources = []
         self.meta_nodes: dict[str, MetaNode] = {}
+        self._epsilon_pair_map: dict[str, Edge] = {}
         self.spatial_index = defaultdict(set)
         self._cluster_cache: dict[int, tuple[int, list[list[str]]]] = {}
         self._cluster_version = 0
@@ -121,7 +122,24 @@ class CausalGraph:
         phase_shift: float = 0.0,
         weight: float | None = None,
         u_id: int = 0,
+        *,
+        epsilon: bool = False,
+        partner_id: str | None = None,
     ) -> None:
+        """Insert a directed edge into the graph.
+
+        Parameters
+        ----------
+        source_id, target_id:
+            Node identifiers for the edge endpoints.
+        epsilon:
+            When ``True`` the edge participates in an ``\u03b5`` pair whose
+            partner is identified by ``partner_id``. Collapses of one node
+            will project the partner to the opposite eigenstate.
+        partner_id:
+            Identifier used to locate the companion ``\u03b5`` edge during
+            graph loading.
+        """
         if weight is None:
             low, high = getattr(Config, "edge_weight_range", [1.0, 1.0])
             weight = random.uniform(low, high)
@@ -138,10 +156,19 @@ class CausalGraph:
             weight,
             density_specified=density_specified,
             u_id=u_id,
+            epsilon=epsilon,
+            partner_id=partner_id,
         )
         self.edges.append(edge)
         self.edges_from[source_id].append(edge)
         self.edges_to[target_id].append(edge)
+        if epsilon and partner_id:
+            other = self._epsilon_pair_map.get(partner_id)
+            if other is not None:
+                edge.partner = other
+                other.partner = edge
+            else:
+                self._epsilon_pair_map[partner_id] = edge
         self._invalidate_density_cache()
 
     def add_bridge(

@@ -306,6 +306,7 @@ class GraphLoadService:
         g.tick_sources = []
         g.spatial_index.clear()
         g.meta_nodes.clear()
+        g._epsilon_pair_map.clear()
 
     # ------------------------------------------------------------------
     def _load_nodes(self, nodes_data: list | dict) -> None:
@@ -382,6 +383,8 @@ class GraphLoadService:
                 delay=edge.get("delay", 1),
                 phase_shift=edge.get("phase_shift", 0.0),
                 weight=edge.get("weight"),
+                epsilon=edge.get("epsilon", False),
+                partner_id=edge.get("partner_id"),
             )
 
     # ------------------------------------------------------------------

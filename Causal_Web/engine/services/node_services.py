@@ -379,6 +379,7 @@ class EdgePropagationService:
             tick_id=new_tick.trace_id,
             cumulative_delay=new_delay,
             entangled_id=new_tick.entangled_id,
+            graph=self.graph,
         )
         GLOBAL_TICK_POOL.release(new_tick)
 
@@ -423,6 +424,7 @@ class EdgePropagationService:
             origin=self.node.id,
             created_tick=self.tick_time,
             entangled_id=self.tick.entangled_id,
+            graph=self.graph,
         )
         target.node_type = NodeType.REFRACTIVE
         log_json(

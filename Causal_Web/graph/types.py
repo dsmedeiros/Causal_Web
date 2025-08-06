@@ -36,6 +36,8 @@ EdgeData = TypedDict(
         "phase_shift": float,
         "weight": float,
         "u_id": int,
+        "epsilon": bool,
+        "partner_id": str,
     },
     total=False,
 )
