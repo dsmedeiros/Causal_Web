@@ -20,10 +20,10 @@ chain of one hundred Hadamards now consumes less than 50 MB with under one
 percent numerical error.
 
 Each node also accumulates a proper-time `tau` that accounts for local velocity
-and density effects. Run `analysis/twin.py` for a simple twin-paradox
-demonstration showcasing this time dilation.
-Run `analysis/lensing.py` to approximate lensing wedge amplitudes via a
-Monte-Carlo path sampler over the graph's causal structure.
+and density effects. Run `python -m Causal_Web.analysis.twin` for a simple
+twin-paradox demonstration showcasing this time dilation. Run
+`python -m Causal_Web.analysis.lensing` to approximate lensing wedge amplitudes
+via a Monte-Carlo path sampler over the graph's causal structure.
 
 ## Table of Contents
 - [Quick Start](#quick-start)
@@ -57,7 +57,10 @@ Monte-Carlo path sampler over the graph's causal structure.
 Clone the repository and install the packages listed in `requirements.txt`. The GUI requires PySide6 and an X11 compatible display.
 
 ## Usage
-Graphs are stored as JSON files under `input/`. Each file defines `nodes`, `edges`, optional `bridges`, `tick_sources`, `observers` and `meta_nodes`. See [docs/graph_format.md](docs/graph_format.md) for the complete schema and an example.
+Graphs are stored as JSON files under `Causal_Web/input/`. Each file defines
+`nodes`, `edges`, optional `bridges`, `tick_sources`, `observers` and
+`meta_nodes`. See [docs/graph_format.md](docs/graph_format.md) for the complete
+schema and an example.
 
 The GUI allows interactive editing of graphs. Drag nodes to reposition them and use the toolbar to add connections or observers. After editing, click **Apply Changes** in the Graph View to update the simulation and save the file. Details on all GUI actions are provided in [docs/gui_usage.md](docs/gui_usage.md).
 Nodes can optionally enable self-connections via a checkbox in the node panel. When enabled, dragging from a node back onto itself creates a curved edge.
@@ -88,7 +91,8 @@ expectation values.
 Runs produce a set of JSON logs in `output/`. The script `bundle_run.py` can be used after a simulation to archive the results. Full descriptions of each log file and their fields are available in [docs/log_schemas.md](docs/log_schemas.md).
 
 ## Configuration
-Runtime parameters are loaded from `input/config.json`. Any value can be overridden with CLI flags using dot notation for nested keys, for example:
+Runtime parameters are loaded from `Causal_Web/input/config.json`. Any value can
+be overridden with CLI flags using dot notation for nested keys, for example:
 ```bash
 python -m Causal_Web.main --no-gui --max_ticks 20
 ```
@@ -196,11 +200,18 @@ contention.
 
 ### Phase smoothing
 
-The `smooth_phase` option applies exponential decay to each node's internal oscillator phase. Enable it from the GUI control panel or set `"smooth_phase": true` in `input/config.json`.
+The `smooth_phase` option applies exponential decay to each node's internal
+oscillator phase. Enable it from the GUI control panel or set `"smooth_phase":
+true` in `Causal_Web/input/config.json`.
 
 ### Propagation control
 
-Check boxes on the control panel allow SIP budding, SIP recombination and collapse seeded propagation to be disabled independently. The `propagation_control` section of `input/config.json` contains `enable_sip_child`, `enable_sip_recomb` and `enable_csp` flags. These can also be toggled via the CLI using `--disable-sip-child`, `--disable-sip-recomb` and `--disable-csp`.
+Check boxes on the control panel allow SIP budding, SIP recombination and
+collapse seeded propagation to be disabled independently. The
+`propagation_control` section of `Causal_Web/input/config.json` contains
+`enable_sip_child`, `enable_sip_recomb` and `enable_csp` flags. These can also
+be toggled via the CLI using `--disable-sip-child`, `--disable-sip-recomb` and
+`--disable-csp`.
 
 ## Contributing
 Unit tests live under `tests/` and can be run with `pytest`. Coding guidelines and packaging instructions are documented in [AGENTS.md](AGENTS.md) and [docs/developer_guide.md](docs/developer_guide.md).

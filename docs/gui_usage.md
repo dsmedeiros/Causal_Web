@@ -13,6 +13,8 @@ New nodes include a *Self Connect* checkbox. When enabled, dragging from a node 
 
 The **Control Panel** window lets you start, pause or stop the simulation and set the tick limit and rate. A tick counter shows the current tick. Window resizing keeps the graph responsive and rendering updates only when the graph changes to reduce idle CPU usage.
 
+Bridge and observer panels expose additional quantum controls. Bridges can enable entanglement, assigning an ``entangled_id`` that observers use to produce deterministic measurements. Observers offer a *Detector Mode* toggle for logging binary outcomes from such bridges. The **Analysis** menu provides a *Bell Inequality Analysis...* action which displays CHSH statistics and expectation histograms for active entangled pairs.
+
 Saved graphs are copied into each run directory when the simulation starts so the exact input is preserved. The GUI also exposes a **Log Files** window to enable or disable specific logs.
 
 Changes made in the Graph View are applied back to the main window using the **Apply Changes** button. This action also writes the current graph to disk when a file is loaded.
