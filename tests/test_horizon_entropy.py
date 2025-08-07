@@ -5,8 +5,8 @@ from Causal_Web.engine.models.node import Node
 
 
 def test_page_curve_behavior():
-    random.seed(0)
-    horizon = HorizonThermodynamics(temperature=2.0)
+    rng = random.Random(0)
+    horizon = HorizonThermodynamics(temperature=2.0, rng=rng)
     nodes = [Node(str(i)) for i in range(3)]
     for n in nodes:
         horizon.register(n, energy=2.0)

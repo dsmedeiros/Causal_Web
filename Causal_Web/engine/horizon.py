@@ -36,11 +36,19 @@ class HorizonThermodynamics:
         Hawking temperature :math:`T_H` controlling the emission probability.
     delta_e:
         Energy carried by a single quantum; defaults to ``1.0``.
+    rng:
+        Optional :class:`random.Random` instance for reproducible emission.
     """
 
-    def __init__(self, temperature: float, delta_e: float = 1.0) -> None:
+    def __init__(
+        self,
+        temperature: float,
+        delta_e: float = 1.0,
+        rng: random.Random | None = None,
+    ) -> None:
         self.temperature = temperature
         self.delta_e = delta_e
+        self.rng = rng or random.Random()
         self.interior_energy: Dict[str, float] = {}
         self.emitted_quanta = 0
         self.total_quanta = 0.0
@@ -75,7 +83,7 @@ class HorizonThermodynamics:
             energy = self.interior_energy.get(node.id, 0.0)
             if energy <= 0.0:
                 continue
-            if random.random() < prob:
+            if self.rng.random() < prob:
                 energy -= self.delta_e
                 self.emitted_quanta += 1
             self.interior_energy[node.id] = max(0.0, energy)
@@ -101,14 +109,17 @@ _horizon: HorizonThermodynamics | None = None
 def get_horizon() -> HorizonThermodynamics:
     """Return the global :class:`HorizonThermodynamics` instance.
 
-    The instance is created lazily using ``Config.hawking_temperature`` for its
-    temperature.
+    The instance is created lazily using ``Config.hawking_temperature`` and
+    ``Config.hawking_delta_e`` for its parameters and is seeded from
+    ``Config.random_seed`` when available.
     """
 
     global _horizon
     if _horizon is None:
         temp = getattr(Config, "hawking_temperature", 1.0)
-        _horizon = HorizonThermodynamics(temp)
+        delta_e = getattr(Config, "hawking_delta_e", 1.0)
+        seed = getattr(Config, "random_seed", None)
+        _horizon = HorizonThermodynamics(temp, delta_e=delta_e, rng=random.Random(seed))
     return _horizon
 
 
