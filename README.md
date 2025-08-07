@@ -138,6 +138,14 @@ to synchronise state between layers.
 ## GPU and Distributed Acceleration
 The engine optionally accelerates per-edge calculations on the GPU when [Cupy](https://cupy.dev) is installed and can shard classical zones across a [Ray](https://www.ray.io) cluster. Classical nodes are partitioned into coherent zones and dispatched in parallel to Ray workers; if Ray is unavailable an info-level message is logged and processing continues locally. Select the backend with `Config.backend` or `--backend` (`cpu` by default, `cupy` for CUDA).
 
+Ray cluster initialisation can be customised via the `--ray-init` flag. Pass a JSON string of keyword arguments forwarded to `ray.init`, for example:
+
+```bash
+python -m Causal_Web.main --ray-init '{"num_cpus":4}'
+```
+
+This enables tailoring the local or remote Ray cluster before sharding zones.
+
 Edge propagation now batches phase factors and attenuations before offloading the
 complex multiply to CuPy, falling back to vectorised NumPy when CUDA is
 unavailable. A micro-benchmark under `tests/perf_edge_kernel.py` asserts the
