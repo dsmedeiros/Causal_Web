@@ -81,6 +81,7 @@ def propagate_chain(
     consumed by the MPS in bytes.
     """
 
+    # TODO: Implement CuPy-backed version when Config.backend == "cupy"
     mps = MatrixProductState(len(unitaries) + 1, chi_max=chi_max)
     for i in range(2):
         mps.tensors[0][0, i, 0] = psi[i]
