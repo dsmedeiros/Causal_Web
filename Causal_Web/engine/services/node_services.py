@@ -22,6 +22,7 @@ from ..logging.logger import log_json
 from ..models.tick import Tick, GLOBAL_TICK_POOL
 from ..models.node import Node, NodeType, Edge
 from ..quantum.tensors import propagate_chain
+from ..backend.cupy_kernels import complex_weighted_sum
 
 HADAMARD = np.array([[1, 1], [1, -1]], dtype=np.complex128) / np.sqrt(2)
 
@@ -321,16 +322,39 @@ class EdgePropagationService:
     tick: Tick
 
     def propagate(self) -> None:
-        """Propagate the tick across all outgoing edges."""
+        """Propagate the tick across all outgoing edges.
+
+        Phases and attenuations are batched into arrays and multiplied via
+        :func:`complex_weighted_sum`, which uses CuPy when available.  The
+        resulting weights are then distributed to individual edge handlers.
+        """
 
         self._log_recursion()
         from ..tick_engine import kappa
 
         edges = self.node._fanout_edges(self.graph)
+        if not edges:
+            return
+
+        if self.node.node_type == NodeType.DECOHERENT:
+            base_phase = (
+                self.node.locked_phase if self.node.locked_phase is not None else 0.0
+            )
+            shifted = np.array([base_phase + e.phase_shift + e.A_phase for e in edges])
+        else:
+            shifted = np.array([self._shift_phase(e) for e in edges])
+        phis = np.exp(1j * shifted)
+        attenuations = np.array([e.attenuation for e in edges])
+        weights = complex_weighted_sum(phis, attenuations)
+
+        def worker(args: tuple[Edge, float, complex]) -> None:
+            edge, s, w = args
+            self._propagate_edge(edge, s, w, kappa)
+
         with ThreadPoolExecutor(
             max_workers=getattr(Config, "thread_count", None)
         ) as ex:
-            ex.map(lambda e: self._propagate_edge(e, kappa), edges)
+            ex.map(worker, zip(edges, shifted, weights))
 
     # ------------------------------------------------------------------
     def _log_recursion(self) -> None:
@@ -345,7 +369,9 @@ class EdgePropagationService:
             )
 
     # ------------------------------------------------------------------
-    def _propagate_edge(self, edge: Edge, kappa: float) -> None:
+    def _propagate_edge(
+        self, edge: Edge, shifted: float, weighted_phi: complex, kappa: float
+    ) -> None:
         chain = self._collect_chain(edge)
         if len(chain) > 4:
             self._propagate_chain_mps(chain, kappa)
@@ -362,22 +388,15 @@ class EdgePropagationService:
         rho = get_field().get(edge)
         delay = max(1.0, delay * (1 + kappa * rho))
         if self.node.node_type == NodeType.DECOHERENT:
-            shifted = (
-                (self.node.locked_phase if self.node.locked_phase is not None else 0.0)
-                + edge.phase_shift
-                + edge.A_phase
-            )
             psi_contrib = self.node.probabilities * edge.attenuation
         else:
-            shifted = self._shift_phase(edge)
-            ei_phi = np.exp(1j * shifted)
             source_psi = self.node.psi
             if edge.u_id == 1:
-                psi_contrib = ei_phi * (HADAMARD @ source_psi)
+                psi_src = HADAMARD @ source_psi
             else:
-                psi_contrib = ei_phi * source_psi
-            psi_contrib *= edge.attenuation
-        # TODO: Port per-edge multiply/add to CuPy kernel
+                psi_src = source_psi
+            psi_contrib = weighted_phi * psi_src
+
         target.psi += psi_contrib
         get_field().deposit(edge, psi_contrib)
         self._log_propagation(target, delay, shifted)

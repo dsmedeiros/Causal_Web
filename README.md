@@ -138,6 +138,11 @@ to synchronise state between layers.
 ## GPU and Distributed Acceleration
 The engine optionally accelerates per-edge calculations on the GPU when [Cupy](https://cupy.dev) is installed and can shard classical zones across a [Ray](https://www.ray.io) cluster. Select the backend with `Config.backend` or `--backend` (`cpu` by default, `cupy` for CUDA).
 
+Edge propagation now batches phase factors and attenuations before offloading the
+complex multiply to CuPy, falling back to vectorised NumPy when CUDA is
+unavailable. A micro-benchmark under `tests/perf_edge_kernel.py` asserts the
+kernel processes one million edges in under 100 ms on compatible hardware.
+
 ## Output Logs
 Each run creates a timestamped directory under `output/runs` containing the graph, configuration and logs. Logging can be enabled or disabled via the GUI **Log Files** window or the `log_files` section of `config.json`. In `config.json` the keys are the categories (`tick`, `phenomena`, `event`) containing individual label flags. The `log_interval` option controls how often metrics and graph snapshots are written, while `logging_mode` selects which categories are written: `diagnostic` (all logs), `tick`, `phenomena` and `events`.
 Logs are consolidated by category into `ticks_log.jsonl`, `phenomena_log.jsonl` and `events_log.jsonl`.
