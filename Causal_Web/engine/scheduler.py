@@ -6,6 +6,7 @@ from typing import Iterable, Mapping
 from ..config import Config
 from .models.node import Node
 from .fields.density import get_field
+from .horizon import step as horizon_step
 
 
 def update_proper_time(node: Node, dt: float, rho: float, kappa: float) -> float:
@@ -72,3 +73,4 @@ def step(
     for node in nodes:
         rho = rho_map.get(node.id, 0.0)
         update_proper_time(node, dt, rho, kappa)
+    horizon_step(nodes)

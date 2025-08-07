@@ -120,6 +120,11 @@ Amplitude energy now feeds a stress–energy field that scales edge delay by
 ``1 + κρ``. This density diffuses each scheduler step with weight
 ``Config.density_diffusion_weight`` (``α``).
 
+Scheduler steps also integrate a toy horizon thermodynamics model. Interior
+nodes may emit Hawking pairs with probability ``exp(-ΔE/T_H)``, and the
+resulting radiation entropy follows a simple Page-curve: growing then
+declining as the horizon evaporates.
+
 ## Output Logs
 Each run creates a timestamped directory under `output/runs` containing the graph, configuration and logs. Logging can be enabled or disabled via the GUI **Log Files** window or the `log_files` section of `config.json`. In `config.json` the keys are the categories (`tick`, `phenomena`, `event`) containing individual label flags. The `log_interval` option controls how often metrics and graph snapshots are written, while `logging_mode` selects which categories are written: `diagnostic` (all logs), `tick`, `phenomena` and `events`.
 Logs are consolidated by category into `ticks_log.jsonl`, `phenomena_log.jsonl` and `events_log.jsonl`.
