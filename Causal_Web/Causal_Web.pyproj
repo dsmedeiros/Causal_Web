@@ -21,9 +21,24 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="analysis\bell.py" />
+    <Compile Include="analysis\lensing.py" />
+    <Compile Include="analysis\twin.py" />
+    <Compile Include="engine\analysis\mc_paths.py" />
+    <Compile Include="engine\analysis\__init__.py" />
+    <Compile Include="engine\backend\cupy_kernels.py" />
+    <Compile Include="engine\backend\ray_cluster.py" />
+    <Compile Include="engine\backend\zone_partitioner.py" />
+    <Compile Include="engine\backend\__init__.py" />
+    <Compile Include="engine\fields\density.py" />
+    <Compile Include="engine\horizon.py" />
     <Compile Include="engine\logging\__init__.py" />
     <Compile Include="engine\models\base.py" />
     <Compile Include="engine\models\__init__.py" />
+    <Compile Include="engine\quantum\tensors.py" />
+    <Compile Include="engine\quantum\__init__.py" />
+    <Compile Include="engine\scheduler.py" />
+    <Compile Include="engine\services\entanglement_service.py" />
     <Compile Include="gui\command_stack.py" />
     <Compile Include="config.py" />
     <Compile Include="database\db_setup.py" />
@@ -60,6 +75,7 @@
     <Compile Include="graph\__init__.py" />
     <Compile Include="gui\state.py" />
     <Compile Include="gui\__init__.py" />
+    <Compile Include="gui_pyside\bell_window.py" />
     <Compile Include="gui_pyside\canvas_widget.py" />
     <Compile Include="gui_pyside\log_files_window.py" />
     <Compile Include="gui_pyside\main_window.py" />
@@ -75,11 +91,19 @@
     <Compile Include="__init__.py" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="analysis\" />
     <Folder Include="assets\fonts\" />
     <Folder Include="database\" />
     <Folder Include="engine\" />
+    <Folder Include="engine\analysis\" />
+    <Folder Include="engine\backend\" />
+    <Folder Include="engine\backend\__pycache__\" />
+    <Folder Include="engine\fields\" />
+    <Folder Include="engine\fields\__pycache__\" />
     <Folder Include="engine\logging\" />
     <Folder Include="engine\models\" />
+    <Folder Include="engine\quantum\" />
+    <Folder Include="engine\quantum\__pycache__\" />
     <Folder Include="engine\services\" />
     <Folder Include="engine\tick_engine\" />
     <Folder Include="graph\" />
@@ -92,6 +116,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="assets\fonts\consola.ttf" />
+    <Content Include="engine\backend\__pycache__\cupy_kernels.cpython-310.pyc" />
+    <Content Include="engine\backend\__pycache__\__init__.cpython-310.pyc" />
+    <Content Include="engine\fields\__pycache__\density.cpython-310.pyc" />
+    <Content Include="engine\quantum\__pycache__\tensors.cpython-310.pyc" />
+    <Content Include="engine\quantum\__pycache__\__init__.cpython-310.pyc" />
     <Content Include="input\config.json" />
     <Content Include="input\destructive_interference_test.json" />
     <Content Include="input\dilation_baseline_test_case.json" />
