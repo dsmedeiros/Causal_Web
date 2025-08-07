@@ -180,11 +180,19 @@ twin:
 Run the sweep with:
 
 ```bash
+cw-sweep sweep.yml
+```
+
+or directly via the module:
+
+```bash
 python tools/sweep.py sweep.yml
 ```
 
 The resulting `*_sweep.csv` and `*_heatmap.png` files summarise Bell scores,
-interference visibility and proper-time ratios.
+interference visibility and proper-time ratios. Sweeps seed module-level random
+generators, so parallel sweeps should run in separate processes to avoid
+contention.
 
 ### Phase smoothing
 
