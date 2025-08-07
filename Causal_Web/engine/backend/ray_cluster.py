@@ -8,6 +8,7 @@ is not installed or a cluster is unavailable.
 from __future__ import annotations
 
 from typing import Callable, Iterable, Any, List
+import logging
 
 try:  # pragma: no cover - optional dependency
     import ray
@@ -52,6 +53,9 @@ def map_zones(func: Callable[[Any], Any], zones: Iterable[Any]) -> List[Any]:
     """
     zone_list = list(zones)
     if ray is None or not ray.is_initialized():
+        logging.getLogger(__name__).info(
+            "Ray cluster unavailable; running zones sequentially"
+        )
         return [func(z) for z in zone_list]
     futures = [_apply.remote(func, z) for z in zone_list]
     return list(ray.get(futures))
