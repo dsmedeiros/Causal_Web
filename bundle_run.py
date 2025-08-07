@@ -5,7 +5,7 @@ import json
 import os
 import shutil
 import zipfile
-from datetime import datetime
+from datetime import datetime, timezone
 
 from Causal_Web.engine.logging.log_interpreter import run_interpreter
 from Causal_Web.config import Config
@@ -293,7 +293,24 @@ def _create_manifest(out_dir: str, run_id: str, timestamp: str) -> None:
 
 
 def bundle_run(output_dir: str, run_id: str, do_zip: bool = False) -> str:
-    timestamp = datetime.utcnow().strftime("%Y-%m-%d_%H-%M")
+    """Bundle logs and summaries for a simulation run.
+
+    Parameters
+    ----------
+    output_dir:
+        Directory containing simulation output files.
+    run_id:
+        Identifier incorporated into the bundled folder name.
+    do_zip:
+        When ``True`` compress the bundle into ``.cwbundle.zip``.
+
+    Returns
+    -------
+    str
+        Path to the bundled directory or archive.
+    """
+
+    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d_%H-%M")
     out_dir = os.path.abspath(output_dir)
 
     # Run interpreter chain first

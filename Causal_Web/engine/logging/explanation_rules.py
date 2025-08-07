@@ -5,7 +5,7 @@ import os
 from typing import Dict, List
 
 from .causal_analyst import ExplanationEvent, CausalAnalyst
-from ..models.base import OutputDirMixin
+from ..models.base import OutputDirMixin, JsonLinesMixin
 
 
 class ExplanationRuleMatcher(OutputDirMixin):
