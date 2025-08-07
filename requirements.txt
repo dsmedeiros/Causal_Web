@@ -1,4 +1,7 @@
-numpy
+matplotlib
 networkx
-pytest
+numpy
+pandas
 pydantic
+pytest
+pyyaml

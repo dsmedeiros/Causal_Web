@@ -162,6 +162,30 @@ Per-tick law-wave frequencies are still written under the `law_wave_log` label i
 The interpreter provides `records_for_tick()` and `assemble_timeline()` helpers to query these consolidated logs.
 The ingestion service also consumes these unified files, routing records to database tables based on their `label` or `event_type`.
 
+## Diagnostics Sweep
+Parameter sweeps can be scripted in YAML and executed via `tools/sweep.py`. Each
+experiment logs metrics to a CSV file and produces a Matplotlib heat-map.
+
+Example configuration:
+
+```yaml
+bell:
+  epsilon: [true, false]
+interference:
+  fan_in: [0, 3]
+twin:
+  velocity: [0.2, 0.4, 0.6]
+```
+
+Run the sweep with:
+
+```bash
+python tools/sweep.py sweep.yml
+```
+
+The resulting `*_sweep.csv` and `*_heatmap.png` files summarise Bell scores,
+interference visibility and proper-time ratios.
+
 ### Phase smoothing
 
 The `smooth_phase` option applies exponential decay to each node's internal oscillator phase. Enable it from the GUI control panel or set `"smooth_phase": true` in `input/config.json`.
