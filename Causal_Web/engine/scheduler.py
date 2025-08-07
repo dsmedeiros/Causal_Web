@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import math
-from typing import Iterable, Mapping
+from typing import Callable, Iterable, Mapping
 
 from ..config import Config
 from .models.node import Node
@@ -74,3 +74,35 @@ def step(
         rho = rho_map.get(node.id, 0.0)
         update_proper_time(node, dt, rho, kappa)
     horizon_step(nodes)
+
+
+def run_multi_layer(
+    q_tick: Callable[[], None],
+    c_tick: Callable[[], None],
+    *,
+    micro_ticks: int,
+    macro_ticks: int,
+    flush: Callable[[], None],
+) -> None:
+    """Execute quantum and classical layers in a nested schedule.
+
+    Parameters
+    ----------
+    q_tick:
+        Callback invoked for every quantum-layer micro-tick.
+    c_tick:
+        Callback invoked once per classical macro-tick after micro ticks.
+    micro_ticks:
+        Number of quantum micro iterations per classical macro iteration.
+    macro_ticks:
+        Total number of classical macro iterations to process.
+    flush:
+        Function called after ``micro_ticks`` to synchronize state between
+        layers before the classical update.
+    """
+
+    for _ in range(macro_ticks):
+        for _ in range(micro_ticks):
+            q_tick()
+        flush()
+        c_tick()

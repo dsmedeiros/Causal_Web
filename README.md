@@ -126,6 +126,11 @@ resulting radiation entropy follows a simple Page-curve: growing then
 declining as the horizon evaporates. The energy quantum ``ΔE`` can be tuned at
 runtime via ``Config.hawking_delta_e``.
 
+The scheduler also supports a quantum micro layer via
+``scheduler.run_multi_layer``. This helper executes ``micro_ticks`` quantum
+steps before each classical update and calls a user-provided ``flush`` callback
+to synchronise state between layers.
+
 ## Output Logs
 Each run creates a timestamped directory under `output/runs` containing the graph, configuration and logs. Logging can be enabled or disabled via the GUI **Log Files** window or the `log_files` section of `config.json`. In `config.json` the keys are the categories (`tick`, `phenomena`, `event`) containing individual label flags. The `log_interval` option controls how often metrics and graph snapshots are written, while `logging_mode` selects which categories are written: `diagnostic` (all logs), `tick`, `phenomena` and `events`.
 Logs are consolidated by category into `ticks_log.jsonl`, `phenomena_log.jsonl` and `events_log.jsonl`.
