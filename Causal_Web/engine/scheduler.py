@@ -7,6 +7,8 @@ from ..config import Config
 from .models.node import Node
 from .fields.density import get_field
 from .horizon import step as horizon_step
+from .backend import ray_cluster
+from .backend.zone_partitioner import partition_zones
 
 
 def update_proper_time(node: Node, dt: float, rho: float, kappa: float) -> float:
@@ -55,9 +57,11 @@ def step(
     ``rho_map`` may supply pre-computed densities keyed by node identifier. If
     omitted, zero density is assumed for every node. When ``graph`` is
     provided, the global density field is diffused using ``alpha`` weight before
-    updating node clocks.
+    updating node clocks. Classical nodes are sharded into coherent zones and
+    updated in parallel via :mod:`ray` when available.
     """
 
+    nodes = list(nodes)
     if rho_map is None:
         rho_map = {}
     if kappa is None:
@@ -70,9 +74,28 @@ def step(
             else getattr(Config, "density_diffusion_weight", 0.0)
         )
         field.diffuse(graph, weight)
+
+        zones = partition_zones(graph)
+
+        def _update(zone: set[str]) -> None:
+            for nid in zone:
+                node = graph.get_node(nid)
+                if node is None:
+                    continue
+                rho = rho_map.get(nid, 0.0)
+                update_proper_time(node, dt, rho, kappa)
+
+        ray_cluster.map_zones(_update, zones)
+        processed = set().union(*zones)
+    else:
+        processed = set()
+
     for node in nodes:
+        if node.id in processed:
+            continue
         rho = rho_map.get(node.id, 0.0)
         update_proper_time(node, dt, rho, kappa)
+
     horizon_step(nodes)
 
 

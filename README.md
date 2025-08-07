@@ -136,7 +136,7 @@ steps before each classical update and calls a user-provided ``flush`` callback
 to synchronise state between layers.
 
 ## GPU and Distributed Acceleration
-The engine optionally accelerates per-edge calculations on the GPU when [Cupy](https://cupy.dev) is installed and can shard classical zones across a [Ray](https://www.ray.io) cluster. Select the backend with `Config.backend` or `--backend` (`cpu` by default, `cupy` for CUDA).
+The engine optionally accelerates per-edge calculations on the GPU when [Cupy](https://cupy.dev) is installed and can shard classical zones across a [Ray](https://www.ray.io) cluster. Classical nodes are partitioned into coherent zones and dispatched in parallel to Ray workers; if Ray is unavailable an info-level message is logged and processing continues locally. Select the backend with `Config.backend` or `--backend` (`cpu` by default, `cupy` for CUDA).
 
 Edge propagation now batches phase factors and attenuations before offloading the
 complex multiply to CuPy, falling back to vectorised NumPy when CUDA is
