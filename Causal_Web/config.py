@@ -63,6 +63,7 @@ class Config:
     N_DECOH = 3  # Fan-in threshold for thermodynamic behaviour
     N_CLASS = 6  # Fan-in threshold for classical fallback
     chi_max = 16  # Max MPS bond dimension
+    hawking_delta_e = 1.0  # Energy quantum for horizon emissions
 
     # Mapping of ``category`` -> {``label``: bool} controlling which logs are
     # written. Categories correspond to consolidated output files and the labels
