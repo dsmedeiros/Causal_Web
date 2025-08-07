@@ -10,6 +10,7 @@ from __future__ import annotations
 from typing import Iterable
 
 import numpy as np
+from ...config import Config
 
 try:  # pragma: no cover - optional dependency
     import cupy as cp
@@ -53,6 +54,6 @@ def complex_weighted_sum(phases: np.ndarray, weights: np.ndarray) -> np.ndarray:
 
 
 def is_available() -> bool:
-    """Return ``True`` if a CUDA backend is ready."""
+    """Return ``True`` when CuPy is selected and available."""
 
-    return cp is not None
+    return cp is not None and Config.backend == "cupy"
