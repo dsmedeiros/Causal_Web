@@ -52,6 +52,9 @@ def _add_config_args(
                 "--density-calc", f"--{prefix}{key}", type=arg_type, dest=dest
             )
             continue
+        if dest == "backend":
+            parser.add_argument(arg_name, choices=["cpu", "cupy"], dest=dest)
+            continue
         if isinstance(value, bool):
             parser.add_argument(arg_name, type=lambda x: x.lower() == "true", dest=dest)
         else:

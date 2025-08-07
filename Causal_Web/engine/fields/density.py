@@ -41,7 +41,7 @@ class DensityField:
         or accelerator backends may require atomic updates or per-thread
         accumulation.
         """
-
+        # TODO: Implement CuPy kernel for energy accumulation
         energy = float(np.sum(np.abs(amplitude) ** 2))
         self._rho[(edge.source, edge.target)] += energy
 

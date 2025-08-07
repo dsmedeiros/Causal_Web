@@ -377,6 +377,7 @@ class EdgePropagationService:
             else:
                 psi_contrib = ei_phi * source_psi
             psi_contrib *= edge.attenuation
+        # TODO: Port per-edge multiply/add to CuPy kernel
         target.psi += psi_contrib
         get_field().deposit(edge, psi_contrib)
         self._log_propagation(target, delay, shifted)
@@ -466,6 +467,7 @@ class EdgePropagationService:
             attenuation *= e.attenuation
             shifted += e.phase_shift + e.A_phase
         ei_phi = np.exp(1j * shifted)
+        # TODO: Replace propagate_chain with CuPy kernel
         psi_contrib, _ = propagate_chain(
             unitaries, self.node.psi, chi_max=getattr(Config, "chi_max", 16)
         )

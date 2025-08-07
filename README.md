@@ -51,6 +51,7 @@ Monte-Carlo path sampler over the graph's causal structure.
    - `--config <path>` to use a custom configuration file.
    - `--graph <path>` to load a different graph.
    - `--profile <file>` to write `cProfile` stats to the given path.
+   - `--backend cupy` to enable GPU acceleration when available.
 
 ## Installation
 Clone the repository and install the packages listed in `requirements.txt`. The GUI requires PySide6 and an X11 compatible display.
@@ -106,6 +107,9 @@ The `chi_max` option caps the bond dimension used when compressing linear
 chains into Matrix Product States. Raising it reduces truncation error at the
 cost of memory.
 
+The `backend` option selects the compute backend. It defaults to `cpu` but
+may be set to `cupy` for CUDA acceleration.
+
 The `density_calc` option controls how edge density is computed. Set one of:
 
 - `local_tick_saturation` (default) – density increases with recent traffic
@@ -132,7 +136,7 @@ steps before each classical update and calls a user-provided ``flush`` callback
 to synchronise state between layers.
 
 ## GPU and Distributed Acceleration
-The engine optionally accelerates per-edge calculations on the GPU when [Cupy](https://cupy.dev) is installed and can shard classical zones across a [Ray](https://www.ray.io) cluster.
+The engine optionally accelerates per-edge calculations on the GPU when [Cupy](https://cupy.dev) is installed and can shard classical zones across a [Ray](https://www.ray.io) cluster. Select the backend with `Config.backend` or `--backend` (`cpu` by default, `cupy` for CUDA).
 
 ## Output Logs
 Each run creates a timestamped directory under `output/runs` containing the graph, configuration and logs. Logging can be enabled or disabled via the GUI **Log Files** window or the `log_files` section of `config.json`. In `config.json` the keys are the categories (`tick`, `phenomena`, `event`) containing individual label flags. The `log_interval` option controls how often metrics and graph snapshots are written, while `logging_mode` selects which categories are written: `diagnostic` (all logs), `tick`, `phenomena` and `events`.
