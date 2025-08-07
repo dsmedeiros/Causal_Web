@@ -4,12 +4,15 @@ from __future__ import annotations
 
 import argparse
 import itertools
+import logging
 from pathlib import Path
 from typing import Any, Dict, Iterable
 
 import matplotlib.pyplot as plt
 import pandas as pd
 import yaml
+
+plt.switch_backend("Agg")
 
 from . import metrics
 
@@ -34,9 +37,13 @@ def _iter_grid(grid: Dict[str, Iterable[Any]]):
 
 
 def _save_heatmap(df: pd.DataFrame, metric: str, out: Path) -> None:
-    """Persist a heat-map for one or two parameter columns."""
+    """Persist a heat-map for up to two parameter columns."""
 
     params = [c for c in df.columns if c not in {metric}]
+    if len(params) > 2:
+        logging.warning(
+            "Heat-map supports only two parameters; ignoring %s", params[2:]
+        )
     if len(params) == 1:
         p = params[0]
         plt.figure()
@@ -45,8 +52,7 @@ def _save_heatmap(df: pd.DataFrame, metric: str, out: Path) -> None:
         plt.ylabel(metric)
         plt.savefig(out)
         plt.close()
-        return
-    if len(params) >= 2:
+    elif len(params) >= 2:
         x, y = params[:2]
         pivot = df.pivot(index=y, columns=x, values=metric)
         plt.figure()
