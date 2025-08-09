@@ -36,7 +36,12 @@ from ..gui.state import (
 from .canvas_widget import CanvasWidget
 from .toolbar_builder import build_toolbar
 from ..gui.command_stack import AddNodeCommand, AddObserverCommand
-from ..engine import tick_engine
+from ..config import Config
+
+if getattr(Config, "engine_mode", "tick") == "v2":
+    from ..engine.engine_v2 import adapter as tick_engine
+else:
+    from ..engine import tick_engine
 from .shared import TooltipCheckBox, TOOLTIPS
 
 
