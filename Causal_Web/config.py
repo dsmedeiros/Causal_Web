@@ -29,8 +29,23 @@ class Config:
     engine_mode:
         Selects the simulation engine: ``"tick"`` for the legacy engine or
         ``"v2"`` for the strict-local core.
-    windowing, rho_delay, epsilon_pairs, bell:
-        Parameter groups used when ``engine_mode`` is ``"v2"``.
+    windowing:
+        Mapping of windowing coefficients used by the v2 engine. Expected keys
+        include ``W0``, ``zeta1``, ``zeta2``, ``a``, ``b``, ``T_hold`` and
+        ``C_min`` which together determine how vertex windows advance.
+    rho_delay:
+        Parameters controlling delayed density feedback in the v2 engine.
+        The group accepts ``alpha_d``, ``alpha_leak``, ``eta``, ``gamma`` and
+        ``rho0`` coefficients.
+    epsilon_pairs:
+        Controls reinforcement and decay for ε-linked partners. Keys such as
+        ``delta_ttl``, ``ancestry_prefix_L``, ``theta_max``, ``sigma0``,
+        ``lambda_decay``, ``sigma_reinforce`` and ``sigma_min`` shape the
+        dynamics.
+    bell:
+        Mutual information gate parameters for Bell pair matching. Supported
+        keys include ``mi_mode``, ``kappa_a``, ``kappa_xi``, ``beta_m`` and
+        ``beta_h``.
     """
 
     # Base directories for package resources

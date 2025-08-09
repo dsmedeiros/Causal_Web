@@ -53,3 +53,36 @@ def test_load_propagation_flags(tmp_path):
         assert Config.propagation_control["enable_sip_child"] is False
     finally:
         Config.propagation_control = original
+
+
+def test_load_engine_mode_and_param_groups(tmp_path):
+    cfg = tmp_path / "config.json"
+    cfg.write_text(
+        json.dumps(
+            {
+                "engine_mode": "v2",
+                "windowing": {"W0": 5},
+                "rho_delay": {"rho0": 1.2},
+                "epsilon_pairs": {"theta_max": 0.5},
+                "bell": {"mi_mode": "MI_lenient"},
+            }
+        )
+    )
+    original_engine = Config.engine_mode
+    original_windowing = Config.windowing.copy()
+    original_rho_delay = Config.rho_delay.copy()
+    original_epairs = Config.epsilon_pairs.copy()
+    original_bell = Config.bell.copy()
+    Config.load_from_file(str(cfg))
+    try:
+        assert Config.engine_mode == "v2"
+        assert Config.windowing["W0"] == 5
+        assert Config.rho_delay["rho0"] == 1.2
+        assert Config.epsilon_pairs["theta_max"] == 0.5
+        assert Config.bell["mi_mode"] == "MI_lenient"
+    finally:
+        Config.engine_mode = original_engine
+        Config.windowing = original_windowing
+        Config.rho_delay = original_rho_delay
+        Config.epsilon_pairs = original_epairs
+        Config.bell = original_bell

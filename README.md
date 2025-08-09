@@ -117,15 +117,45 @@ may be set to `cupy` for CUDA acceleration.
 The `engine_mode` flag selects the simulation core. The default `tick` value
 uses the existing engine while `v2` enables an experimental strict-local core.
 Parameter groups `windowing`, `rho_delay`, `epsilon_pairs`, and `bell` provide
-advanced controls for the v2 engine and currently have placeholder defaults.
-An adapter in ``engine_v2`` mirrors the legacy tick engine API and yields
-synthetic telemetry frames so the GUI can tick while the new physics is under
-development.  A depth-based scheduler orders packets by their arrival depth and
-advances vertex windows using the Local Causal Consistency Model (LCCM).  The
-LCCM computes a window size ``W(v)`` from vertex degree and local density and
-transitions between quantum ``Q``, decohered ``Θ`` and classical ``C`` layers
-with simple hysteresis timers.  A lightweight loader converts graph JSON into
-struct-of-arrays via ``engine_v2.loader.load_graph_arrays`` to prime this core.
+advanced controls for the v2 engine.  Each group is a nested mapping:
+
+```json
+{
+  "engine_mode": "v2",
+  "windowing": {"W0": 2, "zeta1": 0.0, "zeta2": 0.0, "a": 1.0, "b": 0.5,
+                 "T_hold": 1, "C_min": 0.0},
+  "rho_delay": {"alpha_d": 0.0, "alpha_leak": 0.0, "eta": 0.0,
+                "gamma": 0.0, "rho0": 1.0},
+  "epsilon_pairs": {"delta_ttl": 0, "ancestry_prefix_L": 0,
+                     "theta_max": 0.0, "sigma0": 0.0,
+                     "lambda_decay": 0.0, "sigma_reinforce": 0.0,
+                     "sigma_min": 0.0},
+  "bell": {"mi_mode": "MI_strict", "kappa_a": 0.0, "kappa_xi": 0.0,
+            "beta_m": 0.0, "beta_h": 0.0}
+}
+```
+
+The `windowing` values control vertex window advancement. `rho_delay` affects
+how edge density relaxes toward a baseline. `epsilon_pairs` governs ε-pair
+reinforcement and decay while `bell` sets mutual information gates for Bell
+pair matching.
+
+An adapter in ``engine_v2`` mirrors a subset of the legacy tick engine API and
+generates *synthetic telemetry frames* so the GUI can tick while the new
+physics is under development.  A telemetry frame is a simple structure:
+
+```json
+{"depth": 3, "events": 5, "packets": [{"src": 1, "dst": 2, "payload": null}]}
+```
+
+The adapter exposes methods like `build_graph`, `step`, `pause` and
+`snapshot_for_ui` to remain drop-in compatible.  Internally a depth-based
+scheduler orders packets by their arrival depth and advances vertex windows
+using the Local Causal Consistency Model (LCCM).  The LCCM computes a window
+size ``W(v)`` from vertex degree and local density and transitions between
+quantum ``Q``, decohered ``Θ`` and classical ``C`` layers with simple hysteresis
+timers.  A lightweight loader converts graph JSON into struct-of-arrays via
+``engine_v2.loader.load_graph_arrays`` to prime this core.
 
 The `density_calc` option controls how edge density is computed. Set one of:
 
