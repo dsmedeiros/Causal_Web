@@ -26,7 +26,9 @@ class DepthScheduler:
     deterministic pop order even when multiple packets arrive at the same
     depth.  ``peek_depth`` exposes the depth of the next scheduled event
     without removing it from the queue, which is useful for detecting window
-    boundaries in the adapter loop.
+    boundaries in the adapter loop. The scheduler itself does not maintain or
+    increment a global depth counter; it merely stores the depth associated
+    with each scheduled item.
     """
 
     def __init__(self) -> None:
