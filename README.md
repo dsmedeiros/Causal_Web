@@ -141,6 +141,10 @@ Amplitude energy now feeds a stress–energy field that scales edge delay by
 ``1 + κρ``. This density diffuses each scheduler step with weight
 ``Config.density_diffusion_weight`` (``α``).
 
+The helper ``engine.engine_v2.rho_delay.update_rho_delay`` applies this rule
+per edge, adding leakage and external intensity and mapping the resulting
+density to a logarithmically scaled effective delay.
+
 Scheduler steps also integrate a toy horizon thermodynamics model. Interior
 nodes may emit Hawking pairs with probability ``exp(-ΔE/T_H)``, and the
 resulting radiation entropy follows a simple Page-curve: growing then
