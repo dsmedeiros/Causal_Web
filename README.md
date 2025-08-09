@@ -121,6 +121,7 @@ advanced controls for the v2 engine and currently have placeholder defaults.
 An adapter in ``engine_v2`` mirrors the legacy tick engine API and yields
 synthetic telemetry frames so the GUI can tick while the new physics is under
 development.
+A lightweight loader converts graph JSON into struct-of-arrays via ``engine_v2.loader.load_graph_arrays`` to prime this core.
 
 The `density_calc` option controls how edge density is computed. Set one of:
 
