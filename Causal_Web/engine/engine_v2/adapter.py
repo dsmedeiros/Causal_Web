@@ -94,7 +94,12 @@ class EngineAdapter:
         return self.run_until_next_window_or(max_events)
 
     def run_until_next_window_or(self, limit: int | None) -> TelemetryFrame:
-        """Run until the next window boundary or until ``limit`` events."""
+        """Run until the next window boundary or until ``limit`` events.
+
+        The returned frame's ``depth`` mirrors the greatest arrival depth
+        encountered during processing. If no events are handled or only events
+        at the current depth are processed, the depth will remain unchanged.
+        """
 
         if not self._running:
             self.start()
