@@ -19,8 +19,15 @@ class _ScheduledItem:
     payload: Any
 
 
-class Scheduler:
-    """Arrival-depth priority queue."""
+class DepthScheduler:
+    """Arrival-depth priority queue.
+
+    Items are ordered by ``(depth_arr, dst_id, edge_id, seq)`` to guarantee a
+    deterministic pop order even when multiple packets arrive at the same
+    depth.  ``peek_depth`` exposes the depth of the next scheduled event
+    without removing it from the queue, which is useful for detecting window
+    boundaries in the adapter loop.
+    """
 
     def __init__(self) -> None:
         self._queue: List[_ScheduledItem] = []
@@ -33,10 +40,17 @@ class Scheduler:
         heapq.heappush(self._queue, _ScheduledItem(key, payload))
         self._seq += 1
 
-    def pop(self) -> Any:
-        """Remove and return the next payload."""
+    def pop(self) -> Tuple[int, int, int, Any]:
+        """Remove and return the next scheduled payload and its metadata."""
 
-        return heapq.heappop(self._queue).payload
+        item = heapq.heappop(self._queue)
+        depth_arr, dst_id, edge_id, _ = item.key
+        return depth_arr, dst_id, edge_id, item.payload
+
+    def peek_depth(self) -> int:
+        """Return the arrival depth of the next payload without removing it."""
+
+        return self._queue[0].key[0]
 
     def __len__(self) -> int:  # pragma: no cover - trivial
         return len(self._queue)
