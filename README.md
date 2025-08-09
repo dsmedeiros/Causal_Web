@@ -120,8 +120,12 @@ Parameter groups `windowing`, `rho_delay`, `epsilon_pairs`, and `bell` provide
 advanced controls for the v2 engine and currently have placeholder defaults.
 An adapter in ``engine_v2`` mirrors the legacy tick engine API and yields
 synthetic telemetry frames so the GUI can tick while the new physics is under
-development.
-A lightweight loader converts graph JSON into struct-of-arrays via ``engine_v2.loader.load_graph_arrays`` to prime this core.
+development.  A depth-based scheduler orders packets by their arrival depth and
+advances vertex windows using the Local Causal Consistency Model (LCCM).  The
+LCCM computes a window size ``W(v)`` from vertex degree and local density and
+transitions between quantum ``Q``, decohered ``Θ`` and classical ``C`` layers
+with simple hysteresis timers.  A lightweight loader converts graph JSON into
+struct-of-arrays via ``engine_v2.loader.load_graph_arrays`` to prime this core.
 
 The `density_calc` option controls how edge density is computed. Set one of:
 
