@@ -136,9 +136,10 @@ advanced controls for the v2 engine.  Each group is a nested mapping:
 ```
 
 The `windowing` values control vertex window advancement. `rho_delay` affects
-how edge density relaxes toward a baseline. `epsilon_pairs` governs ε-pair
-reinforcement and decay while `bell` sets mutual information gates for Bell
-pair matching.
+how edge density relaxes toward a baseline. `epsilon_pairs` governs dynamic
+ε-pair behaviour – seeds with a limited TTL can bind to form temporary bridge
+edges whose `sigma` values decay unless reinforced – while `bell` sets mutual
+information gates for Bell pair matching.
 
 An adapter in ``engine_v2`` mirrors a subset of the legacy tick engine API and
 generates *synthetic telemetry frames* so the GUI can tick while the new
