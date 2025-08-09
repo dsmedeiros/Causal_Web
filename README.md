@@ -118,6 +118,9 @@ The `engine_mode` flag selects the simulation core. The default `tick` value
 uses the existing engine while `v2` enables an experimental strict-local core.
 Parameter groups `windowing`, `rho_delay`, `epsilon_pairs`, and `bell` provide
 advanced controls for the v2 engine and currently have placeholder defaults.
+An adapter in ``engine_v2`` mirrors the legacy tick engine API and yields
+synthetic telemetry frames so the GUI can tick while the new physics is under
+development.
 
 The `density_calc` option controls how edge density is computed. Set one of:
 
