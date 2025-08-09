@@ -114,6 +114,11 @@ cost of memory.
 The `backend` option selects the compute backend. It defaults to `cpu` but
 may be set to `cupy` for CUDA acceleration.
 
+The `engine_mode` flag selects the simulation core. The default `tick` value
+uses the existing engine while `v2` enables an experimental strict-local core.
+Parameter groups `windowing`, `rho_delay`, `epsilon_pairs`, and `bell` provide
+advanced controls for the v2 engine and currently have placeholder defaults.
+
 The `density_calc` option controls how edge density is computed. Set one of:
 
 - `local_tick_saturation` (default) – density increases with recent traffic
