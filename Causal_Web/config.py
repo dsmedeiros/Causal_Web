@@ -26,6 +26,11 @@ class Config:
         Max MPS bond dimension used for tensor chain compression.
     backend:
         Compute backend to use: ``"cpu"`` (default) or ``"cupy"``.
+    engine_mode:
+        Selects the simulation engine: ``"tick"`` for the legacy engine or
+        ``"v2"`` for the strict-local core.
+    windowing, rho_delay, epsilon_pairs, bell:
+        Parameter groups used when ``engine_mode`` is ``"v2"``.
     """
 
     # Base directories for package resources
@@ -68,6 +73,43 @@ class Config:
     hawking_delta_e = 1.0  # Energy quantum for horizon emissions
     #: Compute backend; ``"cpu"`` or ``"cupy"``
     backend = "cpu"
+
+    #: Selected engine implementation: ``"tick"`` or ``"v2"``
+    engine_mode = "tick"
+
+    # Parameters for the experimental strict-local engine (``engine_mode = "v2"``)
+    windowing = {
+        "W0": 0.0,
+        "zeta1": 0.0,
+        "zeta2": 0.0,
+        "a": 0.0,
+        "b": 0.0,
+        "T_hold": 0.0,
+        "C_min": 0.0,
+    }
+    rho_delay = {
+        "alpha_d": 0.0,
+        "alpha_leak": 0.0,
+        "eta": 0.0,
+        "gamma": 0.0,
+        "rho0": 0.0,
+    }
+    epsilon_pairs = {
+        "delta_ttl": 0,
+        "ancestry_prefix_L": 0,
+        "theta_max": 0.0,
+        "sigma0": 0.0,
+        "lambda_decay": 0.0,
+        "sigma_reinforce": 0.0,
+        "sigma_min": 0.0,
+    }
+    bell = {
+        "mi_mode": "MI_strict",
+        "kappa_a": 0.0,
+        "kappa_xi": 0.0,
+        "beta_m": 0.0,
+        "beta_h": 0.0,
+    }
 
     # Mapping of ``category`` -> {``label``: bool} controlling which logs are
     # written. Categories correspond to consolidated output files and the labels
