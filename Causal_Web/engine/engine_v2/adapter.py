@@ -174,7 +174,9 @@ class EngineAdapter:
             max_depth = max(max_depth, lccm.depth)
             max_window = max(max_window, lccm.window_idx)
 
-        frame = TelemetryFrame(depth=max_depth, events=events, packets=packets)
+        frame = TelemetryFrame(
+            depth=max_depth, events=events, packets=packets, window=max_window
+        )
 
         depth_bucket = max_depth // 10
         self._frame += 1
@@ -225,6 +227,11 @@ class EngineAdapter:
         for data in self._vertices.values():
             max_depth = max(max_depth, data["lccm"].depth)
         return max_depth
+
+    def current_frame(self) -> int:
+        """Return the number of steps executed so far."""
+
+        return self._frame
 
 
 __all__ = ["EngineAdapter"]

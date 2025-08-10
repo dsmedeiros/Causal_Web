@@ -45,8 +45,9 @@ class BellAnalysisWindow(QMainWindow):
     # ------------------------------------------------------------------
     def _run_analysis(self) -> None:
         """Compute statistics and update the display."""
-        s_value, expectations = compute_bell_statistics()
-        self.result_label.setText(f"S = {s_value:.3f}")
+        s_value, expectations, meta = compute_bell_statistics()
+        extra = "" if not meta else " " + ", ".join(f"{k}={v}" for k, v in meta.items())
+        self.result_label.setText(f"S = {s_value:.3f}{extra}")
         if QChartView is object:
             return
 

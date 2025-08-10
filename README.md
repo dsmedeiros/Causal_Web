@@ -90,7 +90,8 @@ preserve ``cnot_source`` flags and their resulting ``epsilon`` pairings on
 reload.
 The GUI now includes an **Analysis** menu with a *Bell Inequality Analysis...*
 action that opens a window showing CHSH statistics and a histogram of
-expectation values.
+expectation values. Any metadata fields found in `entangled_log.jsonl`, such as
+`mode` or `kappa` parameters, are displayed alongside the CHSH score.
 
 Runs produce a set of JSON logs in `output/`. The script `bundle_run.py` can be used after a simulation to archive the results. Full descriptions of each log file and their fields are available in [docs/log_schemas.md](docs/log_schemas.md).
 

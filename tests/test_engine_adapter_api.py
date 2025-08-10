@@ -28,14 +28,17 @@ def test_step_returns_telemetry_frame():
     assert frame.packets and isinstance(frame.packets[0], Packet)
     assert adapter.snapshot_for_ui()["depth"] == frame.depth
     assert adapter.current_depth() == frame.depth
+    assert isinstance(frame.window, int)
+    assert adapter.current_frame() == 1
 
 
 def test_state_data_structures_defaults():
     vertices = VertexArray()
     edges = EdgeArray()
     pkt = Packet(src=1, dst=2, payload={"x": 1})
-    frame = TelemetryFrame(depth=3, events=1, packets=[pkt])
+    frame = TelemetryFrame(depth=3, events=1, packets=[pkt], window=2)
 
     assert vertices.ids == []
     assert edges.ids == []
     assert frame.packets[0].payload == {"x": 1}
+    assert frame.window == 2
