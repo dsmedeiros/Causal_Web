@@ -198,6 +198,9 @@ class Config:
     # Default runtime copy
     log_files = {k: dict(v) for k, v in DEFAULT_LOG_FILES.items()}
 
+    #: Sampling probability for throttled delivery logs
+    log_delivery_sample_rate: float = 0.0
+
     #: Allowed logging modes. ``diagnostic`` enables all logs. ``tick`` enables
     #: per-tick metrics, ``phenomena`` enables aggregated summaries and
     #: ``events`` enables event driven logs.

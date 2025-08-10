@@ -13,6 +13,12 @@ collapses a node to an eigenstate using the Born rule, while the decoherence
 threshold preserves ``psi`` but freezes unitary evolution and records only the
 resulting probability distribution.
 
+Engine v2 stores graph data in a struct-of-arrays format using `float32` and
+`complex64` types and batches deliveries by destination to vectorise quantum
+accumulation. A bucketed scheduler keyed by integer depth reduces heap
+operations to amortised *O*(1) and delivery logs may be sampled via
+`Config.log_delivery_sample_rate` to reduce I/O overhead.
+
 To cap memory growth for long coherent lines, the engine detects tensor clusters
 and represents them as Matrix Product States. Local edge unitaries contract with
 these tensors and singular values beyond ``Config.chi_max`` are truncated. A
