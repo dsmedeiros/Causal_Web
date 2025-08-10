@@ -190,7 +190,11 @@ Amplitude energy now feeds a stress–energy field that scales edge delay by
 
 The helper ``engine.engine_v2.rho_delay.update_rho_delay`` applies this rule
 per edge, adding leakage and external intensity and mapping the resulting
-density to a logarithmically scaled effective delay.
+density to a logarithmically scaled effective delay. The engine v2 adapter
+recomputes this ``d_eff`` on every packet delivery, storing it with the edge
+and using the updated value to schedule the next hop. When a vertex window
+closes the adapter normalises accumulated amplitudes and records ``EQ`` via
+``engine.engine_v2.qtheta_c.close_window``.
 
 Scheduler steps also integrate a toy horizon thermodynamics model. Interior
 nodes may emit Hawking pairs with probability ``exp(-ΔE/T_H)``, and the
