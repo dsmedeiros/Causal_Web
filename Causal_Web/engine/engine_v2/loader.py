@@ -141,17 +141,18 @@ def load_graph_arrays(graph_json: Dict[str, Any]) -> GraphArrays:
         "nbr_idx": np.asarray(nbr_idx, dtype=np.int32),
     }
 
+    d0_arr = np.asarray(edges["d0"], dtype=np.float32)
     edges = {
         "src": np.asarray(edges["src"], dtype=np.int32),
         "dst": np.asarray(edges["dst"], dtype=np.int32),
-        "d0": np.asarray(edges["d0"], dtype=np.float32),
+        "d0": d0_arr,
         "rho": np.asarray(edges["rho"], dtype=np.float32),
         "alpha": np.asarray(edges["alpha"], dtype=np.float32),
         "phi": np.asarray(edges["phi"], dtype=np.float32),
         "A": np.asarray(edges["A"], dtype=np.float32),
         "U": np.asarray(edges["U"], dtype=np.complex64),
         "sigma": np.asarray(edges["sigma"], dtype=np.float32),
-        "d_eff": np.zeros(n_edge, dtype=np.int32),
+        "d_eff": np.maximum(1, np.round(d0_arr)).astype(np.int32),
     }
 
     return GraphArrays(

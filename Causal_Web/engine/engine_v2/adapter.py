@@ -38,8 +38,12 @@ class EngineAdapter:
         self._arrays: GraphArrays | None = None
         self._edges_by_src: Dict[int, np.ndarray] = {}
         self._frame = 0
-        self._epairs = EPairs(**Config.epsilon_pairs)
-        self._bell = BellHelpers()
+        self._rng = random.Random(Config.run_seed)
+        eps_cfg = dict(Config.epsilon_pairs)
+        eps_seed = eps_cfg.pop("seed", Config.run_seed)
+        self._epairs = EPairs(seed=eps_seed, **eps_cfg)
+        bell_seed = Config.bell.get("seed", Config.run_seed)
+        self._bell = BellHelpers(seed=bell_seed)
 
     # Public API -----------------------------------------------------
     def build_graph(self, graph_json_path: str | Dict[str, Any]) -> None:
@@ -277,7 +281,12 @@ class EngineAdapter:
                 self._epairs.emit(dst, h_val, theta, neigh)
 
             if lccm.layer != prev_layer:
-                reason = "fanin_threshold" if prev_layer == "Q" else "decoh_threshold"
+                if prev_layer == "Q" and lccm.layer == "Θ":
+                    reason = "decoh_threshold"
+                elif prev_layer == "Θ" and lccm.layer == "Q":
+                    reason = "recoh_threshold"
+                else:
+                    reason = "layer_change"
                 log_record(
                     category="event",
                     label="layer_transition",
@@ -329,7 +338,7 @@ class EngineAdapter:
                 )
                 edge_logs += 1
                 rate = Config.logging.get("sample_edge_rate", 0.0)
-                if rate <= 0.0 or random.random() < rate:
+                if rate > 0.0 and self._rng.random() < rate:
                     log_record(
                         category="event",
                         label="edge_delivery",
@@ -364,7 +373,7 @@ class EngineAdapter:
                 }
                 edge_logs += 1
                 rate = Config.logging.get("sample_edge_rate", 0.0)
-                if rate <= 0.0 or random.random() < rate:
+                if rate > 0.0 and self._rng.random() < rate:
                     log_record(
                         category="event",
                         label="edge_delivery",
@@ -433,11 +442,11 @@ class EngineAdapter:
                     psi_acc.fill(0)
                     self._arrays.vertices["EQ"][vid] = EQ
                     p_v = data["p_v"]
-                    entropy = (
-                        float(-(p_v * np.log2(p_v + 1e-12)).sum()) if len(p_v) else 0.0
+                    H_pv = (
+                        float(-(p_v * np.log2(p_v + 1e-12)).sum()) if p_v.size else 0.0
                     )
                     conf = float(self._arrays.vertices["conf"][vid])
-                    E_theta = lccm.a * (1.0 - entropy)
+                    E_theta = lccm.a * (1.0 - H_pv)
                     E_C = lccm.b * conf
                     p_v.fill(1.0 / len(p_v))
                     self._arrays.vertices["p"][vid] = p_v

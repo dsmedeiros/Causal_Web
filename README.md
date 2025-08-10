@@ -17,10 +17,11 @@ Engine v2 stores graph data in a struct-of-arrays format using `float32` and
 `complex64` types and batches deliveries by destination to vectorise quantum
 accumulation. A bucketed scheduler keyed by integer depth reduces heap
 operations to amortised *O*(1) and delivery logs may be sampled via
-`Config.log_delivery_sample_rate` to reduce I/O overhead.
-Edge hops can also be throttled by setting
-`Config.logging.sample_edge_rate` (0.0–1.0) which records only a
-fraction of per-hop `edge_delivery` events.
+`Config.log_delivery_sample_rate` to reduce I/O overhead. Edge hops can
+also be throttled by setting `Config.logging.sample_edge_rate`
+(0.0–1.0) which records only a fraction of per-hop `edge_delivery`
+events; a value of `0.0` disables per-edge logs while still emitting a
+per-window summary of edge activity.
 
 To cap memory growth for long coherent lines, the engine detects tensor clusters
 and represents them as Matrix Product States. Local edge unitaries contract with
@@ -154,6 +155,9 @@ how edge density relaxes toward a baseline. `epsilon_pairs` governs dynamic
 ε-pair behaviour – seeds with a limited TTL can bind to form temporary bridge
 edges whose `sigma` values decay unless reinforced – while `bell` sets mutual
 information gates for Bell pair matching.
+
+`run_seed` provides a deterministic seed used by sampling, Bell helpers and
+ε-pair routines, allowing reproducible runs.
 
 An adapter in ``engine_v2`` mirrors a subset of the legacy tick engine API and
 generates *synthetic telemetry frames* so the GUI can tick while the new

@@ -17,6 +17,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Dict, Iterable, List, Tuple
 
+import numpy as np
+
 
 @dataclass
 class Seed:
@@ -62,7 +64,8 @@ class EPairs:
         Mapping of ``(a, b)`` node id pairs to :class:`Bridge` objects.
 
     Parameters are supplied on construction to avoid global state and to
-    make the component easy to test.
+    make the component easy to test. A ``seed`` may be provided for
+    deterministic behaviour in routines that rely on randomness.
     """
 
     def __init__(
@@ -74,6 +77,7 @@ class EPairs:
         lambda_decay: float,
         sigma_reinforce: float,
         sigma_min: float,
+        seed: int | None = None,
     ) -> None:
         self.delta_ttl = delta_ttl
         self.L = ancestry_prefix_L
@@ -84,6 +88,7 @@ class EPairs:
         self.sigma_min = sigma_min
         self.seeds: Dict[int, List[Seed]] = {}
         self.bridges: Dict[Tuple[int, int], Bridge] = {}
+        self._rng = np.random.default_rng(seed)
 
     # ------------------------------------------------------------------
     # seed handling
