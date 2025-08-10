@@ -3,6 +3,7 @@ import random
 import math
 
 from ..logging.logger import log_json
+from ...config import Config
 
 
 class Observer:
@@ -86,28 +87,31 @@ class Observer:
                 setting = rng.choice(self.measurement_settings)
                 adjusted = ev["phase"] - setting
                 outcome = 1 if math.cos(adjusted) > 0 else -1
+                payload = {
+                    "tick_id": ev["tick_id"],
+                    "observer_id": self.id,
+                    "entangled_id": ent_id,
+                    "measurement_setting": setting,
+                    "binary_outcome": outcome,
+                    "mode": getattr(Config, "bell_mode", None),
+                    "kappa_a": getattr(Config, "kappa_a", None),
+                    "kappa_xi": getattr(Config, "kappa_xi", None),
+                    "h_prefix_len": getattr(Config, "h_prefix_len", None),
+                    "delta_ttl": getattr(Config, "delta_ttl", None),
+                    "batch_id": getattr(Config, "batch_id", None),
+                    "setting": setting,
+                    "outcome": outcome,
+                }
                 log_json(
                     "event",
                     "entangled_measurement",
-                    {
-                        "tick_id": ev["tick_id"],
-                        "observer_id": self.id,
-                        "entangled_id": ent_id,
-                        "measurement_setting": setting,
-                        "binary_outcome": outcome,
-                    },
+                    payload,
                     tick=tick_time,
                 )
                 log_json(
                     "entangled",
                     "measurement",
-                    {
-                        "tick_id": ev["tick_id"],
-                        "observer_id": self.id,
-                        "entangled_id": ent_id,
-                        "measurement_setting": setting,
-                        "binary_outcome": outcome,
-                    },
+                    payload,
                     tick=tick_time,
                 )
         self.memory.append({"tick": tick_time, "events": events})
