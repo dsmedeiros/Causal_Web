@@ -133,10 +133,10 @@ advanced controls for the v2 engine.  Each group is a nested mapping:
 ```json
 {
   "engine_mode": "v2",
-  "windowing": {"W0": 2, "zeta1": 0.0, "zeta2": 0.0, "a": 1.0, "b": 0.5,
-                 "T_hold": 1, "C_min": 0.0},
-  "rho_delay": {"alpha_d": 0.0, "alpha_leak": 0.0, "eta": 0.0,
-                "gamma": 0.0, "rho0": 1.0},
+  "windowing": {"W0": 4, "zeta1": 0.3, "zeta2": 0.3, "a": 0.7, "b": 0.4,
+                 "T_hold": 2, "C_min": 0.1},
+  "rho_delay": {"alpha_d": 0.1, "alpha_leak": 0.01, "eta": 0.2,
+                "gamma": 0.8, "rho0": 1.0},
   "epsilon_pairs": {"delta_ttl": 0, "ancestry_prefix_L": 0,
                      "theta_max": 0.0, "sigma0": 0.0,
                      "lambda_decay": 0.0, "sigma_reinforce": 0.0,

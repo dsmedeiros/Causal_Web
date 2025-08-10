@@ -5,13 +5,8 @@ from Causal_Web.engine.engine_v2.state import Packet
 def test_run_until_next_window_or_rolls_window():
     graph = {
         "params": {"W0": 2},
-        "vertices": [
-            {
-                "id": 0,
-                "rho_mean": 0.0,
-                "edges": [{"id": 0, "dst": 0, "d_eff": 1}],
-            }
-        ],
+        "nodes": [{"id": "0", "rho_mean": 0.0}],
+        "edges": [{"from": "0", "to": "0", "delay": 1.0}],
     }
 
     adapter = EngineAdapter()
@@ -30,7 +25,7 @@ def test_run_until_next_window_or_rolls_window():
 def test_run_until_next_window_or_no_events():
     """Adapter reports zero depth and events when scheduler is empty."""
 
-    graph = {"vertices": [{"id": 0, "rho_mean": 0.0, "edges": []}]}
+    graph = {"nodes": [{"id": "0", "rho_mean": 0.0}], "edges": []}
 
     adapter = EngineAdapter()
     adapter.build_graph(graph)
@@ -44,7 +39,7 @@ def test_run_until_next_window_or_no_events():
 def test_run_until_next_window_or_single_event():
     """Processing a single event does not advance the depth."""
 
-    graph = {"vertices": [{"id": 0, "rho_mean": 0.0, "edges": []}]}
+    graph = {"nodes": [{"id": "0", "rho_mean": 0.0}], "edges": []}
 
     adapter = EngineAdapter()
     adapter.build_graph(graph)

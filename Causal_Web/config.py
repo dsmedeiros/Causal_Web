@@ -94,20 +94,20 @@ class Config:
 
     # Parameters for the experimental strict-local engine (``engine_mode = "v2"``)
     windowing = {
-        "W0": 0.0,
-        "zeta1": 0.0,
-        "zeta2": 0.0,
-        "a": 0.0,
-        "b": 0.0,
-        "T_hold": 0.0,
-        "C_min": 0.0,
+        "W0": 4.0,
+        "zeta1": 0.3,
+        "zeta2": 0.3,
+        "a": 0.7,
+        "b": 0.4,
+        "T_hold": 2.0,
+        "C_min": 0.1,
     }
     rho_delay = {
-        "alpha_d": 0.0,
-        "alpha_leak": 0.0,
-        "eta": 0.0,
-        "gamma": 0.0,
-        "rho0": 0.0,
+        "alpha_d": 0.1,
+        "alpha_leak": 0.01,
+        "eta": 0.2,
+        "gamma": 0.8,
+        "rho0": 1.0,
     }
     epsilon_pairs = {
         "delta_ttl": 0,
