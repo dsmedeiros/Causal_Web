@@ -10,13 +10,8 @@ from Causal_Web.engine.engine_v2.state import (
 def test_step_returns_telemetry_frame():
     graph = {
         "params": {"W0": 2},
-        "vertices": [
-            {
-                "id": 0,
-                "rho_mean": 0.0,
-                "edges": [{"id": 0, "dst": 0, "d_eff": 1}],
-            }
-        ],
+        "nodes": [{"id": "0", "rho_mean": 0.0}],
+        "edges": [{"from": "0", "to": "0", "delay": 1.0}],
     }
     adapter = EngineAdapter()
     adapter.build_graph(graph)

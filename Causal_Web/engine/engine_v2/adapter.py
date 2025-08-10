@@ -12,10 +12,15 @@ from typing import Any, Dict, Optional
 import threading
 import time
 
+import numpy as np
+
 from ..logging.logger import log_record
 from .lccm import LCCM
 from .scheduler import DepthScheduler
 from .state import Packet, TelemetryFrame
+from .loader import GraphArrays, load_graph_arrays
+from .rho_delay import update_rho_delay
+from ...config import Config
 
 
 class EngineAdapter:
@@ -25,6 +30,8 @@ class EngineAdapter:
         self._scheduler = DepthScheduler()
         self._running = False
         self._vertices: Dict[int, Dict[str, Any]] = {}
+        self._arrays: GraphArrays | None = None
+        self._edges_by_src: Dict[int, np.ndarray] = {}
         self._frame = 0
 
     # Public API -----------------------------------------------------
@@ -40,24 +47,29 @@ class EngineAdapter:
                 graph = json.load(fh)
 
         params = graph.get("params", {})
-        W0 = params.get("W0", 4)
-        zeta1 = params.get("zeta1", 0.0)
-        zeta2 = params.get("zeta2", 0.0)
+        window_defaults = dict(Config.windowing)
+        window_defaults.update(params)
+        W0 = window_defaults.get("W0", 4)
+        zeta1 = window_defaults.get("zeta1", 0.0)
+        zeta2 = window_defaults.get("zeta2", 0.0)
         rho0 = params.get("rho0", 1.0)
-        a = params.get("a", 1.0)
-        b = params.get("b", 0.5)
-        C_min = params.get("C_min", 0.0)
+        a = window_defaults.get("a", 1.0)
+        b = window_defaults.get("b", 0.5)
+        C_min = window_defaults.get("C_min", 0.0)
         f_min = params.get("f_min", 1.0)
         H_max = params.get("H_max", 0.0)
-        T_hold = params.get("T_hold", 1)
+        T_hold = window_defaults.get("T_hold", 1)
         T_class = params.get("T_class", 1)
 
+        self._arrays = load_graph_arrays(graph)
         self._vertices.clear()
-        for v in graph.get("vertices", []):
-            vid = int(v["id"])
-            edges = v.get("edges", [])
-            deg = len(edges)
-            rho_mean = v.get("rho_mean", 0.0)
+        edges = self._arrays.edges
+        n_vert = len(self._arrays.vertices["depth"])
+        for vid in range(n_vert):
+            out_idx = np.where(edges["src"] == vid)[0]
+            self._edges_by_src[vid] = out_idx
+            deg = len(out_idx)
+            rho_mean = float(self._arrays.vertices.get("rho_mean")[vid])
             lccm = LCCM(
                 W0,
                 zeta1,
@@ -73,7 +85,7 @@ class EngineAdapter:
                 deg=deg,
                 rho_mean=rho_mean,
             )
-            self._vertices[vid] = {"edges": edges, "lccm": lccm}
+            self._vertices[vid] = {"lccm": lccm}
 
     def start(self) -> None:
         """Mark the engine as running."""
@@ -144,23 +156,45 @@ class EngineAdapter:
                     },
                 )
 
-            for edge in vertex.get("edges", []):
-                depth_next = depth_arr + edge.get("d_eff", 1)
-                new_pkt = Packet(src=dst, dst=edge["dst"], payload=None)
+            edges = self._arrays.edges if self._arrays else {}
+            adj = self._arrays.adjacency if self._arrays else {}
+            for edge_idx in self._edges_by_src.get(dst, []):
+                rho_before = float(edges["rho"][edge_idx])
+                ptr = adj["nbr_ptr"]
+                nbr = adj["nbr_idx"]
+                n_start = ptr[edge_idx]
+                n_end = ptr[edge_idx + 1]
+                neighbours = edges["rho"][nbr[n_start:n_end]]
+                rho_after, d_eff = update_rho_delay(
+                    rho_before,
+                    neighbours,
+                    0.0,
+                    alpha_d=Config.rho_delay.get("alpha_d", 0.0),
+                    alpha_leak=Config.rho_delay.get("alpha_leak", 0.0),
+                    eta=Config.rho_delay.get("eta", 0.0),
+                    d0=float(edges["d0"][edge_idx]),
+                    gamma=Config.rho_delay.get("gamma", 0.0),
+                    rho0=Config.rho_delay.get("rho0", 1.0),
+                )
+                edges["rho"][edge_idx] = rho_after
+                depth_next = depth_arr + d_eff
+                new_pkt = Packet(src=dst, dst=int(edges["dst"][edge_idx]), payload=None)
                 log_record(
                     category="event",
                     label="edge_delivery",
                     tick=self._frame,
                     value={
-                        "rho_before": None,
-                        "rho_after": None,
-                        "d_eff": edge.get("d_eff"),
-                        "leak_contrib": edge.get("leak_contrib"),
-                        "is_bridge": edge.get("is_bridge"),
-                        "sigma": edge.get("sigma"),
+                        "rho_before": rho_before,
+                        "rho_after": rho_after,
+                        "d_eff": d_eff,
+                        "leak_contrib": None,
+                        "is_bridge": False,
+                        "sigma": float(edges["sigma"][edge_idx]),
                     },
                 )
-                self._scheduler.push(depth_next, edge["dst"], edge["id"], new_pkt)
+                self._scheduler.push(
+                    depth_next, int(edges["dst"][edge_idx]), edge_idx, new_pkt
+                )
             events += 1
 
             if any(
@@ -256,7 +290,10 @@ def simulation_loop() -> None:
     def _run() -> None:
         while True:
             with Config.state_lock:
-                if not Config.is_running:
+                if not Config.is_running or (
+                    Config.tick_limit and Config.current_tick >= Config.tick_limit
+                ):
+                    Config.is_running = False
                     break
             _ENGINE.step()
             with Config.state_lock:

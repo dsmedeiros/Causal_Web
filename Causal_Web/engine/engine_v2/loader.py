@@ -78,6 +78,9 @@ def load_graph_arrays(graph_json: Dict[str, Any]) -> GraphArrays:
         "fanin": np.zeros(n_vert, dtype=np.int32),
         "ancestry": np.zeros((n_vert, 4), dtype=np.int32),
         "m": np.zeros((n_vert, 3), dtype=np.float32),
+        "rho_mean": np.asarray(
+            [nodes[nid].get("rho_mean", 0.0) for nid in nodes], dtype=np.float32
+        ),
     }
 
     edges_data = graph_json.get("edges", [])
