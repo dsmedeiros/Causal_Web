@@ -151,6 +151,7 @@ def load_graph_arrays(graph_json: Dict[str, Any]) -> GraphArrays:
         "A": np.asarray(edges["A"], dtype=np.float32),
         "U": np.asarray(edges["U"], dtype=np.complex64),
         "sigma": np.asarray(edges["sigma"], dtype=np.float32),
+        "d_eff": np.zeros(n_edge, dtype=np.int32),
     }
 
     return GraphArrays(

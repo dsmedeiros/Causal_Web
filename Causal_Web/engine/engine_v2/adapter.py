@@ -20,6 +20,7 @@ from .scheduler import DepthScheduler
 from .state import Packet, TelemetryFrame
 from .loader import GraphArrays, load_graph_arrays
 from .rho_delay import update_rho_delay
+from .qtheta_c import close_window
 from ...config import Config
 
 
@@ -138,6 +139,8 @@ class EngineAdapter:
             lccm.advance_depth(depth_arr)
             prev_layer = lccm.layer
             lccm.deliver()
+            if self._arrays is not None:
+                self._arrays.vertices["psi_acc"][dst][0] += 1.0
             packets.append(pkt)
 
             if lccm.layer != prev_layer:
@@ -177,6 +180,8 @@ class EngineAdapter:
                     rho0=Config.rho_delay.get("rho0", 1.0),
                 )
                 edges["rho"][edge_idx] = rho_after
+                if "d_eff" in edges:
+                    edges["d_eff"][edge_idx] = d_eff
                 depth_next = depth_arr + d_eff
                 new_pkt = Packet(src=dst, dst=int(edges["dst"][edge_idx]), payload=None)
                 log_record(
@@ -231,6 +236,13 @@ class EngineAdapter:
         for vid, data in self._vertices.items():
             lccm = data["lccm"]
             if lccm.window_idx != start_windows.get(vid, lccm.window_idx):
+                if self._arrays is not None:
+                    psi_acc = self._arrays.vertices["psi_acc"][vid]
+                    psi, EQ = close_window(psi_acc)
+                    self._arrays.vertices["psi"][vid] = psi
+                    self._arrays.vertices["psi_acc"][vid].fill(0)
+                    self._arrays.vertices["EQ"][vid] = EQ
+                    lccm.update_eq(EQ)
                 log_record(
                     category="event",
                     label="vertex_window_close",
