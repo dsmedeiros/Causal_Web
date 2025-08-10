@@ -9,6 +9,7 @@ according to the local causal consistency math.
 from __future__ import annotations
 
 from typing import Any, Dict, Optional
+from collections import deque
 import threading
 import time
 
@@ -20,7 +21,7 @@ from .scheduler import DepthScheduler
 from .state import Packet, TelemetryFrame
 from .loader import GraphArrays, load_graph_arrays
 from .rho_delay import update_rho_delay
-from .qtheta_c import close_window
+from .qtheta_c import close_window, deliver_packet
 from ...config import Config
 
 
@@ -86,7 +87,13 @@ class EngineAdapter:
                 deg=deg,
                 rho_mean=rho_mean,
             )
-            self._vertices[vid] = {"lccm": lccm}
+            vertex_state = {
+                "lccm": lccm,
+                "psi_acc": self._arrays.vertices["psi_acc"][vid],
+                "p_v": self._arrays.vertices["p"][vid],
+                "bit_deque": deque(maxlen=8),
+            }
+            self._vertices[vid] = vertex_state
 
     def start(self) -> None:
         """Mark the engine as running."""
@@ -138,12 +145,66 @@ class EngineAdapter:
             lccm = vertex["lccm"]
             lccm.advance_depth(depth_arr)
             prev_layer = lccm.layer
-            lccm.deliver()
+
+            packet_data = pkt.payload or {}
+            if not isinstance(packet_data, dict):
+                packet_data = {}
+            packet_data.setdefault("depth_arr", depth_arr)
+            if "psi" not in packet_data:
+                packet_data["psi"] = np.zeros_like(vertex["psi_acc"])
+            if "p" not in packet_data:
+                packet_data["p"] = np.zeros_like(vertex["p_v"])
+            if "bit" not in packet_data:
+                packet_data["bit"] = 0
+
+            edges = self._arrays.edges if self._arrays else {}
+            dim = len(vertex["psi_acc"])
+            edge_params: Dict[str, Any] = {
+                "alpha": 1.0,
+                "phi": 0.0,
+                "A": 0.0,
+                "U": np.eye(dim, dtype=np.complex64),
+            }
+            if edges and edge_id < len(edges.get("alpha", [])):
+                edge_params.update(
+                    {
+                        "alpha": float(edges["alpha"][edge_id]),
+                        "phi": float(edges["phi"][edge_id]),
+                        "A": float(edges["A"][edge_id]),
+                        "U": edges["U"][edge_id],
+                    }
+                )
+
+            depth_v, psi_acc, p_v, (bit, conf), intensity = deliver_packet(
+                lccm.depth,
+                vertex["psi_acc"],
+                vertex["p_v"],
+                vertex["bit_deque"],
+                packet_data,
+                edge_params,
+            )
+
+            vertex["psi_acc"][:] = psi_acc
+            vertex["p_v"][:] = p_v
             if self._arrays is not None:
-                self._arrays.vertices["psi_acc"][dst][0] += 1.0
+                self._arrays.vertices["psi_acc"][dst] = vertex["psi_acc"]
+                self._arrays.vertices["p"][dst] = vertex["p_v"]
+                self._arrays.vertices["bit"][dst] = bit
+                self._arrays.vertices["conf"][dst] = conf
+                self._arrays.vertices["depth"][dst] = depth_v
+
+            bit_fraction = (
+                sum(vertex["bit_deque"]) / len(vertex["bit_deque"])
+                if vertex["bit_deque"]
+                else 0.0
+            )
+            entropy = float(-(p_v * np.log2(p_v + 1e-12)).sum()) if len(p_v) else 0.0
+            lccm.update_classical_metrics(bit_fraction, entropy)
+            lccm.deliver()
             packets.append(pkt)
 
             if lccm.layer != prev_layer:
+                reason = "fanin_threshold" if prev_layer == "Q" else "decoh_threshold"
                 log_record(
                     category="event",
                     label="layer_transition",
@@ -152,9 +213,7 @@ class EngineAdapter:
                         "v_id": dst,
                         "from_layer": prev_layer,
                         "to_layer": lccm.layer,
-                        "reason": (
-                            "lambda_threshold" if prev_layer == "Q" else "hysteresis"
-                        ),
+                        "reason": reason,
                         "window_idx": lccm.window_idx,
                     },
                 )
@@ -171,7 +230,7 @@ class EngineAdapter:
                 rho_after, d_eff = update_rho_delay(
                     rho_before,
                     neighbours,
-                    0.0,
+                    intensity,
                     alpha_d=Config.rho_delay.get("alpha_d", 0.0),
                     alpha_leak=Config.rho_delay.get("alpha_leak", 0.0),
                     eta=Config.rho_delay.get("eta", 0.0),
@@ -183,7 +242,14 @@ class EngineAdapter:
                 if "d_eff" in edges:
                     edges["d_eff"][edge_idx] = d_eff
                 depth_next = depth_arr + d_eff
-                new_pkt = Packet(src=dst, dst=int(edges["dst"][edge_idx]), payload=None)
+                payload = {
+                    "psi": self._arrays.vertices["psi"][dst],
+                    "p": self._arrays.vertices["p"][dst],
+                    "bit": int(self._arrays.vertices["bit"][dst]),
+                }
+                new_pkt = Packet(
+                    src=dst, dst=int(edges["dst"][edge_idx]), payload=payload
+                )
                 log_record(
                     category="event",
                     label="edge_delivery",
@@ -237,12 +303,28 @@ class EngineAdapter:
             lccm = data["lccm"]
             if lccm.window_idx != start_windows.get(vid, lccm.window_idx):
                 if self._arrays is not None:
-                    psi_acc = self._arrays.vertices["psi_acc"][vid]
+                    psi_acc = data["psi_acc"]
                     psi, EQ = close_window(psi_acc)
                     self._arrays.vertices["psi"][vid] = psi
-                    self._arrays.vertices["psi_acc"][vid].fill(0)
+                    psi_acc.fill(0)
                     self._arrays.vertices["EQ"][vid] = EQ
+                    p_v = data["p_v"]
+                    entropy = (
+                        float(-(p_v * np.log2(p_v + 1e-12)).sum()) if len(p_v) else 0.0
+                    )
+                    conf = float(self._arrays.vertices["conf"][vid])
+                    E_theta = lccm.a * (1.0 - entropy)
+                    E_C = lccm.b * conf
+                    p_v.fill(1.0 / len(p_v))
+                    self._arrays.vertices["p"][vid] = p_v
+                    self._arrays.vertices["bit"][vid] = 0
+                    self._arrays.vertices["conf"][vid] = 0.0
+                    data["bit_deque"].clear()
                     lccm.update_eq(EQ)
+                else:
+                    EQ = lccm._eq
+                    E_theta = 0.0
+                    E_C = 0.0
                 log_record(
                     category="event",
                     label="vertex_window_close",
@@ -250,8 +332,9 @@ class EngineAdapter:
                     value={
                         "layer": lccm.layer,
                         "Lambda_v": lccm._lambda,
-                        "EQ": lccm._eq,
-                        "E_C": lccm.b * getattr(lccm, "_bit_fraction", 0.0),
+                        "EQ": EQ,
+                        "E_theta": E_theta,
+                        "E_C": E_C,
                         "v_id": vid,
                     },
                     metadata={"window_idx": lccm.window_idx},

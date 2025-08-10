@@ -17,6 +17,8 @@ class VertexArray:
     """Struct-of-arrays representation of vertex data."""
 
     ids: list[int] = field(default_factory=list)
+    depth: list[int] = field(default_factory=list)
+    window_idx: list[int] = field(default_factory=list)
 
 
 @dataclass
@@ -24,6 +26,8 @@ class EdgeArray:
     """Struct-of-arrays representation of edge data."""
 
     ids: list[int] = field(default_factory=list)
+    src: list[int] = field(default_factory=list)
+    dst: list[int] = field(default_factory=list)
 
 
 @dataclass
