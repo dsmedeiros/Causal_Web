@@ -241,6 +241,8 @@ The following lists describe the JSON keys recorded in each output file.
 #### `entangled_measurement.json`
 - event-driven record with `tick_id`, `observer_id`, `entangled_id`,
   `measurement_setting` and `binary_outcome` for each detected entangled tick.
+- optional fields: `mode`, `kappa_a`, `kappa_xi`, `h_prefix_len`,
+  `delta_ttl`, `batch_id`, `setting`, `outcome`.
 
 #### `entangled_log.jsonl`
 - JSON lines file capturing entangled tick activity. `label` values include
@@ -274,6 +276,8 @@ The following lists describe the JSON keys recorded in each output file.
 
 #### `tick_delivery_log.json`
 - `source`, `node_id` and `stored_phase` for incoming ticks.
+- optional fields: `rho_before`, `rho_after`, `d_eff`, `leak_contrib`,
+  `is_bridge`, `sigma`.
 
 
 #### `tick_drop_log.json`

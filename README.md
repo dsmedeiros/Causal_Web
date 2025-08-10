@@ -153,6 +153,11 @@ physics is under development.  A telemetry frame is a simple structure:
 {"depth": 3, "events": 5, "packets": [{"src": 1, "dst": 2, "payload": null}]}
 ```
 
+Each frame is also logged to `ticks_log.jsonl` with its sequential frame number,
+coarse ``depth_bucket`` and the highest ``window_idx`` encountered. Additional
+edge and vertex telemetry fields are appended without renaming existing keys so
+existing ingestion remains compatible.
+
 The adapter exposes methods like `build_graph`, `step`, `pause` and
 `snapshot_for_ui` to remain drop-in compatible.  Internally a depth-based
 scheduler orders packets by their arrival depth and advances vertex windows

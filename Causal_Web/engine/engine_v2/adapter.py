@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
+from ..logging.logger import log_record
 from .lccm import LCCM
 from .scheduler import DepthScheduler
 from .state import Packet, TelemetryFrame
@@ -22,6 +23,7 @@ class EngineAdapter:
         self._scheduler = DepthScheduler()
         self._running = False
         self._vertices: Dict[int, Dict[str, Any]] = {}
+        self._frame = 0
 
     # Public API -----------------------------------------------------
     def build_graph(self, graph_json_path: str | Dict[str, Any]) -> None:
@@ -120,11 +122,42 @@ class EngineAdapter:
                 continue
             lccm = vertex["lccm"]
             lccm.advance_depth(depth_arr)
+            prev_layer = lccm.layer
             lccm.deliver()
             packets.append(pkt)
+
+            if lccm.layer != prev_layer:
+                log_record(
+                    category="event",
+                    label="layer_transition",
+                    tick=self._frame,
+                    value={
+                        "v_id": dst,
+                        "from_layer": prev_layer,
+                        "to_layer": lccm.layer,
+                        "reason": (
+                            "lambda_threshold" if prev_layer == "Q" else "hysteresis"
+                        ),
+                        "window_idx": lccm.window_idx,
+                    },
+                )
+
             for edge in vertex.get("edges", []):
                 depth_next = depth_arr + edge.get("d_eff", 1)
                 new_pkt = Packet(src=dst, dst=edge["dst"], payload=None)
+                log_record(
+                    category="event",
+                    label="edge_delivery",
+                    tick=self._frame,
+                    value={
+                        "rho_before": None,
+                        "rho_after": None,
+                        "d_eff": edge.get("d_eff"),
+                        "leak_contrib": edge.get("leak_contrib"),
+                        "is_bridge": edge.get("is_bridge"),
+                        "sigma": edge.get("sigma"),
+                    },
+                )
                 self._scheduler.push(depth_next, edge["dst"], edge["id"], new_pkt)
             events += 1
 
@@ -135,10 +168,47 @@ class EngineAdapter:
                 break
 
         max_depth = 0
+        max_window = 0
         for data in self._vertices.values():
-            max_depth = max(max_depth, data["lccm"].depth)
+            lccm = data["lccm"]
+            max_depth = max(max_depth, lccm.depth)
+            max_window = max(max_window, lccm.window_idx)
 
-        return TelemetryFrame(depth=max_depth, events=events, packets=packets)
+        frame = TelemetryFrame(depth=max_depth, events=events, packets=packets)
+
+        depth_bucket = max_depth // 10
+        self._frame += 1
+        log_record(
+            category="tick",
+            label="adapter_frame",
+            tick=self._frame,
+            value={"depth": max_depth, "events": events},
+            metadata={
+                "frame": self._frame,
+                "depth_bucket": depth_bucket,
+                "window_idx": max_window,
+            },
+        )
+
+        for vid, data in self._vertices.items():
+            lccm = data["lccm"]
+            if lccm.window_idx != start_windows.get(vid, lccm.window_idx):
+                log_record(
+                    category="event",
+                    label="vertex_window_close",
+                    tick=self._frame,
+                    value={
+                        "layer": lccm.layer,
+                        "Lambda_v": lccm._lambda,
+                        "EQ": lccm._eq,
+                        "E_Theta": lccm.a * (1 - getattr(lccm, "_entropy", 0.0)),
+                        "E_C": lccm.b * getattr(lccm, "_bit_fraction", 0.0),
+                        "v_id": vid,
+                    },
+                    metadata={"window_idx": lccm.window_idx},
+                )
+
+        return frame
 
     def snapshot_for_ui(self) -> dict:
         """Return a minimal snapshot for the GUI."""

@@ -475,6 +475,12 @@ class Node(LoggingMixin):
         cumulative_delay: float = 0.0,
         entangled_id: str | None = None,
         graph: "CausalGraph | None" = None,
+        rho_before: float | None = None,
+        rho_after: float | None = None,
+        d_eff: float | None = None,
+        leak_contrib: float | None = None,
+        is_bridge: bool | None = None,
+        sigma: float | None = None,
     ) -> None:
         """Store an incoming phase for future evaluation.
 
@@ -489,6 +495,8 @@ class Node(LoggingMixin):
             Phase value being delivered.
         origin : str, optional
             ID of the node that emitted the phase.
+        rho_before, rho_after, d_eff, leak_contrib, is_bridge, sigma:
+            Optional telemetry fields describing edge delivery characteristics.
         """
 
         if created_tick is None:
@@ -516,15 +524,25 @@ class Node(LoggingMixin):
             f"[{self.id}] Received tick at {tick_time} with phase {incoming_phase:.2f}"
         )
         if origin is not None:
-            self._log(
-                "tick_delivery_log.json",
-                {
-                    "tick": tick_time,
-                    "source": origin,
-                    "node_id": self.id,
-                    "stored_phase": incoming_phase,
-                },
-            )
+            record = {
+                "tick": tick_time,
+                "source": origin,
+                "node_id": self.id,
+                "stored_phase": incoming_phase,
+            }
+            if rho_before is not None:
+                record["rho_before"] = rho_before
+            if rho_after is not None:
+                record["rho_after"] = rho_after
+            if d_eff is not None:
+                record["d_eff"] = d_eff
+            if leak_contrib is not None:
+                record["leak_contrib"] = leak_contrib
+            if is_bridge is not None:
+                record["is_bridge"] = is_bridge
+            if sigma is not None:
+                record["sigma"] = sigma
+            self._log("tick_delivery_log.json", record)
         from .. import tick_engine as te
 
         te.mark_for_update(self.id)
