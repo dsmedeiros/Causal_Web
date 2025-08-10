@@ -10,6 +10,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Dict, List
 
+import numpy as np
+
 from ...config import Config
 
 
@@ -55,20 +57,27 @@ def load_graph_arrays(graph_json: Dict[str, Any]) -> GraphArrays:
     Dq = int(Config.windowing.get("Dq", 1))
     Dp = int(Config.windowing.get("Dp", 1))
 
+    psi_init = np.zeros((n_vert, Dq), dtype=np.complex64)
+    psi_init[:, 0] = 1.0
+
     vertices = {
-        "depth": [0 for _ in range(n_vert)],
-        "window_len": [nodes[nid].get("window_len", W0) for nid in nodes],
-        "window_idx": [0 for _ in range(n_vert)],
-        "layer": [nodes[nid].get("layer", Q) for nid in nodes],
-        "psi": [[1.0 if j == 0 else 0.0 for j in range(Dq)] for _ in range(n_vert)],
-        "psi_acc": [[0.0 for _ in range(Dq)] for _ in range(n_vert)],
-        "EQ": [0.0 for _ in range(n_vert)],
-        "p": [[1.0 / Dp for _ in range(Dp)] for _ in range(n_vert)],
-        "bit": [0 for _ in range(n_vert)],
-        "conf": [0 for _ in range(n_vert)],
-        "fanin": [0 for _ in range(n_vert)],
-        "ancestry": [[0, 0, 0, 0] for _ in range(n_vert)],
-        "m": [[0, 0, 0] for _ in range(n_vert)],
+        "depth": np.zeros(n_vert, dtype=np.int32),
+        "window_len": np.asarray(
+            [nodes[nid].get("window_len", W0) for nid in nodes], dtype=np.float32
+        ),
+        "window_idx": np.zeros(n_vert, dtype=np.int32),
+        "layer": np.asarray(
+            [nodes[nid].get("layer", Q) for nid in nodes], dtype=np.int32
+        ),
+        "psi": psi_init,
+        "psi_acc": np.zeros((n_vert, Dq), dtype=np.complex64),
+        "EQ": np.zeros(n_vert, dtype=np.float32),
+        "p": np.full((n_vert, Dp), 1.0 / Dp, dtype=np.float32),
+        "bit": np.zeros(n_vert, dtype=np.int8),
+        "conf": np.zeros(n_vert, dtype=np.float32),
+        "fanin": np.zeros(n_vert, dtype=np.int32),
+        "ancestry": np.zeros((n_vert, 4), dtype=np.int32),
+        "m": np.zeros((n_vert, 3), dtype=np.float32),
     }
 
     edges_data = graph_json.get("edges", [])
@@ -124,7 +133,22 @@ def load_graph_arrays(graph_json: Dict[str, Any]) -> GraphArrays:
         nbr_idx.extend(sorted(neighbors))
         nbr_ptr.append(len(nbr_idx))
 
-    adjacency = {"nbr_ptr": nbr_ptr, "nbr_idx": nbr_idx}
+    adjacency = {
+        "nbr_ptr": np.asarray(nbr_ptr, dtype=np.int32),
+        "nbr_idx": np.asarray(nbr_idx, dtype=np.int32),
+    }
+
+    edges = {
+        "src": np.asarray(edges["src"], dtype=np.int32),
+        "dst": np.asarray(edges["dst"], dtype=np.int32),
+        "d0": np.asarray(edges["d0"], dtype=np.float32),
+        "rho": np.asarray(edges["rho"], dtype=np.float32),
+        "alpha": np.asarray(edges["alpha"], dtype=np.float32),
+        "phi": np.asarray(edges["phi"], dtype=np.float32),
+        "A": np.asarray(edges["A"], dtype=np.float32),
+        "U": np.asarray(edges["U"], dtype=np.complex64),
+        "sigma": np.asarray(edges["sigma"], dtype=np.float32),
+    }
 
     return GraphArrays(
         id_map=id_map, vertices=vertices, edges=edges, adjacency=adjacency

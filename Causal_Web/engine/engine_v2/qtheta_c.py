@@ -52,14 +52,13 @@ def deliver_packet(
 
     depth_v = max(depth_v, int(packet.get("depth_arr", 0)))
 
-    U = np.asarray(edge.get("U"), dtype=np.complex128)
-    psi = np.asarray(packet.get("psi"), dtype=np.complex128)
-    coeff = edge.get("alpha", 1.0) * np.exp(
-        1j * (edge.get("phi", 0.0) + edge.get("A", 0.0))
-    )
+    U = np.asarray(edge.get("U"), dtype=np.complex64)
+    psi = np.asarray(packet.get("psi"), dtype=np.complex64)
+    alpha = np.float32(edge.get("alpha", 1.0))
+    coeff = alpha * np.exp(1j * np.float32(edge.get("phi", 0.0) + edge.get("A", 0.0)))
     psi_acc = psi_acc + coeff * (U @ psi)
 
-    p_v = p_v + edge.get("alpha", 1.0) * np.asarray(packet.get("p"))
+    p_v = p_v + alpha * np.asarray(packet.get("p"), dtype=np.float32)
     total = float(np.sum(p_v))
     if total > 0:
         p_v = p_v / total
@@ -91,4 +90,75 @@ def close_window(psi_acc: np.ndarray) -> Tuple[np.ndarray, float]:
     return psi, EQ
 
 
-__all__ = ["deliver_packet", "close_window"]
+def deliver_packets_batch(
+    depth_v: int,
+    psi_acc: np.ndarray,
+    p_v: np.ndarray,
+    bit_deque: Deque[int],
+    packets: dict,
+    edges: dict,
+    max_deque: int = 8,
+) -> Tuple[int, np.ndarray, np.ndarray, Tuple[int, float], float]:
+    """Vectorised delivery for packets sharing destination and window.
+
+    Parameters
+    ----------
+    depth_v:
+        Current depth of the destination vertex.
+    psi_acc:
+        Accumulator for quantum amplitudes.
+    p_v:
+        Classical probability vector for the vertex.
+    bit_deque:
+        Recent bits used for majority voting.
+    packets:
+        Struct-of-arrays packet fields ``{psi, p, bit, depth_arr}``.
+    edges:
+        Struct-of-arrays edge parameters ``{alpha, phi, A, U}``.
+    max_deque:
+        Maximum length of ``bit_deque``.
+
+    Returns
+    -------
+    tuple
+        Updated ``depth_v``, ``psi_acc``, ``p_v``, ``(bit, conf)`` and
+        combined intensity in ``[0, 1]``.
+    """
+
+    if packets.get("depth_arr") is not None:
+        depth_v = max(depth_v, int(np.max(packets.get("depth_arr"))))
+
+    psi = np.asarray(packets.get("psi"), dtype=np.complex64)
+    p = np.asarray(packets.get("p"), dtype=np.float32)
+    bits = np.asarray(packets.get("bit", []), dtype=np.int8)
+
+    U = np.asarray(edges.get("U"), dtype=np.complex64)
+    alpha = np.asarray(edges.get("alpha", 1.0), dtype=np.float32)
+    phi = np.asarray(edges.get("phi", 0.0), dtype=np.float32)
+    A = np.asarray(edges.get("A", 0.0), dtype=np.float32)
+    coeff = alpha * np.exp(1j * (phi + A)).astype(np.complex64)
+
+    psi_acc = psi_acc + np.einsum("n,nij,nj->i", coeff, U, psi)
+    p_v = p_v + (alpha[:, None] * p).sum(axis=0)
+    total = float(np.sum(p_v))
+    if total > 0:
+        p_v = p_v / total
+
+    bit_deque.extend(bits.tolist())
+    while len(bit_deque) > max_deque:
+        bit_deque.popleft()
+    ones = sum(bit_deque)
+    zeros = len(bit_deque) - ones
+    bit = 1 if ones >= zeros else 0
+    conf = abs(ones - zeros) / len(bit_deque)
+
+    out = np.einsum("nij,nj->ni", U, psi)
+    q_intensity = min(1.0, float(np.linalg.norm(out) ** 2))
+    theta_intensity = min(1.0, float(np.sum(np.abs(p))))
+    c_intensity = bit
+    intensity = min(1.0, q_intensity + theta_intensity + c_intensity)
+
+    return depth_v, psi_acc, p_v, (bit, conf), intensity
+
+
+__all__ = ["deliver_packet", "deliver_packets_batch", "close_window"]

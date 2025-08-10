@@ -8,6 +8,7 @@ from typing import Set, List, Dict, Optional
 import numpy as np
 import json
 import uuid
+import random
 from ...config import Config
 from .base import LoggingMixin
 from .tick import Tick, GLOBAL_TICK_POOL
@@ -523,7 +524,10 @@ class Node(LoggingMixin):
         print(
             f"[{self.id}] Received tick at {tick_time} with phase {incoming_phase:.2f}"
         )
-        if origin is not None:
+        if origin is not None and (
+            Config.log_delivery_sample_rate <= 0.0
+            or random.random() < Config.log_delivery_sample_rate
+        ):
             record = {
                 "tick": tick_time,
                 "source": origin,

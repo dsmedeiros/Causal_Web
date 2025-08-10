@@ -1,63 +1,69 @@
-"""Event scheduler for the v2 engine prototype.
-
-Events are ordered by a four-tuple key ``(depth_arr, dst_id, edge_id, seq)``
-which allows deterministic processing of packets arriving at the same
-depth. This module only provides a minimal priority queue wrapper
-sufficient for early experimentation.
-"""
+"""Bucketed event scheduler for the v2 engine prototype."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from bisect import bisect
+from collections import defaultdict
 import heapq
-from typing import Any, List, Tuple
-
-
-@dataclass(order=True)
-class _ScheduledItem:
-    key: Tuple[int, int, int, int]
-    payload: Any
+from typing import Any, DefaultDict, List, Tuple
 
 
 class DepthScheduler:
-    """Arrival-depth priority queue.
+    """Arrival-depth bucketed priority queue.
 
-    Items are ordered by ``(depth_arr, dst_id, edge_id, seq)`` to guarantee a
-    deterministic pop order even when multiple packets arrive at the same
-    depth.  ``peek_depth`` exposes the depth of the next scheduled event
-    without removing it from the queue, which is useful for detecting window
-    boundaries in the adapter loop. The scheduler itself does not maintain or
-    increment a global depth counter; it merely stores the depth associated
-    with each scheduled item.
+    Events are grouped into buckets by integer arrival depth.  Each bucket
+    maintains its items ordered by ``(dst_id, edge_id, seq)`` ensuring a
+    deterministic processing order. A separate min-heap tracks which depths are
+    present, so heap operations occur only when a new depth is added or an
+    existing depth bucket becomes empty, yielding amortised :math:`O(1)` push and
+    pop operations for batches sharing the same depth.
     """
 
     def __init__(self) -> None:
-        self._queue: List[_ScheduledItem] = []
+        self._buckets: DefaultDict[int, List[Tuple[Tuple[int, int, int], Any]]] = (
+            defaultdict(list)
+        )
+        self._depths: List[int] = []
         self._seq = 0
 
     def push(self, depth_arr: int, dst_id: int, edge_id: int, payload: Any) -> None:
-        """Insert a payload into the queue."""
+        """Insert a payload into the scheduler."""
 
-        key = (depth_arr, dst_id, edge_id, self._seq)
-        heapq.heappush(self._queue, _ScheduledItem(key, payload))
+        bucket = self._buckets[depth_arr]
+        if not bucket:
+            heapq.heappush(self._depths, depth_arr)
+        key = (dst_id, edge_id, self._seq)
+        idx = bisect(bucket, (key, payload))
+        bucket.insert(idx, (key, payload))
         self._seq += 1
 
     def pop(self) -> Tuple[int, int, int, Any]:
-        """Remove and return the next scheduled payload and its metadata."""
+        """Remove and return the next scheduled payload and metadata."""
 
-        item = heapq.heappop(self._queue)
-        depth_arr, dst_id, edge_id, _ = item.key
-        return depth_arr, dst_id, edge_id, item.payload
+        if not self._depths:
+            raise IndexError("pop from empty scheduler")
+        depth = self._depths[0]
+        bucket = self._buckets[depth]
+        key, payload = bucket.pop(0)
+        if not bucket:
+            heapq.heappop(self._depths)
+            del self._buckets[depth]
+        dst_id, edge_id, _ = key
+        return depth, dst_id, edge_id, payload
 
     def peek_depth(self) -> int:
         """Return the arrival depth of the next payload without removing it."""
 
-        return self._queue[0].key[0]
+        if not self._depths:
+            raise IndexError("peek from empty scheduler")
+        return self._depths[0]
 
     def __len__(self) -> int:  # pragma: no cover - trivial
-        return len(self._queue)
+        return sum(len(b) for b in self._buckets.values())
 
     def clear(self) -> None:
         """Drop all scheduled items."""
 
-        self._queue.clear()
+        self._buckets.clear()
+        self._depths.clear()
+        self._seq = 0
