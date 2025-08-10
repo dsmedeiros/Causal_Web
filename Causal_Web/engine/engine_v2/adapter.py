@@ -251,7 +251,6 @@ class EngineAdapter:
                         "layer": lccm.layer,
                         "Lambda_v": lccm._lambda,
                         "EQ": lccm._eq,
-                        "E_Theta": lccm.a * (1 - getattr(lccm, "_entropy", 0.0)),
                         "E_C": lccm.b * getattr(lccm, "_bit_fraction", 0.0),
                         "v_id": vid,
                     },
