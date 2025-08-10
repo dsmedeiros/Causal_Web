@@ -42,3 +42,4 @@ class TelemetryFrame:
     depth: int
     events: int
     packets: List[Packet] = field(default_factory=list)
+    window: int = 0

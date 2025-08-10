@@ -71,6 +71,6 @@ def test_chsh_epsilon(tmp_path, monkeypatch):
         )
 
     logger.flush()
-    s, _ = compute_bell_statistics(tmp_path / "entangled_log.jsonl")
+    s, _, _ = compute_bell_statistics(tmp_path / "entangled_log.jsonl")
     assert s > 2.6
 
