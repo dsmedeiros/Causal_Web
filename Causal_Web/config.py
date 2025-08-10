@@ -126,6 +126,13 @@ class Config:
         "beta_h": 0.0,
     }
 
+    #: Logging related settings used by the experimental engine.
+    logging = {
+        # Probability that an individual edge delivery is recorded.
+        # A value of 0.0 disables per-edge logs while 1.0 logs all deliveries.
+        "sample_edge_rate": 0.0,
+    }
+
     # Mapping of ``category`` -> {``label``: bool} controlling which logs are
     # written. Categories correspond to consolidated output files and the labels
     # are used as ``label`` or ``event_type`` within those files.

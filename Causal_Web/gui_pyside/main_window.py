@@ -324,6 +324,12 @@ class MainWindow(QMainWindow):
                 tick_engine.graph.to_dict() if running else get_graph().to_dict()
             )
             self.tick_label.setText(str(tick))
+            if getattr(Config, "engine_mode", "tick") == "v2":
+                snap = tick_engine.snapshot_for_ui()
+                if hasattr(self, "depth_label"):
+                    self.depth_label.setText(str(snap.get("depth", 0)))
+                if hasattr(self, "window_label"):
+                    self.window_label.setText(str(snap.get("window", 0)))
         self.sim_canvas.load_model(GraphModel.from_dict(model_dict))
         if not running:
             self.start_button.setEnabled(get_active_file() is not None)
