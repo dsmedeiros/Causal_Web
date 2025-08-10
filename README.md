@@ -18,6 +18,9 @@ Engine v2 stores graph data in a struct-of-arrays format using `float32` and
 accumulation. A bucketed scheduler keyed by integer depth reduces heap
 operations to amortised *O*(1) and delivery logs may be sampled via
 `Config.log_delivery_sample_rate` to reduce I/O overhead.
+Edge hops can also be throttled by setting
+`Config.logging.sample_edge_rate` (0.0–1.0) which records only a
+fraction of per-hop `edge_delivery` events.
 
 To cap memory growth for long coherent lines, the engine detects tensor clusters
 and represents them as Matrix Product States. Local edge unitaries contract with

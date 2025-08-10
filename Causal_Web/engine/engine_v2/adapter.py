@@ -12,6 +12,7 @@ from typing import Any, Dict, Optional
 from collections import deque
 import threading
 import time
+import random
 
 import numpy as np
 
@@ -22,6 +23,8 @@ from .state import Packet, TelemetryFrame
 from .loader import GraphArrays, load_graph_arrays
 from .rho_delay import update_rho_delay
 from .qtheta_c import close_window, deliver_packet
+from .epairs import EPairs
+from .bell import BellHelpers, Ancestry
 from ...config import Config
 
 
@@ -35,6 +38,8 @@ class EngineAdapter:
         self._arrays: GraphArrays | None = None
         self._edges_by_src: Dict[int, np.ndarray] = {}
         self._frame = 0
+        self._epairs = EPairs(**Config.epsilon_pairs)
+        self._bell = BellHelpers()
 
     # Public API -----------------------------------------------------
     def build_graph(self, graph_json_path: str | Dict[str, Any]) -> None:
@@ -136,6 +141,7 @@ class EngineAdapter:
         }
         events = 0
         packets = []
+        edge_logs = 0
 
         while self._scheduler and events < limit:
             depth_arr, dst, edge_id, pkt = self._scheduler.pop()
@@ -203,6 +209,73 @@ class EngineAdapter:
             lccm.deliver()
             packets.append(pkt)
 
+            bell_cfg = Config.bell
+            mi_mode = (
+                "strict"
+                if bell_cfg.get("mi_mode", "MI_strict") == "MI_strict"
+                else "conditioned"
+            )
+            ancestry_arr = (
+                self._arrays.vertices["ancestry"][dst]
+                if self._arrays is not None
+                else np.zeros(4, dtype=np.int32)
+            )
+            m_arr = (
+                self._arrays.vertices["m"][dst]
+                if self._arrays is not None
+                else np.zeros(3, dtype=float)
+            )
+
+            if "lambda_u" in packet_data:
+                detector_anc = Ancestry(ancestry_arr.copy(), m_arr.copy())
+                source_anc = Ancestry(
+                    np.array(packet_data.get("ancestry", ancestry_arr)),
+                    np.array(packet_data.get("m", m_arr)),
+                )
+                a_D = self._bell.setting_draw(
+                    mi_mode,
+                    detector_anc,
+                    packet_data["lambda_u"],
+                    bell_cfg.get("kappa_a", 0.0),
+                )
+                outcome, meta = self._bell.contextual_readout(
+                    mi_mode,
+                    a_D,
+                    detector_anc,
+                    packet_data["lambda_u"],
+                    packet_data.get("zeta", 0),
+                    bell_cfg.get("kappa_xi", 0.0),
+                    source_anc,
+                    bell_cfg.get("kappa_a", 0.0),
+                    batch=self._frame,
+                )
+                log_record(
+                    category="entangled",
+                    label="measurement",
+                    tick=self._frame,
+                    value={"setting": a_D.tolist(), "outcome": int(outcome)},
+                    metadata=meta,
+                )
+                packet_data.setdefault("ancestry", ancestry_arr)
+                packet_data.setdefault("m", m_arr)
+            else:
+                source_anc = Ancestry(ancestry_arr.copy(), m_arr.copy())
+                lam_u, zeta = self._bell.lambda_at_source(
+                    source_anc,
+                    bell_cfg.get("beta_m", 0.0),
+                    bell_cfg.get("beta_h", 0.0),
+                )
+                packet_data["lambda_u"] = lam_u
+                packet_data["zeta"] = zeta
+                packet_data["ancestry"] = ancestry_arr
+                packet_data["m"] = m_arr
+
+            if lccm.layer == "Q" and self._arrays is not None:
+                h_val = int.from_bytes(ancestry_arr.tobytes(), "little")
+                neigh = [int(edges["dst"][e]) for e in self._edges_by_src.get(dst, [])]
+                theta = float(np.angle(self._arrays.vertices["psi"][dst][0]))
+                self._epairs.emit(dst, h_val, theta, neigh)
+
             if lccm.layer != prev_layer:
                 reason = "fanin_threshold" if prev_layer == "Q" else "decoh_threshold"
                 log_record(
@@ -246,26 +319,69 @@ class EngineAdapter:
                     "psi": self._arrays.vertices["psi"][dst],
                     "p": self._arrays.vertices["p"][dst],
                     "bit": int(self._arrays.vertices["bit"][dst]),
+                    "lambda_u": packet_data.get("lambda_u"),
+                    "zeta": packet_data.get("zeta"),
+                    "ancestry": packet_data.get("ancestry"),
+                    "m": packet_data.get("m"),
                 }
                 new_pkt = Packet(
                     src=dst, dst=int(edges["dst"][edge_idx]), payload=payload
                 )
-                log_record(
-                    category="event",
-                    label="edge_delivery",
-                    tick=self._frame,
-                    value={
-                        "rho_before": rho_before,
-                        "rho_after": rho_after,
-                        "d_eff": d_eff,
-                        "leak_contrib": None,
-                        "is_bridge": False,
-                        "sigma": float(edges["sigma"][edge_idx]),
-                    },
-                )
+                edge_logs += 1
+                rate = Config.logging.get("sample_edge_rate", 0.0)
+                if rate <= 0.0 or random.random() < rate:
+                    log_record(
+                        category="event",
+                        label="edge_delivery",
+                        tick=self._frame,
+                        value={
+                            "rho_before": rho_before,
+                            "rho_after": rho_after,
+                            "d_eff": d_eff,
+                            "leak_contrib": None,
+                            "is_bridge": False,
+                            "sigma": float(edges["sigma"][edge_idx]),
+                        },
+                    )
                 self._scheduler.push(
                     depth_next, int(edges["dst"][edge_idx]), edge_idx, new_pkt
                 )
+                self._epairs.reinforce(dst, int(edges["dst"][edge_idx]))
+
+            for (a, b), bridge in list(self._epairs.bridges.items()):
+                other = b if a == dst else a if b == dst else None
+                if other is None:
+                    continue
+                depth_next = depth_arr + 1
+                payload = {
+                    "psi": self._arrays.vertices["psi"][dst],
+                    "p": self._arrays.vertices["p"][dst],
+                    "bit": int(self._arrays.vertices["bit"][dst]),
+                    "lambda_u": packet_data.get("lambda_u"),
+                    "zeta": packet_data.get("zeta"),
+                    "ancestry": packet_data.get("ancestry"),
+                    "m": packet_data.get("m"),
+                }
+                edge_logs += 1
+                rate = Config.logging.get("sample_edge_rate", 0.0)
+                if rate <= 0.0 or random.random() < rate:
+                    log_record(
+                        category="event",
+                        label="edge_delivery",
+                        tick=self._frame,
+                        value={
+                            "rho_before": 0.0,
+                            "rho_after": 0.0,
+                            "d_eff": 1,
+                            "leak_contrib": None,
+                            "is_bridge": True,
+                            "sigma": bridge.sigma,
+                        },
+                    )
+                self._scheduler.push(
+                    depth_next, other, -1, Packet(src=dst, dst=other, payload=payload)
+                )
+                self._epairs.reinforce(dst, other)
             events += 1
 
             if any(
@@ -297,6 +413,14 @@ class EngineAdapter:
                 "depth_bucket": depth_bucket,
                 "window_idx": max_window,
             },
+        )
+
+        log_record(
+            category="tick",
+            label="edge_window_summary",
+            tick=self._frame,
+            value={"count": edge_logs},
+            metadata={"window_idx": max_window},
         )
 
         for vid, data in self._vertices.items():
@@ -346,9 +470,12 @@ class EngineAdapter:
         """Return a minimal snapshot for the GUI."""
 
         max_depth = 0
+        max_window = 0
         for data in self._vertices.values():
-            max_depth = max(max_depth, data["lccm"].depth)
-        return {"depth": max_depth}
+            lccm = data["lccm"]
+            max_depth = max(max_depth, lccm.depth)
+            max_window = max(max_window, lccm.window_idx)
+        return {"depth": max_depth, "window": max_window}
 
     def current_depth(self) -> int:
         """Return the current depth of the simulation."""
