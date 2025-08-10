@@ -80,6 +80,7 @@ class Config:
     tick_limit = 10000
     allow_tick_override = True
     current_tick = 0  # Counter to display progress
+    run_seed = 0  # Seed for reproducible runs
     # Preallocated ticks for object pool
     TICK_POOL_SIZE = 10000
     N_DECOH = 3  # Fan-in threshold for thermodynamic behaviour
