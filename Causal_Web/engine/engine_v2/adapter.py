@@ -148,6 +148,7 @@ class EngineAdapter:
         edge_logs = 0
 
         while self._scheduler and events < limit:
+            self._epairs.decay_all()
             depth_arr, dst, edge_id, pkt = self._scheduler.pop()
             vertex = self._vertices.get(dst)
             if vertex is None:
@@ -213,12 +214,6 @@ class EngineAdapter:
             lccm.deliver()
             packets.append(pkt)
 
-            bell_cfg = Config.bell
-            mi_mode = (
-                "strict"
-                if bell_cfg.get("mi_mode", "MI_strict") == "MI_strict"
-                else "conditioned"
-            )
             ancestry_arr = (
                 self._arrays.vertices["ancestry"][dst]
                 if self._arrays is not None
@@ -230,49 +225,66 @@ class EngineAdapter:
                 else np.zeros(3, dtype=float)
             )
 
-            if "lambda_u" in packet_data:
-                detector_anc = Ancestry(ancestry_arr.copy(), m_arr.copy())
-                source_anc = Ancestry(
-                    np.array(packet_data.get("ancestry", ancestry_arr)),
-                    np.array(packet_data.get("m", m_arr)),
+            bell_cfg = Config.bell
+            if bell_cfg.get("enabled", False):
+                mi_mode = (
+                    "strict"
+                    if bell_cfg.get("mi_mode", "MI_strict") == "MI_strict"
+                    else "conditioned"
                 )
-                a_D = self._bell.setting_draw(
-                    mi_mode,
-                    detector_anc,
-                    packet_data["lambda_u"],
-                    bell_cfg.get("kappa_a", 0.0),
-                )
-                outcome, meta = self._bell.contextual_readout(
-                    mi_mode,
-                    a_D,
-                    detector_anc,
-                    packet_data["lambda_u"],
-                    packet_data.get("zeta", 0),
-                    bell_cfg.get("kappa_xi", 0.0),
-                    source_anc,
-                    bell_cfg.get("kappa_a", 0.0),
-                    batch=self._frame,
-                )
-                log_record(
-                    category="entangled",
-                    label="measurement",
-                    tick=self._frame,
-                    value={"setting": a_D.tolist(), "outcome": int(outcome)},
-                    metadata=meta,
-                )
-                packet_data.setdefault("ancestry", ancestry_arr)
-                packet_data.setdefault("m", m_arr)
-            else:
-                source_anc = Ancestry(ancestry_arr.copy(), m_arr.copy())
-                lam_u, zeta = self._bell.lambda_at_source(
-                    source_anc,
-                    bell_cfg.get("beta_m", 0.0),
-                    bell_cfg.get("beta_h", 0.0),
-                )
-                packet_data["lambda_u"] = lam_u
-                packet_data["zeta"] = zeta
-                packet_data["ancestry"] = ancestry_arr
-                packet_data["m"] = m_arr
+
+                if "lambda_u" in packet_data:
+                    detector_anc = Ancestry(ancestry_arr.copy(), m_arr.copy())
+                    source_anc = Ancestry(
+                        np.array(packet_data.get("ancestry", ancestry_arr)),
+                        np.array(packet_data.get("m", m_arr)),
+                    )
+                    a_D = self._bell.setting_draw(
+                        mi_mode,
+                        detector_anc,
+                        packet_data["lambda_u"],
+                        bell_cfg.get("kappa_a", 0.0),
+                    )
+                    outcome, meta = self._bell.contextual_readout(
+                        mi_mode,
+                        a_D,
+                        detector_anc,
+                        packet_data["lambda_u"],
+                        packet_data.get("zeta", 0),
+                        bell_cfg.get("kappa_xi", 0.0),
+                        source_anc,
+                        bell_cfg.get("kappa_a", 0.0),
+                        batch=self._frame,
+                    )
+                    log_record(
+                        category="entangled",
+                        label="measurement",
+                        tick=self._frame,
+                        value={
+                            "setting": a_D.tolist(),
+                            "outcome": int(outcome),
+                            "mode": mi_mode,
+                        },
+                        metadata={
+                            "kappa_a": bell_cfg.get("kappa_a", 0.0),
+                            "kappa_xi": bell_cfg.get("kappa_xi", 0.0),
+                            "batch_id": self._frame,
+                            **meta,
+                        },
+                    )
+                    packet_data.setdefault("ancestry", ancestry_arr)
+                    packet_data.setdefault("m", m_arr)
+                else:
+                    source_anc = Ancestry(ancestry_arr.copy(), m_arr.copy())
+                    lam_u, zeta = self._bell.lambda_at_source(
+                        source_anc,
+                        bell_cfg.get("beta_m", 0.0),
+                        bell_cfg.get("beta_h", 0.0),
+                    )
+                    packet_data["lambda_u"] = lam_u
+                    packet_data["zeta"] = zeta
+                    packet_data["ancestry"] = ancestry_arr
+                    packet_data["m"] = m_arr
 
             if lccm.layer == "Q" and self._arrays is not None:
                 h_val = int.from_bytes(ancestry_arr.tobytes(), "little")
@@ -357,10 +369,8 @@ class EngineAdapter:
                 )
                 self._epairs.reinforce(dst, int(edges["dst"][edge_idx]))
 
-            for (a, b), bridge in list(self._epairs.bridges.items()):
-                other = b if a == dst else a if b == dst else None
-                if other is None:
-                    continue
+            for other in list(self._epairs.adjacency.get(dst, [])):
+                bridge = self._epairs.bridges[self._epairs._bridge_key(dst, other)]
                 depth_next = depth_arr + 1
                 payload = {
                     "psi": self._arrays.vertices["psi"][dst],

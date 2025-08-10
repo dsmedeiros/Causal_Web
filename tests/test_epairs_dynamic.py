@@ -22,17 +22,22 @@ def test_seed_binding_creates_bridge():
     mgr.emit(origin=2, h_value=0b1101_0001, theta=0.15, neighbours=[3])
     assert (1, 2) in mgr.bridges
     assert mgr.bridges[(1, 2)].sigma == 1.0
+    assert 2 in mgr.adjacency.get(1, [])
+    assert 1 in mgr.adjacency.get(2, [])
 
 
 def test_bridge_reinforcement_and_decay():
     mgr = _make_manager()
-    mgr.bridges[(1, 2)] = Bridge(0.05)
+    mgr.bridges[(1, 2)] = Bridge(0.3)
+    mgr.adjacency[1] = [2]
+    mgr.adjacency[2] = [1]
+    mgr.decay_all()
     mgr.reinforce(1, 2)
-    # sigma: (1-0.5)*0.05 + 0.2 = 0.225 > sigma_min -> bridge persists
-    assert mgr.bridges[(1, 2)].sigma == (1 - 0.5) * 0.05 + 0.2
+    # sigma: (1-0.5)*0.3 + 0.2 = 0.35 > sigma_min -> bridge persists
+    assert mgr.bridges[(1, 2)].sigma == (1 - 0.5) * 0.3 + 0.2
     # decay below minimum removes the bridge
     mgr.lambda_decay = 0.8
     mgr.sigma_reinforce = 0.0
-    mgr.reinforce(1, 2)
+    mgr.decay_all()
     assert (1, 2) not in mgr.bridges
 
