@@ -9,6 +9,8 @@ according to the local causal consistency math.
 from __future__ import annotations
 
 from typing import Any, Dict, Optional
+import threading
+import time
 
 from ..logging.logger import log_record
 from .lccm import LCCM
@@ -234,4 +236,79 @@ class EngineAdapter:
         return self._frame
 
 
-__all__ = ["EngineAdapter"]
+_ENGINE = EngineAdapter()
+
+
+def build_graph(graph_json_path: str | Dict[str, Any] | None = None) -> None:
+    """Build the simulation graph for headless runs."""
+
+    from ...config import Config
+
+    path = graph_json_path or Config.graph_file
+    _ENGINE.build_graph(path)
+
+
+def simulation_loop() -> None:
+    """Start a background loop advancing the engine while running."""
+
+    from ...config import Config
+
+    def _run() -> None:
+        while True:
+            with Config.state_lock:
+                if not Config.is_running:
+                    break
+            _ENGINE.step()
+            with Config.state_lock:
+                Config.current_tick += 1
+            time.sleep(0)
+
+    threading.Thread(target=_run, daemon=True).start()
+
+
+def pause_simulation() -> None:
+    """Pause execution of the simulation."""
+
+    from ...config import Config
+
+    _ENGINE.pause()
+    with Config.state_lock:
+        Config.is_running = False
+
+
+def resume_simulation() -> None:
+    """Resume a previously paused simulation."""
+
+    from ...config import Config
+
+    _ENGINE.start()
+    with Config.state_lock:
+        Config.is_running = True
+    simulation_loop()
+
+
+def stop_simulation() -> None:
+    """Stop the simulation and reset state."""
+
+    from ...config import Config
+
+    _ENGINE.stop()
+    with Config.state_lock:
+        Config.is_running = False
+
+
+def get_snapshot() -> dict:
+    """Return a minimal snapshot for the UI."""
+
+    return _ENGINE.snapshot_for_ui()
+
+
+__all__ = [
+    "EngineAdapter",
+    "build_graph",
+    "simulation_loop",
+    "pause_simulation",
+    "resume_simulation",
+    "stop_simulation",
+    "get_snapshot",
+]

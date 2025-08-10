@@ -9,21 +9,21 @@ will expand as the engine matures.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, List
+from typing import Any
 
 
 @dataclass
 class VertexArray:
     """Struct-of-arrays representation of vertex data."""
 
-    ids: List[int] = field(default_factory=list)
+    ids: list[int] = field(default_factory=list)
 
 
 @dataclass
 class EdgeArray:
     """Struct-of-arrays representation of edge data."""
 
-    ids: List[int] = field(default_factory=list)
+    ids: list[int] = field(default_factory=list)
 
 
 @dataclass
@@ -32,7 +32,7 @@ class Packet:
 
     src: int
     dst: int
-    payload: Any = None
+    payload: Any | None = None
 
 
 @dataclass
@@ -41,5 +41,5 @@ class TelemetryFrame:
 
     depth: int
     events: int
-    packets: List[Packet] = field(default_factory=list)
+    packets: list[Packet] = field(default_factory=list)
     window: int = 0
