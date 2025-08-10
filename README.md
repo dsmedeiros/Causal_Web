@@ -145,8 +145,8 @@ advanced controls for the v2 engine.  Each group is a nested mapping:
                      "theta_max": 0.0, "sigma0": 0.0,
                      "lambda_decay": 0.0, "sigma_reinforce": 0.0,
                      "sigma_min": 0.0},
-  "bell": {"mi_mode": "MI_strict", "kappa_a": 0.0, "kappa_xi": 0.0,
-            "beta_m": 0.0, "beta_h": 0.0}
+  "bell": {"enabled": false, "mi_mode": "MI_strict", "kappa_a": 0.0,
+            "kappa_xi": 0.0, "beta_m": 0.0, "beta_h": 0.0}
 }
 ```
 
@@ -154,7 +154,8 @@ The `windowing` values control vertex window advancement. `rho_delay` affects
 how edge density relaxes toward a baseline. `epsilon_pairs` governs dynamic
 ε-pair behaviour – seeds with a limited TTL can bind to form temporary bridge
 edges whose `sigma` values decay unless reinforced – while `bell` sets mutual
-information gates for Bell pair matching.
+information gates for Bell pair matching. The Bell block is disabled by default;
+set `"enabled": true` to activate measurement-interaction modes.
 
 `run_seed` provides a deterministic seed used by sampling, Bell helpers and
 ε-pair routines, allowing reproducible runs.

@@ -88,6 +88,8 @@ class EPairs:
         self.sigma_min = sigma_min
         self.seeds: Dict[int, List[Seed]] = {}
         self.bridges: Dict[Tuple[int, int], Bridge] = {}
+        # adjacency list of active bridge partners
+        self.adjacency: Dict[int, List[int]] = {}
         self._rng = np.random.default_rng(seed)
 
     # ------------------------------------------------------------------
@@ -137,20 +139,44 @@ class EPairs:
         key = self._bridge_key(a, b)
         if key not in self.bridges:
             self.bridges[key] = Bridge(self.sigma0)
+            self.adjacency.setdefault(a, []).append(b)
+            self.adjacency.setdefault(b, []).append(a)
 
     def _bridge_key(self, a: int, b: int) -> Tuple[int, int]:
         return (a, b) if a <= b else (b, a)
+
+    def _remove_bridge(self, a: int, b: int) -> None:
+        key = self._bridge_key(a, b)
+        if key in self.bridges:
+            del self.bridges[key]
+        for src, dst in ((a, b), (b, a)):
+            neigh = self.adjacency.get(src)
+            if neigh and dst in neigh:
+                neigh.remove(dst)
+                if not neigh:
+                    del self.adjacency[src]
 
     # ------------------------------------------------------------------
     # bridge handling
 
     def reinforce(self, a: int, b: int) -> None:
-        """Reinforce or decay the bridge between ``a`` and ``b``."""
+        """Reinforce the bridge between ``a`` and ``b`` if present."""
 
         key = self._bridge_key(a, b)
         bridge = self.bridges.get(key)
         if bridge is None:
             return
-        bridge.sigma = (1.0 - self.lambda_decay) * bridge.sigma + self.sigma_reinforce
+        bridge.sigma += self.sigma_reinforce
         if bridge.sigma < self.sigma_min:
-            del self.bridges[key]
+            self._remove_bridge(a, b)
+
+    def decay_all(self) -> None:
+        """Decay all bridges, removing those below :attr:`sigma_min`."""
+
+        factor = 1.0 - self.lambda_decay
+        if factor >= 1.0:
+            return
+        for (a, b), bridge in list(self.bridges.items()):
+            bridge.sigma *= factor
+            if bridge.sigma < self.sigma_min:
+                self._remove_bridge(a, b)

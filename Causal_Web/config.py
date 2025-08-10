@@ -120,6 +120,7 @@ class Config:
         "sigma_min": 0.0,
     }
     bell = {
+        "enabled": False,
         "mi_mode": "MI_strict",
         "kappa_a": 0.0,
         "kappa_xi": 0.0,
