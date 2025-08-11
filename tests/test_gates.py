@@ -184,8 +184,8 @@ def _energy_total():
     bit_deque: deque[int] = deque()
     packet = {"psi": np.array([1, 0], np.complex64), "p": [0.4, 0.6], "bit": 1}
     edge = {"alpha": 1.0, "phi": 0.0, "A": 0.0, "U": np.eye(2, dtype=np.complex64)}
-    depth, psi_acc, p_v, (bit, conf), intensity = deliver_packet(
-        0, psi_acc, p_v, bit_deque, packet, edge, "Q"
+    depth, psi_acc, p_v, (bit, conf), intensities = deliver_packet(
+        0, psi_acc, p_v, bit_deque, packet, edge
     )
     psi, EQ = close_window(psi_acc)
     H_pv = float(-(p_v * np.log2(p_v + 1e-12)).sum())
