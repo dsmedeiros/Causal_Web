@@ -1,5 +1,7 @@
 import json
 from copy import deepcopy
+import math
+import pytest
 from Causal_Web.config import Config
 
 
@@ -86,3 +88,27 @@ def test_load_engine_mode_and_param_groups(tmp_path):
         Config.rho_delay = original_rho_delay
         Config.epsilon_pairs = original_epairs
         Config.bell = original_bell
+
+
+def test_default_epsilon_pairs_values():
+    ep = Config.epsilon_pairs
+    assert ep["delta_ttl"] == 8.0
+    assert ep["ancestry_prefix_L"] == 16
+    assert ep["theta_max"] == pytest.approx(math.pi / 12, rel=1e-6)
+    assert ep["sigma0"] == 0.3
+    assert ep["lambda_decay"] == 0.05
+    assert ep["sigma_reinforce"] == 0.1
+    assert ep["sigma_min"] == 0.001
+
+
+def test_delta_ttl_scales_with_W0(tmp_path):
+    cfg = tmp_path / "config.json"
+    cfg.write_text(json.dumps({"windowing": {"W0": 5}}))
+    original_windowing = Config.windowing.copy()
+    original_epairs = Config.epsilon_pairs.copy()
+    Config.load_from_file(str(cfg))
+    try:
+        assert Config.epsilon_pairs["delta_ttl"] == 10
+    finally:
+        Config.windowing = original_windowing
+        Config.epsilon_pairs = original_epairs

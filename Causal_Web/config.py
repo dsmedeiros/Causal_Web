@@ -1,5 +1,6 @@
 # config.py
 
+import math
 import os
 import shutil
 import threading
@@ -116,13 +117,13 @@ class Config:
         "rho0": 1.0,
     }
     epsilon_pairs = {
-        "delta_ttl": 0,
-        "ancestry_prefix_L": 0,
-        "theta_max": 0.0,
-        "sigma0": 0.0,
-        "lambda_decay": 0.0,
-        "sigma_reinforce": 0.0,
-        "sigma_min": 0.0,
+        "delta_ttl": 2 * windowing["W0"],
+        "ancestry_prefix_L": 16,
+        "theta_max": math.pi / 12,
+        "sigma0": 0.3,
+        "lambda_decay": 0.05,
+        "sigma_reinforce": 0.1,
+        "sigma_min": 1e-3,
     }
     bell = {
         "enabled": False,
@@ -558,6 +559,11 @@ class Config:
                 current.update(value)
             else:
                 setattr(cls, key, value)
+
+        if "delta_ttl" not in data.get("epsilon_pairs", {}):
+            cls.epsilon_pairs["delta_ttl"] = 2 * cls.windowing.get(
+                "W0", cls.windowing["W0"]
+            )
 
 
 def load_config(path: str | None = None) -> dict:
