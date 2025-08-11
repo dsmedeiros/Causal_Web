@@ -14,6 +14,8 @@ from typing import Dict, Tuple
 
 import numpy as np
 
+from ...config import Config
+
 
 @dataclass
 class Ancestry:
@@ -35,7 +37,14 @@ class BellHelpers:
     """Utility methods for Bell experiment simulations."""
 
     def __init__(self, seed: int | None = None) -> None:
-        self._rng = np.random.default_rng(seed)
+        """Initialise the helper with an optional RNG ``seed``.
+
+        When ``seed`` is ``None`` the global :data:`Config.run_seed` is used
+        so that helper invocations remain reproducible without explicit
+        seeding.
+        """
+
+        self._rng = np.random.default_rng(seed if seed is not None else Config.run_seed)
 
     # ------------------------------------------------------------------
     # Helpers

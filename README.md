@@ -73,6 +73,9 @@ Graphs are stored as JSON files under `Causal_Web/input/`. Each file defines
 schema and an example.
 
 The GUI allows interactive editing of graphs. Drag nodes to reposition them and use the toolbar to add connections or observers. After editing, click **Apply Changes** in the Graph View to update the simulation and save the file. Details on all GUI actions are provided in [docs/gui_usage.md](docs/gui_usage.md).
+During simulation a small HUD overlay reports the current tick, depth and
+window when using the v2 engine, offering immediate feedback on scheduler
+progress.
 Nodes can optionally enable self-connections via a checkbox in the node panel. When enabled, dragging from a node back onto itself creates a curved edge.
 Bridges now support an `Entanglement Enabled` option. When selected, the bridge
 is tagged with an `entangled_id` used by observers to generate deterministic
@@ -160,7 +163,9 @@ scales with `W0` (`2*W0`) to simplify experiments, while the remaining
 parameters set decay and reinforcement dynamics. `bell` sets mutual information
 gates for Bell pair matching. Bridge creation and removal now emit
 `bridge_created` and `bridge_removed` events (carrying a stable synthetic
-`bridge_id` and final `σ`), providing additional telemetry for analysis. The
+`bridge_id` and final `σ`), providing additional telemetry for analysis.
+`seed_emitted` and `seed_dropped` events capture ε-pair propagation and
+expiry reasons (`expired`, `angle`, `prefix`), aiding locality tests. The
 Bell block is disabled by default;
 set `"enabled": true` to activate measurement-interaction modes.
 

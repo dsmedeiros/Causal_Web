@@ -298,6 +298,13 @@ The following lists describe the JSON keys recorded in each output file.
 - seeder actions recording `node`, `phase`, `strategy`,
   `coherence`, `threshold`, `success` and optional `failure_reason`.
 
+#### `seed_emitted` / `seed_dropped` events
+- recorded under the `event` category when ε-pair seeds propagate.
+- `seed_emitted` includes `src`, `dst`, `origin`, `expiry_depth`, `h_prefix`
+  and `theta`.
+- `seed_dropped` stores `src`, `origin` and a `reason` of `expired`, `angle`
+  or `prefix`.
+
 #### `tick_trace.json`
 - complete graph snapshot including nodes, edges, bridges and tick history.
 
