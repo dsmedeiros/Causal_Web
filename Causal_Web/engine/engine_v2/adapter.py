@@ -8,7 +8,7 @@ according to the local causal consistency math.
 
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from collections import deque
 import threading
 import time
@@ -174,6 +174,17 @@ class EngineAdapter:
         self._vertices.clear()
         edges = self._arrays.edges
         n_vert = len(self._arrays.vertices["depth"])
+
+        incident: Dict[int, List[int]] = {vid: [] for vid in range(n_vert)}
+        for idx in range(len(edges["src"])):
+            s = int(edges["src"][idx])
+            d = int(edges["dst"][idx])
+            d_eff = int(edges["d_eff"][idx]) if "d_eff" in edges else 1
+            incident[s].append(d_eff)
+            incident[d].append(d_eff)
+
+        self._epairs.set_incident_delays(incident)
+
         for vid in range(n_vert):
             out_idx = np.where(edges["src"] == vid)[0]
             in_idx = np.where(edges["dst"] == vid)[0]

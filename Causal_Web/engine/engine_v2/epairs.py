@@ -54,7 +54,9 @@ class Bridge:
     sigma:
         Reinforcement level for the bridge.
     d_bridge:
-        Traversal delay applied when packets cross the bridge.
+        Traversal delay applied when packets cross the bridge. The delay is
+        derived from the incident edge delays of the bridge's endpoints and is
+        set to ``max(1, median(d_eff))`` at creation time.
     edge_id:
         Synthetic identifier used when scheduling packets across the
         bridge.  A unique negative ID is allocated per bridge and
@@ -116,6 +118,8 @@ class EPairs:
         self._rng = np.random.default_rng(seed if seed is not None else Config.run_seed)
         # Synthetic edge identifier allocation for bridges
         self._next_bridge_id = -1
+        # Cache of incident edge delays per vertex for bridge delay estimation
+        self._incident_delays: Dict[int, List[int]] = {}
 
     # ------------------------------------------------------------------
     # seed handling
@@ -252,9 +256,28 @@ class EPairs:
                 return
         seeds.append(seed)
 
-    def _create_bridge(self, a: int, b: int, d_bridge: int = 1) -> None:
+    def set_incident_delays(self, delays: Dict[int, Iterable[int]]) -> None:
+        """Provide incident edge delays for bridge delay estimation.
+
+        Parameters
+        ----------
+        delays:
+            Mapping of vertex id to the delays of edges incident on that vertex.
+        """
+
+        self._incident_delays = {v: list(vals) for v, vals in delays.items()}
+
+    def _create_bridge(self, a: int, b: int, d_bridge: int | None = None) -> None:
         key = self._bridge_key(a, b)
         if key not in self.bridges:
+            if d_bridge is None:
+                delays = self._incident_delays.get(a, []) + self._incident_delays.get(
+                    b, []
+                )
+                if delays:
+                    d_bridge = max(1, int(np.median(delays)))
+                else:
+                    d_bridge = 1
             edge_id = self._next_bridge_id
             self.bridges[key] = Bridge(self.sigma0, d_bridge, edge_id)
             self._next_bridge_id -= 1
