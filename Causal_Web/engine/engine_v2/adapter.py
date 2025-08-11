@@ -369,8 +369,8 @@ class EngineAdapter:
                 h_val = int.from_bytes(ancestry_arr.tobytes(), "little")
                 neigh = [int(edges["dst"][e]) for e in self._edges_by_src.get(dst, [])]
                 theta = float(np.angle(self._arrays.vertices["psi"][dst][0]))
-                self._epairs.carry(dst, neigh)
-                self._epairs.emit(dst, h_val, theta, neigh)
+                self._epairs.carry(dst, depth_arr, neigh)
+                self._epairs.emit(dst, h_val, theta, depth_arr, neigh)
 
             if lccm.layer != prev_layer:
                 if prev_layer == "Q" and lccm.layer == "Θ":

@@ -120,6 +120,18 @@ def test_gate3_lccm_hysteresis_transitions():
 
 def test_gate4_epairs_locality_ttl_and_decay():
     mgr = EPairs(
+        delta_ttl=0,
+        ancestry_prefix_L=4,
+        theta_max=0.1,
+        sigma0=1.0,
+        lambda_decay=0.5,
+        sigma_reinforce=0.2,
+        sigma_min=0.1,
+    )
+    mgr.emit(origin=1, h_value=0b1101_0000, theta=0.1, depth_emit=0, neighbours=[3])
+    mgr.emit(origin=2, h_value=0b1101_1111, theta=0.1, depth_emit=0, neighbours=[3])
+    assert (1, 2) not in mgr.bridges
+    mgr2 = EPairs(
         delta_ttl=1,
         ancestry_prefix_L=4,
         theta_max=0.1,
@@ -128,20 +140,8 @@ def test_gate4_epairs_locality_ttl_and_decay():
         sigma_reinforce=0.2,
         sigma_min=0.1,
     )
-    mgr.emit(origin=1, h_value=0b1101_0000, theta=0.1, neighbours=[3])
-    mgr.emit(origin=2, h_value=0b1101_1111, theta=0.1, neighbours=[3])
-    assert (1, 2) not in mgr.bridges
-    mgr2 = EPairs(
-        delta_ttl=2,
-        ancestry_prefix_L=4,
-        theta_max=0.1,
-        sigma0=1.0,
-        lambda_decay=0.5,
-        sigma_reinforce=0.2,
-        sigma_min=0.1,
-    )
-    mgr2.emit(origin=1, h_value=0b1101_0000, theta=0.1, neighbours=[3])
-    mgr2.emit(origin=2, h_value=0b1101_1111, theta=0.1, neighbours=[3])
+    mgr2.emit(origin=1, h_value=0b1101_0000, theta=0.1, depth_emit=0, neighbours=[3])
+    mgr2.emit(origin=2, h_value=0b1101_1111, theta=0.1, depth_emit=0, neighbours=[3])
     assert (1, 2) in mgr2.bridges
     mgr2.lambda_decay = 1.0
     mgr2.decay_all()

@@ -1,7 +1,7 @@
 """Dynamic ε-pair management for the v2 engine.
 
 This module implements a toy model for *ε*-pair formation.  Each
-"seed" carries a time-to-live (TTL), a hash prefix identifying the
+"seed" carries an expiry depth, a hash prefix identifying the
 originating site and a local ``theta`` value.  Seeds are emitted along
 outgoing edges during Q-delivery and, when two compatible seeds meet,
 their sources are connected by a temporary "bridge" edge.  Bridges
@@ -30,8 +30,8 @@ class Seed:
     ----------
     origin:
         Identifier of the node that emitted the seed.
-    ttl:
-        Remaining hop budget for the seed.
+    expiry_depth:
+        Maximum propagation depth for the seed.
     h_prefix:
         ``L``-bit prefix derived from the origin's hash.
     theta:
@@ -39,7 +39,7 @@ class Seed:
     """
 
     origin: int
-    ttl: int
+    expiry_depth: int
     h_prefix: int
     theta: float
 
@@ -115,45 +115,56 @@ class EPairs:
     # seed handling
 
     def emit(
-        self, origin: int, h_value: int, theta: float, neighbours: Iterable[int]
+        self,
+        origin: int,
+        h_value: int,
+        theta: float,
+        depth_emit: int,
+        neighbours: Iterable[int],
     ) -> None:
         """Emit seeds from ``origin`` to each neighbour.
 
-        Each seed consumes one unit of TTL during the hop.  Seeds with a
-        remaining TTL of zero are discarded.  When a seed arrives at a
-        site it is compared against existing seeds to determine whether a
-        bridge should be formed.
+        ``depth_emit`` is the depth of the emitting node.  Seeds inherit an
+        ``expiry_depth`` of ``depth_emit + delta_ttl``.  A seed is only
+        forwarded to a neighbour if the next hop depth does not exceed its
+        expiry, providing a depth-based TTL.
         """
 
         prefix = self._prefix(h_value)
+        expiry = depth_emit + self.delta_ttl
+        depth_next = depth_emit + 1
+        if depth_next > expiry:
+            return
         for n in neighbours:
-            seed = Seed(
-                origin=origin, ttl=self.delta_ttl - 1, h_prefix=prefix, theta=theta
+            self._place_seed(
+                n,
+                Seed(
+                    origin=origin,
+                    expiry_depth=expiry,
+                    h_prefix=prefix,
+                    theta=theta,
+                ),
             )
-            if seed.ttl > 0:
-                self._place_seed(n, seed)
 
-    def carry(self, site: int, neighbours: Iterable[int]) -> None:
+    def carry(self, site: int, depth_curr: int, neighbours: Iterable[int]) -> None:
         """Propagate existing seeds at ``site`` to its neighbours.
 
-        Each hop consumes one unit of TTL. Seeds whose TTL drops to zero
-        or below are discarded. Seeds are removed from ``site`` once they
-        have been carried.
+        Seeds are removed from ``site`` once carried.  Forwarding halts
+        when the proposed ``depth_next`` would exceed a seed's
+        ``expiry_depth``.
         """
 
         seeds = self.seeds.pop(site, [])
+        depth_next = depth_curr + 1
         for seed in seeds:
-            if seed.ttl <= 0:
-                continue
-            ttl = seed.ttl - 1
-            if ttl <= 0:
+            if depth_next > seed.expiry_depth:
                 continue
             for n in neighbours:
                 self._place_seed(
                     n,
                     Seed(
                         origin=seed.origin,
-                        ttl=ttl,
+                        expiry_depth=seed.expiry_depth,
                         h_prefix=seed.h_prefix,
                         theta=seed.theta,
                     ),
@@ -173,7 +184,6 @@ class EPairs:
             if (
                 seed.h_prefix == other.h_prefix
                 and abs(seed.theta - other.theta) <= self.theta_max
-                and other.ttl > 0
             ):
                 self._create_bridge(seed.origin, other.origin)
                 seeds.remove(other)
