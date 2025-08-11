@@ -198,7 +198,7 @@ $$
 
 where $\bar\rho_v$ is the mean $\rho$ of edges incident to $v$. $W(v)\ge 1$.
 
-* **Θ reset policy:** $\theta_\text{reset}\in\{\text{uniform},\text{renorm},\text{hold}\}$ chooses how $p_v$ is reset when the window closes.
+* **Θ reset policy:** $\theta_\text{reset}\in\{\text{uniform},\text{renorm},\text{hold}\}$ chooses how $p_v$ is reset when the window closes (default $\text{renorm}$).
 
 ## 5.2 Thresholds & timers
 

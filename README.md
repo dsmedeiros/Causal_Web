@@ -153,7 +153,7 @@ advanced controls for the v2 engine.  Each group is a nested mapping:
                      "sigma_min": 0.001},
   "bell": {"enabled": false, "mi_mode": "MI_strict", "kappa_a": 0.0,
             "kappa_xi": 0.0, "beta_m": 0.0, "beta_h": 0.0},
-  "theta_reset": "uniform"
+  "theta_reset": "renorm"
 }
 ```
 
@@ -224,7 +224,7 @@ closes the adapter normalises accumulated amplitudes and records ``EQ`` via
 ``engine.engine_v2.qtheta_c.close_window``. The post-window Θ distribution
 reset policy is governed by ``Config.theta_reset`` which accepts ``"uniform"``
 for an even reset, ``"renorm"`` to normalise existing values or ``"hold"`` to
-leave the distribution unchanged.
+leave the distribution unchanged (default ``"renorm"``).
 
 Scheduler steps also integrate a toy horizon thermodynamics model. Interior
 nodes may emit Hawking pairs with probability ``exp(-ΔE/T_H)``, and the

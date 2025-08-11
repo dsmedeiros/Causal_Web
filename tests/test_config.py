@@ -112,3 +112,7 @@ def test_delta_ttl_scales_with_W0(tmp_path):
     finally:
         Config.windowing = original_windowing
         Config.epsilon_pairs = original_epairs
+
+
+def test_theta_reset_default():
+    assert Config.theta_reset == "renorm"
