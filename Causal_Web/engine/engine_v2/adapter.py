@@ -22,7 +22,7 @@ from .scheduler import DepthScheduler
 from .state import Packet, TelemetryFrame
 from .loader import GraphArrays, load_graph_arrays
 from .rho_delay import update_rho_delay
-from .qtheta_c import close_window, deliver_packet
+from .qtheta_c import close_window, deliver_packet, deliver_packets_batch
 from .epairs import EPairs
 from .bell import BellHelpers, Ancestry
 from ...config import Config
@@ -129,9 +129,11 @@ class EngineAdapter:
     def run_until_next_window_or(self, limit: int | None) -> TelemetryFrame:
         """Run until the next window boundary or until ``limit`` events.
 
-        The returned frame's ``depth`` mirrors the greatest arrival depth
-        encountered during processing. If no events are handled or only events
-        at the current depth are processed, the depth will remain unchanged.
+        Arrivals targeting the same destination and window are grouped so that
+        field updates can be applied in batches for improved performance. The
+        returned frame's ``depth`` mirrors the greatest arrival depth encountered
+        during processing. If no events are handled or only events at the current
+        depth are processed, the depth will remain unchanged.
         """
 
         if not self._running:
@@ -186,14 +188,91 @@ class EngineAdapter:
                     }
                 )
 
-            depth_v, psi_acc, p_v, (bit, conf), intensity = deliver_packet(
-                lccm.depth,
-                vertex["psi_acc"],
-                vertex["p_v"],
-                vertex["bit_deque"],
-                packet_data,
-                edge_params,
-            )
+            packet_list = [packet_data]
+            edge_list = [edge_params]
+            pkt_list = [pkt]
+            window_idx = lccm.window_idx
+            requeue: list[tuple[int, int, int, Packet]] = []
+            while self._scheduler and events + len(pkt_list) < limit:
+                d2, dst2, edge2, pkt2 = self._scheduler.pop()
+                if dst2 != dst:
+                    requeue.append((d2, dst2, edge2, pkt2))
+                    continue
+                old_depth, old_window, old_lambda = (
+                    lccm.depth,
+                    lccm.window_idx,
+                    lccm._lambda,
+                )
+                lccm.advance_depth(d2)
+                if lccm.window_idx != window_idx:
+                    lccm.depth, lccm.window_idx, lccm._lambda = (
+                        old_depth,
+                        old_window,
+                        old_lambda,
+                    )
+                    requeue.append((d2, dst2, edge2, pkt2))
+                    break
+                pd2 = pkt2.payload or {}
+                if not isinstance(pd2, dict):
+                    pd2 = {}
+                pd2.setdefault("depth_arr", d2)
+                if "psi" not in pd2:
+                    pd2["psi"] = np.zeros_like(vertex["psi_acc"])
+                if "p" not in pd2:
+                    pd2["p"] = np.zeros_like(vertex["p_v"])
+                if "bit" not in pd2:
+                    pd2["bit"] = 0
+                ep2: Dict[str, Any] = {
+                    "alpha": 1.0,
+                    "phi": 0.0,
+                    "A": 0.0,
+                    "U": np.eye(dim, dtype=np.complex64),
+                }
+                if edges and 0 <= edge2 < len(edges.get("alpha", [])):
+                    ep2.update(
+                        {
+                            "alpha": float(edges["alpha"][edge2]),
+                            "phi": float(edges["phi"][edge2]),
+                            "A": float(edges["A"][edge2]),
+                            "U": edges["U"][edge2],
+                        }
+                    )
+                packet_list.append(pd2)
+                edge_list.append(ep2)
+                pkt_list.append(pkt2)
+            for item in requeue:
+                self._scheduler.push(*item)
+
+            if len(pkt_list) > 1:
+                packets_struct = {
+                    "psi": [pd["psi"] for pd in packet_list],
+                    "p": [pd["p"] for pd in packet_list],
+                    "bit": [pd["bit"] for pd in packet_list],
+                    "depth_arr": [pd["depth_arr"] for pd in packet_list],
+                }
+                edges_struct = {
+                    "alpha": [ep["alpha"] for ep in edge_list],
+                    "phi": [ep["phi"] for ep in edge_list],
+                    "A": [ep["A"] for ep in edge_list],
+                    "U": [ep["U"] for ep in edge_list],
+                }
+                depth_v, psi_acc, p_v, (bit, conf), intensity = deliver_packets_batch(
+                    lccm.depth,
+                    vertex["psi_acc"],
+                    vertex["p_v"],
+                    vertex["bit_deque"],
+                    packets_struct,
+                    edges_struct,
+                )
+            else:
+                depth_v, psi_acc, p_v, (bit, conf), intensity = deliver_packet(
+                    lccm.depth,
+                    vertex["psi_acc"],
+                    vertex["p_v"],
+                    vertex["bit_deque"],
+                    packet_data,
+                    edge_params,
+                )
 
             vertex["psi_acc"][:] = psi_acc
             vertex["p_v"][:] = p_v
@@ -212,7 +291,7 @@ class EngineAdapter:
             entropy = float(-(p_v * np.log2(p_v + 1e-12)).sum()) if len(p_v) else 0.0
             lccm.update_classical_metrics(bit_fraction, entropy)
             lccm.deliver()
-            packets.append(pkt)
+            packets.extend(pkt_list)
 
             ancestry_arr = (
                 self._arrays.vertices["ancestry"][dst]
@@ -309,6 +388,7 @@ class EngineAdapter:
                         "to_layer": lccm.layer,
                         "reason": reason,
                         "window_idx": lccm.window_idx,
+                        "Lambda_v": lccm._lambda,
                     },
                 )
 
@@ -405,7 +485,7 @@ class EngineAdapter:
                     Packet(src=dst, dst=other, payload=payload),
                 )
                 self._epairs.reinforce(dst, other)
-            events += 1
+            events += len(pkt_list)
 
             if any(
                 data["lccm"].window_idx != start_windows[vid]
@@ -490,6 +570,7 @@ class EngineAdapter:
                         "layer": lccm.layer,
                         "Lambda_v": lccm._lambda,
                         "EQ": EQ,
+                        "H_p": H_pv,
                         "E_theta": E_theta,
                         "E_C": E_C,
                         "v_id": vid,
