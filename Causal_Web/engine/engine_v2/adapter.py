@@ -65,24 +65,23 @@ class EngineAdapter:
         edge_id: int,
         depth_arr: int,
         seq: int,
-        psi: np.ndarray,
-        phi_e: float,
-        A_e: float,
-        U_e: np.ndarray,
-    ) -> tuple[np.ndarray, np.ndarray, float]:
+        mu: float,
+        kappa: float,
+    ) -> tuple[np.ndarray, np.ndarray]:
         """Update ancestry hash and phase moment for ``dst``.
 
         The update uses only local information from the arriving packet and is
-        deterministic given :data:`Config.run_seed`.  The phase moment ``m``
-        is biased toward the destination's unitary by computing
-        ``mu = arg(<U_e ψ, ψ>)`` and is down-weighted under heavy fan-in using
-        ``β_m = β_m0 / (1 + Λ_v)`` where ``Λ_v`` counts quantum arrivals in the
-        current window. The coefficient ``β_m0`` is sourced from
-        :data:`Config.ancestry` so it can be adjusted via configuration.
+        deterministic given :data:`Config.run_seed`. The phase moment ``m`` is
+        biased toward the destination's unitary via the supplied phase
+        ``mu`` (``arg(<U ψ, ψ>)``) and coherence ``kappa`` and is
+        down-weighted under heavy fan-in using ``β_m = β_m0 / (1 + Λ_v)`` where
+        ``Λ_v`` counts quantum arrivals in the current window. The coefficient
+        ``β_m0`` is sourced from :data:`Config.ancestry` so it can be adjusted via
+        configuration.
         """
 
         if self._arrays is None:
-            return np.zeros(4, dtype=np.uint64), np.zeros(3, dtype=float), 0.0
+            return np.zeros(4, dtype=np.uint64), np.zeros(3, dtype=float)
 
         v_arr = self._arrays.vertices
 
@@ -98,12 +97,6 @@ class EngineAdapter:
 
         # --------------------------------------------------------------
         # Local phase statistics
-        psi = np.asarray(psi, dtype=np.complex64)
-        U_e = np.asarray(U_e, dtype=np.complex64)
-        psi_rot = np.exp(1j * (phi_e + A_e)) * (U_e @ psi)
-        z = np.vdot(psi_rot, psi)
-        mu = float(np.angle(z))
-        kappa = float(abs(z))
         u_local = np.array([np.cos(mu), np.sin(mu), kappa], dtype=np.float32)
 
         # Moment update with normalisation
@@ -145,7 +138,7 @@ class EngineAdapter:
         v_arr["h3"][dst] = h3
 
         ancestry = np.array([h0, h1, h2, h3], dtype=np.uint64)
-        return ancestry, m, mu
+        return ancestry, m
 
     # Public API -----------------------------------------------------
     def build_graph(self, graph_json_path: str | Dict[str, Any]) -> None:
@@ -374,7 +367,15 @@ class EngineAdapter:
                 self._scheduler.push(*item)
 
             if len(pkt_list) > 1:
-                depth_v, psi_acc, p_v, (bit, conf), intensities = deliver_packets_batch(
+                (
+                    depth_v,
+                    psi_acc,
+                    p_v,
+                    (bit, conf),
+                    intensities,
+                    mu,
+                    kappa,
+                ) = deliver_packets_batch(
                     lccm.depth,
                     vertex["psi_acc"],
                     vertex["p_v"],
@@ -402,7 +403,15 @@ class EngineAdapter:
                     "A": A_list[0],
                     "U": U_list[0],
                 }
-                depth_v, psi_acc, p_v, (bit, conf), intensities = deliver_packet(
+                (
+                    depth_v,
+                    psi_acc,
+                    p_v,
+                    (bit, conf),
+                    intensities,
+                    mu,
+                    kappa,
+                ) = deliver_packet(
                     lccm.depth,
                     vertex["psi_acc"],
                     vertex["p_v"],
@@ -439,21 +448,15 @@ class EngineAdapter:
             }
             intensity = intensity_map.get(lccm.layer, sum(intensities))
 
-            psi_local = psi_list[0]
-            phi_local = phi_list[0]
-            A_local = A_list[0]
-            U_local = U_list[0]
             theta = 0.0
             if lccm.layer == "Q":
-                ancestry_arr, m_arr, mu = self._update_ancestry(
+                ancestry_arr, m_arr = self._update_ancestry(
                     dst,
                     edge_id_list[0],
                     depth_arr,
                     0,
-                    psi_local,
-                    phi_local,
-                    A_local,
-                    U_local,
+                    mu,
+                    kappa,
                 )
                 theta = mu
             else:
@@ -613,7 +616,7 @@ class EngineAdapter:
                     src=dst, dst=int(edges["dst"][edge_idx]), payload=payload
                 )
                 edge_logs += 1
-                rate = Config.logging.get("sample_edge_rate", 0.0)
+                rate = Config.logging.get("sample_rho_rate", 0.0)
                 if rate > 0.0 and self._rng.random() < rate:
                     log_record(
                         category="event",
@@ -646,7 +649,7 @@ class EngineAdapter:
                     "m": packet_data.get("m"),
                 }
                 edge_logs += 1
-                rate = Config.logging.get("sample_edge_rate", 0.0)
+                rate = Config.logging.get("sample_rho_rate", 0.0)
                 if rate > 0.0 and self._rng.random() < rate:
                     log_record(
                         category="event",

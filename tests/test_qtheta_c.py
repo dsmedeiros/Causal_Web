@@ -16,7 +16,7 @@ def test_deliver_packet_updates_fields():
         "U": [[1.0, 0.0], [0.0, 1.0]],
     }
 
-    depth, psi_acc, p_v, (bit, conf), intensities = deliver_packet(
+    depth, psi_acc, p_v, (bit, conf), intensities, mu, kappa = deliver_packet(
         depth, psi_acc, p_v, bits, packet, edge
     )
 
@@ -37,7 +37,9 @@ def test_intensity_theta_layer_ignores_other_contributions():
     packet = {"depth_arr": 1, "psi": [1.0, 0.0], "p": [0.1, 0.2], "bit": 1}
     edge = {"alpha": 1.0, "phi": 0.0, "A": 0.0, "U": [[1.0, 0.0], [0.0, 1.0]]}
 
-    _, _, _, _, intensities = deliver_packet(depth, psi_acc, p_v, bits, packet, edge)
+    _, _, _, _, intensities, mu, kappa = deliver_packet(
+        depth, psi_acc, p_v, bits, packet, edge
+    )
     assert intensities[1] == pytest.approx(0.3, abs=1e-6)
 
 
@@ -47,5 +49,7 @@ def test_intensity_c_layer_only_counts_bits():
     packet = {"depth_arr": 1, "psi": [1.0, 0.0], "p": [0.1, 0.2], "bit": 0}
     edge = {"alpha": 1.0, "phi": 0.0, "A": 0.0, "U": [[1.0, 0.0], [0.0, 1.0]]}
 
-    _, _, _, _, intensities = deliver_packet(depth, psi_acc, p_v, bits, packet, edge)
+    _, _, _, _, intensities, mu, kappa = deliver_packet(
+        depth, psi_acc, p_v, bits, packet, edge
+    )
     assert intensities[2] == 0.0
