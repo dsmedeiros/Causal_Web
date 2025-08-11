@@ -389,24 +389,22 @@ class EngineAdapter:
                     "A": A_list,
                     "U": U_list,
                 }
-                depth_v, psi_acc, p_v, (bit, conf), intensity = deliver_packets_batch(
+                depth_v, psi_acc, p_v, (bit, conf), intensities = deliver_packets_batch(
                     lccm.depth,
                     vertex["psi_acc"],
                     vertex["p_v"],
                     vertex["bit_deque"],
                     packets_struct,
                     edges_struct,
-                    lccm.layer,
                 )
             else:
-                depth_v, psi_acc, p_v, (bit, conf), intensity = deliver_packet(
+                depth_v, psi_acc, p_v, (bit, conf), intensities = deliver_packet(
                     lccm.depth,
                     vertex["psi_acc"],
                     vertex["p_v"],
                     vertex["bit_deque"],
                     packet_data,
                     edge_params,
-                    lccm.layer,
                 )
 
             vertex["psi_acc"][:] = psi_acc
@@ -428,21 +426,49 @@ class EngineAdapter:
             lccm.deliver()
             packets.extend(pkt_list)
 
+            intensity_map = {
+                "Q": intensities[0],
+                "Θ": intensities[1],
+                "C": intensities[2],
+            }
+            intensity = intensity_map.get(lccm.layer, sum(intensities))
+
             psi_local = packet_list[0]["psi"]
             phi_local = edge_list[0]["phi"]
             A_local = edge_list[0]["A"]
             U_local = edge_list[0]["U"]
-            theta = float(np.angle(psi_local[0])) if len(psi_local) else 0.0
-            ancestry_arr, m_arr = self._update_ancestry(
-                dst,
-                edge_id_list[0],
-                depth_arr,
-                0,
-                psi_local,
-                phi_local,
-                A_local,
-                U_local,
-            )
+            theta = 0.0
+            if lccm.layer == "Q":
+                theta = float(np.angle(psi_local[0])) if len(psi_local) else 0.0
+                ancestry_arr, m_arr = self._update_ancestry(
+                    dst,
+                    edge_id_list[0],
+                    depth_arr,
+                    0,
+                    psi_local,
+                    phi_local,
+                    A_local,
+                    U_local,
+                )
+            else:
+                if self._arrays is not None:
+                    v_arr = self._arrays.vertices
+                    ancestry_arr = np.array(
+                        [
+                            v_arr["h0"][dst],
+                            v_arr["h1"][dst],
+                            v_arr["h2"][dst],
+                            v_arr["h3"][dst],
+                        ],
+                        dtype=np.uint64,
+                    )
+                    m_arr = np.array(
+                        [v_arr["m0"][dst], v_arr["m1"][dst], v_arr["m2"][dst]],
+                        dtype=np.float32,
+                    )
+                else:
+                    ancestry_arr = np.zeros(4, dtype=np.uint64)
+                    m_arr = np.zeros(3, dtype=float)
 
             bell_cfg = Config.bell
             if bell_cfg.get("enabled", False):

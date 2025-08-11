@@ -2,9 +2,9 @@
 
 This module provides minimal routines for the experimental v2 engine to
 update quantum (``psi``), probabilistic (``p``) and classical (``bit``)
-fields when a packet is delivered across an edge.  The functions operate on
-simple ``dict`` structures matching the loader's output and return the
-combined intensity used by the density-delay model.
+fields when a packet is delivered across an edge. The functions operate on
+simple ``dict`` structures matching the loader's output and return per-layer
+intensity contributions used by the density-delay model.
 """
 
 from __future__ import annotations
@@ -22,9 +22,8 @@ def deliver_packet(
     bit_deque: Deque[int],
     packet: dict,
     edge: dict,
-    layer: str,
     max_deque: int = 8,
-) -> Tuple[int, np.ndarray, np.ndarray, Tuple[int, float], float]:
+) -> Tuple[int, np.ndarray, np.ndarray, Tuple[int, float], Tuple[float, float, float]]:
     """Apply Q/Θ/C delivery rules for a single packet.
 
     Parameters
@@ -38,11 +37,9 @@ def deliver_packet(
     bit_deque:
         Recent bits used for majority voting.
     packet:
-        Packet carrying ``depth_arr``, ``psi`", ``p`` and ``bit`` fields.
+        Packet carrying ``depth_arr``, ``psi``, ``p`` and ``bit`` fields.
     edge:
-        Edge parameters ``alpha``, ``phi`", ``A`` and unitary ``U``.
-    layer:
-        Layer of the destination vertex (``"Q"``, ``"Θ"`` or ``"C"``).
+        Edge parameters ``alpha``, ``phi``, ``A`` and unitary ``U``.
     max_deque:
         Maximum length of ``bit_deque``.
 
@@ -50,7 +47,7 @@ def deliver_packet(
     -------
     tuple
         Updated ``depth_v``, ``psi_acc``, ``p_v``, ``(bit, conf)`` and the
-        intensity contribution from the supplied ``layer`` in ``[0, 1]``.
+        per-layer intensity contributions ``(I_Q, I_Θ, I_C)`` each in ``[0, 1]``.
     """
 
     depth_v = max(depth_v, int(packet.get("depth_arr", 0)))
@@ -79,17 +76,11 @@ def deliver_packet(
 
     q_intensity = min(1.0, float(np.linalg.norm(psi_rot) ** 2))
     theta_intensity = min(1.0, float(np.sum(np.abs(packet.get("p", [])))))
-    c_intensity = bit
-    if layer == "Q":
-        intensity = q_intensity
-    elif layer == "Θ":
-        intensity = theta_intensity
-    elif layer == "C":
-        intensity = c_intensity
-    else:
-        intensity = min(1.0, q_intensity + theta_intensity + c_intensity)
+    c_intensity = float(bit)
 
-    return depth_v, psi_acc, p_v, (bit, conf), intensity
+    intensities = (q_intensity, theta_intensity, c_intensity)
+
+    return depth_v, psi_acc, p_v, (bit, conf), intensities
 
 
 def close_window(psi_acc: np.ndarray) -> Tuple[np.ndarray, float]:
@@ -110,9 +101,8 @@ def deliver_packets_batch(
     bit_deque: Deque[int],
     packets: dict,
     edges: dict,
-    layer: str,
     max_deque: int = 8,
-) -> Tuple[int, np.ndarray, np.ndarray, Tuple[int, float], float]:
+) -> Tuple[int, np.ndarray, np.ndarray, Tuple[int, float], Tuple[float, float, float]]:
     """Vectorised delivery for packets sharing destination and window.
 
     Parameters
@@ -129,8 +119,6 @@ def deliver_packets_batch(
         Struct-of-arrays packet fields ``{psi, p, bit, depth_arr}``.
     edges:
         Struct-of-arrays edge parameters ``{alpha, phi, A, U}``.
-    layer:
-        Layer of the destination vertex (``"Q"``, ``"Θ"`` or ``"C"``).
     max_deque:
         Maximum length of ``bit_deque``.
 
@@ -138,7 +126,7 @@ def deliver_packets_batch(
     -------
     tuple
         Updated ``depth_v``, ``psi_acc``, ``p_v``, ``(bit, conf)`` and
-        intensity contribution from the supplied ``layer`` in ``[0, 1]``.
+        per-layer intensity contributions ``(I_Q, I_Θ, I_C)`` each in ``[0, 1]``.
     """
 
     if packets.get("depth_arr") is not None:
@@ -172,17 +160,11 @@ def deliver_packets_batch(
 
     q_intensity = min(1.0, float(np.linalg.norm(psi_rot) ** 2))
     theta_intensity = min(1.0, float(np.sum(np.abs(p))))
-    c_intensity = bit
-    if layer == "Q":
-        intensity = q_intensity
-    elif layer == "Θ":
-        intensity = theta_intensity
-    elif layer == "C":
-        intensity = c_intensity
-    else:
-        intensity = min(1.0, q_intensity + theta_intensity + c_intensity)
+    c_intensity = float(bit)
 
-    return depth_v, psi_acc, p_v, (bit, conf), intensity
+    intensities = (q_intensity, theta_intensity, c_intensity)
+
+    return depth_v, psi_acc, p_v, (bit, conf), intensities
 
 
 __all__ = ["deliver_packet", "deliver_packets_batch", "close_window"]
