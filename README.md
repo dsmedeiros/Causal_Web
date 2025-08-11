@@ -202,7 +202,10 @@ density to a logarithmically scaled effective delay. The engine v2 adapter
 recomputes this ``d_eff`` on every packet delivery, storing it with the edge
 and using the updated value to schedule the next hop. When a vertex window
 closes the adapter normalises accumulated amplitudes and records ``EQ`` via
-``engine.engine_v2.qtheta_c.close_window``.
+``engine.engine_v2.qtheta_c.close_window``. The post-window Θ distribution
+reset policy is governed by ``Config.theta_reset`` which accepts ``"uniform"``
+for an even reset, ``"renorm"`` to normalise existing values or ``"hold"`` to
+leave the distribution unchanged.
 
 Scheduler steps also integrate a toy horizon thermodynamics model. Interior
 nodes may emit Hawking pairs with probability ``exp(-ΔE/T_H)``, and the

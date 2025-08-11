@@ -44,9 +44,20 @@ class Seed:
 
 @dataclass
 class Bridge:
-    """State associated with a dynamic bridge."""
+    """State associated with a dynamic bridge.
+
+    Attributes
+    ----------
+    sigma:
+        Reinforcement level for the bridge.
+    edge_id:
+        Synthetic identifier used when scheduling packets across the
+        bridge. Negative values ensure the ID space does not clash with
+        real edges.
+    """
 
     sigma: float
+    edge_id: int = -1
 
 
 class EPairs:
@@ -91,6 +102,8 @@ class EPairs:
         # adjacency list of active bridge partners
         self.adjacency: Dict[int, List[int]] = {}
         self._rng = np.random.default_rng(seed)
+        # Synthetic edge identifier allocation for bridges
+        self._next_bridge_id = -1
 
     # ------------------------------------------------------------------
     # seed handling
@@ -138,7 +151,8 @@ class EPairs:
     def _create_bridge(self, a: int, b: int) -> None:
         key = self._bridge_key(a, b)
         if key not in self.bridges:
-            self.bridges[key] = Bridge(self.sigma0)
+            self.bridges[key] = Bridge(self.sigma0, self._next_bridge_id)
+            self._next_bridge_id -= 1
             self.adjacency.setdefault(a, []).append(b)
             self.adjacency.setdefault(b, []).append(a)
 
