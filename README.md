@@ -189,7 +189,8 @@ The adapter exposes methods like `build_graph`, `step`, `pause` and
 `snapshot_for_ui` to remain drop-in compatible.  Internally a depth-based
 scheduler orders packets by their arrival depth and advances vertex windows
 using the Local Causal Consistency Model (LCCM).  The LCCM computes a window
-size ``W(v)`` from vertex degree and local density and transitions between
+size ``W(v)`` from the vertex's incident degree (fan-in plus fan-out) and local
+density and transitions between
 quantum ``Q``, decohered ``Θ`` and classical ``C`` layers with simple hysteresis
 timers.  A lightweight loader converts graph JSON into struct-of-arrays via
 ``engine_v2.loader.load_graph_arrays`` to prime this core.

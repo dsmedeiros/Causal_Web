@@ -18,10 +18,12 @@ class LCCM:
     """Track window indices and layer transitions for a vertex.
 
     Parameters defining the window function and transition thresholds are
-    provided at construction time.  ``deg`` represents the vertex out-degree
-    while ``rho_mean`` is the mean local density used in ``W(v)`` and
-    ``conf_min`` is the minimum bit-majority confidence required for
-    Θ→C transitions.  The public attributes ``depth``, ``window_idx`` and
+    provided at construction time.  ``deg`` is the vertex's **incident degree**—
+    the sum of its in-degree and out-degree.  ``W(v)`` uses this combined
+    degree to size the rolling window so that both fan-in and fan-out pressure
+    influence window growth.  ``rho_mean`` is the mean local density used in
+    ``W(v)`` and ``conf_min`` is the minimum bit-majority confidence required
+    for Θ→C transitions.  The public attributes ``depth``, ``window_idx`` and
     ``layer`` expose the current state for callers.
     """
 
@@ -37,7 +39,7 @@ class LCCM:
     H_max: float
     T_hold: int
     T_class: int
-    deg: int = 0
+    deg: int = 0  # incident degree (in + out) used in W(v)
     rho_mean: float = 0.0
     depth: int = 0
     window_idx: int = 0

@@ -10,13 +10,12 @@ from typing import Any, DefaultDict, List, Tuple
 class DepthScheduler:
     """Arrival-depth bucketed priority queue.
 
-    Events are grouped into buckets by integer arrival depth.  Each bucket
-    retains items in the order they are scheduled, keyed by
-    ``(dst_id, edge_id, seq)`` to ensure deterministic processing. A separate
-    min-heap tracks which depths are present, so heap operations occur only when
-    a new depth is added or an existing depth bucket becomes empty, yielding
-    amortised :math:`O(1)` push and pop operations for batches sharing the same
-    depth.
+    Events are grouped into buckets by integer arrival depth.  Each bucket is a
+    min-heap keyed by ``(dst_id, edge_id, seq)`` to ensure deterministic
+    processing without needing to resort on every insert. A separate min-heap
+    tracks which depths are present, so heap operations occur only when a new
+    depth is added or an existing depth bucket becomes empty, yielding amortised
+    :math:`O(1)` push and pop operations for batches sharing the same depth.
     """
 
     def __init__(self) -> None:
@@ -33,8 +32,7 @@ class DepthScheduler:
         if not bucket:
             heapq.heappush(self._depths, depth_arr)
         key = (dst_id, edge_id, self._seq)
-        bucket.append((key, payload))
-        bucket.sort()
+        heapq.heappush(bucket, (key, payload))
         self._seq += 1
 
     def pop(self) -> Tuple[int, int, int, Any]:
@@ -44,7 +42,7 @@ class DepthScheduler:
             raise IndexError("pop from empty scheduler")
         depth = self._depths[0]
         bucket = self._buckets[depth]
-        key, payload = bucket.pop(0)
+        key, payload = heapq.heappop(bucket)
         if not bucket:
             heapq.heappop(self._depths)
             del self._buckets[depth]

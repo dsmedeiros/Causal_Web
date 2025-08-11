@@ -79,8 +79,11 @@ class EngineAdapter:
         n_vert = len(self._arrays.vertices["depth"])
         for vid in range(n_vert):
             out_idx = np.where(edges["src"] == vid)[0]
+            in_idx = np.where(edges["dst"] == vid)[0]
             self._edges_by_src[vid] = out_idx
-            deg = len(out_idx)
+            # Use incident degree (fan-in + fan-out) so window sizing reflects
+            # both upstream and downstream pressure.
+            deg = len(out_idx) + len(in_idx)
             rho_mean = float(self._arrays.vertices.get("rho_mean")[vid])
             lccm = LCCM(
                 W0,
