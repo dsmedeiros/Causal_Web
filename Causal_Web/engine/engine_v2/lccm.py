@@ -23,8 +23,10 @@ class LCCM:
     degree to size the rolling window so that both fan-in and fan-out pressure
     influence window growth.  ``rho_mean`` is the mean local density used in
     ``W(v)`` and ``conf_min`` is the minimum bit-majority confidence required
-    for Θ→C transitions.  The public attributes ``depth``, ``window_idx`` and
-    ``layer`` expose the current state for callers.
+    for Θ→C transitions.  The coefficients ``k_theta`` and ``k_c`` weight the
+    ``E_Θ`` and ``E_C`` meters reported at window closure.  The public
+    attributes ``depth``, ``window_idx`` and ``layer`` expose the current state
+    for callers.
     """
 
     W0: int
@@ -39,6 +41,8 @@ class LCCM:
     H_max: float
     T_hold: int
     T_class: int
+    k_theta: float = 1.0
+    k_c: float = 0.5
     deg: int = 0  # incident degree (in + out) used in W(v)
     rho_mean: float = 0.0
     depth: int = 0

@@ -44,6 +44,10 @@ class EngineAdapter:
         self._epairs = EPairs(seed=eps_seed, **eps_cfg)
         bell_seed = Config.bell.get("seed", Config.run_seed)
         self._bell = BellHelpers(seed=bell_seed)
+        # Preallocated helpers to avoid per-event allocations
+        self._eye_cache: Dict[int, np.ndarray] = {}
+        self._psi_zero: Dict[int, np.ndarray] = {}
+        self._p_zero: Dict[int, np.ndarray] = {}
 
     # ------------------------------------------------------------------
     def _splitmix64(self, x: int) -> int:
@@ -168,6 +172,8 @@ class EngineAdapter:
         rho0 = params.get("rho0", 1.0)
         a = window_defaults.get("a", 1.0)
         b = window_defaults.get("b", 0.5)
+        k_theta = window_defaults.get("k_theta", a)
+        k_c = window_defaults.get("k_c", b)
         C_min = window_defaults.get("C_min", 0.0)
         f_min = params.get("f_min", 1.0)
         conf_min = params.get("conf_min", 0.0)
@@ -215,6 +221,8 @@ class EngineAdapter:
                 H_max,
                 T_hold,
                 T_class,
+                k_theta=k_theta,
+                k_c=k_c,
                 deg=deg,
                 rho_mean=rho_mean,
             )
@@ -281,37 +289,41 @@ class EngineAdapter:
             lccm.advance_depth(depth_arr)
             prev_layer = lccm.layer
 
+            edges = self._arrays.edges if self._arrays else {}
+            dim = len(vertex["psi_acc"])
+            eye = self._eye_cache.setdefault(dim, np.eye(dim, dtype=np.complex64))
+            psi_zero = self._psi_zero.setdefault(dim, np.zeros(dim, dtype=np.complex64))
+            p_zero = self._p_zero.setdefault(
+                len(vertex["p_v"]), np.zeros(len(vertex["p_v"]), dtype=np.float32)
+            )
+
             packet_data = pkt.payload or {}
             if not isinstance(packet_data, dict):
                 packet_data = {}
-            packet_data.setdefault("depth_arr", depth_arr)
-            if "psi" not in packet_data:
-                packet_data["psi"] = np.zeros_like(vertex["psi_acc"])
-            if "p" not in packet_data:
-                packet_data["p"] = np.zeros_like(vertex["p_v"])
-            if "bit" not in packet_data:
-                packet_data["bit"] = 0
+            depth_val = int(packet_data.get("depth_arr", depth_arr))
+            psi_val = packet_data.get("psi", psi_zero)
+            p_val = packet_data.get("p", p_zero)
+            bit_val = int(packet_data.get("bit", 0))
 
-            edges = self._arrays.edges if self._arrays else {}
-            dim = len(vertex["psi_acc"])
-            edge_params: Dict[str, Any] = {
-                "alpha": 1.0,
-                "phi": 0.0,
-                "A": 0.0,
-                "U": np.eye(dim, dtype=np.complex64),
-            }
             if edges and 0 <= edge_id < len(edges.get("alpha", [])):
-                edge_params.update(
-                    {
-                        "alpha": float(edges["alpha"][edge_id]),
-                        "phi": float(edges["phi"][edge_id]),
-                        "A": float(edges["A"][edge_id]),
-                        "U": edges["U"][edge_id],
-                    }
-                )
+                alpha_val = float(edges["alpha"][edge_id])
+                phi_val = float(edges["phi"][edge_id])
+                A_val = float(edges["A"][edge_id])
+                U_val = edges["U"][edge_id]
+            else:
+                alpha_val = 1.0
+                phi_val = 0.0
+                A_val = 0.0
+                U_val = eye
 
-            packet_list = [packet_data]
-            edge_list = [edge_params]
+            psi_list = [psi_val]
+            p_list = [p_val]
+            bit_list = [bit_val]
+            depth_list = [depth_val]
+            alpha_list = [alpha_val]
+            phi_list = [phi_val]
+            A_list = [A_val]
+            U_list = [U_val]
             pkt_list = [pkt]
             edge_id_list = [edge_id]
             window_idx = lccm.window_idx
@@ -338,60 +350,32 @@ class EngineAdapter:
                 pd2 = pkt2.payload or {}
                 if not isinstance(pd2, dict):
                     pd2 = {}
-                pd2.setdefault("depth_arr", d2)
-                if "psi" not in pd2:
-                    pd2["psi"] = np.zeros_like(vertex["psi_acc"])
-                if "p" not in pd2:
-                    pd2["p"] = np.zeros_like(vertex["p_v"])
-                if "bit" not in pd2:
-                    pd2["bit"] = 0
-                ep2: Dict[str, Any] = {
-                    "alpha": 1.0,
-                    "phi": 0.0,
-                    "A": 0.0,
-                    "U": np.eye(dim, dtype=np.complex64),
-                }
+                depth_list.append(int(pd2.get("depth_arr", d2)))
+                psi_list.append(pd2.get("psi", psi_zero))
+                p_list.append(pd2.get("p", p_zero))
+                bit_list.append(int(pd2.get("bit", 0)))
                 if edges and 0 <= edge2 < len(edges.get("alpha", [])):
-                    ep2.update(
-                        {
-                            "alpha": float(edges["alpha"][edge2]),
-                            "phi": float(edges["phi"][edge2]),
-                            "A": float(edges["A"][edge2]),
-                            "U": edges["U"][edge2],
-                        }
-                    )
-                packet_list.append(pd2)
-                edge_list.append(ep2)
+                    alpha_list.append(float(edges["alpha"][edge2]))
+                    phi_list.append(float(edges["phi"][edge2]))
+                    A_list.append(float(edges["A"][edge2]))
+                    U_list.append(edges["U"][edge2])
+                else:
+                    alpha_list.append(1.0)
+                    phi_list.append(0.0)
+                    A_list.append(0.0)
+                    U_list.append(eye)
                 pkt_list.append(pkt2)
                 edge_id_list.append(edge2)
             for item in requeue:
                 self._scheduler.push(*item)
 
             if len(pkt_list) > 1:
-                psi_list: list[Any] = []
-                p_list: list[Any] = []
-                bit_list: list[Any] = []
-                depth_list: list[int] = []
-                for pd in packet_list:
-                    psi_list.append(pd["psi"])
-                    p_list.append(pd["p"])
-                    bit_list.append(pd["bit"])
-                    depth_list.append(pd["depth_arr"])
                 packets_struct = {
                     "psi": psi_list,
                     "p": p_list,
                     "bit": bit_list,
                     "depth_arr": depth_list,
                 }
-                alpha_list: list[float] = []
-                phi_list: list[float] = []
-                A_list: list[float] = []
-                U_list: list[Any] = []
-                for ep in edge_list:
-                    alpha_list.append(ep["alpha"])
-                    phi_list.append(ep["phi"])
-                    A_list.append(ep["A"])
-                    U_list.append(ep["U"])
                 edges_struct = {
                     "alpha": alpha_list,
                     "phi": phi_list,
@@ -407,13 +391,25 @@ class EngineAdapter:
                     edges_struct,
                 )
             else:
+                packet_struct = {
+                    "psi": psi_list[0],
+                    "p": p_list[0],
+                    "bit": bit_list[0],
+                    "depth_arr": depth_list[0],
+                }
+                edge_struct = {
+                    "alpha": alpha_list[0],
+                    "phi": phi_list[0],
+                    "A": A_list[0],
+                    "U": U_list[0],
+                }
                 depth_v, psi_acc, p_v, (bit, conf), intensities = deliver_packet(
                     lccm.depth,
                     vertex["psi_acc"],
                     vertex["p_v"],
                     vertex["bit_deque"],
-                    packet_data,
-                    edge_params,
+                    packet_struct,
+                    edge_struct,
                 )
 
             vertex["psi_acc"][:] = psi_acc
@@ -442,10 +438,10 @@ class EngineAdapter:
             }
             intensity = intensity_map.get(lccm.layer, sum(intensities))
 
-            psi_local = packet_list[0]["psi"]
-            phi_local = edge_list[0]["phi"]
-            A_local = edge_list[0]["A"]
-            U_local = edge_list[0]["U"]
+            psi_local = psi_list[0]
+            phi_local = phi_list[0]
+            A_local = A_list[0]
+            U_local = U_list[0]
             theta = 0.0
             if lccm.layer == "Q":
                 if len(psi_local):
@@ -641,7 +637,7 @@ class EngineAdapter:
                 )
                 self._epairs.reinforce(dst, int(edges["dst"][edge_idx]))
 
-            for other in list(self._epairs.adjacency.get(dst, [])):
+            for other in self._epairs.partners(dst):
                 bridge = self._epairs.bridges[self._epairs._bridge_key(dst, other)]
                 depth_next = depth_arr + bridge.d_bridge
                 payload = {
@@ -732,8 +728,8 @@ class EngineAdapter:
                         float(-(p_v * np.log2(p_v + 1e-12)).sum()) if p_v.size else 0.0
                     )
                     conf = float(self._arrays.vertices["conf"][vid])
-                    E_theta = lccm.a * (1.0 - H_pv)
-                    E_C = lccm.b * conf
+                    E_theta = lccm.k_theta * (1.0 - H_pv)
+                    E_C = lccm.k_c * conf
                     match Config.theta_reset:
                         case "uniform":
                             p_v.fill(1.0 / len(p_v))
