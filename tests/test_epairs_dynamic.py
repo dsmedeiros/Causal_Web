@@ -63,6 +63,36 @@ def test_bridge_lifecycle_events(monkeypatch):
     assert any(lbl == "bridge_removed" for lbl, _ in events)
 
 
+def test_bridge_full_lifecycle_removal_event(monkeypatch):
+    """Bridge creation, reinforcement and decay emit a removal event.
+
+    This exercises the complete lifecycle: a bridge is created, reinforced to
+    keep it alive, then allowed to decay immediately.  The manager should log
+    both the creation and removal events and the bridge should be deleted from
+    internal state.  It locks behaviour so cleanup is observable rather than
+    silent.
+    """
+
+    events = []
+
+    def fake_log_record(category, label, *, value=None, **kwargs):
+        if label in {"bridge_created", "bridge_removed"}:
+            events.append(label)
+
+    monkeypatch.setattr(
+        "Causal_Web.engine.engine_v2.epairs.log_record", fake_log_record
+    )
+
+    mgr = _make_manager()
+    mgr._create_bridge(1, 2)
+    mgr.reinforce(1, 2)
+    mgr.lambda_decay = 1.0
+    mgr.decay_all()
+
+    assert events == ["bridge_created", "bridge_removed"]
+    assert (1, 2) not in mgr.bridges
+
+
 def test_bridge_id_stability():
     mgr = _make_manager()
     mgr._create_bridge(1, 2)
