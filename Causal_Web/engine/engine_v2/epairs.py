@@ -227,8 +227,7 @@ class EPairs:
     def _prefix(self, h_value: int) -> int:
         if self.L <= 0:
             return 0
-        shift = max(0, h_value.bit_length() - self.L)
-        return h_value >> shift
+        return (h_value >> (64 - self.L)) & ((1 << self.L) - 1)
 
     def _place_seed(self, site: int, seed: Seed) -> None:
         seeds = self.seeds.setdefault(site, [])

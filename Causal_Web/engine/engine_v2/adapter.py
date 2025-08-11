@@ -56,36 +56,87 @@ class EngineAdapter:
         return int(z ^ (z >> 31))
 
     def _update_ancestry(
-        self, dst: int, depth_arr: int, phase: float
+        self,
+        dst: int,
+        edge_id: int,
+        depth_arr: int,
+        seq: int,
+        psi: np.ndarray,
+        phi_e: float,
+        A_e: float,
     ) -> tuple[np.ndarray, np.ndarray]:
         """Update ancestry hash and phase moment for ``dst``.
 
-        The update uses only local payloads from the arriving packet and is
-        deterministic given ``Config.run_seed``.
+        The update uses only local information from the arriving packet and is
+        deterministic given :data:`Config.run_seed`.
         """
 
         if self._arrays is None:
             return np.zeros(4, dtype=np.uint64), np.zeros(3, dtype=float)
 
-        ancestry = self._arrays.vertices["ancestry"][dst]
-        moment = self._arrays.vertices["m"][dst]
+        v_arr = self._arrays.vertices
 
-        phase_q = int(round(phase * 1000.0))
-        seed = (
-            (np.uint64(dst) << np.uint64(32))
-            ^ np.uint64(depth_arr)
-            ^ np.uint64(phase_q & 0xFFFFFFFF)
+        # Current hash lanes and moment vector
+        h0 = np.uint64(v_arr["h0"][dst])
+        h1 = np.uint64(v_arr["h1"][dst])
+        h2 = np.uint64(v_arr["h2"][dst])
+        h3 = np.uint64(v_arr["h3"][dst])
+        m = np.array(
+            [v_arr["m0"][dst], v_arr["m1"][dst], v_arr["m2"][dst]],
+            dtype=np.float32,
         )
-        h = self._splitmix64(int(seed))
-        ancestry[:] = np.roll(ancestry, 1)
-        ancestry[0] ^= np.uint64(h)
 
-        direction = np.array([np.cos(phase), np.sin(phase), 0.0], dtype=float)
-        moment[:] = 0.9 * moment + 0.1 * direction
+        # --------------------------------------------------------------
+        # Local phase statistics
+        psi = np.asarray(psi, dtype=np.complex64)
+        r = np.abs(psi) ** 2
+        total = float(r.sum())
+        if total > 0:
+            w = r / total
+        else:
+            w = r
+        phi_k = np.angle(psi)
+        z = np.sum(w * np.exp(1j * (phi_k + phi_e + A_e)))
+        mu = float(np.angle(z))
+        kappa = float(abs(z))
+        u_local = np.array([np.cos(mu), np.sin(mu), kappa], dtype=np.float32)
 
-        self._arrays.vertices["ancestry"][dst] = ancestry
-        self._arrays.vertices["m"][dst] = moment
-        return ancestry, moment
+        # Moment update with normalisation
+        beta_m = 0.1
+        m = (1.0 - beta_m) * m + beta_m * u_local
+        norm = float(np.linalg.norm(m))
+        if norm > 0:
+            m_norm = norm
+            m /= norm
+        else:
+            m_norm = 0.0
+
+        v_arr["m0"][dst] = m[0]
+        v_arr["m1"][dst] = m[1]
+        v_arr["m2"][dst] = m[2]
+        v_arr["m_norm"][dst] = m_norm
+
+        # --------------------------------------------------------------
+        # Rolling hash update
+        def f2u64(x: float) -> np.uint64:
+            return np.frombuffer(np.float64(x).tobytes(), dtype=np.uint64)[0]
+
+        h0 ^= np.uint64(dst) ^ (np.uint64(depth_arr) << np.uint64(1))
+        h1 ^= np.uint64(np.int64(edge_id)) ^ (np.uint64(seq) << np.uint64(1))
+        h2 ^= f2u64(mu)
+        h3 ^= f2u64(kappa)
+        h0 = np.uint64(self._splitmix64(int(h0)))
+        h1 = np.uint64(self._splitmix64(int(h1)))
+        h2 = np.uint64(self._splitmix64(int(h2)))
+        h3 = np.uint64(self._splitmix64(int(h3)))
+
+        v_arr["h0"][dst] = h0
+        v_arr["h1"][dst] = h1
+        v_arr["h2"][dst] = h2
+        v_arr["h3"][dst] = h3
+
+        ancestry = np.array([h0, h1, h2, h3], dtype=np.uint64)
+        return ancestry, m
 
     # Public API -----------------------------------------------------
     def build_graph(self, graph_json_path: str | Dict[str, Any]) -> None:
@@ -238,6 +289,7 @@ class EngineAdapter:
             packet_list = [packet_data]
             edge_list = [edge_params]
             pkt_list = [pkt]
+            edge_id_list = [edge_id]
             window_idx = lccm.window_idx
             requeue: list[tuple[int, int, int, Packet]] = []
             while self._scheduler and events + len(pkt_list) < limit:
@@ -287,6 +339,7 @@ class EngineAdapter:
                 packet_list.append(pd2)
                 edge_list.append(ep2)
                 pkt_list.append(pkt2)
+                edge_id_list.append(edge2)
             for item in requeue:
                 self._scheduler.push(*item)
 
@@ -360,12 +413,19 @@ class EngineAdapter:
             lccm.deliver()
             packets.extend(pkt_list)
 
-            theta = (
-                float(np.angle(self._arrays.vertices["psi"][dst][0]))
-                if self._arrays is not None
-                else 0.0
+            psi_local = packet_list[0]["psi"]
+            phi_local = edge_list[0]["phi"]
+            A_local = edge_list[0]["A"]
+            theta = float(np.angle(psi_local[0])) if len(psi_local) else 0.0
+            ancestry_arr, m_arr = self._update_ancestry(
+                dst,
+                edge_id_list[0],
+                depth_arr,
+                0,
+                psi_local,
+                phi_local,
+                A_local,
             )
-            ancestry_arr, m_arr = self._update_ancestry(dst, depth_arr, theta)
 
             bell_cfg = Config.bell
             if bell_cfg.get("enabled", False):
@@ -431,7 +491,7 @@ class EngineAdapter:
 
             edges = self._arrays.edges if self._arrays else {}
             if lccm.layer == "Q" and self._arrays is not None:
-                h_val = int.from_bytes(ancestry_arr.tobytes(), "little")
+                h_val = int(ancestry_arr[0])
                 edge_ids = self._edges_by_src.get(dst, [])
                 self._epairs.carry(dst, depth_arr, edge_ids, edges)
                 self._epairs.emit(dst, h_val, theta, depth_arr, edge_ids, edges)
