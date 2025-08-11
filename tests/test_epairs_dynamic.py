@@ -75,3 +75,22 @@ def test_bridge_id_stability():
     mgr._remove_bridge(1, 2)
     mgr._create_bridge(1, 2)
     assert mgr.bridges[(1, 2)].edge_id != id1
+
+
+def test_seed_ttl_propagates_and_expires():
+    mgr = EPairs(
+        delta_ttl=3,
+        ancestry_prefix_L=4,
+        theta_max=0.1,
+        sigma0=1.0,
+        lambda_decay=0.5,
+        sigma_reinforce=0.2,
+        sigma_min=0.1,
+    )
+    mgr.emit(origin=1, h_value=0b1101_0000, theta=0.1, neighbours=[2])
+    mgr.carry(2, [3])
+    assert 2 not in mgr.seeds
+    assert mgr.seeds[3][0].ttl == 1
+    mgr.carry(3, [4])
+    assert 3 not in mgr.seeds
+    assert 4 not in mgr.seeds

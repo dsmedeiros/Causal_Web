@@ -133,6 +133,32 @@ class EPairs:
             if seed.ttl > 0:
                 self._place_seed(n, seed)
 
+    def carry(self, site: int, neighbours: Iterable[int]) -> None:
+        """Propagate existing seeds at ``site`` to its neighbours.
+
+        Each hop consumes one unit of TTL. Seeds whose TTL drops to zero
+        or below are discarded. Seeds are removed from ``site`` once they
+        have been carried.
+        """
+
+        seeds = self.seeds.pop(site, [])
+        for seed in seeds:
+            if seed.ttl <= 0:
+                continue
+            ttl = seed.ttl - 1
+            if ttl <= 0:
+                continue
+            for n in neighbours:
+                self._place_seed(
+                    n,
+                    Seed(
+                        origin=seed.origin,
+                        ttl=ttl,
+                        h_prefix=seed.h_prefix,
+                        theta=seed.theta,
+                    ),
+                )
+
     # Internal helpers -------------------------------------------------
 
     def _prefix(self, h_value: int) -> int:
