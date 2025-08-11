@@ -68,6 +68,7 @@ class EngineAdapter:
         b = window_defaults.get("b", 0.5)
         C_min = window_defaults.get("C_min", 0.0)
         f_min = params.get("f_min", 1.0)
+        conf_min = params.get("conf_min", 0.0)
         H_max = params.get("H_max", 0.0)
         T_hold = window_defaults.get("T_hold", 1)
         T_class = params.get("T_class", 1)
@@ -90,6 +91,7 @@ class EngineAdapter:
                 b,
                 C_min,
                 f_min,
+                conf_min,
                 H_max,
                 T_hold,
                 T_class,
@@ -309,7 +311,7 @@ class EngineAdapter:
                 else 0.0
             )
             entropy = float(-(p_v * np.log2(p_v + 1e-12)).sum()) if len(p_v) else 0.0
-            lccm.update_classical_metrics(bit_fraction, entropy)
+            lccm.update_classical_metrics(bit_fraction, entropy, conf)
             lccm.deliver()
             packets.extend(pkt_list)
 
@@ -591,6 +593,14 @@ class EngineAdapter:
                     self._arrays.vertices["conf"][vid] = 0.0
                     data["bit_deque"].clear()
                     lccm.update_eq(EQ)
+                    edges_arr = self._arrays.edges
+                    mask = (edges_arr["src"] == vid) | (edges_arr["dst"] == vid)
+                    if np.any(mask):
+                        rho_mean = float(edges_arr["rho"][mask].mean())
+                    else:
+                        rho_mean = 0.0
+                    self._arrays.vertices["rho_mean"][vid] = rho_mean
+                    lccm.rho_mean = rho_mean
                 else:
                     EQ = lccm._eq
                     E_theta = 0.0

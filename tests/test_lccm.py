@@ -11,6 +11,7 @@ def test_lccm_layer_transitions_with_hysteresis():
         b=0.5,
         C_min=1.0,
         f_min=0.9,
+        conf_min=0.9,
         H_max=0.5,
         T_hold=2,
         T_class=2,
@@ -42,10 +43,10 @@ def test_lccm_layer_transitions_with_hysteresis():
     assert lccm.layer == "Θ"
 
     # Θ -> C when classical dominance sustained for T_class
-    lccm.update_classical_metrics(1.0, 0.0)
+    lccm.update_classical_metrics(1.0, 0.0, 1.0)
     lccm.deliver()
     assert lccm.layer == "Θ"
     lccm.advance_depth(6)
-    lccm.update_classical_metrics(1.0, 0.0)
+    lccm.update_classical_metrics(1.0, 0.0, 1.0)
     lccm.deliver()
     assert lccm.layer == "C"
