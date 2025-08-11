@@ -15,7 +15,7 @@ still under development.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Sequence, Tuple
+from typing import Callable, Dict, Iterable, List, Sequence, Tuple
 from array import array
 
 import numpy as np
@@ -120,8 +120,9 @@ class EPairs:
         self._rng = np.random.default_rng(seed if seed is not None else Config.run_seed)
         # Synthetic edge identifier allocation for bridges
         self._next_bridge_id = -1
-        # Cache of incident edge delays per vertex for bridge delay estimation
+        # Source for incident edge delays used when estimating bridge latency.
         self._incident_delays: Dict[int, List[int]] = {}
+        self._incident_delay_cb: Callable[[int], Iterable[int]] | None = None
 
     # Internal helpers -------------------------------------------------
     def _log_seed(self, label: str, value: Dict[str, int | float]) -> None:
@@ -312,24 +313,35 @@ class EPairs:
                 return
         seeds.append(seed)
 
-    def set_incident_delays(self, delays: Dict[int, Iterable[int]]) -> None:
+    def set_incident_delays(
+        self, delays: Dict[int, Iterable[int]] | Callable[[int], Iterable[int]]
+    ) -> None:
         """Provide incident edge delays for bridge delay estimation.
 
-        Parameters
-        ----------
-        delays:
-            Mapping of vertex id to the delays of edges incident on that vertex.
+        The source can be given either as a mapping from vertex id to a list of
+        delays or as a callable returning an iterable of delays for a vertex.
+        Supplying a callable allows the manager to read live delay values as the
+        simulation evolves.
         """
 
-        self._incident_delays = {v: list(vals) for v, vals in delays.items()}
+        if callable(delays):
+            self._incident_delay_cb = delays
+            self._incident_delays = {}
+        else:
+            self._incident_delays = {v: list(vals) for v, vals in delays.items()}
+            self._incident_delay_cb = None
 
     def _create_bridge(self, a: int, b: int, d_bridge: int | None = None) -> None:
         key = self._bridge_key(a, b)
         if key not in self.bridges:
             if d_bridge is None:
-                delays = self._incident_delays.get(a, []) + self._incident_delays.get(
-                    b, []
-                )
+                if self._incident_delay_cb is not None:
+                    delays_a = list(self._incident_delay_cb(a))
+                    delays_b = list(self._incident_delay_cb(b))
+                else:
+                    delays_a = self._incident_delays.get(a, [])
+                    delays_b = self._incident_delays.get(b, [])
+                delays = delays_a + delays_b
                 if delays:
                     d_bridge = max(1, int(np.median(delays)))
                 else:

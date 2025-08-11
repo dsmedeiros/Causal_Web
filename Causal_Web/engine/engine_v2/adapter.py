@@ -8,7 +8,7 @@ according to the local causal consistency math.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Iterable, List, Optional
 from collections import deque
 import threading
 import time
@@ -77,7 +77,8 @@ class EngineAdapter:
         is biased toward the destination's unitary by computing
         ``mu = arg(<U_e ψ, ψ>)`` and is down-weighted under heavy fan-in using
         ``β_m = β_m0 / (1 + Λ_v)`` where ``Λ_v`` counts quantum arrivals in the
-        current window.
+        current window. The coefficient ``β_m0`` is sourced from
+        :data:`Config.ancestry` so it can be adjusted via configuration.
         """
 
         if self._arrays is None:
@@ -189,15 +190,13 @@ class EngineAdapter:
         incident_ptr = adj.get("incident_ptr")
         incident_idx = adj.get("incident_idx")
 
-        incident: Dict[int, List[int]] = {}
-        d_eff_arr = edges.get("d_eff", np.ones(len(edges["src"]), dtype=int))
-        for vid in range(n_vert):
+        def incident_delay_cb(vid: int) -> Iterable[int]:
             start = int(incident_ptr[vid])
             end = int(incident_ptr[vid + 1])
             idxs = incident_idx[start:end]
-            incident[vid] = [int(d_eff_arr[i]) for i in idxs]
+            return (int(edges["d_eff"][i]) for i in idxs)
 
-        self._epairs.set_incident_delays(incident)
+        self._epairs.set_incident_delays(incident_delay_cb)
 
         for vid in range(n_vert):
             out_idx = np.where(edges["src"] == vid)[0]
@@ -231,6 +230,7 @@ class EngineAdapter:
                 "psi_acc": self._arrays.vertices["psi_acc"][vid],
                 "p_v": self._arrays.vertices["p"][vid],
                 "bit_deque": deque(maxlen=8),
+                "base_deg": deg,
             }
             self._vertices[vid] = vertex_state
 
@@ -756,6 +756,8 @@ class EngineAdapter:
                     self._arrays.vertices["p"][vid] = p_v
                     self._arrays.vertices["bit"][vid] = 0
                     self._arrays.vertices["conf"][vid] = 0.0
+                    v_arr["E_theta"][vid] = E_theta
+                    v_arr["E_C"][vid] = E_C
                     data["bit_deque"].clear()
                     lccm.update_eq(EQ)
                     edges_arr = self._arrays.edges
@@ -769,6 +771,8 @@ class EngineAdapter:
                         rho_mean = 0.0
                     self._arrays.vertices["rho_mean"][vid] = rho_mean
                     lccm.rho_mean = rho_mean
+                    base_deg = data.get("base_deg", lccm.deg)
+                    lccm.deg = base_deg + len(self._epairs.partners(vid))
                 else:
                     EQ = lccm._eq
                     E_theta = 0.0
