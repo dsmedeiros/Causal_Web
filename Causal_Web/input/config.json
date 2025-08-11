@@ -15,7 +15,7 @@
     "random_seed": 42,
     "thread_count": 4,
     "backend": "cpu",
-    "engine_mode": "tick",
+    "engine_mode": "v2",
     "log_verbosity": "info",
     "memory_window": 20,
     "initial_coherence_threshold": 0.6,

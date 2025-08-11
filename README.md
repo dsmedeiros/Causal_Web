@@ -133,8 +133,8 @@ cost of memory.
 The `backend` option selects the compute backend. It defaults to `cpu` but
 may be set to `cupy` for CUDA acceleration.
 
-The `engine_mode` flag selects the simulation core. The default `tick` value
-uses the existing engine while `v2` enables an experimental strict-local core.
+The `engine_mode` flag selects the simulation core. The default `v2` value
+enables the strict-local engine while `tick` selects the legacy implementation.
 Parameter groups `windowing`, `rho_delay`, `epsilon_pairs`, and `bell` provide
 advanced controls for the v2 engine.  Each group is a nested mapping:
 

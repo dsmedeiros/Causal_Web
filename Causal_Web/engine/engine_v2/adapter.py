@@ -45,6 +45,48 @@ class EngineAdapter:
         bell_seed = Config.bell.get("seed", Config.run_seed)
         self._bell = BellHelpers(seed=bell_seed)
 
+    # ------------------------------------------------------------------
+    def _splitmix64(self, x: int) -> int:
+        """Return a SplitMix64 hash of ``x``."""
+
+        x = (x + 0x9E3779B97F4A7C15) & 0xFFFFFFFFFFFFFFFF
+        z = x
+        z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9 & 0xFFFFFFFFFFFFFFFF
+        z = (z ^ (z >> 27)) * 0x94D049BB133111EB & 0xFFFFFFFFFFFFFFFF
+        return int(z ^ (z >> 31))
+
+    def _update_ancestry(
+        self, dst: int, depth_arr: int, phase: float
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Update ancestry hash and phase moment for ``dst``.
+
+        The update uses only local payloads from the arriving packet and is
+        deterministic given ``Config.run_seed``.
+        """
+
+        if self._arrays is None:
+            return np.zeros(4, dtype=np.uint64), np.zeros(3, dtype=float)
+
+        ancestry = self._arrays.vertices["ancestry"][dst]
+        moment = self._arrays.vertices["m"][dst]
+
+        phase_q = int(round(phase * 1000.0))
+        seed = (
+            (np.uint64(dst) << np.uint64(32))
+            ^ np.uint64(depth_arr)
+            ^ np.uint64(phase_q & 0xFFFFFFFF)
+        )
+        h = self._splitmix64(int(seed))
+        ancestry[:] = np.roll(ancestry, 1)
+        ancestry[0] ^= np.uint64(h)
+
+        direction = np.array([np.cos(phase), np.sin(phase), 0.0], dtype=float)
+        moment[:] = 0.9 * moment + 0.1 * direction
+
+        self._arrays.vertices["ancestry"][dst] = ancestry
+        self._arrays.vertices["m"][dst] = moment
+        return ancestry, moment
+
     # Public API -----------------------------------------------------
     def build_graph(self, graph_json_path: str | Dict[str, Any]) -> None:
         """Load a graph description."""
@@ -318,16 +360,12 @@ class EngineAdapter:
             lccm.deliver()
             packets.extend(pkt_list)
 
-            ancestry_arr = (
-                self._arrays.vertices["ancestry"][dst]
+            theta = (
+                float(np.angle(self._arrays.vertices["psi"][dst][0]))
                 if self._arrays is not None
-                else np.zeros(4, dtype=np.int32)
+                else 0.0
             )
-            m_arr = (
-                self._arrays.vertices["m"][dst]
-                if self._arrays is not None
-                else np.zeros(3, dtype=float)
-            )
+            ancestry_arr, m_arr = self._update_ancestry(dst, depth_arr, theta)
 
             bell_cfg = Config.bell
             if bell_cfg.get("enabled", False):
@@ -395,7 +433,6 @@ class EngineAdapter:
             if lccm.layer == "Q" and self._arrays is not None:
                 h_val = int.from_bytes(ancestry_arr.tobytes(), "little")
                 edge_ids = self._edges_by_src.get(dst, [])
-                theta = float(np.angle(self._arrays.vertices["psi"][dst][0]))
                 self._epairs.carry(dst, depth_arr, edge_ids, edges)
                 self._epairs.emit(dst, h_val, theta, depth_arr, edge_ids, edges)
 

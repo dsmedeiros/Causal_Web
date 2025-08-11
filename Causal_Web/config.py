@@ -96,8 +96,8 @@ class Config:
     #: Compute backend; ``"cpu"`` or ``"cupy"``
     backend = "cpu"
 
-    #: Selected engine implementation: ``"tick"`` or ``"v2"``
-    engine_mode = "tick"
+    #: Selected engine implementation: ``"v2"`` (strict-local) or ``"tick"``
+    engine_mode = "v2"
 
     # Parameters for the experimental strict-local engine (``engine_mode = "v2"``)
     windowing = {

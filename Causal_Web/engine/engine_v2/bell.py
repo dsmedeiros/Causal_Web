@@ -24,12 +24,12 @@ class Ancestry:
     Parameters
     ----------
     h:
-        Rolling hash stored as four ``int32`` segments.
+        Rolling hash stored as four ``uint64`` segments.
     m:
         Three dimensional phase-moment vector.
     """
 
-    h: np.ndarray = field(default_factory=lambda: np.zeros(4, dtype=np.int32))
+    h: np.ndarray = field(default_factory=lambda: np.zeros(4, dtype=np.uint64))
     m: np.ndarray = field(default_factory=lambda: np.zeros(3, dtype=float))
 
 
