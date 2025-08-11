@@ -52,3 +52,18 @@ def test_scheduler_same_dst_edge_seq_order():
         popped.append((dst, edge, pkt.payload))
 
     assert popped == [(1, 1, "b"), (1, 1, "c"), (1, 2, "a")]
+
+
+def test_scheduler_two_packet_edge_order():
+    """Ensure deterministic ordering for identical depths and destinations."""
+
+    sched = DepthScheduler()
+    sched.push(5, 1, 2, Packet(0, 0))
+    sched.push(5, 1, 1, Packet(0, 0))
+
+    popped = []
+    while sched:
+        depth, dst, edge, pkt = sched.pop()
+        popped.append((dst, edge))
+
+    assert popped == [(1, 1), (1, 2)]

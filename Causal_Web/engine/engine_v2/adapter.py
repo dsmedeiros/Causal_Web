@@ -244,17 +244,35 @@ class EngineAdapter:
                 self._scheduler.push(*item)
 
             if len(pkt_list) > 1:
+                psi_list: list[Any] = []
+                p_list: list[Any] = []
+                bit_list: list[Any] = []
+                depth_list: list[int] = []
+                for pd in packet_list:
+                    psi_list.append(pd["psi"])
+                    p_list.append(pd["p"])
+                    bit_list.append(pd["bit"])
+                    depth_list.append(pd["depth_arr"])
                 packets_struct = {
-                    "psi": [pd["psi"] for pd in packet_list],
-                    "p": [pd["p"] for pd in packet_list],
-                    "bit": [pd["bit"] for pd in packet_list],
-                    "depth_arr": [pd["depth_arr"] for pd in packet_list],
+                    "psi": psi_list,
+                    "p": p_list,
+                    "bit": bit_list,
+                    "depth_arr": depth_list,
                 }
+                alpha_list: list[float] = []
+                phi_list: list[float] = []
+                A_list: list[float] = []
+                U_list: list[Any] = []
+                for ep in edge_list:
+                    alpha_list.append(ep["alpha"])
+                    phi_list.append(ep["phi"])
+                    A_list.append(ep["A"])
+                    U_list.append(ep["U"])
                 edges_struct = {
-                    "alpha": [ep["alpha"] for ep in edge_list],
-                    "phi": [ep["phi"] for ep in edge_list],
-                    "A": [ep["A"] for ep in edge_list],
-                    "U": [ep["U"] for ep in edge_list],
+                    "alpha": alpha_list,
+                    "phi": phi_list,
+                    "A": A_list,
+                    "U": U_list,
                 }
                 depth_v, psi_acc, p_v, (bit, conf), intensity = deliver_packets_batch(
                     lccm.depth,
