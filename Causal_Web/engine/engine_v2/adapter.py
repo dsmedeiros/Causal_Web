@@ -342,14 +342,15 @@ class EngineAdapter:
                         value={
                             "setting": a_D.tolist(),
                             "outcome": int(outcome),
-                            "mode": mi_mode,
-                        },
-                        metadata={
+                            "mi_mode": mi_mode,
                             "kappa_a": bell_cfg.get("kappa_a", 0.0),
                             "kappa_xi": bell_cfg.get("kappa_xi", 0.0),
                             "batch_id": self._frame,
-                            **meta,
+                            "h_prefix_len": Config.epsilon_pairs.get(
+                                "ancestry_prefix_L", 0
+                            ),
                         },
+                        metadata={"L": meta.get("L")},
                     )
                     packet_data.setdefault("ancestry", ancestry_arr)
                     packet_data.setdefault("m", m_arr)
@@ -379,6 +380,15 @@ class EngineAdapter:
                     reason = "recoh_threshold"
                 else:
                     reason = "layer_change"
+                if self._arrays is not None:
+                    p_v = vertex["p_v"]
+                    H_pv = (
+                        float(-(p_v * np.log2(p_v + 1e-12)).sum()) if p_v.size else 0.0
+                    )
+                    EQ = float(self._arrays.vertices["EQ"][dst])
+                else:
+                    H_pv = 0.0
+                    EQ = lccm._eq
                 log_record(
                     category="event",
                     label="layer_transition",
@@ -390,6 +400,8 @@ class EngineAdapter:
                         "reason": reason,
                         "window_idx": lccm.window_idx,
                         "Lambda_v": lccm._lambda,
+                        "EQ": EQ,
+                        "H_p": H_pv,
                     },
                 )
 
