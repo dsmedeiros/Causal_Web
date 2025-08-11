@@ -144,7 +144,12 @@ class EngineAdapter:
 
     # Public API -----------------------------------------------------
     def build_graph(self, graph_json_path: str | Dict[str, Any]) -> None:
-        """Load a graph description."""
+        """Load a graph description and initialise per-vertex state.
+
+        The loader exposes a CSR of incident edges which is used here to size
+        windows and to compute mean incident densities for dynamic window
+        growth.
+        """
 
         if isinstance(graph_json_path, dict):
             graph = graph_json_path
@@ -173,26 +178,30 @@ class EngineAdapter:
         self._arrays = load_graph_arrays(graph)
         self._vertices.clear()
         edges = self._arrays.edges
+        adj = self._arrays.adjacency
         n_vert = len(self._arrays.vertices["depth"])
+        incident_ptr = adj.get("incident_ptr")
+        incident_idx = adj.get("incident_idx")
 
-        incident: Dict[int, List[int]] = {vid: [] for vid in range(n_vert)}
-        for idx in range(len(edges["src"])):
-            s = int(edges["src"][idx])
-            d = int(edges["dst"][idx])
-            d_eff = int(edges["d_eff"][idx]) if "d_eff" in edges else 1
-            incident[s].append(d_eff)
-            incident[d].append(d_eff)
+        incident: Dict[int, List[int]] = {}
+        d_eff_arr = edges.get("d_eff", np.ones(len(edges["src"]), dtype=int))
+        for vid in range(n_vert):
+            start = int(incident_ptr[vid])
+            end = int(incident_ptr[vid + 1])
+            idxs = incident_idx[start:end]
+            incident[vid] = [int(d_eff_arr[i]) for i in idxs]
 
         self._epairs.set_incident_delays(incident)
 
         for vid in range(n_vert):
             out_idx = np.where(edges["src"] == vid)[0]
-            in_idx = np.where(edges["dst"] == vid)[0]
             self._edges_by_src[vid] = out_idx
-            # Use incident degree (fan-in + fan-out) so window sizing reflects
-            # both upstream and downstream pressure.
-            deg = len(out_idx) + len(in_idx)
-            rho_mean = float(self._arrays.vertices.get("rho_mean")[vid])
+            start = int(incident_ptr[vid])
+            end = int(incident_ptr[vid + 1])
+            idxs = incident_idx[start:end]
+            deg = end - start
+            rho_mean = float(edges["rho"][idxs].mean()) if deg > 0 else 0.0
+            self._arrays.vertices["rho_mean"][vid] = rho_mean
             lccm = LCCM(
                 W0,
                 zeta1,
@@ -737,9 +746,12 @@ class EngineAdapter:
                     data["bit_deque"].clear()
                     lccm.update_eq(EQ)
                     edges_arr = self._arrays.edges
-                    mask = (edges_arr["src"] == vid) | (edges_arr["dst"] == vid)
-                    if np.any(mask):
-                        rho_mean = float(edges_arr["rho"][mask].mean())
+                    adj = self._arrays.adjacency
+                    start = int(adj["incident_ptr"][vid])
+                    end = int(adj["incident_ptr"][vid + 1])
+                    if end > start:
+                        idxs = adj["incident_idx"][start:end]
+                        rho_mean = float(edges_arr["rho"][idxs].mean())
                     else:
                         rho_mean = 0.0
                     self._arrays.vertices["rho_mean"][vid] = rho_mean

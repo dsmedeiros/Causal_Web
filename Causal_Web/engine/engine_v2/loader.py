@@ -17,12 +17,17 @@ from ...config import Config
 
 @dataclass
 class GraphArrays:
-    """Struct-of-arrays container returned by :func:`load_graph_arrays`."""
+    """Struct-of-arrays container returned by :func:`load_graph_arrays`.
+
+    The ``adjacency`` mapping includes edge-neighbour relationships as well as
+    a compact CSR describing edges incident on each vertex via
+    ``incident_ptr``/``incident_idx`` arrays.
+    """
 
     id_map: Dict[str, int]
     vertices: Dict[str, Any]
     edges: Dict[str, Any]
-    adjacency: Dict[str, List[int]]
+    adjacency: Dict[str, Any]
 
 
 def _identity_matrix(dim: int) -> List[List[float]]:
@@ -42,7 +47,9 @@ def load_graph_arrays(graph_json: Dict[str, Any]) -> GraphArrays:
     Returns
     -------
     GraphArrays
-        Struct-of-arrays representation of ``graph_json``.
+        Struct-of-arrays representation of ``graph_json`` with an adjacency
+        mapping that exposes both edge-neighbour and vertex-incident CSR
+        arrays.
     """
 
     nodes = graph_json.get("nodes", {})
@@ -150,12 +157,13 @@ def load_graph_arrays(graph_json: Dict[str, Any]) -> GraphArrays:
             edges["U"].append([row[:] for row in default_u])
         edges["sigma"].append(0.0)
 
-    # Build edge-neighbor adjacency CSR
+    # Build edge-neighbour and vertex-incident adjacency structures
     vertex_edges: Dict[int, List[int]] = {i: [] for i in range(n_vert)}
     for idx, (s, d) in enumerate(zip(edges["src"], edges["dst"])):
         vertex_edges[s].append(idx)
         vertex_edges[d].append(idx)
 
+    # Edge-to-edge neighbourhood CSR used by rho-delay updates
     nbr_ptr: List[int] = [0]
     nbr_idx: List[int] = []
     for idx in range(n_edge):
@@ -166,9 +174,18 @@ def load_graph_arrays(graph_json: Dict[str, Any]) -> GraphArrays:
         nbr_idx.extend(sorted(neighbors))
         nbr_ptr.append(len(nbr_idx))
 
+    # Vertex-to-incident-edge CSR for fast lookups
+    incident_ptr: List[int] = [0]
+    incident_idx: List[int] = []
+    for vid in range(n_vert):
+        incident_idx.extend(sorted(vertex_edges[vid]))
+        incident_ptr.append(len(incident_idx))
+
     adjacency = {
         "nbr_ptr": np.asarray(nbr_ptr, dtype=np.int32),
         "nbr_idx": np.asarray(nbr_idx, dtype=np.int32),
+        "incident_ptr": np.asarray(incident_ptr, dtype=np.int32),
+        "incident_idx": np.asarray(incident_idx, dtype=np.int32),
     }
 
     d0_arr = np.asarray(edges["d0"], dtype=np.float32)
