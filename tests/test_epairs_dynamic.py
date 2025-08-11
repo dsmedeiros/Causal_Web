@@ -328,3 +328,20 @@ def test_bridge_delay_median_used_in_scheduler(monkeypatch):
     adapter.run_until_next_window_or(limit=10)
 
     assert any(depth == median and dst == 1 for depth, dst, _ in pushed)
+
+
+def test_bridge_delay_reads_live_d_eff():
+    adapter = EngineAdapter()
+    graph = {
+        "nodes": [{"id": "0"}, {"id": "1"}],
+        "edges": [
+            {"from": "0", "to": "1", "delay": 1.0},
+            {"from": "1", "to": "0", "delay": 1.0},
+        ],
+    }
+    adapter.build_graph(graph)
+    adapter._arrays.edges["d_eff"][0] = 9
+    adapter._epairs._create_bridge(0, 1)
+    bridge = adapter._epairs.bridges[(0, 1)]
+    expected = int(np.median([9, adapter._arrays.edges["d_eff"][1]]))
+    assert bridge.d_bridge == expected

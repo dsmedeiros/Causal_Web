@@ -95,6 +95,8 @@ def load_graph_arrays(graph_json: Dict[str, Any]) -> GraphArrays:
         "rho_mean": np.asarray(
             [nodes[nid].get("rho_mean", 0.0) for nid in nodes], dtype=np.float32
         ),
+        "E_theta": np.zeros(n_vert, dtype=np.float32),
+        "E_C": np.zeros(n_vert, dtype=np.float32),
     }
 
     # Initialise ancestry hashes using SplitMix64 and seed the moment vector.
