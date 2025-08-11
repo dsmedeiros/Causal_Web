@@ -15,7 +15,7 @@ still under development.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Tuple
+from typing import Dict, Iterable, List, Sequence, Tuple
 
 import numpy as np
 
@@ -53,6 +53,8 @@ class Bridge:
     ----------
     sigma:
         Reinforcement level for the bridge.
+    d_bridge:
+        Traversal delay applied when packets cross the bridge.
     edge_id:
         Synthetic identifier used when scheduling packets across the
         bridge.  A unique negative ID is allocated per bridge and
@@ -61,6 +63,7 @@ class Bridge:
     """
 
     sigma: float
+    d_bridge: int = 1
     edge_id: int = -1
 
 
@@ -123,33 +126,37 @@ class EPairs:
         h_value: int,
         theta: float,
         depth_emit: int,
-        neighbours: Iterable[int],
+        edge_ids: Iterable[int],
+        edges: Dict[str, Sequence[int]],
     ) -> None:
         """Emit seeds from ``origin`` to each neighbour.
 
         ``depth_emit`` is the depth of the emitting node.  Seeds inherit an
         ``expiry_depth`` of ``depth_emit + delta_ttl``.  A seed is only
-        forwarded to a neighbour if the next hop depth does not exceed its
-        expiry, providing a depth-based TTL.
+        forwarded along an edge if the next hop depth ``depth_emit +
+        edges['d_eff'][edge_id]`` does not exceed its expiry, providing a
+        depth-based TTL that respects per-edge effective distance.
         """
 
         prefix = self._prefix(h_value)
         expiry = depth_emit + self.delta_ttl
-        depth_next = depth_emit + 1
-        if depth_next > expiry:
-            log_record(
-                category="event",
-                label="seed_dropped",
-                value={"src": origin, "origin": origin, "reason": "expired"},
-            )
-            return
-        for n in neighbours:
+        for edge_id in edge_ids:
+            d_eff = int(edges["d_eff"][edge_id]) if "d_eff" in edges else 1
+            depth_next = depth_emit + d_eff
+            dst = int(edges["dst"][edge_id])
+            if depth_next > expiry:
+                log_record(
+                    category="event",
+                    label="seed_dropped",
+                    value={"src": origin, "origin": origin, "reason": "expired"},
+                )
+                continue
             log_record(
                 category="event",
                 label="seed_emitted",
                 value={
                     "src": origin,
-                    "dst": n,
+                    "dst": dst,
                     "origin": origin,
                     "expiry_depth": expiry,
                     "h_prefix": prefix,
@@ -157,7 +164,7 @@ class EPairs:
                 },
             )
             self._place_seed(
-                n,
+                dst,
                 Seed(
                     origin=origin,
                     expiry_depth=expiry,
@@ -166,31 +173,39 @@ class EPairs:
                 ),
             )
 
-    def carry(self, site: int, depth_curr: int, neighbours: Iterable[int]) -> None:
+    def carry(
+        self,
+        site: int,
+        depth_curr: int,
+        edge_ids: Iterable[int],
+        edges: Dict[str, Sequence[int]],
+    ) -> None:
         """Propagate existing seeds at ``site`` to its neighbours.
 
-        Seeds are removed from ``site`` once carried.  Forwarding halts
-        when the proposed ``depth_next`` would exceed a seed's
-        ``expiry_depth``.
+        Seeds are removed from ``site`` once carried.  Forwarding along a
+        given edge halts when the proposed ``depth_next`` would exceed a
+        seed's ``expiry_depth``.
         """
 
         seeds = self.seeds.pop(site, [])
-        depth_next = depth_curr + 1
         for seed in seeds:
-            if depth_next > seed.expiry_depth:
-                log_record(
-                    category="event",
-                    label="seed_dropped",
-                    value={"src": site, "origin": seed.origin, "reason": "expired"},
-                )
-                continue
-            for n in neighbours:
+            for edge_id in edge_ids:
+                d_eff = int(edges["d_eff"][edge_id]) if "d_eff" in edges else 1
+                depth_next = depth_curr + d_eff
+                if depth_next > seed.expiry_depth:
+                    log_record(
+                        category="event",
+                        label="seed_dropped",
+                        value={"src": site, "origin": seed.origin, "reason": "expired"},
+                    )
+                    continue
+                dst = int(edges["dst"][edge_id])
                 log_record(
                     category="event",
                     label="seed_emitted",
                     value={
                         "src": site,
-                        "dst": n,
+                        "dst": dst,
                         "origin": seed.origin,
                         "expiry_depth": seed.expiry_depth,
                         "h_prefix": seed.h_prefix,
@@ -198,7 +213,7 @@ class EPairs:
                     },
                 )
                 self._place_seed(
-                    n,
+                    dst,
                     Seed(
                         origin=seed.origin,
                         expiry_depth=seed.expiry_depth,
@@ -238,11 +253,11 @@ class EPairs:
                 return
         seeds.append(seed)
 
-    def _create_bridge(self, a: int, b: int) -> None:
+    def _create_bridge(self, a: int, b: int, d_bridge: int = 1) -> None:
         key = self._bridge_key(a, b)
         if key not in self.bridges:
             edge_id = self._next_bridge_id
-            self.bridges[key] = Bridge(self.sigma0, edge_id)
+            self.bridges[key] = Bridge(self.sigma0, d_bridge, edge_id)
             self._next_bridge_id -= 1
             self.adjacency.setdefault(a, []).append(b)
             self.adjacency.setdefault(b, []).append(a)

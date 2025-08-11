@@ -22,6 +22,7 @@ def deliver_packet(
     bit_deque: Deque[int],
     packet: dict,
     edge: dict,
+    layer: str,
     max_deque: int = 8,
 ) -> Tuple[int, np.ndarray, np.ndarray, Tuple[int, float], float]:
     """Apply Q/Θ/C delivery rules for a single packet.
@@ -37,9 +38,11 @@ def deliver_packet(
     bit_deque:
         Recent bits used for majority voting.
     packet:
-        Packet carrying ``depth_arr``, ``psi``, ``p`` and ``bit`` fields.
+        Packet carrying ``depth_arr``, ``psi`", ``p`` and ``bit`` fields.
     edge:
-        Edge parameters ``alpha``, ``phi``, ``A`` and unitary ``U``.
+        Edge parameters ``alpha``, ``phi`", ``A`` and unitary ``U``.
+    layer:
+        Layer of the destination vertex (``"Q"``, ``"Θ"`` or ``"C"``).
     max_deque:
         Maximum length of ``bit_deque``.
 
@@ -47,7 +50,7 @@ def deliver_packet(
     -------
     tuple
         Updated ``depth_v``, ``psi_acc``, ``p_v``, ``(bit, conf)`` and the
-        combined intensity in ``[0, 1]``.
+        intensity contribution from the supplied ``layer`` in ``[0, 1]``.
     """
 
     depth_v = max(depth_v, int(packet.get("depth_arr", 0)))
@@ -74,7 +77,14 @@ def deliver_packet(
     q_intensity = min(1.0, float(np.linalg.norm(U @ psi) ** 2))
     theta_intensity = min(1.0, float(np.sum(np.abs(packet.get("p", [])))))
     c_intensity = bit
-    intensity = min(1.0, q_intensity + theta_intensity + c_intensity)
+    if layer == "Q":
+        intensity = q_intensity
+    elif layer == "Θ":
+        intensity = theta_intensity
+    elif layer == "C":
+        intensity = c_intensity
+    else:
+        intensity = min(1.0, q_intensity + theta_intensity + c_intensity)
 
     return depth_v, psi_acc, p_v, (bit, conf), intensity
 
@@ -97,6 +107,7 @@ def deliver_packets_batch(
     bit_deque: Deque[int],
     packets: dict,
     edges: dict,
+    layer: str,
     max_deque: int = 8,
 ) -> Tuple[int, np.ndarray, np.ndarray, Tuple[int, float], float]:
     """Vectorised delivery for packets sharing destination and window.
@@ -115,6 +126,8 @@ def deliver_packets_batch(
         Struct-of-arrays packet fields ``{psi, p, bit, depth_arr}``.
     edges:
         Struct-of-arrays edge parameters ``{alpha, phi, A, U}``.
+    layer:
+        Layer of the destination vertex (``"Q"``, ``"Θ"`` or ``"C"``).
     max_deque:
         Maximum length of ``bit_deque``.
 
@@ -122,7 +135,7 @@ def deliver_packets_batch(
     -------
     tuple
         Updated ``depth_v``, ``psi_acc``, ``p_v``, ``(bit, conf)`` and
-        combined intensity in ``[0, 1]``.
+        intensity contribution from the supplied ``layer`` in ``[0, 1]``.
     """
 
     if packets.get("depth_arr") is not None:
@@ -156,7 +169,14 @@ def deliver_packets_batch(
     q_intensity = min(1.0, float(np.linalg.norm(out) ** 2))
     theta_intensity = min(1.0, float(np.sum(np.abs(p))))
     c_intensity = bit
-    intensity = min(1.0, q_intensity + theta_intensity + c_intensity)
+    if layer == "Q":
+        intensity = q_intensity
+    elif layer == "Θ":
+        intensity = theta_intensity
+    elif layer == "C":
+        intensity = c_intensity
+    else:
+        intensity = min(1.0, q_intensity + theta_intensity + c_intensity)
 
     return depth_v, psi_acc, p_v, (bit, conf), intensity
 

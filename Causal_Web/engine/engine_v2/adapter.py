@@ -281,6 +281,7 @@ class EngineAdapter:
                     vertex["bit_deque"],
                     packets_struct,
                     edges_struct,
+                    lccm.layer,
                 )
             else:
                 depth_v, psi_acc, p_v, (bit, conf), intensity = deliver_packet(
@@ -290,6 +291,7 @@ class EngineAdapter:
                     vertex["bit_deque"],
                     packet_data,
                     edge_params,
+                    lccm.layer,
                 )
 
             vertex["psi_acc"][:] = psi_acc
@@ -384,12 +386,13 @@ class EngineAdapter:
                     packet_data["ancestry"] = ancestry_arr
                     packet_data["m"] = m_arr
 
+            edges = self._arrays.edges if self._arrays else {}
             if lccm.layer == "Q" and self._arrays is not None:
                 h_val = int.from_bytes(ancestry_arr.tobytes(), "little")
-                neigh = [int(edges["dst"][e]) for e in self._edges_by_src.get(dst, [])]
+                edge_ids = self._edges_by_src.get(dst, [])
                 theta = float(np.angle(self._arrays.vertices["psi"][dst][0]))
-                self._epairs.carry(dst, depth_arr, neigh)
-                self._epairs.emit(dst, h_val, theta, depth_arr, neigh)
+                self._epairs.carry(dst, depth_arr, edge_ids, edges)
+                self._epairs.emit(dst, h_val, theta, depth_arr, edge_ids, edges)
 
             if lccm.layer != prev_layer:
                 if prev_layer == "Q" and lccm.layer == "Θ":
@@ -423,7 +426,6 @@ class EngineAdapter:
                     },
                 )
 
-            edges = self._arrays.edges if self._arrays else {}
             adj = self._arrays.adjacency if self._arrays else {}
             for edge_idx in self._edges_by_src.get(dst, []):
                 rho_before = float(edges["rho"][edge_idx])
@@ -482,7 +484,7 @@ class EngineAdapter:
 
             for other in list(self._epairs.adjacency.get(dst, [])):
                 bridge = self._epairs.bridges[self._epairs._bridge_key(dst, other)]
-                depth_next = depth_arr + 1
+                depth_next = depth_arr + bridge.d_bridge
                 payload = {
                     "psi": self._arrays.vertices["psi"][dst],
                     "p": self._arrays.vertices["p"][dst],
@@ -502,7 +504,7 @@ class EngineAdapter:
                         value={
                             "rho_before": 0.0,
                             "rho_after": 0.0,
-                            "d_eff": 1,
+                            "d_eff": bridge.d_bridge,
                             "leak_contrib": None,
                             "is_bridge": True,
                             "sigma": bridge.sigma,

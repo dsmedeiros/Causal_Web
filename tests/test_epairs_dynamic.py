@@ -18,8 +18,23 @@ def _make_manager():
 def test_seed_binding_creates_bridge():
     mgr = _make_manager()
     # Seeds share a 4 bit prefix and close theta values
-    mgr.emit(origin=1, h_value=0b1101_1110, theta=0.10, depth_emit=0, neighbours=[3])
-    mgr.emit(origin=2, h_value=0b1101_0001, theta=0.15, depth_emit=0, neighbours=[3])
+    edges = {"dst": [3], "d_eff": [1]}
+    mgr.emit(
+        origin=1,
+        h_value=0b1101_1110,
+        theta=0.10,
+        depth_emit=0,
+        edge_ids=[0],
+        edges=edges,
+    )
+    mgr.emit(
+        origin=2,
+        h_value=0b1101_0001,
+        theta=0.15,
+        depth_emit=0,
+        edge_ids=[0],
+        edges=edges,
+    )
     assert (1, 2) in mgr.bridges
     bridge = mgr.bridges[(1, 2)]
     assert bridge.sigma == 1.0
@@ -55,8 +70,23 @@ def test_bridge_lifecycle_events(monkeypatch):
     )
 
     mgr = _make_manager()
-    mgr.emit(origin=1, h_value=0b1101_1110, theta=0.10, depth_emit=0, neighbours=[3])
-    mgr.emit(origin=2, h_value=0b1101_0001, theta=0.15, depth_emit=0, neighbours=[3])
+    edges = {"dst": [3], "d_eff": [1]}
+    mgr.emit(
+        origin=1,
+        h_value=0b1101_1110,
+        theta=0.10,
+        depth_emit=0,
+        edge_ids=[0],
+        edges=edges,
+    )
+    mgr.emit(
+        origin=2,
+        h_value=0b1101_0001,
+        theta=0.15,
+        depth_emit=0,
+        edge_ids=[0],
+        edges=edges,
+    )
     assert any(
         lbl == "bridge_created" and {"src", "dst", "sigma", "bridge_id"} <= value.keys()
         for lbl, value in events
@@ -123,13 +153,35 @@ def test_seed_ttl_propagates_and_expires():
         sigma_reinforce=0.2,
         sigma_min=0.1,
     )
-    mgr.emit(origin=1, h_value=0b1101_0000, theta=0.1, depth_emit=0, neighbours=[2])
-    mgr.carry(2, depth_curr=1, neighbours=[3])
+    edges = {"dst": [2, 3, 4], "d_eff": [1, 1, 1]}
+    mgr.emit(
+        origin=1,
+        h_value=0b1101_0000,
+        theta=0.1,
+        depth_emit=0,
+        edge_ids=[0],
+        edges=edges,
+    )
+    mgr.carry(2, depth_curr=1, edge_ids=[1], edges=edges)
     assert 2 not in mgr.seeds
     assert mgr.seeds[3][0].expiry_depth == 2
-    mgr.carry(3, depth_curr=2, neighbours=[4])
+    mgr.carry(3, depth_curr=2, edge_ids=[2], edges=edges)
     assert 3 not in mgr.seeds
     assert 4 not in mgr.seeds
+
+
+def test_seed_expires_with_large_d_eff():
+    mgr = _make_manager()
+    edges = {"dst": [2], "d_eff": [5]}
+    mgr.emit(
+        origin=1,
+        h_value=0b1101_0000,
+        theta=0.1,
+        depth_emit=0,
+        edge_ids=[0],
+        edges=edges,
+    )
+    assert 2 not in mgr.seeds
 
 
 def test_seed_logging(monkeypatch):
@@ -153,18 +205,63 @@ def test_seed_logging(monkeypatch):
     )
 
     # expiry drop
-    mgr.emit(origin=1, h_value=0b1101_0000, theta=0.0, depth_emit=0, neighbours=[2])
-    mgr.carry(2, depth_curr=1, neighbours=[3])
+    edges1 = {"dst": [2], "d_eff": [1]}
+    mgr.emit(
+        origin=1,
+        h_value=0b1101_0000,
+        theta=0.0,
+        depth_emit=0,
+        edge_ids=[0],
+        edges=edges1,
+    )
+    edges2 = {"dst": [3], "d_eff": [1]}
+    mgr.carry(2, depth_curr=1, edge_ids=[0], edges=edges2)
 
     # prefix mismatch drop
-    mgr.emit(origin=4, h_value=0b1111_0000, theta=0.0, depth_emit=0, neighbours=[5])
-    mgr.emit(origin=5, h_value=0b0000_0000, theta=0.0, depth_emit=0, neighbours=[5])
+    edges3 = {"dst": [5], "d_eff": [1]}
+    mgr.emit(
+        origin=4,
+        h_value=0b1111_0000,
+        theta=0.0,
+        depth_emit=0,
+        edge_ids=[0],
+        edges=edges3,
+    )
+    mgr.emit(
+        origin=5,
+        h_value=0b0000_0000,
+        theta=0.0,
+        depth_emit=0,
+        edge_ids=[0],
+        edges=edges3,
+    )
 
     # angle mismatch drop
-    mgr.emit(origin=6, h_value=0b1010_0000, theta=0.0, depth_emit=0, neighbours=[7])
-    mgr.emit(origin=7, h_value=0b1010_1111, theta=1.0, depth_emit=0, neighbours=[7])
+    edges4 = {"dst": [7], "d_eff": [1]}
+    mgr.emit(
+        origin=6,
+        h_value=0b1010_0000,
+        theta=0.0,
+        depth_emit=0,
+        edge_ids=[0],
+        edges=edges4,
+    )
+    mgr.emit(
+        origin=7,
+        h_value=0b1010_1111,
+        theta=1.0,
+        depth_emit=0,
+        edge_ids=[0],
+        edges=edges4,
+    )
 
     assert any(lbl == "seed_emitted" for lbl, _ in events)
-    assert any(lbl == "seed_dropped" and val["reason"] == "expired" for lbl, val in events)
-    assert any(lbl == "seed_dropped" and val["reason"] == "prefix" for lbl, val in events)
-    assert any(lbl == "seed_dropped" and val["reason"] == "angle" for lbl, val in events)
+    assert any(
+        lbl == "seed_dropped" and val["reason"] == "expired" for lbl, val in events
+    )
+    assert any(
+        lbl == "seed_dropped" and val["reason"] == "prefix" for lbl, val in events
+    )
+    assert any(
+        lbl == "seed_dropped" and val["reason"] == "angle" for lbl, val in events
+    )

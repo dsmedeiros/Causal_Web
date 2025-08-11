@@ -128,8 +128,23 @@ def test_gate4_epairs_locality_ttl_and_decay():
         sigma_reinforce=0.2,
         sigma_min=0.1,
     )
-    mgr.emit(origin=1, h_value=0b1101_0000, theta=0.1, depth_emit=0, neighbours=[3])
-    mgr.emit(origin=2, h_value=0b1101_1111, theta=0.1, depth_emit=0, neighbours=[3])
+    edges = {"dst": [3], "d_eff": [1]}
+    mgr.emit(
+        origin=1,
+        h_value=0b1101_0000,
+        theta=0.1,
+        depth_emit=0,
+        edge_ids=[0],
+        edges=edges,
+    )
+    mgr.emit(
+        origin=2,
+        h_value=0b1101_1111,
+        theta=0.1,
+        depth_emit=0,
+        edge_ids=[0],
+        edges=edges,
+    )
     assert (1, 2) not in mgr.bridges
     mgr2 = EPairs(
         delta_ttl=1,
@@ -140,8 +155,22 @@ def test_gate4_epairs_locality_ttl_and_decay():
         sigma_reinforce=0.2,
         sigma_min=0.1,
     )
-    mgr2.emit(origin=1, h_value=0b1101_0000, theta=0.1, depth_emit=0, neighbours=[3])
-    mgr2.emit(origin=2, h_value=0b1101_1111, theta=0.1, depth_emit=0, neighbours=[3])
+    mgr2.emit(
+        origin=1,
+        h_value=0b1101_0000,
+        theta=0.1,
+        depth_emit=0,
+        edge_ids=[0],
+        edges=edges,
+    )
+    mgr2.emit(
+        origin=2,
+        h_value=0b1101_1111,
+        theta=0.1,
+        depth_emit=0,
+        edge_ids=[0],
+        edges=edges,
+    )
     assert (1, 2) in mgr2.bridges
     mgr2.lambda_decay = 1.0
     mgr2.decay_all()
@@ -155,7 +184,7 @@ def _energy_total():
     packet = {"psi": np.array([1, 0], np.complex64), "p": [0.4, 0.6], "bit": 1}
     edge = {"alpha": 1.0, "phi": 0.0, "A": 0.0, "U": np.eye(2, dtype=np.complex64)}
     depth, psi_acc, p_v, (bit, conf), intensity = deliver_packet(
-        0, psi_acc, p_v, bit_deque, packet, edge
+        0, psi_acc, p_v, bit_deque, packet, edge, "Q"
     )
     psi, EQ = close_window(psi_acc)
     H_pv = float(-(p_v * np.log2(p_v + 1e-12)).sum())

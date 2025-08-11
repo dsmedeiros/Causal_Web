@@ -209,8 +209,8 @@ Amplitude energy now feeds a stress–energy field that scales edge delay by
 ``Config.density_diffusion_weight`` (``α``).
 
 The helper ``engine.engine_v2.rho_delay.update_rho_delay`` applies this rule
-per edge, adding leakage and external intensity and mapping the resulting
-density to a logarithmically scaled effective delay. The engine v2 adapter
+per edge, adding leakage and layer-scoped external intensity and mapping the
+resulting density to a logarithmically scaled effective delay. The engine v2 adapter
 recomputes this ``d_eff`` on every packet delivery, storing it with the edge
 and using the updated value to schedule the next hop. When a vertex window
 closes the adapter normalises accumulated amplitudes and records ``EQ`` via
