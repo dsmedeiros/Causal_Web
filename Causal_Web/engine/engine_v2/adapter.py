@@ -64,11 +64,16 @@ class EngineAdapter:
         psi: np.ndarray,
         phi_e: float,
         A_e: float,
+        U_e: np.ndarray,
     ) -> tuple[np.ndarray, np.ndarray]:
         """Update ancestry hash and phase moment for ``dst``.
 
         The update uses only local information from the arriving packet and is
-        deterministic given :data:`Config.run_seed`.
+        deterministic given :data:`Config.run_seed`.  The phase moment ``m``
+        is biased toward the destination's unitary by computing
+        ``mu = arg(<U_e ψ, ψ>)`` and is down-weighted under heavy fan-in using
+        ``β_m = β_m0 / (1 + Λ_v)`` where ``Λ_v`` counts quantum arrivals in the
+        current window.
         """
 
         if self._arrays is None:
@@ -89,20 +94,19 @@ class EngineAdapter:
         # --------------------------------------------------------------
         # Local phase statistics
         psi = np.asarray(psi, dtype=np.complex64)
-        r = np.abs(psi) ** 2
-        total = float(r.sum())
-        if total > 0:
-            w = r / total
-        else:
-            w = r
-        phi_k = np.angle(psi)
-        z = np.sum(w * np.exp(1j * (phi_k + phi_e + A_e)))
+        U_e = np.asarray(U_e, dtype=np.complex64)
+        psi_rot = np.exp(1j * (phi_e + A_e)) * (U_e @ psi)
+        z = np.vdot(psi_rot, psi)
         mu = float(np.angle(z))
         kappa = float(abs(z))
         u_local = np.array([np.cos(mu), np.sin(mu), kappa], dtype=np.float32)
 
         # Moment update with normalisation
-        beta_m = 0.1
+        lambda_v = 0
+        if dst in self._vertices:
+            lambda_v = getattr(self._vertices[dst]["lccm"], "_lambda", 0)
+        beta_m0 = 0.1
+        beta_m = beta_m0 / (1.0 + float(lambda_v))
         m = (1.0 - beta_m) * m + beta_m * u_local
         norm = float(np.linalg.norm(m))
         if norm > 0:
@@ -416,6 +420,7 @@ class EngineAdapter:
             psi_local = packet_list[0]["psi"]
             phi_local = edge_list[0]["phi"]
             A_local = edge_list[0]["A"]
+            U_local = edge_list[0]["U"]
             theta = float(np.angle(psi_local[0])) if len(psi_local) else 0.0
             ancestry_arr, m_arr = self._update_ancestry(
                 dst,
@@ -425,6 +430,7 @@ class EngineAdapter:
                 psi_local,
                 phi_local,
                 A_local,
+                U_local,
             )
 
             bell_cfg = Config.bell
