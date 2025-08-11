@@ -43,3 +43,35 @@ def test_bridge_reinforcement_and_decay():
     mgr.decay_all()
     assert (1, 2) not in mgr.bridges
 
+
+def test_bridge_lifecycle_events(monkeypatch):
+    events = []
+
+    def fake_log_record(category, label, *, value=None, **kwargs):
+        events.append((label, value))
+
+    monkeypatch.setattr(
+        "Causal_Web.engine.engine_v2.epairs.log_record", fake_log_record
+    )
+
+    mgr = _make_manager()
+    mgr.emit(origin=1, h_value=0b1101_1110, theta=0.10, neighbours=[3])
+    mgr.emit(origin=2, h_value=0b1101_0001, theta=0.15, neighbours=[3])
+    assert any(lbl == "bridge_created" for lbl, _ in events)
+    mgr.lambda_decay = 1.0
+    mgr.decay_all()
+    assert any(lbl == "bridge_removed" for lbl, _ in events)
+
+
+def test_bridge_id_stability():
+    mgr = _make_manager()
+    mgr._create_bridge(1, 2)
+    mgr._create_bridge(3, 4)
+    id1 = mgr.bridges[(1, 2)].edge_id
+    id2 = mgr.bridges[(3, 4)].edge_id
+    assert id1 != id2
+    mgr.reinforce(1, 2)
+    assert mgr.bridges[(1, 2)].edge_id == id1
+    mgr._remove_bridge(1, 2)
+    mgr._create_bridge(1, 2)
+    assert mgr.bridges[(1, 2)].edge_id != id1

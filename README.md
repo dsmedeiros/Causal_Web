@@ -154,7 +154,10 @@ The `windowing` values control vertex window advancement. `rho_delay` affects
 how edge density relaxes toward a baseline. `epsilon_pairs` governs dynamic
 ε-pair behaviour – seeds with a limited TTL can bind to form temporary bridge
 edges whose `sigma` values decay unless reinforced – while `bell` sets mutual
-information gates for Bell pair matching. The Bell block is disabled by default;
+information gates for Bell pair matching. Bridge creation and removal now emit
+`bridge_created` and `bridge_removed` events (carrying a stable synthetic
+`bridge_id` and final `σ`), providing additional telemetry for analysis. The
+Bell block is disabled by default;
 set `"enabled": true` to activate measurement-interaction modes.
 
 `run_seed` provides a deterministic seed used by sampling, Bell helpers and
