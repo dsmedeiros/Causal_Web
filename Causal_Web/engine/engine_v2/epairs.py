@@ -44,9 +44,25 @@ class Seed:
 
 @dataclass
 class Bridge:
-    """State associated with a dynamic bridge."""
+    """State associated with a dynamic bridge.
+
+    Bridges obtain a *synthetic* identifier when they are created.  The
+    identifier is drawn from a monotonically decreasing sequence of
+    negative integers (``-1, -2, …``).  Because the allocator only moves in
+    one direction, an ``edge_id`` is unique and remains stable for the
+    lifetime of the bridge, providing deterministic ordering and readable
+    logs while avoiding clashes with real edge identifiers.
+
+    Attributes
+    ----------
+    sigma:
+        Reinforcement level for the bridge.
+    edge_id:
+        Stable synthetic identifier assigned at creation.
+    """
 
     sigma: float
+    edge_id: int = -1
 
 
 class EPairs:
@@ -66,6 +82,15 @@ class EPairs:
     Parameters are supplied on construction to avoid global state and to
     make the component easy to test. A ``seed`` may be provided for
     deterministic behaviour in routines that rely on randomness.
+
+    Notes
+    -----
+    Each bridge receives a synthetic ``edge_id`` when created.  The IDs
+    are allocated from a strictly decreasing sequence of negative
+    integers, ensuring they never collide with genuine network edges.
+    Once assigned an ``edge_id`` does not change for the duration of the
+    bridge, which guarantees stable scheduling and log ordering across
+    runs.
     """
 
     def __init__(
@@ -91,6 +116,8 @@ class EPairs:
         # adjacency list of active bridge partners
         self.adjacency: Dict[int, List[int]] = {}
         self._rng = np.random.default_rng(seed)
+        # Synthetic edge identifier allocation for bridges
+        self._next_bridge_id = -1
 
     # ------------------------------------------------------------------
     # seed handling
@@ -138,7 +165,8 @@ class EPairs:
     def _create_bridge(self, a: int, b: int) -> None:
         key = self._bridge_key(a, b)
         if key not in self.bridges:
-            self.bridges[key] = Bridge(self.sigma0)
+            self.bridges[key] = Bridge(self.sigma0, self._next_bridge_id)
+            self._next_bridge_id -= 1
             self.adjacency.setdefault(a, []).append(b)
             self.adjacency.setdefault(b, []).append(a)
 

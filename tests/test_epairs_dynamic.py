@@ -21,7 +21,9 @@ def test_seed_binding_creates_bridge():
     mgr.emit(origin=1, h_value=0b1101_1110, theta=0.10, neighbours=[3])
     mgr.emit(origin=2, h_value=0b1101_0001, theta=0.15, neighbours=[3])
     assert (1, 2) in mgr.bridges
-    assert mgr.bridges[(1, 2)].sigma == 1.0
+    bridge = mgr.bridges[(1, 2)]
+    assert bridge.sigma == 1.0
+    assert bridge.edge_id < 0
     assert 2 in mgr.adjacency.get(1, [])
     assert 1 in mgr.adjacency.get(2, [])
 

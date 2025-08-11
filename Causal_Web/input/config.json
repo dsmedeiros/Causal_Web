@@ -68,6 +68,7 @@
         "beta_m": 0.0,
         "beta_h": 0.0,
     },
+    "theta_reset": "uniform",
     "propagation_control": {
         "enable_sip_child": true,
         "enable_sip_recomb": true,
