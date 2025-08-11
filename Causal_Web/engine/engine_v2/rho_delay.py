@@ -30,10 +30,16 @@ def diffuse(rho: List[float], weight: float) -> List[float]:
     return [r + weight * (avg - r) for r in rho]
 
 
-def effective_delay(rho: float, cap: float = 1.0) -> float:
-    """Map density to an effective delay using a simple saturation."""
+def effective_delay(
+    rho: float,
+    *,
+    d0: float,
+    gamma: float,
+    rho0: float,
+) -> float:
+    """Map density to an effective delay using the saturating log rule."""
 
-    return min(rho, cap)
+    return float(max(1, d0 + round(gamma * math.log(1 + rho / rho0))))
 
 
 def update_rho_delay(
