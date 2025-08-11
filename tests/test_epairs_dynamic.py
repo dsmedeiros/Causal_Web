@@ -345,3 +345,26 @@ def test_bridge_delay_reads_live_d_eff():
     bridge = adapter._epairs.bridges[(0, 1)]
     expected = int(np.median([9, adapter._arrays.edges["d_eff"][1]]))
     assert bridge.d_bridge == expected
+
+
+def test_bridge_delay_updates_after_rho_change():
+    adapter = EngineAdapter()
+    graph = {
+        "nodes": [{"id": "0"}, {"id": "1"}],
+        "edges": [
+            {"from": "0", "to": "1", "delay": 1.0},
+            {"from": "1", "to": "0", "delay": 1.0},
+        ],
+    }
+    adapter.build_graph(graph)
+
+    adapter._epairs._create_bridge(0, 1)
+    bridge = adapter._epairs.bridges[(0, 1)]
+    assert bridge.d_bridge == 1
+
+    adapter._epairs._remove_bridge(0, 1)
+    adapter._arrays.edges["d_eff"][0] = 9
+    adapter._epairs._create_bridge(0, 1)
+    bridge = adapter._epairs.bridges[(0, 1)]
+    expected = int(np.median([9, adapter._arrays.edges["d_eff"][1]]))
+    assert bridge.d_bridge == expected
