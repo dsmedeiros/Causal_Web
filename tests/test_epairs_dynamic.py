@@ -25,7 +25,7 @@ def test_seed_binding_creates_bridge():
     edges = {"dst": [3], "d_eff": [1]}
     mgr.emit(
         origin=1,
-        h_value=0b1101_1110,
+        h_value=0xD00000000000000E,
         theta=0.10,
         depth_emit=0,
         edge_ids=[0],
@@ -33,7 +33,7 @@ def test_seed_binding_creates_bridge():
     )
     mgr.emit(
         origin=2,
-        h_value=0b1101_0001,
+        h_value=0xD000000000000001,
         theta=0.15,
         depth_emit=0,
         edge_ids=[0],
@@ -77,7 +77,7 @@ def test_bridge_lifecycle_events(monkeypatch):
     edges = {"dst": [3], "d_eff": [1]}
     mgr.emit(
         origin=1,
-        h_value=0b1101_1110,
+        h_value=0xD00000000000000E,
         theta=0.10,
         depth_emit=0,
         edge_ids=[0],
@@ -85,7 +85,7 @@ def test_bridge_lifecycle_events(monkeypatch):
     )
     mgr.emit(
         origin=2,
-        h_value=0b1101_0001,
+        h_value=0xD000000000000001,
         theta=0.15,
         depth_emit=0,
         edge_ids=[0],
@@ -160,7 +160,7 @@ def test_seed_ttl_propagates_and_expires():
     edges = {"dst": [2, 3, 4], "d_eff": [1, 1, 1]}
     mgr.emit(
         origin=1,
-        h_value=0b1101_0000,
+        h_value=0xD000000000000000,
         theta=0.1,
         depth_emit=0,
         edge_ids=[0],
@@ -179,7 +179,7 @@ def test_seed_expires_with_large_d_eff():
     edges = {"dst": [2], "d_eff": [5]}
     mgr.emit(
         origin=1,
-        h_value=0b1101_0000,
+        h_value=0xD000000000000000,
         theta=0.1,
         depth_emit=0,
         edge_ids=[0],
@@ -212,7 +212,7 @@ def test_seed_logging(monkeypatch):
     edges1 = {"dst": [2], "d_eff": [1]}
     mgr.emit(
         origin=1,
-        h_value=0b1101_0000,
+        h_value=0xD000000000000000,
         theta=0.0,
         depth_emit=0,
         edge_ids=[0],
@@ -225,7 +225,7 @@ def test_seed_logging(monkeypatch):
     edges3 = {"dst": [5], "d_eff": [1]}
     mgr.emit(
         origin=4,
-        h_value=0b1111_0000,
+        h_value=0xF000000000000000,
         theta=0.0,
         depth_emit=0,
         edge_ids=[0],
@@ -233,7 +233,7 @@ def test_seed_logging(monkeypatch):
     )
     mgr.emit(
         origin=5,
-        h_value=0b0000_0000,
+        h_value=0x0000000000000000,
         theta=0.0,
         depth_emit=0,
         edge_ids=[0],
@@ -244,7 +244,7 @@ def test_seed_logging(monkeypatch):
     edges4 = {"dst": [7], "d_eff": [1]}
     mgr.emit(
         origin=6,
-        h_value=0b1010_0000,
+        h_value=0xA000000000000000,
         theta=0.0,
         depth_emit=0,
         edge_ids=[0],
@@ -252,7 +252,7 @@ def test_seed_logging(monkeypatch):
     )
     mgr.emit(
         origin=7,
-        h_value=0b1010_1111,
+        h_value=0xA00000000000000F,
         theta=1.0,
         depth_emit=0,
         edge_ids=[0],

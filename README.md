@@ -86,10 +86,12 @@ Bridge propagation now occurs before observers handle a tick so detector events
 reflect entangled activity in the same cycle.
 These detector events are additionally written to `entangled_log.jsonl` for
 Bell inequality analysis.
-The underlying Bell helpers now track 256-bit ancestry fields and allow
-detector settings to be drawn either strictly independently or from a
-von Mises–Fisher distribution conditioned on shared ancestry.  This
-toggle enables controlled measurement dependence studies.
+The underlying Bell helpers now track explicit 256-bit ancestry hash lanes
+(`h0`–`h3`) and a three-component moment vector (`m0`–`m2`) with an
+associated normalisation (`m_norm`). Detector settings can be drawn either
+strictly independently or from a von Mises–Fisher distribution conditioned on
+shared ancestry.  This toggle enables controlled measurement dependence
+studies.
 Graphs may also define ``epsilon`` edges linking two nodes in a singlet state.
 When one node collapses, its ``epsilon`` partner is projected onto the opposite
 eigenvector, enabling Bell-test correlations without a bridge. Collapse now

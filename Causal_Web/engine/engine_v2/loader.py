@@ -76,12 +76,42 @@ def load_graph_arrays(graph_json: Dict[str, Any]) -> GraphArrays:
         "bit": np.zeros(n_vert, dtype=np.int8),
         "conf": np.zeros(n_vert, dtype=np.float32),
         "fanin": np.zeros(n_vert, dtype=np.int32),
-        "ancestry": np.zeros((n_vert, 4), dtype=np.uint64),
-        "m": np.zeros((n_vert, 3), dtype=np.float32),
+        # Ancestry hash lanes h0..h3 and moment vector m0..m2
+        "h0": np.zeros(n_vert, dtype=np.uint64),
+        "h1": np.zeros(n_vert, dtype=np.uint64),
+        "h2": np.zeros(n_vert, dtype=np.uint64),
+        "h3": np.zeros(n_vert, dtype=np.uint64),
+        "m0": np.zeros(n_vert, dtype=np.float32),
+        "m1": np.zeros(n_vert, dtype=np.float32),
+        "m2": np.zeros(n_vert, dtype=np.float32),
+        "m_norm": np.ones(n_vert, dtype=np.float32),
         "rho_mean": np.asarray(
             [nodes[nid].get("rho_mean", 0.0) for nid in nodes], dtype=np.float32
         ),
     }
+
+    # Initialise ancestry hashes using SplitMix64 and seed the moment vector.
+
+    def _smix(x: np.uint64) -> np.uint64:
+        x = (x + np.uint64(0x9E3779B97F4A7C15)) & np.uint64(0xFFFFFFFFFFFFFFFF)
+        z = x
+        z = (z ^ (z >> np.uint64(30))) * np.uint64(0xBF58476D1CE4E5B9)
+        z = (z ^ (z >> np.uint64(27))) * np.uint64(0x94D049BB133111EB)
+        return z ^ (z >> np.uint64(31))
+
+    for vid in range(n_vert):
+        h = _smix(np.uint64(vid))
+        vertices["h0"][vid] = h
+        h = _smix(h)
+        vertices["h1"][vid] = h
+        h = _smix(h)
+        vertices["h2"][vid] = h
+        h = _smix(h)
+        vertices["h3"][vid] = h
+        vertices["m0"][vid] = np.float32(1.0)
+        vertices["m1"][vid] = np.float32(0.0)
+        vertices["m2"][vid] = np.float32(0.0)
+        vertices["m_norm"][vid] = np.float32(1.0)
 
     edges_data = graph_json.get("edges", [])
     n_edge = len(edges_data)
