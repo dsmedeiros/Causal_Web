@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from collections import deque
 
 from Causal_Web.engine.engine_v2.qtheta_c import deliver_packet, close_window
@@ -28,3 +29,25 @@ def test_deliver_packet_updates_fields():
     assert np.isclose(EQ, np.vdot(psi_acc, psi_acc).real)
     if EQ > 0:
         assert np.allclose(psi, psi_acc / np.sqrt(EQ))
+
+
+def test_intensity_theta_layer_ignores_other_contributions():
+    depth, psi_acc, p_v = 0, np.zeros(2, dtype=np.complex128), np.array([0.5, 0.5])
+    bits = deque()
+    packet = {"depth_arr": 1, "psi": [1.0, 0.0], "p": [0.1, 0.2], "bit": 1}
+    edge = {"alpha": 1.0, "phi": 0.0, "A": 0.0, "U": [[1.0, 0.0], [0.0, 1.0]]}
+
+    _, _, _, _, intensity = deliver_packet(depth, psi_acc, p_v, bits, packet, edge, "Θ")
+
+    assert intensity == pytest.approx(0.3, abs=1e-6)
+
+
+def test_intensity_c_layer_only_counts_bits():
+    depth, psi_acc, p_v = 0, np.zeros(2, dtype=np.complex128), np.array([0.5, 0.5])
+    bits = deque()
+    packet = {"depth_arr": 1, "psi": [1.0, 0.0], "p": [0.1, 0.2], "bit": 0}
+    edge = {"alpha": 1.0, "phi": 0.0, "A": 0.0, "U": [[1.0, 0.0], [0.0, 1.0]]}
+
+    _, _, _, _, intensity = deliver_packet(depth, psi_acc, p_v, bits, packet, edge, "C")
+
+    assert intensity == 0.0

@@ -1,6 +1,10 @@
 """Tests for the dynamic ε-pair utilities."""
 
+import numpy as np
+
+from Causal_Web.engine.engine_v2.adapter import EngineAdapter
 from Causal_Web.engine.engine_v2.epairs import Bridge, EPairs
+from Causal_Web.engine.engine_v2.state import Packet
 
 
 def _make_manager():
@@ -265,3 +269,60 @@ def test_seed_logging(monkeypatch):
     assert any(
         lbl == "seed_dropped" and val["reason"] == "angle" for lbl, val in events
     )
+
+
+def test_seed_chain_respects_d_eff():
+    mgr = EPairs(
+        delta_ttl=6,
+        ancestry_prefix_L=4,
+        theta_max=0.1,
+        sigma0=1.0,
+        lambda_decay=0.5,
+        sigma_reinforce=0.2,
+        sigma_min=0.1,
+    )
+
+    edges1 = {"dst": [2], "d_eff": [3]}
+    mgr.emit(
+        origin=1,
+        h_value=0,
+        theta=0.0,
+        depth_emit=0,
+        edge_ids=[0],
+        edges=edges1,
+    )
+
+    assert 2 in mgr.seeds
+    assert mgr.seeds[2][0].expiry_depth == 6
+
+    edges2 = {"dst": [3], "d_eff": [4]}
+    mgr.carry(2, depth_curr=3, edge_ids=[0], edges=edges2)
+
+    assert 3 not in mgr.seeds
+
+
+def test_bridge_delay_median_used_in_scheduler(monkeypatch):
+    adapter = EngineAdapter()
+    graph = {"nodes": [{"id": "0"}, {"id": "1"}], "edges": []}
+    adapter.build_graph(graph)
+
+    delays = [2, 6]
+    median = int(np.median(delays))
+    adapter._epairs._create_bridge(0, 1, d_bridge=median)
+
+    bridge = adapter._epairs.bridges[(0, 1)]
+    assert bridge.d_bridge == median
+
+    pushed: list[tuple[int, int, int]] = []
+    original_push = adapter._scheduler.push
+
+    def capture(depth: int, dst: int, edge_id: int, packet: Packet) -> None:
+        pushed.append((depth, dst, edge_id))
+        original_push(depth, dst, edge_id, packet)
+
+    adapter._scheduler.push = capture  # type: ignore[assignment]
+
+    adapter._scheduler.push(0, 0, 0, Packet(src=-1, dst=0, payload=None))
+    adapter.run_until_next_window_or(limit=10)
+
+    assert any(depth == median and dst == 1 for depth, dst, _ in pushed)
