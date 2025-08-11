@@ -103,8 +103,14 @@ def deliver_packets_batch(
     psi_acc: np.ndarray,
     p_v: np.ndarray,
     bit_deque: Deque[int],
-    packets: dict,
-    edges: dict,
+    psi: Iterable[np.ndarray],
+    p: Iterable[np.ndarray],
+    bits: Iterable[int],
+    depth_arr: Iterable[int] | None,
+    alpha: Iterable[float],
+    phi: Iterable[float],
+    A: Iterable[float],
+    U: Iterable[np.ndarray],
     max_deque: int = 8,
     update_p: bool = True,
 ) -> Tuple[int, np.ndarray, np.ndarray, Tuple[int, float], Tuple[float, float, float]]:
@@ -120,10 +126,10 @@ def deliver_packets_batch(
         Classical probability vector for the vertex.
     bit_deque:
         Recent bits used for majority voting.
-    packets:
-        Struct-of-arrays packet fields ``{psi, p, bit, depth_arr}``.
-    edges:
-        Struct-of-arrays edge parameters ``{alpha, phi, A, U}``.
+    psi, p, bits, depth_arr:
+        Packet fields supplied as sequences or arrays.
+    alpha, phi, A, U:
+        Edge parameters supplied as sequences or arrays.
     max_deque:
         Maximum length of ``bit_deque``.
     update_p:
@@ -136,17 +142,17 @@ def deliver_packets_batch(
         per-layer intensity contributions ``(I_Q, I_Θ, I_C)`` each in ``[0, 1]``.
     """
 
-    if packets.get("depth_arr") is not None:
-        depth_v = max(depth_v, int(np.max(packets.get("depth_arr"))))
+    if depth_arr is not None:
+        depth_v = max(depth_v, int(np.max(depth_arr)))
 
-    psi = np.asarray(packets.get("psi"), dtype=np.complex64)
-    p = np.asarray(packets.get("p"), dtype=np.float32)
-    bits = np.asarray(packets.get("bit", []), dtype=np.int8)
+    psi = np.asarray(list(psi), dtype=np.complex64)
+    p = np.asarray(list(p), dtype=np.float32)
+    bits = np.asarray(list(bits), dtype=np.int8)
 
-    U = np.asarray(edges.get("U"), dtype=np.complex64)
-    alpha = np.asarray(edges.get("alpha", 1.0), dtype=np.float32)
-    phi = np.asarray(edges.get("phi", 0.0), dtype=np.float32)
-    A = np.asarray(edges.get("A", 0.0), dtype=np.float32)
+    U = np.asarray(list(U), dtype=np.complex64)
+    alpha = np.asarray(list(alpha), dtype=np.float32)
+    phi = np.asarray(list(phi), dtype=np.float32)
+    A = np.asarray(list(A), dtype=np.float32)
 
     out = np.einsum("nij,nj->ni", U, psi)
     phase = np.exp(1j * (phi + A))[:, None]

@@ -278,9 +278,13 @@ class EngineAdapter:
         events = 0
         packets = []
         edge_logs = 0
+        decay_counter = 0
+        DECAY_INTERVAL = 32
 
         while self._scheduler and events < limit:
-            self._epairs.decay_all()
+            if decay_counter == 0:
+                self._epairs.decay_all()
+            decay_counter = (decay_counter + 1) % DECAY_INTERVAL
             depth_arr, dst, edge_id, pkt = self._scheduler.pop()
             vertex = self._vertices.get(dst)
             if vertex is None:
@@ -370,25 +374,19 @@ class EngineAdapter:
                 self._scheduler.push(*item)
 
             if len(pkt_list) > 1:
-                packets_struct = {
-                    "psi": psi_list,
-                    "p": p_list,
-                    "bit": bit_list,
-                    "depth_arr": depth_list,
-                }
-                edges_struct = {
-                    "alpha": alpha_list,
-                    "phi": phi_list,
-                    "A": A_list,
-                    "U": U_list,
-                }
                 depth_v, psi_acc, p_v, (bit, conf), intensities = deliver_packets_batch(
                     lccm.depth,
                     vertex["psi_acc"],
                     vertex["p_v"],
                     vertex["bit_deque"],
-                    packets_struct,
-                    edges_struct,
+                    psi_list,
+                    p_list,
+                    bit_list,
+                    depth_list,
+                    alpha_list,
+                    phi_list,
+                    A_list,
+                    U_list,
                     update_p=lccm.layer == "Θ",
                 )
             else:
