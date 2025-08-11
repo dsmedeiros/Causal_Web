@@ -69,7 +69,7 @@ class EngineAdapter:
         phi_e: float,
         A_e: float,
         U_e: np.ndarray,
-    ) -> tuple[np.ndarray, np.ndarray]:
+    ) -> tuple[np.ndarray, np.ndarray, float]:
         """Update ancestry hash and phase moment for ``dst``.
 
         The update uses only local information from the arriving packet and is
@@ -81,7 +81,7 @@ class EngineAdapter:
         """
 
         if self._arrays is None:
-            return np.zeros(4, dtype=np.uint64), np.zeros(3, dtype=float)
+            return np.zeros(4, dtype=np.uint64), np.zeros(3, dtype=float), 0.0
 
         v_arr = self._arrays.vertices
 
@@ -108,8 +108,8 @@ class EngineAdapter:
         # Moment update with normalisation
         lambda_v = 0
         if dst in self._vertices:
-            lambda_v = getattr(self._vertices[dst]["lccm"], "_lambda", 0)
-        beta_m0 = 0.1
+            lambda_v = getattr(self._vertices[dst]["lccm"], "_lambda_q", 0)
+        beta_m0 = Config.ancestry.get("beta_m0", 0.1)
         beta_m = beta_m0 / (1.0 + float(lambda_v))
         m = (1.0 - beta_m) * m + beta_m * u_local
         norm = float(np.linalg.norm(m))
@@ -144,7 +144,7 @@ class EngineAdapter:
         v_arr["h3"][dst] = h3
 
         ancestry = np.array([h0, h1, h2, h3], dtype=np.uint64)
-        return ancestry, m
+        return ancestry, m, mu
 
     # Public API -----------------------------------------------------
     def build_graph(self, graph_json_path: str | Dict[str, Any]) -> None:
@@ -389,6 +389,7 @@ class EngineAdapter:
                     vertex["bit_deque"],
                     packets_struct,
                     edges_struct,
+                    update_p=lccm.layer == "Θ",
                 )
             else:
                 packet_struct = {
@@ -410,6 +411,7 @@ class EngineAdapter:
                     vertex["bit_deque"],
                     packet_struct,
                     edge_struct,
+                    update_p=lccm.layer == "Θ",
                 )
 
             vertex["psi_acc"][:] = psi_acc
@@ -428,7 +430,8 @@ class EngineAdapter:
             )
             entropy = float(-(p_v * np.log2(p_v + 1e-12)).sum()) if len(p_v) else 0.0
             lccm.update_classical_metrics(bit_fraction, entropy, conf)
-            lccm.deliver()
+            is_q = lccm.layer == "Q"
+            lccm.deliver(is_q)
             packets.extend(pkt_list)
 
             intensity_map = {
@@ -444,13 +447,7 @@ class EngineAdapter:
             U_local = U_list[0]
             theta = 0.0
             if lccm.layer == "Q":
-                if len(psi_local):
-                    phases = np.angle(psi_local)
-                    weights = np.abs(psi_local) ** 2
-                    s = np.einsum("i,i->", weights, np.sin(phases))
-                    c = np.einsum("i,i->", weights, np.cos(phases))
-                    theta = float(np.arctan2(s, c))
-                ancestry_arr, m_arr = self._update_ancestry(
+                ancestry_arr, m_arr, mu = self._update_ancestry(
                     dst,
                     edge_id_list[0],
                     depth_arr,
@@ -460,6 +457,7 @@ class EngineAdapter:
                     A_local,
                     U_local,
                 )
+                theta = mu
             else:
                 if self._arrays is not None:
                     v_arr = self._arrays.vertices
@@ -719,17 +717,31 @@ class EngineAdapter:
             if lccm.window_idx != start_windows.get(vid, lccm.window_idx):
                 if self._arrays is not None:
                     psi_acc = data["psi_acc"]
+                    v_arr = self._arrays.vertices
                     psi, EQ = close_window(psi_acc)
-                    self._arrays.vertices["psi"][vid] = psi
+                    v_arr["psi"][vid] = psi
                     psi_acc.fill(0)
-                    self._arrays.vertices["EQ"][vid] = EQ
+                    v_arr["EQ"][vid] = EQ
                     p_v = data["p_v"]
                     H_pv = (
                         float(-(p_v * np.log2(p_v + 1e-12)).sum()) if p_v.size else 0.0
                     )
-                    conf = float(self._arrays.vertices["conf"][vid])
+                    conf = float(v_arr["conf"][vid])
                     E_theta = lccm.k_theta * (1.0 - H_pv)
                     E_C = lccm.k_c * conf
+                    if getattr(lccm, "_lambda_q_prev", 0) == 0:
+                        m = np.array(
+                            [v_arr["m0"][vid], v_arr["m1"][vid], v_arr["m2"][vid]],
+                            dtype=np.float32,
+                        )
+                        delta = Config.ancestry.get("delta_m", 0.02)
+                        m *= 1.0 - delta
+                        norm = float(np.linalg.norm(m))
+                        m /= max(norm, 1e-12)
+                        v_arr["m0"][vid] = m[0]
+                        v_arr["m1"][vid] = m[1]
+                        v_arr["m2"][vid] = m[2]
+                        v_arr["m_norm"][vid] = norm
                     match Config.theta_reset:
                         case "uniform":
                             p_v.fill(1.0 / len(p_v))

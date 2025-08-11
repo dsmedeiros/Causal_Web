@@ -21,34 +21,34 @@ def test_lccm_layer_transitions_with_hysteresis():
 
     # Q -> Θ when λ >= a*W
     lccm.advance_depth(0)
-    lccm.deliver()
+    lccm.deliver(True)
     assert lccm.layer == "Q"
-    lccm.deliver()
+    lccm.deliver(True)
     assert lccm.layer == "Θ"
 
     # Θ -> Q requires λ <= b*W and EQ above threshold for T_hold
     lccm.advance_depth(2)
     lccm.update_eq(1.0)
-    lccm.deliver()
+    lccm.deliver(False)
     assert lccm.layer == "Θ"
     lccm.advance_depth(4)
     lccm.update_eq(1.0)
-    lccm.deliver()
+    lccm.deliver(False)
     assert lccm.layer == "Q"
 
     # Decoherence again for Θ -> C test
     lccm.advance_depth(5)
-    lccm.deliver()
-    lccm.deliver()
+    lccm.deliver(True)
+    lccm.deliver(True)
     assert lccm.layer == "Θ"
 
     # Θ -> C when classical dominance sustained for T_class
     lccm.update_classical_metrics(1.0, 0.0, 1.0)
-    lccm.deliver()
+    lccm.deliver(False)
     assert lccm.layer == "Θ"
     lccm.advance_depth(6)
     lccm.update_classical_metrics(1.0, 0.0, 1.0)
-    lccm.deliver()
+    lccm.deliver(False)
     assert lccm.layer == "C"
 
 
@@ -98,15 +98,15 @@ def test_theta_to_c_requires_sustained_confidence():
 
     for _ in range(2):
         lccm.update_classical_metrics(0.6, 0.1, 0.9)
-        lccm.deliver()
+        lccm.deliver(False)
         assert lccm.layer == "Θ"
 
     lccm.update_classical_metrics(0.6, 0.1, 0.7)
-    lccm.deliver()
+    lccm.deliver(False)
     assert lccm.layer == "Θ"
 
     for _ in range(3):
         lccm.update_classical_metrics(0.6, 0.1, 0.9)
-        lccm.deliver()
+        lccm.deliver(False)
 
     assert lccm.layer == "C"

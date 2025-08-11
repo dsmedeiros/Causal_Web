@@ -35,9 +35,9 @@ def test_theta_reset_uniform():
 
 def test_theta_reset_hold():
     p_final = _run_policy("hold")
-    assert np.allclose(p_final, [0.75, 0.25])
+    assert np.allclose(p_final, [0.5, 0.5])
 
 
 def test_theta_reset_renorm():
     p_final = _run_policy("renorm")
-    assert np.allclose(p_final, [0.75, 0.25])
+    assert np.allclose(p_final, [0.5, 0.5])

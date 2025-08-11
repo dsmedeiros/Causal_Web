@@ -50,6 +50,8 @@ class LCCM:
     layer: str = "Q"
 
     _lambda: int = 0
+    _lambda_q: int = 0
+    _lambda_q_prev: int = 0
     _eq: float = 0.0
     _eq_hold: int = 0
     _bit_fraction: float = 0.0
@@ -79,12 +81,22 @@ class LCCM:
         idx = new_depth // w
         if idx != self.window_idx:
             self.window_idx = idx
+            self._lambda_q_prev = self._lambda_q
             self._lambda = 0
+            self._lambda_q = 0
 
-    def deliver(self) -> None:
-        """Record a packet delivery at the current depth."""
+    def deliver(self, is_q: bool = False) -> None:
+        """Record a packet delivery at the current depth.
+
+        Parameters
+        ----------
+        is_q:
+            Whether the arrival is treated as quantum for fan-in statistics.
+        """
 
         self._lambda += 1
+        if is_q:
+            self._lambda_q += 1
         self._check_transitions()
 
     def update_eq(self, value: float) -> None:

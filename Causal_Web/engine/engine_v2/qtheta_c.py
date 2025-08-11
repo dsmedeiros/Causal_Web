@@ -23,6 +23,7 @@ def deliver_packet(
     packet: dict,
     edge: dict,
     max_deque: int = 8,
+    update_p: bool = True,
 ) -> Tuple[int, np.ndarray, np.ndarray, Tuple[int, float], Tuple[float, float, float]]:
     """Apply Q/Θ/C delivery rules for a single packet.
 
@@ -42,6 +43,8 @@ def deliver_packet(
         Edge parameters ``alpha``, ``phi``, ``A`` and unitary ``U``.
     max_deque:
         Maximum length of ``bit_deque``.
+    update_p:
+        When ``True`` accumulate the probabilistic field ``p_v``.
 
     Returns
     -------
@@ -61,10 +64,11 @@ def deliver_packet(
     psi_rot = np.exp(1j * (phi + A)) * psi_out
     psi_acc = psi_acc + alpha * psi_rot
 
-    p_v = p_v + alpha * np.asarray(packet.get("p"), dtype=np.float32)
-    total = float(np.sum(p_v))
-    if total > 0:
-        p_v = p_v / total
+    if update_p:
+        p_v = p_v + alpha * np.asarray(packet.get("p"), dtype=np.float32)
+        total = float(np.sum(p_v))
+        if total > 0:
+            p_v = p_v / total
 
     bit_deque.append(int(packet.get("bit", 0)))
     while len(bit_deque) > max_deque:
@@ -102,6 +106,7 @@ def deliver_packets_batch(
     packets: dict,
     edges: dict,
     max_deque: int = 8,
+    update_p: bool = True,
 ) -> Tuple[int, np.ndarray, np.ndarray, Tuple[int, float], Tuple[float, float, float]]:
     """Vectorised delivery for packets sharing destination and window.
 
@@ -121,6 +126,8 @@ def deliver_packets_batch(
         Struct-of-arrays edge parameters ``{alpha, phi, A, U}``.
     max_deque:
         Maximum length of ``bit_deque``.
+    update_p:
+        When ``True`` accumulate the probabilistic field ``p_v``.
 
     Returns
     -------
@@ -145,10 +152,11 @@ def deliver_packets_batch(
     phase = np.exp(1j * (phi + A))[:, None]
     psi_rot = phase * out
     psi_acc = psi_acc + (alpha[:, None] * psi_rot).sum(axis=0)
-    p_v = p_v + (alpha[:, None] * p).sum(axis=0)
-    total = float(np.sum(p_v))
-    if total > 0:
-        p_v = p_v / total
+    if update_p:
+        p_v = p_v + (alpha[:, None] * p).sum(axis=0)
+        total = float(np.sum(p_v))
+        if total > 0:
+            p_v = p_v / total
 
     bit_deque.extend(bits.tolist())
     while len(bit_deque) > max_deque:
