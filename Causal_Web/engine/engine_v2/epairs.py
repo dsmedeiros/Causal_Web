@@ -19,6 +19,8 @@ from typing import Dict, Iterable, List, Tuple
 
 import numpy as np
 
+from ..logging.logger import log_record
+
 
 @dataclass
 class Seed:
@@ -52,8 +54,9 @@ class Bridge:
         Reinforcement level for the bridge.
     edge_id:
         Synthetic identifier used when scheduling packets across the
-        bridge. Negative values ensure the ID space does not clash with
-        real edges.
+        bridge.  A unique negative ID is allocated per bridge and
+        remains stable until the bridge is removed, ensuring the ID
+        space does not clash with real edges.
     """
 
     sigma: float
@@ -73,6 +76,9 @@ class EPairs:
         ``sigma_min``.
     ``bridges``
         Mapping of ``(a, b)`` node id pairs to :class:`Bridge` objects.
+
+    ``bridge_created`` and ``bridge_removed`` events are logged via the
+    global logger when bridges form or decay below ``sigma_min``.
 
     Parameters are supplied on construction to avoid global state and to
     make the component easy to test. A ``seed`` may be provided for
@@ -151,17 +157,39 @@ class EPairs:
     def _create_bridge(self, a: int, b: int) -> None:
         key = self._bridge_key(a, b)
         if key not in self.bridges:
-            self.bridges[key] = Bridge(self.sigma0, self._next_bridge_id)
+            edge_id = self._next_bridge_id
+            self.bridges[key] = Bridge(self.sigma0, edge_id)
             self._next_bridge_id -= 1
             self.adjacency.setdefault(a, []).append(b)
             self.adjacency.setdefault(b, []).append(a)
+            log_record(
+                category="event",
+                label="bridge_created",
+                value={
+                    "src": a,
+                    "dst": b,
+                    "sigma": self.sigma0,
+                    "bridge_id": edge_id,
+                },
+            )
 
     def _bridge_key(self, a: int, b: int) -> Tuple[int, int]:
         return (a, b) if a <= b else (b, a)
 
     def _remove_bridge(self, a: int, b: int) -> None:
         key = self._bridge_key(a, b)
-        if key in self.bridges:
+        bridge = self.bridges.get(key)
+        if bridge is not None:
+            log_record(
+                category="event",
+                label="bridge_removed",
+                value={
+                    "src": a,
+                    "dst": b,
+                    "sigma": bridge.sigma,
+                    "bridge_id": bridge.edge_id,
+                },
+            )
             del self.bridges[key]
         for src, dst in ((a, b), (b, a)):
             neigh = self.adjacency.get(src)
