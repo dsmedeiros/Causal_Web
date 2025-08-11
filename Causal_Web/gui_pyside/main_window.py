@@ -318,6 +318,8 @@ class MainWindow(QMainWindow):
                 self.depth_label.setText(str(frame.depth))
             if hasattr(self, "window_label"):
                 self.window_label.setText(str(frame.window))
+            if hasattr(self.sim_canvas, "update_hud"):
+                self.sim_canvas.update_hud(tick, frame.depth, frame.window)
             model_dict = get_graph().to_dict()
         else:
             model_dict = (
@@ -330,6 +332,12 @@ class MainWindow(QMainWindow):
                     self.depth_label.setText(str(snap.get("depth", 0)))
                 if hasattr(self, "window_label"):
                     self.window_label.setText(str(snap.get("window", 0)))
+                if hasattr(self.sim_canvas, "update_hud"):
+                    self.sim_canvas.update_hud(
+                        tick,
+                        snap.get("depth", 0),
+                        snap.get("window", 0),
+                    )
         self.sim_canvas.load_model(GraphModel.from_dict(model_dict))
         if not running:
             self.start_button.setEnabled(get_active_file() is not None)

@@ -370,6 +370,15 @@ class CanvasWidget(QGraphicsView):
         self._connect_start: Optional[NodeItem] = None
         self._connect_dragged: bool = False
         self._temp_edge: Optional[QGraphicsLineItem] = None
+        self._hud_item: Optional[QGraphicsSimpleTextItem] = None
+        if not self.editable:
+            scene = self.scene()
+            if scene is not None:
+                self._hud_item = QGraphicsSimpleTextItem("")
+                self._hud_item.setBrush(QBrush(Qt.white))
+                self._hud_item.setZValue(2)
+                self._hud_item.setPos(5, 5)
+                scene.addItem(self._hud_item)
 
     def load_model(self, model: GraphModel) -> None:
         """Populate the scene from ``model``."""
@@ -382,6 +391,9 @@ class CanvasWidget(QGraphicsView):
         self.nodes.clear()
         self.meta_nodes.clear()
         self.observers.clear()
+        if self._hud_item is not None:
+            scene.addItem(self._hud_item)
+            self._hud_item.setPos(5, 5)
 
         for node_id, data in model.nodes.items():
             x, y = data.get("x", 0.0), data.get("y", 0.0)
@@ -412,7 +424,13 @@ class CanvasWidget(QGraphicsView):
             item = ObserverItem(idx, x, y, targets, self)
             scene.addItem(item)
             item.update_lines()
-            self.observers[idx] = item
+        self.observers[idx] = item
+
+    def update_hud(self, tick: int, depth: int, window: int) -> None:
+        """Update the on-canvas HUD text."""
+
+        if self._hud_item is not None:
+            self._hud_item.setText(f"tick {tick} | depth {depth} | window {window}")
 
     # ---- interaction -------------------------------------------------
     def wheelEvent(self, event: QWheelEvent) -> None:

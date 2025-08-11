@@ -130,3 +130,41 @@ def test_seed_ttl_propagates_and_expires():
     mgr.carry(3, depth_curr=2, neighbours=[4])
     assert 3 not in mgr.seeds
     assert 4 not in mgr.seeds
+
+
+def test_seed_logging(monkeypatch):
+    events = []
+
+    def fake_log_record(category, label, *, value=None, **kwargs):
+        events.append((label, value))
+
+    monkeypatch.setattr(
+        "Causal_Web.engine.engine_v2.epairs.log_record", fake_log_record
+    )
+
+    mgr = EPairs(
+        delta_ttl=1,
+        ancestry_prefix_L=4,
+        theta_max=0.1,
+        sigma0=1.0,
+        lambda_decay=0.5,
+        sigma_reinforce=0.2,
+        sigma_min=0.1,
+    )
+
+    # expiry drop
+    mgr.emit(origin=1, h_value=0b1101_0000, theta=0.0, depth_emit=0, neighbours=[2])
+    mgr.carry(2, depth_curr=1, neighbours=[3])
+
+    # prefix mismatch drop
+    mgr.emit(origin=4, h_value=0b1111_0000, theta=0.0, depth_emit=0, neighbours=[5])
+    mgr.emit(origin=5, h_value=0b0000_0000, theta=0.0, depth_emit=0, neighbours=[5])
+
+    # angle mismatch drop
+    mgr.emit(origin=6, h_value=0b1010_0000, theta=0.0, depth_emit=0, neighbours=[7])
+    mgr.emit(origin=7, h_value=0b1010_1111, theta=1.0, depth_emit=0, neighbours=[7])
+
+    assert any(lbl == "seed_emitted" for lbl, _ in events)
+    assert any(lbl == "seed_dropped" and val["reason"] == "expired" for lbl, val in events)
+    assert any(lbl == "seed_dropped" and val["reason"] == "prefix" for lbl, val in events)
+    assert any(lbl == "seed_dropped" and val["reason"] == "angle" for lbl, val in events)

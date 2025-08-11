@@ -20,6 +20,7 @@ from typing import Dict, Iterable, List, Tuple
 import numpy as np
 
 from ..logging.logger import log_record
+from ...config import Config
 
 
 @dataclass
@@ -82,7 +83,9 @@ class EPairs:
 
     Parameters are supplied on construction to avoid global state and to
     make the component easy to test. A ``seed`` may be provided for
-    deterministic behaviour in routines that rely on randomness.
+    deterministic behaviour in routines that rely on randomness. When
+    omitted, the manager defaults to :data:`Config.run_seed` so runs are
+    reproducible without additional wiring.
     """
 
     def __init__(
@@ -107,7 +110,7 @@ class EPairs:
         self.bridges: Dict[Tuple[int, int], Bridge] = {}
         # adjacency list of active bridge partners
         self.adjacency: Dict[int, List[int]] = {}
-        self._rng = np.random.default_rng(seed)
+        self._rng = np.random.default_rng(seed if seed is not None else Config.run_seed)
         # Synthetic edge identifier allocation for bridges
         self._next_bridge_id = -1
 
@@ -134,8 +137,25 @@ class EPairs:
         expiry = depth_emit + self.delta_ttl
         depth_next = depth_emit + 1
         if depth_next > expiry:
+            log_record(
+                category="event",
+                label="seed_dropped",
+                value={"src": origin, "origin": origin, "reason": "expired"},
+            )
             return
         for n in neighbours:
+            log_record(
+                category="event",
+                label="seed_emitted",
+                value={
+                    "src": origin,
+                    "dst": n,
+                    "origin": origin,
+                    "expiry_depth": expiry,
+                    "h_prefix": prefix,
+                    "theta": theta,
+                },
+            )
             self._place_seed(
                 n,
                 Seed(
@@ -158,8 +178,25 @@ class EPairs:
         depth_next = depth_curr + 1
         for seed in seeds:
             if depth_next > seed.expiry_depth:
+                log_record(
+                    category="event",
+                    label="seed_dropped",
+                    value={"src": site, "origin": seed.origin, "reason": "expired"},
+                )
                 continue
             for n in neighbours:
+                log_record(
+                    category="event",
+                    label="seed_emitted",
+                    value={
+                        "src": site,
+                        "dst": n,
+                        "origin": seed.origin,
+                        "expiry_depth": seed.expiry_depth,
+                        "h_prefix": seed.h_prefix,
+                        "theta": seed.theta,
+                    },
+                )
                 self._place_seed(
                     n,
                     Seed(
@@ -181,12 +218,23 @@ class EPairs:
     def _place_seed(self, site: int, seed: Seed) -> None:
         seeds = self.seeds.setdefault(site, [])
         for other in list(seeds):
-            if (
-                seed.h_prefix == other.h_prefix
-                and abs(seed.theta - other.theta) <= self.theta_max
-            ):
-                self._create_bridge(seed.origin, other.origin)
-                seeds.remove(other)
+            if seed.h_prefix == other.h_prefix:
+                if abs(seed.theta - other.theta) <= self.theta_max:
+                    self._create_bridge(seed.origin, other.origin)
+                    seeds.remove(other)
+                else:
+                    log_record(
+                        category="event",
+                        label="seed_dropped",
+                        value={"src": site, "origin": seed.origin, "reason": "angle"},
+                    )
+                return
+            else:
+                log_record(
+                    category="event",
+                    label="seed_dropped",
+                    value={"src": site, "origin": seed.origin, "reason": "prefix"},
+                )
                 return
         seeds.append(seed)
 
