@@ -150,9 +150,9 @@ class Config:
 
     #: Logging related settings used by the experimental engine.
     logging = {
-        # Probability that an individual edge delivery is recorded.
-        # A value of 0.0 disables per-edge logs while 1.0 logs all deliveries.
-        "sample_edge_rate": 0.0,
+        # Probability that a per-edge ρ/delay update is recorded.
+        # A value of 0.0 disables per-edge logs while 1.0 logs all updates.
+        "sample_rho_rate": 0.0,
         "sample_seed_rate": 1.0,
         "sample_bridge_rate": 1.0,
     }
