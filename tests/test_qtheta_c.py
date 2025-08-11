@@ -53,3 +53,15 @@ def test_intensity_c_layer_only_counts_bits():
         depth, psi_acc, p_v, bits, packet, edge
     )
     assert intensities[2] == 0.0
+
+
+def test_p_v_unchanged_when_update_p_false():
+    depth, psi_acc, p_v = 0, np.zeros(2, dtype=np.complex128), np.array([0.7, 0.3])
+    bits = deque()
+    packet = {"depth_arr": 1, "psi": [1.0, 0.0], "p": [0.1, 0.9], "bit": 1}
+    edge = {"alpha": 1.0, "phi": 0.0, "A": 0.0, "U": [[1.0, 0.0], [0.0, 1.0]]}
+
+    _, _, p_out, _, _, _, _ = deliver_packet(
+        depth, psi_acc, p_v, bits, packet, edge, update_p=False
+    )
+    assert np.allclose(p_out, p_v)
