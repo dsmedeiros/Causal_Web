@@ -178,6 +178,7 @@ $$
 * Ensures integrality, positivity, and no singularities.
 
 ## 4.4 Layer intensities (bounded)
+Intensity $I$ is taken from the current layer $\ell(v)$ at delivery.
 
 * **Q:** $I = \|\,U_e\,\psi\,\|_2^2 \le 1$.
 * **Θ:** $I = \|p\|_1$ (with $\sum p\le 1$ after mixing).
@@ -196,6 +197,8 @@ W(v) = W_0
 $$
 
 where $\bar\rho_v$ is the mean $\rho$ of edges incident to $v$. $W(v)\ge 1$.
+
+* **Θ reset policy:** $\theta_\text{reset}\in\{\text{uniform},\text{renorm},\text{hold}\}$ chooses how $p_v$ is reset when the window closes.
 
 ## 5.2 Thresholds & timers
 
@@ -240,7 +243,8 @@ Two seeds **collide** at a vertex and **bind** iff:
 Binding creates a **transient bridge edge** with:
 
 * initial $\sigma=\sigma_0$;
-* local effective delay $d_\text{bridge}\ge 1$ (e.g., median of neighbor $d_\text{eff}$);
+* local effective delay
+  $d_\text{bridge}(u,v)=\max\!\Big\{1,\Big\lfloor\operatorname{median}\{d_\text{eff}(e): e\text{ incident to }u\text{ or }v\}\Big\rfloor\Big\}$;
 * **stable synthetic id** (negative id space) for determinism/logs.
 
 Bridges are scheduled **exactly like edges**.
@@ -284,7 +288,18 @@ Each vertex maintains:
 
 * **Hash** $h_v$ (rolling 256-bit; implementation uses 4×64).
 * **Moment** $m_v\in\mathbb R^3$ (phase-direction statistics).
-  Updated on Q-arrivals using only local payloads.
+
+On each Q-layer delivery to $v$ with phase $\theta$ and arrival-depth $d_\text{arr}$:
+
+$$
+\begin{aligned}
+\text{seed} &= (v \ll 32) \oplus d_\text{arr} \oplus \operatorname{round}(\theta\cdot 1000), \\
+h_v &\leftarrow \operatorname{roll}(h_v) \oplus \operatorname{splitmix64}(\text{seed}), \\
+m_v &\leftarrow 0.9\, m_v + 0.1\,(\cos\theta,\sin\theta,0).
+\end{aligned}
+$$
+
+No updates occur on Θ or C deliveries.
 
 ## 8.2 Source hidden variable
 
