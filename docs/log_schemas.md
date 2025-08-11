@@ -207,7 +207,8 @@ The following lists describe the JSON keys recorded in each output file.
 - keyed by tick mapping nodes to stabilised law-wave frequencies.
 
 #### `layer_transition_log.json`
-- `tick`, `node`, source `from` layer, destination `to` layer and `trace_id`.
+- `tick`, `node`, source `from` layer, destination `to` layer, `reason`,
+  `window_idx`, `Lambda_v`, `EQ` and `H_p`.
 
 #### `layer_transition_events.json`
 - counts of layer transitions summarised as
@@ -241,8 +242,8 @@ The following lists describe the JSON keys recorded in each output file.
 #### `entangled_measurement.json`
 - event-driven record with `tick_id`, `observer_id`, `entangled_id`,
   `measurement_setting` and `binary_outcome` for each detected entangled tick.
-- optional fields: `mode`, `kappa_a`, `kappa_xi`, `h_prefix_len`,
-  `delta_ttl`, `batch_id`, `setting`, `outcome`.
+- optional fields: `mi_mode`, `kappa_a`, `kappa_xi`, `h_prefix_len`,
+  `batch_id`, `delta_ttl`, `setting`, `outcome`.
 
 #### `entangled_log.jsonl`
 - JSON lines file capturing entangled tick activity. `label` values include

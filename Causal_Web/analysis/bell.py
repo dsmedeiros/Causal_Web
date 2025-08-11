@@ -49,7 +49,7 @@ def compute_bell_statistics(
                 payload = obj.get("payload") or obj.get("value") or {}
                 if not metadata:
                     for key in [
-                        "mode",
+                        "mi_mode",
                         "kappa_a",
                         "kappa_xi",
                         "h_prefix_len",
