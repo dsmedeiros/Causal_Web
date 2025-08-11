@@ -22,6 +22,8 @@ also be throttled by setting `Config.logging.sample_edge_rate`
 (0.0–1.0) which records only a fraction of per-hop `edge_delivery`
 events; a value of `0.0` disables per-edge logs while still emitting a
 per-window summary of edge activity.
+Seed and bridge events can be sampled in the same way using
+`Config.logging.sample_seed_rate` and `Config.logging.sample_bridge_rate`.
 
 To cap memory growth for long coherent lines, the engine detects tensor clusters
 and represents them as Matrix Product States. Local edge unitaries contract with

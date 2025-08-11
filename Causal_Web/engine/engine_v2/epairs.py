@@ -16,6 +16,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Dict, Iterable, List, Sequence, Tuple
+from array import array
 
 import numpy as np
 
@@ -113,13 +114,55 @@ class EPairs:
         self.sigma_min = sigma_min
         self.seeds: Dict[int, List[Seed]] = {}
         self.bridges: Dict[Tuple[int, int], Bridge] = {}
-        # adjacency list of active bridge partners
-        self.adjacency: Dict[int, List[int]] = {}
+        # adjacency of active bridge partners stored in fixed arrays
+        self.adjacency: Dict[int, array] = {}
+        self._adj_free: Dict[int, List[int]] = {}
         self._rng = np.random.default_rng(seed if seed is not None else Config.run_seed)
         # Synthetic edge identifier allocation for bridges
         self._next_bridge_id = -1
         # Cache of incident edge delays per vertex for bridge delay estimation
         self._incident_delays: Dict[int, List[int]] = {}
+
+    # Internal helpers -------------------------------------------------
+    def _log_seed(self, label: str, value: Dict[str, int | float]) -> None:
+        rate = Config.logging.get("sample_seed_rate", 1.0)
+        if self._rng.random() < rate:
+            log_record(category="event", label=label, value=value)
+
+    def _log_bridge(self, label: str, value: Dict[str, int | float]) -> None:
+        rate = Config.logging.get("sample_bridge_rate", 1.0)
+        if self._rng.random() < rate:
+            log_record(category="event", label=label, value=value)
+
+    def _add_adj(self, src: int, dst: int) -> None:
+        arr = self.adjacency.setdefault(src, array("i"))
+        free = self._adj_free.setdefault(src, [])
+        if free:
+            idx = free.pop()
+            arr[idx] = dst
+        else:
+            arr.append(dst)
+
+    def _del_adj(self, src: int, dst: int) -> None:
+        arr = self.adjacency.get(src)
+        if arr is None:
+            return
+        for i, val in enumerate(arr):
+            if val == dst:
+                arr[i] = -1
+                self._adj_free.setdefault(src, []).append(i)
+                break
+        if all(v == -1 for v in arr):
+            del self.adjacency[src]
+            self._adj_free.pop(src, None)
+
+    def partners(self, site: int) -> List[int]:
+        """Return active bridge partners for ``site``."""
+
+        arr = self.adjacency.get(site)
+        if arr is None:
+            return []
+        return [v for v in arr if v != -1]
 
     # ------------------------------------------------------------------
     # seed handling
@@ -149,16 +192,14 @@ class EPairs:
             depth_next = depth_emit + d_eff
             dst = int(edges["dst"][edge_id])
             if depth_next > expiry:
-                log_record(
-                    category="event",
-                    label="seed_dropped",
-                    value={"src": origin, "origin": origin, "reason": "expired"},
+                self._log_seed(
+                    "seed_dropped",
+                    {"src": origin, "origin": origin, "reason": "expired"},
                 )
                 continue
-            log_record(
-                category="event",
-                label="seed_emitted",
-                value={
+            self._log_seed(
+                "seed_emitted",
+                {
                     "src": origin,
                     "dst": dst,
                     "origin": origin,
@@ -197,17 +238,15 @@ class EPairs:
                 d_eff = int(edges["d_eff"][edge_id]) if "d_eff" in edges else 1
                 depth_next = depth_curr + d_eff
                 if depth_next > seed.expiry_depth:
-                    log_record(
-                        category="event",
-                        label="seed_dropped",
-                        value={"src": site, "origin": seed.origin, "reason": "expired"},
+                    self._log_seed(
+                        "seed_dropped",
+                        {"src": site, "origin": seed.origin, "reason": "expired"},
                     )
                     continue
                 dst = int(edges["dst"][edge_id])
-                log_record(
-                    category="event",
-                    label="seed_emitted",
-                    value={
+                self._log_seed(
+                    "seed_emitted",
+                    {
                         "src": site,
                         "dst": dst,
                         "origin": seed.origin,
@@ -260,17 +299,15 @@ class EPairs:
                     self._create_bridge(seed.origin, other.origin)
                     seeds.remove(other)
                 else:
-                    log_record(
-                        category="event",
-                        label="seed_dropped",
-                        value={"src": site, "origin": seed.origin, "reason": "angle"},
+                    self._log_seed(
+                        "seed_dropped",
+                        {"src": site, "origin": seed.origin, "reason": "angle"},
                     )
                 return
             else:
-                log_record(
-                    category="event",
-                    label="seed_dropped",
-                    value={"src": site, "origin": seed.origin, "reason": "prefix"},
+                self._log_seed(
+                    "seed_dropped",
+                    {"src": site, "origin": seed.origin, "reason": "prefix"},
                 )
                 return
         seeds.append(seed)
@@ -300,12 +337,11 @@ class EPairs:
             edge_id = self._next_bridge_id
             self.bridges[key] = Bridge(self.sigma0, d_bridge, edge_id)
             self._next_bridge_id -= 1
-            self.adjacency.setdefault(a, []).append(b)
-            self.adjacency.setdefault(b, []).append(a)
-            log_record(
-                category="event",
-                label="bridge_created",
-                value={
+            self._add_adj(a, b)
+            self._add_adj(b, a)
+            self._log_bridge(
+                "bridge_created",
+                {
                     "src": a,
                     "dst": b,
                     "sigma": self.sigma0,
@@ -320,10 +356,9 @@ class EPairs:
         key = self._bridge_key(a, b)
         bridge = self.bridges.get(key)
         if bridge is not None:
-            log_record(
-                category="event",
-                label="bridge_removed",
-                value={
+            self._log_bridge(
+                "bridge_removed",
+                {
                     "src": a,
                     "dst": b,
                     "sigma": bridge.sigma,
@@ -332,11 +367,7 @@ class EPairs:
             )
             del self.bridges[key]
         for src, dst in ((a, b), (b, a)):
-            neigh = self.adjacency.get(src)
-            if neigh and dst in neigh:
-                neigh.remove(dst)
-                if not neigh:
-                    del self.adjacency[src]
+            self._del_adj(src, dst)
 
     # ------------------------------------------------------------------
     # bridge handling

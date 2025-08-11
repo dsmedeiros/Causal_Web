@@ -50,8 +50,10 @@ def test_seed_binding_creates_bridge():
 def test_bridge_reinforcement_and_decay():
     mgr = _make_manager()
     mgr.bridges[(1, 2)] = Bridge(0.3)
-    mgr.adjacency[1] = [2]
-    mgr.adjacency[2] = [1]
+    from array import array
+
+    mgr.adjacency[1] = array("i", [2])
+    mgr.adjacency[2] = array("i", [1])
     mgr.decay_all()
     mgr.reinforce(1, 2)
     # sigma: (1-0.5)*0.3 + 0.2 = 0.35 > sigma_min -> bridge persists

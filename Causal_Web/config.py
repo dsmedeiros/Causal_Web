@@ -107,6 +107,8 @@ class Config:
         "zeta2": 0.3,
         "a": 0.7,
         "b": 0.4,
+        "k_theta": 0.7,
+        "k_c": 0.4,
         "T_hold": 2.0,
         "C_min": 0.1,
     }
@@ -143,6 +145,8 @@ class Config:
         # Probability that an individual edge delivery is recorded.
         # A value of 0.0 disables per-edge logs while 1.0 logs all deliveries.
         "sample_edge_rate": 0.0,
+        "sample_seed_rate": 1.0,
+        "sample_bridge_rate": 1.0,
     }
 
     # Mapping of ``category`` -> {``label``: bool} controlling which logs are
