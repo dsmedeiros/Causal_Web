@@ -448,7 +448,12 @@ class EngineAdapter:
             U_local = edge_list[0]["U"]
             theta = 0.0
             if lccm.layer == "Q":
-                theta = float(np.angle(psi_local[0])) if len(psi_local) else 0.0
+                if len(psi_local):
+                    phases = np.angle(psi_local)
+                    weights = np.abs(psi_local) ** 2
+                    s = np.einsum("i,i->", weights, np.sin(phases))
+                    c = np.einsum("i,i->", weights, np.cos(phases))
+                    theta = float(np.arctan2(s, c))
                 ancestry_arr, m_arr = self._update_ancestry(
                     dst,
                     edge_id_list[0],

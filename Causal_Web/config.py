@@ -51,7 +51,8 @@ class Config:
         Policy controlling how the Θ distribution ``p_v`` is reset when a
         vertex window closes. Supported values are ``"uniform"`` to reset to
         an even distribution, ``"renorm"`` to normalise the existing values
-        and ``"hold"`` to leave the distribution untouched.
+        and ``"hold"`` to leave the distribution untouched. Defaults to
+        ``"renorm"``.
     """
 
     # Base directories for package resources
@@ -135,7 +136,7 @@ class Config:
     }
 
     #: Reset policy for Θ distribution after window closure
-    theta_reset = "uniform"
+    theta_reset = "renorm"
 
     #: Logging related settings used by the experimental engine.
     logging = {

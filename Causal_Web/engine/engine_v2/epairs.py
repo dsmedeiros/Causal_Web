@@ -229,9 +229,28 @@ class EPairs:
     # Internal helpers -------------------------------------------------
 
     def _prefix(self, h_value: int) -> int:
+        """Return the first ``L`` MSBs of a 64-bit ancestry lane.
+
+        Parameters
+        ----------
+        h_value:
+            Value of the ``h0`` ancestry lane.  ``h_value`` is cast to
+            ``uint64`` to ensure consistent semantics irrespective of the
+            magnitude of the input integer.
+
+        Returns
+        -------
+        int
+            The ``L``-bit prefix extracted from the most significant bits of
+            ``h_value``.  ``L`` values ``<= 0`` yield ``0``.
+        """
+
         if self.L <= 0:
             return 0
-        return (h_value >> (64 - self.L)) & ((1 << self.L) - 1)
+
+        h0 = np.uint64(h_value)
+        prefix = (h0 >> np.uint64(64 - self.L)) & np.uint64((1 << self.L) - 1)
+        return int(prefix)
 
     def _place_seed(self, site: int, seed: Seed) -> None:
         seeds = self.seeds.setdefault(site, [])
