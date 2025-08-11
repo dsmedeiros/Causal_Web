@@ -176,7 +176,7 @@ class EngineAdapter:
                 "A": 0.0,
                 "U": np.eye(dim, dtype=np.complex64),
             }
-            if edges and edge_id < len(edges.get("alpha", [])):
+            if edges and 0 <= edge_id < len(edges.get("alpha", [])):
                 edge_params.update(
                     {
                         "alpha": float(edges["alpha"][edge_id]),
@@ -395,10 +395,14 @@ class EngineAdapter:
                             "leak_contrib": None,
                             "is_bridge": True,
                             "sigma": bridge.sigma,
+                            "edge_id": bridge.edge_id,
                         },
                     )
                 self._scheduler.push(
-                    depth_next, other, -1, Packet(src=dst, dst=other, payload=payload)
+                    depth_next,
+                    other,
+                    bridge.edge_id,
+                    Packet(src=dst, dst=other, payload=payload),
                 )
                 self._epairs.reinforce(dst, other)
             events += 1
@@ -458,7 +462,17 @@ class EngineAdapter:
                     conf = float(self._arrays.vertices["conf"][vid])
                     E_theta = lccm.a * (1.0 - H_pv)
                     E_C = lccm.b * conf
-                    p_v.fill(1.0 / len(p_v))
+                    match Config.theta_reset:
+                        case "uniform":
+                            p_v.fill(1.0 / len(p_v))
+                        case "renorm":
+                            total = float(p_v.sum())
+                            if total > 0.0:
+                                p_v /= total
+                        case "hold":
+                            pass
+                        case _:
+                            p_v.fill(1.0 / len(p_v))
                     self._arrays.vertices["p"][vid] = p_v
                     self._arrays.vertices["bit"][vid] = 0
                     self._arrays.vertices["conf"][vid] = 0.0

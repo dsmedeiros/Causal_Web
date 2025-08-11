@@ -46,6 +46,11 @@ class Config:
         Mutual information gate parameters for Bell pair matching. Supported
         keys include ``mi_mode``, ``kappa_a``, ``kappa_xi``, ``beta_m`` and
         ``beta_h``.
+    theta_reset:
+        Policy controlling how the Θ distribution ``p_v`` is reset when a
+        vertex window closes. Supported values are ``"uniform"`` to reset to
+        an even distribution, ``"renorm"`` to normalise the existing values
+        and ``"hold"`` to leave the distribution untouched.
     """
 
     # Base directories for package resources
@@ -127,6 +132,9 @@ class Config:
         "beta_m": 0.0,
         "beta_h": 0.0,
     }
+
+    #: Reset policy for Θ distribution after window closure
+    theta_reset = "uniform"
 
     #: Logging related settings used by the experimental engine.
     logging = {
