@@ -116,3 +116,9 @@ def test_delta_ttl_scales_with_W0(tmp_path):
 
 def test_theta_reset_default():
     assert Config.theta_reset == "renorm"
+
+
+def test_default_ancestry_values():
+    anc = Config.ancestry
+    assert anc["beta_m0"] == 0.1
+    assert anc["delta_m"] == 0.02

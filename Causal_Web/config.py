@@ -43,6 +43,10 @@ class Config:
         ``delta_ttl``, ``ancestry_prefix_L``, ``theta_max``, ``sigma0``,
         ``lambda_decay``, ``sigma_reinforce`` and ``sigma_min`` shape the
         dynamics.
+    ancestry:
+        Parameters for local ancestry fields. ``beta_m0`` sets the base
+        down-weight applied to the phase moment while ``delta_m`` controls the
+        decay applied when a window closes without any quantum arrivals.
     bell:
         Mutual information gate parameters for Bell pair matching. Supported
         keys include ``mi_mode``, ``kappa_a``, ``kappa_xi``, ``beta_m`` and
@@ -127,6 +131,10 @@ class Config:
         "lambda_decay": 0.05,
         "sigma_reinforce": 0.1,
         "sigma_min": 1e-3,
+    }
+    ancestry = {
+        "beta_m0": 0.1,
+        "delta_m": 0.02,
     }
     bell = {
         "enabled": False,

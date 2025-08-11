@@ -108,14 +108,14 @@ def test_gate3_lccm_hysteresis_transitions():
         T_class=10,
     )
     lccm.advance_depth(0)
-    lccm.deliver()
-    lccm.deliver()
+    lccm.deliver(True)
+    lccm.deliver(True)
     assert lccm.layer == "Θ"
     lccm.update_eq(1.0)
     lccm.advance_depth(4)
-    lccm.deliver()
+    lccm.deliver(False)
     lccm.advance_depth(6)
-    lccm.deliver()
+    lccm.deliver(False)
     assert lccm.layer == "Q"
 
 

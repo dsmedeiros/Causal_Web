@@ -68,6 +68,10 @@
         "beta_m": 0.0,
         "beta_h": 0.0,
     },
+    "ancestry": {
+        "beta_m0": 0.1,
+        "delta_m": 0.02
+    },
     "theta_reset": "renorm",
     "propagation_control": {
         "enable_sip_child": true,
