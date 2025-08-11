@@ -58,8 +58,11 @@ def deliver_packet(
     U = np.asarray(edge.get("U"), dtype=np.complex64)
     psi = np.asarray(packet.get("psi"), dtype=np.complex64)
     alpha = np.float32(edge.get("alpha", 1.0))
-    coeff = alpha * np.exp(1j * np.float32(edge.get("phi", 0.0) + edge.get("A", 0.0)))
-    psi_acc = psi_acc + coeff * (U @ psi)
+    phi = np.float32(edge.get("phi", 0.0))
+    A = np.float32(edge.get("A", 0.0))
+    psi_out = U @ psi
+    psi_rot = np.exp(1j * (phi + A)) * psi_out
+    psi_acc = psi_acc + alpha * psi_rot
 
     p_v = p_v + alpha * np.asarray(packet.get("p"), dtype=np.float32)
     total = float(np.sum(p_v))
@@ -74,7 +77,7 @@ def deliver_packet(
     bit = 1 if ones >= zeros else 0
     conf = abs(ones - zeros) / len(bit_deque)
 
-    q_intensity = min(1.0, float(np.linalg.norm(U @ psi) ** 2))
+    q_intensity = min(1.0, float(np.linalg.norm(psi_rot) ** 2))
     theta_intensity = min(1.0, float(np.sum(np.abs(packet.get("p", [])))))
     c_intensity = bit
     if layer == "Q":
@@ -149,9 +152,11 @@ def deliver_packets_batch(
     alpha = np.asarray(edges.get("alpha", 1.0), dtype=np.float32)
     phi = np.asarray(edges.get("phi", 0.0), dtype=np.float32)
     A = np.asarray(edges.get("A", 0.0), dtype=np.float32)
-    coeff = alpha * np.exp(1j * (phi + A)).astype(np.complex64)
 
-    psi_acc = psi_acc + np.einsum("n,nij,nj->i", coeff, U, psi)
+    out = np.einsum("nij,nj->ni", U, psi)
+    phase = np.exp(1j * (phi + A))[:, None]
+    psi_rot = phase * out
+    psi_acc = psi_acc + (alpha[:, None] * psi_rot).sum(axis=0)
     p_v = p_v + (alpha[:, None] * p).sum(axis=0)
     total = float(np.sum(p_v))
     if total > 0:
@@ -165,8 +170,7 @@ def deliver_packets_batch(
     bit = 1 if ones >= zeros else 0
     conf = abs(ones - zeros) / len(bit_deque)
 
-    out = np.einsum("nij,nj->ni", U, psi)
-    q_intensity = min(1.0, float(np.linalg.norm(out) ** 2))
+    q_intensity = min(1.0, float(np.linalg.norm(psi_rot) ** 2))
     theta_intensity = min(1.0, float(np.sum(np.abs(p))))
     c_intensity = bit
     if layer == "Q":

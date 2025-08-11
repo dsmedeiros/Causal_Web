@@ -21,6 +21,7 @@ def test_entropy_meter_decreases_with_entropy():
         b=0.0,
         C_min=0.0,
         f_min=1.0,
+        conf_min=0.0,
         H_max=1.0,
         T_hold=1,
         T_class=1,

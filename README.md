@@ -193,6 +193,10 @@ size ``W(v)`` from vertex degree and local density and transitions between
 quantum ``Q``, decohered ``Θ`` and classical ``C`` layers with simple hysteresis
 timers.  A lightweight loader converts graph JSON into struct-of-arrays via
 ``engine_v2.loader.load_graph_arrays`` to prime this core.
+The LCCM recomputes the mean incident edge density ``ρ`` at every window
+boundary so that subsequent window sizes adapt to current traffic.  Classical
+dominance (Θ→C) additionally requires the majority-vote confidence to exceed
+``conf_min`` alongside the existing bit fraction and entropy thresholds.
 
 The `density_calc` option controls how edge density is computed. Set one of:
 

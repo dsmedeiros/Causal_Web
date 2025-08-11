@@ -19,9 +19,10 @@ class LCCM:
 
     Parameters defining the window function and transition thresholds are
     provided at construction time.  ``deg`` represents the vertex out-degree
-    while ``rho_mean`` is the mean local density used in ``W(v)``.  The public
-    attributes ``depth``, ``window_idx`` and ``layer`` expose the current state
-    for callers.
+    while ``rho_mean`` is the mean local density used in ``W(v)`` and
+    ``conf_min`` is the minimum bit-majority confidence required for
+    Θ→C transitions.  The public attributes ``depth``, ``window_idx`` and
+    ``layer`` expose the current state for callers.
     """
 
     W0: int
@@ -32,6 +33,7 @@ class LCCM:
     b: float
     C_min: float
     f_min: float
+    conf_min: float
     H_max: float
     T_hold: int
     T_class: int
@@ -46,6 +48,7 @@ class LCCM:
     _eq_hold: int = 0
     _bit_fraction: float = 0.0
     _entropy: float = 0.0
+    _confidence: float = 0.0
     _class_timer: int = 0
 
     # ------------------------------------------------------------------
@@ -83,11 +86,24 @@ class LCCM:
 
         self._eq = value
 
-    def update_classical_metrics(self, bit_fraction: float, entropy: float) -> None:
-        """Update metrics used for Θ→C transitions."""
+    def update_classical_metrics(
+        self, bit_fraction: float, entropy: float, confidence: float
+    ) -> None:
+        """Update metrics used for Θ→C transitions.
+
+        Parameters
+        ----------
+        bit_fraction:
+            Fraction of ``1`` bits observed within the current window.
+        entropy:
+            Shannon entropy of the classical distribution ``p``.
+        confidence:
+            Majority-vote confidence of the recent bits.
+        """
 
         self._bit_fraction = bit_fraction
         self._entropy = entropy
+        self._confidence = confidence
 
     # Internal helpers -------------------------------------------------
     def _check_transitions(self) -> None:
@@ -111,7 +127,11 @@ class LCCM:
                 return
 
             # Classical dominance toward C
-            if self._bit_fraction >= self.f_min and self._entropy <= self.H_max:
+            if (
+                self._bit_fraction >= self.f_min
+                and self._confidence >= self.conf_min
+                and self._entropy <= self.H_max
+            ):
                 self._class_timer += 1
             else:
                 self._class_timer = 0
