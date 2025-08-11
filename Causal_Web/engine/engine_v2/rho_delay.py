@@ -12,6 +12,8 @@ from __future__ import annotations
 import math
 from typing import Iterable, List, Tuple
 
+import numpy as np
+
 
 def diffuse(rho: List[float], weight: float) -> List[float]:
     """Diffuse density values across neighbours.
@@ -61,7 +63,9 @@ def update_rho_delay(
     rho:
         Current density on the edge.
     neighbours:
-        Densities of neighbouring edges used for diffusion.
+        Densities of neighbouring edges used for diffusion. If provided as a
+        NumPy array the mean is computed via vectorised operations to reduce
+        Python overhead.
     intensity:
         External input contribution ``I``.
     alpha_d, alpha_leak, eta:
@@ -75,8 +79,11 @@ def update_rho_delay(
         Updated ``rho`` and integer ``d_eff``.
     """
 
-    nbr_list = list(neighbours)
-    mean = sum(nbr_list) / len(nbr_list) if nbr_list else 0.0
+    if isinstance(neighbours, np.ndarray):
+        mean = float(neighbours.mean()) if neighbours.size else 0.0
+    else:
+        nbr_list = list(neighbours)
+        mean = sum(nbr_list) / len(nbr_list) if nbr_list else 0.0
     rho = (1 - alpha_d - alpha_leak) * rho + alpha_d * mean + eta * intensity
     rho = max(0.0, rho)
     d_eff = max(1, int(round(d0 + gamma * math.log(1 + rho / rho0))))
