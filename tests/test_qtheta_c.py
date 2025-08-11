@@ -16,7 +16,7 @@ def test_deliver_packet_updates_fields():
     }
 
     depth, psi_acc, p_v, (bit, conf), intensity = deliver_packet(
-        depth, psi_acc, p_v, bits, packet, edge
+        depth, psi_acc, p_v, bits, packet, edge, "Q"
     )
 
     assert depth == 2
