@@ -109,6 +109,7 @@ def close_window(psi_acc: np.ndarray) -> Tuple[np.ndarray, float]:
         psi = psi_acc / np.sqrt(EQ)
     else:
         psi = psi_acc.copy()
+    psi = np.where(np.isfinite(psi), psi, np.zeros_like(psi))
     return psi, EQ
 
 

@@ -184,9 +184,10 @@ parameters set decay and reinforcement dynamics. `decay_interval` controls how
 often bridges decay and `decay_on_window_close` toggles a decay step when a
 window closes. `max_seeds_per_site` bounds how many unmatched seeds a vertex
 retains, evicting the oldest when full. An `overflow_drops` counter records how
-many seeds are removed due to this limit for post-run diagnostics. `emit_per_delivery` enables a
-high-fidelity mode where seeds emit on each Q-delivery instead of once per
-batch. The `ancestry` group tunes
+many seeds are removed due to this limit for post-run diagnostics.
+`emit_per_delivery` enables a high-fidelity mode where seeds emit on each
+Q-delivery instead of the default moment-angle emission once per
+vertex-window. The `ancestry` group tunes
 phase-moment updates and decay. `bell` sets mutual information gates for Bell
 pair matching. Bridge creation and removal now emit `bridge_created` and
 `bridge_removed` events (carrying a stable synthetic `bridge_id` and final `σ`),

@@ -167,6 +167,10 @@ $$
 * $\alpha_{\text{leak}}\in[0,1)$: sink term.
 * $\eta$: injection scale from **intensity** $I$.
 
+*Implementation knob*: choose the injection set with
+`inject_mode \in \{\text{"incoming"},\text{"incident"},\text{"outgoing"}\}`
+(default `incoming`).
+
 ## 4.3 Effective delay (saturating)
 
 $$
@@ -229,6 +233,9 @@ On Q-delivery at $v$, emit **seeds** along outgoing edges with:
 * **Ancestry prefix**: match key from $h_v$ (first $L$ bits).
 * **Angle tag**: local phase proxy $\theta_v$.
 * **Expiry by depth:** $d_\text{exp} = d_\text{emit} + \Delta$.
+
+*Implementation note*: by default, a vertex emits one seed per window using its
+moment angle; enabling `emit_per_delivery` switches to per-delivery emission.
 
 A seed forwarded across an edge with $d_\text{eff}$ computes $d_\text{next}=d_\text{curr}+d_\text{eff}$ and **continues only if** $d_\text{next}\le d_\text{exp}$. Otherwise it **drops** (strict locality in arrival-depth).
 
