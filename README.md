@@ -60,6 +60,8 @@ via a Monte-Carlo path sampler over the graph's causal structure.
   experiment utilities and configuration knobs.
 - Metrics logger now emits `summary_invariants.json` with pass rates for gate
   invariants.
+- Replaced legacy `NodeManager` with v2 `EngineAdapter` and removed the former
+  from the public API.
 
 ## Table of Contents
 - [Quick Start](#quick-start)

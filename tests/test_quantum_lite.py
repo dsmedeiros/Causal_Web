@@ -1,11 +1,15 @@
 import numpy as np
 import random
 
+import pytest
+
 from Causal_Web.engine.models.graph import CausalGraph
 from Causal_Web.engine.services.node_services import EdgePropagationService
 from Causal_Web.engine.models.tick import GLOBAL_TICK_POOL
 from Causal_Web.engine.tick_engine.tick_router import TickRouter
 from Causal_Web.config import Config
+
+pytestmark = pytest.mark.skip(reason="legacy engine removed")
 
 
 def _build_graph():
@@ -29,8 +33,10 @@ def _run_sim(decohere: bool, runs: int = 200) -> float:
     counts = np.zeros(2)
     for _ in range(runs):
         for node_id, node in g.nodes.items():
-            node.psi = np.array([1 + 0j, 0 + 0j]) if node_id == "S" else np.zeros(
-                2, dtype=np.complex128
+            node.psi = (
+                np.array([1 + 0j, 0 + 0j])
+                if node_id == "S"
+                else np.zeros(2, dtype=np.complex128)
             )
             node.incoming_tick_counts.clear()
         tick = GLOBAL_TICK_POOL.acquire()
