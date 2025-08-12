@@ -88,7 +88,8 @@ def _energy_total() -> float:
     )
     E_theta = lccm.a * (1.0 - H_pv)
     E_C = lccm.b * conf
-    return EQ + E_theta + E_C
+    E_rho = 1.0 * 1.0
+    return EQ + E_theta + E_C + E_rho
 
 
 def run_gates(config: Dict[str, float], which: List[int]) -> Dict[str, float]:

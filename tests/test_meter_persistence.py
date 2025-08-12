@@ -15,3 +15,4 @@ def test_theta_c_meters_persist():
     v_arr = adapter._arrays.vertices
     assert np.isclose(v_arr["E_theta"][0], lccm.k_theta)
     assert np.isclose(v_arr["E_C"][0], lccm.k_c)
+    assert np.isclose(v_arr["E_rho"][0], 0.0)

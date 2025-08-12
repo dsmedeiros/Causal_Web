@@ -436,6 +436,10 @@ class EngineAdapter:
                 c_int = float(b_i)
                 pkt_intensities.append((q_int, theta_int, c_int))
 
+            theta_vals = [float(np.sum(np.abs(p_i))) for p_i in p_list]
+            theta_mean = float(np.mean(theta_vals)) if theta_vals else 0.0
+            theta_mean = min(1.0, theta_mean)
+
             if len(pkt_list) > 1:
                 (
                     depth_v,
@@ -508,7 +512,9 @@ class EngineAdapter:
             for idx, eid in enumerate(edge_id_list):
                 edge_intensity[int(eid)] = pkt_intensities[idx]
 
-            if pkt_intensities:
+            if inject_mode != "incoming" and lccm.layer == "Θ":
+                intensity = theta_mean
+            elif pkt_intensities:
                 if lccm.layer in layer_idx_map:
                     idx = layer_idx_map[lccm.layer]
                     values = [pi[idx] for pi in pkt_intensities]
@@ -667,6 +673,11 @@ class EngineAdapter:
                         "H_p": H_pv,
                     },
                 )
+                if prev_layer == "C" and lccm.layer != "C":
+                    if self._arrays is not None:
+                        self._arrays.vertices["bit"][dst] = 0
+                        self._arrays.vertices["conf"][dst] = 0.0
+                    vertex["bit_deque"].clear()
 
             adj = self._arrays.adjacency if self._arrays else {}
             mode = inject_mode
@@ -961,8 +972,9 @@ class EngineAdapter:
                         case _:
                             p_v.fill(1.0 / len(p_v))
                     self._arrays.vertices["p"][vid] = p_v
-                    self._arrays.vertices["bit"][vid] = 0
-                    self._arrays.vertices["conf"][vid] = 0.0
+                    if lccm.layer != "C":
+                        self._arrays.vertices["bit"][vid] = 0
+                        self._arrays.vertices["conf"][vid] = 0.0
                     v_arr["E_theta"][vid] = E_theta
                     v_arr["E_C"][vid] = E_C
                     data["bit_deque"].clear()
@@ -978,12 +990,16 @@ class EngineAdapter:
                         rho_mean = 0.0
                     self._arrays.vertices["rho_mean"][vid] = rho_mean
                     lccm.rho_mean = rho_mean
+                    k_rho = Config.windowing.get("k_rho", 1.0)
+                    E_rho = k_rho * rho_mean
+                    v_arr["E_rho"][vid] = E_rho
                     base_deg = data.get("base_deg", lccm.deg)
                     lccm.deg = base_deg + len(self._epairs.partners(vid))
                 else:
                     EQ = lccm._eq
                     E_theta = 0.0
                     E_C = 0.0
+                    E_rho = 0.0
                 log_record(
                     category="event",
                     label="vertex_window_close",
@@ -995,6 +1011,7 @@ class EngineAdapter:
                         "H_p": H_pv,
                         "E_theta": E_theta,
                         "E_C": E_C,
+                        "E_rho": E_rho,
                         "v_id": vid,
                     },
                     metadata={"window_idx": lccm.window_idx},

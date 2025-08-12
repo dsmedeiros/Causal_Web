@@ -55,7 +55,7 @@ Each vertex $v$ may host a phase $\theta_v\in [0,2\pi)$ with intrinsic $\omega_v
 * **C-bit & confidence:** $(\text{bit}_v\in\{0,1\},\, \text{conf}_v\in[0,1])$ via majority buffer.
 * **Fan-in this window:** $\Lambda_v\in\mathbb Z_{\ge0}$.
 * **Q-arrivals this window:** $\Lambda_v^{Q}\in\mathbb Z_{\ge0}$.
-* **Meters:** $E_Q(v),\,E_\Theta(v),\,E_C(v)$ at window close (Sec. 7).
+* **Meters:** $E_Q(v),\,E_\Theta(v),\,E_C(v),\,E_\rho(v)$ at window close (Sec. 7).
 * **Ancestry fields (Bell):** rolling hash $h_v$ and phase-moment $m_v\in\mathbb R^3$.
 
 ### Edge $e:u\to v$
@@ -96,7 +96,8 @@ Each vertex has a **local window** length $W(v)$ (Sec. 5.1). The **window index*
 
 * compute $E_Q$ and normalize $\psi_v$;
 * reset $\psi^\text{acc}_v$ and $\Lambda_v$;
-* evaluate meters / transitions.
+* evaluate meters / transitions;
+* while in C, retain $(\text{bit}_v, \text{conf}_v)$ across windows, clearing only the majority buffer. These fields reset on C→Θ transitions.
 
 ---
 
@@ -175,6 +176,7 @@ $$
 *Implementation knob*: choose the injection set with
 `inject_mode \in \{\text{"incoming"},\text{"incident"},\text{"outgoing"}\}`
 (default `incoming`). Default is `inject_mode="incoming"`, updating only the delivered edge using the per-delivery intensity from Sec. 4.4. Other modes (`incident`,`outgoing`) are implementation variants for ablation, not the default.
+For `inject_mode \neq "incoming"` the intensity is the mean of per-packet $\|p\|_1$ over the window/batch.
 
 ## 4.3 Effective delay (saturating)
 
@@ -191,6 +193,7 @@ Intensity $I$ is taken from the current layer $\ell(v)$ at delivery.
 
 * **Q:** $I = \|\,U_e\,\psi\,\|_2^2 \le 1$.
 * **Theta:** $I = \|p\|_1$ (with $\sum p\le 1$ after mixing).
+  For `inject_mode` $\neq$ ``"incoming"`` the ρ update uses the mean of per-packet $\|p\|_1$ over the window or batch to avoid saturation under high fan-in.
 * **C:** $I = \text{bit}\in\{0,1\}$.
 
 ---
@@ -224,6 +227,7 @@ $$
 * **Theta -> Q** ("**recoh_threshold**"): when $\Lambda_v \le N_\text{recoh}(v)$ for $T_\text{hold}$ consecutive windows **and** $E_Q(v)\ge C_\text{min}$.
 * **Theta -> C** ("**classical_dominance**"): when $H(p_v)\le H_\text{max}$ and $\text{bit\_frac}\ge f_\text{min}$ and $\text{conf}_v\ge \text{conf}_\text{min}$ for $T_\text{class}$ windows.
 * (Optional C->Theta can be added; not required for v1.2.)
+While in layer C the bit and confidence persist across window boundaries, with only the majority buffer cleared each window. Upon leaving C these fields are reset.
 
 ---
 
@@ -275,6 +279,7 @@ At each window close:
 * **Q meter:** $E_Q(v) = \|\psi^\text{acc}_v\|_2^2$.
 * **Theta meter:** $E_\Theta(v) = \kappa_\Theta\,(1 - H(p_v))$.
 * **C meter:** $E_C(v) = \kappa_C\cdot \text{conf}_v$.
+* **ρ meter:** $E_\rho(v) = \kappa_\rho\, \bar\rho_v$.
 
 Global/region balance (over any finite processed region $\mathcal R$):
 

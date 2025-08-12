@@ -127,6 +127,7 @@ class Config:
         "b": 0.4,
         "k_theta": 0.7,
         "k_c": 0.4,
+        "k_rho": 1.0,
         "T_hold": 2.0,
         "C_min": 0.1,
     }
