@@ -90,4 +90,43 @@ def update_rho_delay(
     return rho, d_eff
 
 
-__all__ = ["diffuse", "effective_delay", "update_rho_delay"]
+def update_rho_delay_vec(
+    rho: np.ndarray,
+    mean: np.ndarray,
+    intensity: float,
+    *,
+    alpha_d: float,
+    alpha_leak: float,
+    eta: float,
+    d0: np.ndarray,
+    gamma: float,
+    rho0: float,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Vectorised density and delay update.
+
+    Parameters
+    ----------
+    rho:
+        Current density values for each edge.
+    mean:
+        Mean neighbour density for each edge.
+    intensity:
+        External input shared across updates.
+    d0:
+        Baseline delays per edge.
+
+    Returns
+    -------
+    tuple of arrays
+        Updated densities and integer effective delays.
+    """
+
+    rho = (1 - alpha_d - alpha_leak) * rho + alpha_d * mean + eta * intensity
+    rho = np.maximum(0.0, rho)
+    d_eff = np.maximum(1, np.floor(d0 + gamma * np.log(1 + rho / rho0))).astype(
+        np.int32
+    )
+    return rho, d_eff
+
+
+__all__ = ["diffuse", "effective_delay", "update_rho_delay", "update_rho_delay_vec"]
