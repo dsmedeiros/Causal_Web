@@ -132,6 +132,8 @@ class Config:
         "lambda_decay": 0.05,
         "sigma_reinforce": 0.1,
         "sigma_min": 1e-3,
+        "decay_interval": 32,
+        "decay_on_window_close": True,
     }
     ancestry = {
         "beta_m0": 0.1,
@@ -141,10 +143,14 @@ class Config:
         "enabled": False,
         "mi_mode": "MI_strict",
         "kappa_a": 0.0,
+        # ``kappa_xi`` controls measurement noise; ``0`` means maximal noise.
         "kappa_xi": 0.0,
         "beta_m": 0.0,
         "beta_h": 0.0,
     }
+
+    # Maximum length of the classical bit deque used for majority voting.
+    max_deque: int = 8
 
     #: Reset policy for Θ distribution after window closure
     theta_reset = "renorm"

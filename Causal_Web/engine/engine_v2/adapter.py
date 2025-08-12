@@ -21,7 +21,7 @@ from .lccm import LCCM
 from .scheduler import DepthScheduler
 from .state import Packet, TelemetryFrame
 from .loader import GraphArrays, load_graph_arrays
-from .rho_delay import effective_delay, update_rho_delay
+from .rho_delay import effective_delay, update_rho_delay, update_rho_delay_vec
 from .qtheta_c import close_window, deliver_packet, deliver_packets_batch
 from .epairs import EPairs
 from .bell import BellHelpers, Ancestry
@@ -40,6 +40,8 @@ class EngineAdapter:
         self._frame = 0
         self._rng = random.Random(Config.run_seed)
         eps_cfg = dict(Config.epsilon_pairs)
+        eps_cfg.pop("decay_interval", None)
+        eps_cfg.pop("decay_on_window_close", None)
         eps_seed = eps_cfg.pop("seed", Config.run_seed)
         self._epairs = EPairs(seed=eps_seed, **eps_cfg)
         bell_seed = Config.bell.get("seed", Config.run_seed)
@@ -272,12 +274,12 @@ class EngineAdapter:
         packets = []
         edge_logs = 0
         decay_counter = 0
-        DECAY_INTERVAL = 32
+        decay_interval = Config.epsilon_pairs.get("decay_interval", 32)
 
         while self._scheduler and events < limit:
             if decay_counter == 0:
                 self._epairs.decay_all()
-            decay_counter = (decay_counter + 1) % DECAY_INTERVAL
+            decay_counter = (decay_counter + 1) % max(1, decay_interval)
             depth_arr, dst, edge_id, seq, pkt = self._scheduler.pop()
             vertex = self._vertices.get(dst)
             if vertex is None:
@@ -399,6 +401,7 @@ class EngineAdapter:
                     phi_list,
                     A_list,
                     U_list,
+                    max_deque=Config.max_deque,
                     update_p=lccm.layer == "Θ",
                 )
             else:
@@ -429,6 +432,7 @@ class EngineAdapter:
                     vertex["bit_deque"],
                     packet_struct,
                     edge_struct,
+                    max_deque=Config.max_deque,
                     update_p=lccm.layer == "Θ",
                 )
 
@@ -621,29 +625,49 @@ class EngineAdapter:
                 ]
 
             injected: Dict[int, Tuple[float, float, int]] = {}
-            for edge_idx in inject_edges:
-                rho_before = float(edges["rho"][edge_idx])
-                ptr = adj["nbr_ptr"]
-                nbr = adj["nbr_idx"]
-                n_start = ptr[edge_idx]
-                n_end = ptr[edge_idx + 1]
-                neighbours = edges["rho"][nbr[n_start:n_end]]
-                rho_after, d_eff = update_rho_delay(
-                    rho_before,
-                    neighbours,
-                    intensity,
-                    alpha_d=rho_cfg.get("alpha_d", 0.0),
-                    alpha_leak=rho_cfg.get("alpha_leak", 0.0),
-                    eta=rho_cfg.get("eta", 0.0),
-                    d0=float(edges["d0"][edge_idx]),
-                    gamma=rho_cfg.get("gamma", 0.0),
-                    rho0=rho_cfg.get("rho0", 1.0),
-                )
-                edges["rho"][edge_idx] = rho_after
-                if "d_eff" in edges:
-                    edges["d_eff"][edge_idx] = d_eff
-                injected[edge_idx] = (rho_before, rho_after, d_eff)
+            if inject_edges:
+                ptr = adj.get("nbr_ptr")
+                nbr = adj.get("nbr_idx")
+                if ptr is not None and nbr is not None and len(ptr) > 1:
+                    valid = [e for e in inject_edges if 0 <= e < len(ptr) - 1]
+                    if valid:
+                        inject_arr = np.asarray(valid, dtype=np.int32)
+                        rho_before = edges["rho"][inject_arr]
+                        neigh_sums_all = (
+                            np.add.reduceat(edges["rho"][nbr], ptr[:-1])
+                            if nbr.size > 0
+                            else np.zeros(len(ptr) - 1, dtype=np.float32)
+                        )
+                        neigh_sums = neigh_sums_all[inject_arr]
+                        counts = (ptr[1:] - ptr[:-1])[inject_arr]
+                        mean = np.divide(
+                            neigh_sums,
+                            counts,
+                            out=np.zeros_like(neigh_sums, dtype=np.float32),
+                            where=counts > 0,
+                        )
+                        rho_after, d_eff = update_rho_delay_vec(
+                            rho_before,
+                            mean,
+                            intensity,
+                            alpha_d=rho_cfg.get("alpha_d", 0.0),
+                            alpha_leak=rho_cfg.get("alpha_leak", 0.0),
+                            eta=rho_cfg.get("eta", 0.0),
+                            d0=edges["d0"][inject_arr],
+                            gamma=rho_cfg.get("gamma", 0.0),
+                            rho0=rho_cfg.get("rho0", 1.0),
+                        )
+                        edges["rho"][inject_arr] = rho_after
+                        if "d_eff" in edges:
+                            edges["d_eff"][inject_arr] = d_eff
+                        for idx, rb, ra, de in zip(
+                            inject_arr, rho_before, rho_after, d_eff
+                        ):
+                            injected[int(idx)] = (float(rb), float(ra), int(de))
 
+            log_rho_edges = self._rng.random() < Config.logging.get(
+                "sample_rho_rate", 0.0
+            )
             for edge_idx in self._edges_by_src.get(dst, []):
                 rho_before = float(edges["rho"][edge_idx])
                 if edge_idx in injected:
@@ -674,8 +698,7 @@ class EngineAdapter:
                     src=dst, dst=int(edges["dst"][edge_idx]), payload=payload
                 )
                 edge_logs += 1
-                rate = Config.logging.get("sample_rho_rate", 0.0)
-                if rate > 0.0 and self._rng.random() < rate:
+                if log_rho_edges:
                     log_record(
                         category="event",
                         label="edge_delivery",
@@ -851,7 +874,8 @@ class EngineAdapter:
                     },
                     metadata={"window_idx": lccm.window_idx},
                 )
-                self._epairs.decay_all()
+                if Config.epsilon_pairs.get("decay_on_window_close", True):
+                    self._epairs.decay_all()
 
         return frame
 

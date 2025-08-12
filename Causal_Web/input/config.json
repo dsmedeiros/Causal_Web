@@ -51,6 +51,7 @@
         "eta": 0.0,
         "gamma": 0.0,
         "rho0": 0.0,
+        "inject_mode": "incoming"
     },
     "epsilon_pairs": {
         "delta_ttl": 8,
@@ -60,6 +61,8 @@
         "lambda_decay": 0.05,
         "sigma_reinforce": 0.1,
         "sigma_min": 0.001,
+        "decay_interval": 32,
+        "decay_on_window_close": true
     },
     "bell": {
         "mi_mode": "MI_strict",
@@ -73,6 +76,7 @@
         "delta_m": 0.02
     },
     "theta_reset": "renorm",
+    "max_deque": 8,
     "propagation_control": {
         "enable_sip_child": true,
         "enable_sip_recomb": true,

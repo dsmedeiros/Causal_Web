@@ -78,6 +78,7 @@ def deliver_packet(
 
     if update_p:
         p_v = p_v + alpha * np.asarray(packet.get("p"), dtype=np.float32)
+        p_v = np.clip(p_v, 0.0, 1.0)
         total = float(np.sum(p_v))
         if total > 0:
             p_v = p_v / total
@@ -184,6 +185,7 @@ def deliver_packets_batch(
     kappa = float(abs(z)) if psi_rot.size else 0.0
     if update_p:
         p_v = p_v + (alpha[:, None] * p).sum(axis=0)
+        p_v = np.clip(p_v, 0.0, 1.0)
         total = float(np.sum(p_v))
         if total > 0:
             p_v = p_v / total
