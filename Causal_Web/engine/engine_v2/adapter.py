@@ -23,6 +23,7 @@ from .scheduler import DepthScheduler
 from .state import Packet, TelemetryFrame
 from .loader import GraphArrays, load_graph_arrays
 from .rho_delay import effective_delay, update_rho_delay, update_rho_delay_vec
+from .rho.variational import lambda_to_coeffs
 from .qtheta_c import close_window, deliver_packet, deliver_packets_batch
 from .epairs import EPairs
 from .bell import BellHelpers, Ancestry
@@ -167,14 +168,25 @@ class EngineAdapter:
         params = graph.get("params", {})
         window_defaults = dict(Config.windowing)
         window_defaults.update(params)
+        lccm_cfg = Config.lccm
+        mode = lccm_cfg.get("mode", "thresholds")
+        fe_cfg = lccm_cfg.get("free_energy", {})
         W0 = window_defaults.get("W0", 4)
         zeta1 = window_defaults.get("zeta1", 0.0)
         zeta2 = window_defaults.get("zeta2", 0.0)
         rho0 = params.get("rho0", 1.0)
         a = window_defaults.get("a", 1.0)
         b = window_defaults.get("b", 0.5)
-        k_theta = window_defaults.get("k_theta", a)
-        k_c = window_defaults.get("k_c", b)
+        if mode == "free_energy":
+            k_theta = fe_cfg.get("k_theta", window_defaults.get("k_theta", a))
+            k_c = fe_cfg.get("k_c", window_defaults.get("k_c", b))
+            k_q = fe_cfg.get("k_q", 0.0)
+            F_min = fe_cfg.get("F_min", 0.0)
+        else:
+            k_theta = window_defaults.get("k_theta", a)
+            k_c = window_defaults.get("k_c", b)
+            k_q = 0.0
+            F_min = 0.0
         C_min = window_defaults.get("C_min", 0.0)
         f_min = params.get("f_min", 1.0)
         conf_min = params.get("conf_min", 0.0)
@@ -222,6 +234,9 @@ class EngineAdapter:
                 T_class,
                 k_theta=k_theta,
                 k_c=k_c,
+                mode=mode,
+                k_q=k_q,
+                F_min=F_min,
                 deg=deg,
                 rho_mean=rho_mean,
             )
@@ -272,9 +287,18 @@ class EngineAdapter:
         if limit is None:
             limit = float("inf")
         rho_cfg = Config.rho_delay
+        rho_mode = Config.rho.get("update_mode", "heuristic")
+        lambda_cfg = Config.rho.get("variational", {})
         alpha_d = rho_cfg.get("alpha_d", 0.0)
         alpha_leak = rho_cfg.get("alpha_leak", 0.0)
         eta = rho_cfg.get("eta", 0.0)
+        if rho_mode == "variational":
+            alpha_d, alpha_leak, eta = lambda_to_coeffs(
+                lambda_cfg.get("lambda_s", 0.0),
+                lambda_cfg.get("lambda_l", 0.0),
+                lambda_cfg.get("lambda_I", 0.0),
+                eta,
+            )
         gamma = rho_cfg.get("gamma", 0.0)
         rho0 = rho_cfg.get("rho0", 1.0)
         inject_mode = rho_cfg.get("inject_mode", "incoming")

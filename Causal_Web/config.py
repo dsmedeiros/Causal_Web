@@ -138,6 +138,14 @@ class Config:
         "rho0": 1.0,
         "inject_mode": "incoming",
     }
+    rho = {
+        "update_mode": "heuristic",
+        "variational": {"lambda_s": 0.2, "lambda_l": 0.01, "lambda_I": 1.0},
+    }
+    lccm = {
+        "mode": "thresholds",
+        "free_energy": {"k_theta": 1.0, "k_c": 1.0, "k_q": 0.2, "F_min": 0.3},
+    }
     epsilon_pairs = {
         "delta_ttl": 2 * windowing["W0"],
         "ancestry_prefix_L": 16,
