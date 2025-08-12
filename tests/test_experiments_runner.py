@@ -55,3 +55,19 @@ def test_runner_deterministic(tmp_path: Path):
 
     assert summary1 == summary2
     assert metrics1 == metrics2
+
+
+def test_metrics_csv_has_gate_and_invariants(tmp_path: Path):
+    cfg_path = create_config(tmp_path)
+    base_path = create_base(tmp_path)
+    out_dir = tmp_path / "run"
+    run(cfg_path, base_path, out_dir)
+    import csv
+
+    with (out_dir / "metrics.csv").open() as fh:
+        rows = list(csv.DictReader(fh))
+    assert "G1" in rows[0]
+    assert "inv_causality_ok" in rows[0]
+    assert "inv_conservation_residual" in rows[0]
+    assert "inv_no_signaling_delta" in rows[0]
+    assert "inv_ancestry_ok" in rows[0]

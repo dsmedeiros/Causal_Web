@@ -18,3 +18,4 @@ def test_metrics_logger(tmp_path: Path):
     assert summary["seed"] == 0
     assert summary["gates"] == [1]
     assert summary["metrics_agg"]["mean_G1"] == 1.0
+    assert summary["metrics_agg"]["std_G1"] == 0.0

@@ -30,13 +30,18 @@ def run_gates(config: Dict[str, float], which: List[int]) -> Dict[str, float]:
     Notes
     -----
     This function currently returns placeholder invariant fields and
-    should be connected to the real engine implementation.
+    per-gate metrics and should be connected to the real engine
+    implementation.
     """
 
     # TODO: wire to your engine entrypoints
-    return {
-        "inv_causality_ok": True,
-        "inv_conservation_residual": 0.0,
-        "inv_no_signaling_delta": 0.0,
-        "inv_ancestry_ok": True,
-    }
+    metrics = {f"G{g}": float(g) for g in which}
+    metrics.update(
+        {
+            "inv_causality_ok": True,
+            "inv_conservation_residual": 0.0,
+            "inv_no_signaling_delta": 0.0,
+            "inv_ancestry_ok": True,
+        }
+    )
+    return metrics
