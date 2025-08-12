@@ -113,16 +113,13 @@
     <Folder Include="engine\" />
     <Folder Include="engine\analysis\" />
     <Folder Include="engine\backend\" />
-    <Folder Include="engine\backend\__pycache__\" />
     <Folder Include="engine\engine_v2\" />
     <Folder Include="engine\engine_v2\lccm\" />
     <Folder Include="engine\engine_v2\rho\" />
     <Folder Include="engine\fields\" />
-    <Folder Include="engine\fields\__pycache__\" />
     <Folder Include="engine\logging\" />
     <Folder Include="engine\models\" />
     <Folder Include="engine\quantum\" />
-    <Folder Include="engine\quantum\__pycache__\" />
     <Folder Include="engine\services\" />
     <Folder Include="engine\tick_engine\" />
     <Folder Include="geometry\" />
@@ -136,11 +133,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="assets\fonts\consola.ttf" />
-    <Content Include="engine\backend\__pycache__\cupy_kernels.cpython-310.pyc" />
-    <Content Include="engine\backend\__pycache__\__init__.cpython-310.pyc" />
-    <Content Include="engine\fields\__pycache__\density.cpython-310.pyc" />
-    <Content Include="engine\quantum\__pycache__\tensors.cpython-310.pyc" />
-    <Content Include="engine\quantum\__pycache__\__init__.cpython-310.pyc" />
     <Content Include="input\config.json" />
     <Content Include="input\destructive_interference_test.json" />
     <Content Include="input\dilation_baseline_test_case.json" />
