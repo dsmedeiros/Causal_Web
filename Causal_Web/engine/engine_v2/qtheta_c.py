@@ -9,10 +9,74 @@ intensity contributions used by the density-delay model.
 
 from __future__ import annotations
 
-from collections import deque
 from typing import Deque, Iterable, Tuple
 
 import numpy as np
+
+
+def phase_stats(
+    U: np.ndarray, phase: complex, psi: np.ndarray
+) -> tuple[float, float, np.ndarray]:
+    """Return rotated state and local phase statistics.
+
+    Parameters
+    ----------
+    U:
+        Unitary matrix applied to ``psi``.
+    phase:
+        Complex phase factor for the edge.
+    psi:
+        Input state vector.
+
+    Returns
+    -------
+    tuple
+        ``(mu, kappa, psi_rot)`` where ``mu`` is the mean direction and
+        ``kappa`` the coherence of ``psi_rot`` relative to ``psi``.
+    """
+
+    psi_out = U @ psi
+    psi_rot = phase * psi_out
+    z = np.vdot(psi_rot, psi)
+    mu = float(np.angle(z))
+    kappa = float(abs(z))
+    return mu, kappa, psi_rot
+
+
+def phase_stats_batch(
+    U: Iterable[np.ndarray] | np.ndarray,
+    phase: Iterable[complex] | np.ndarray,
+    psi: Iterable[np.ndarray] | np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Vectorised phase statistics for stacked inputs.
+
+    Parameters
+    ----------
+    U, phase, psi:
+        Sequences or arrays describing multiple unitary/phase/state triples.
+
+    Returns
+    -------
+    tuple
+        Arrays ``mu`` and ``kappa`` with per-packet phase statistics and the
+        rotated states ``psi_rot``.
+    """
+
+    U_arr = np.asarray(
+        list(U) if not isinstance(U, np.ndarray) else U, dtype=np.complex64
+    )
+    phase_arr = np.asarray(
+        list(phase) if not isinstance(phase, np.ndarray) else phase, dtype=np.complex64
+    )
+    psi_arr = np.asarray(
+        list(psi) if not isinstance(psi, np.ndarray) else psi, dtype=np.complex64
+    )
+    out = np.einsum("nij,nj->ni", U_arr, psi_arr)
+    psi_rot = phase_arr[:, None] * out
+    z = np.einsum("ni,ni->n", np.conjugate(psi_rot), psi_arr)
+    mu = np.angle(z).astype(float)
+    kappa = np.abs(z).astype(float)
+    return mu, kappa, psi_rot
 
 
 def deliver_packet(
@@ -75,13 +139,9 @@ def deliver_packet(
         A = np.float32(edge.get("A", 0.0))
         phase = np.exp(1j * (phi + A))
     phase = np.complex64(phase)
-    psi_out = U @ psi
-    psi_rot = phase * psi_out
+    mu, kappa, psi_rot = phase_stats(U, phase, psi)
     psi_acc = psi_acc + alpha * psi_rot
     psi_acc = np.where(np.isfinite(psi_acc), psi_acc, np.zeros_like(psi_acc))
-    z = np.vdot(psi_rot, psi)
-    mu = float(np.angle(z))
-    kappa = float(abs(z))
 
     if update_p:
         p_v = p_v + alpha * np.asarray(packet.get("p"), dtype=np.float32)
@@ -194,4 +254,10 @@ def deliver_packets_batch(
     return depth_v, psi_acc, p_v, (bit, conf)
 
 
-__all__ = ["deliver_packet", "deliver_packets_batch", "close_window"]
+__all__ = [
+    "deliver_packet",
+    "deliver_packets_batch",
+    "close_window",
+    "phase_stats",
+    "phase_stats_batch",
+]
