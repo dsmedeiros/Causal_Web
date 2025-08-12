@@ -24,6 +24,7 @@ class DepthScheduler:
         )
         self._depths: List[int] = []
         self._seq = 0
+        self._size = 0
 
     def push(self, depth_arr: int, dst_id: int, edge_id: int, payload: Any) -> None:
         """Insert a payload into the scheduler."""
@@ -34,6 +35,7 @@ class DepthScheduler:
         key = (dst_id, edge_id, self._seq)
         heapq.heappush(bucket, (key, payload))
         self._seq += 1
+        self._size += 1
 
     def pop(self) -> Tuple[int, int, int, int, Any]:
         """Remove and return the next scheduled payload and metadata.
@@ -54,6 +56,7 @@ class DepthScheduler:
             heapq.heappop(self._depths)
             del self._buckets[depth]
         dst_id, edge_id, seq = key
+        self._size -= 1
         return depth, dst_id, edge_id, seq, payload
 
     def peek_depth(self) -> int:
@@ -64,7 +67,7 @@ class DepthScheduler:
         return self._depths[0]
 
     def __len__(self) -> int:  # pragma: no cover - trivial
-        return sum(len(b) for b in self._buckets.values())
+        return self._size
 
     def clear(self) -> None:
         """Drop all scheduled items."""
@@ -72,3 +75,4 @@ class DepthScheduler:
         self._buckets.clear()
         self._depths.clear()
         self._seq = 0
+        self._size = 0
