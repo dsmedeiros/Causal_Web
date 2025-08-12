@@ -99,7 +99,12 @@ def run(
     out_dir: pathlib.Path,
     parallel: int = 1,
 ) -> None:
-    """Execute a design-of-experiments sweep."""
+    """Execute a design-of-experiments sweep.
+
+    Parameters are sampled from dimensionless groups and converted to raw
+    configurations before the experiment is executed. Results are logged in
+    a deterministic order even when processed in parallel.
+    """
 
     cfg = _load_config(exp_path)
     rng = np.random.default_rng(cfg.seed)
@@ -110,7 +115,13 @@ def run(
     normalizer = Normalizer()
     base = _load_base_config(base_path)
 
-    def process(i: int, groups: Dict[str, float]) -> None:
+    results: List[
+        Tuple[
+            Dict[str, float], Dict[str, float], int, Dict[str, float], Dict[str, float]
+        ]
+    ] = [None] * len(samples)
+
+    def process(i: int, groups: Dict[str, float]):
         sample_seed = _mix(cfg.seed, i)
         raw = normalizer.to_raw(base, groups)
         raw["seed"] = sample_seed
@@ -125,18 +136,21 @@ def run(
             raise ValueError("no-signaling failed")
         if not inv["inv_ancestry_ok"]:
             raise ValueError("ancestry determinism failed")
-        logger.log(i, groups, raw, sample_seed, gate_metrics, inv)
+        return i, groups, raw, sample_seed, gate_metrics, inv
 
     if parallel > 1:
         with ThreadPoolExecutor(max_workers=parallel) as ex:
-            futures = [
-                ex.submit(process, i, groups) for i, groups in enumerate(samples)
-            ]
-            for f in futures:
-                f.result()
+            futs = [ex.submit(process, i, g) for i, g in enumerate(samples)]
+            for f in futs:
+                i, groups, raw, seed, gm, inv = f.result()
+                results[i] = (groups, raw, seed, gm, inv)
     else:
-        for i, groups in enumerate(samples):
-            process(i, groups)
+        for i, g in enumerate(samples):
+            _, groups, raw, seed, gm, inv = process(i, g)
+            results[i] = (groups, raw, seed, gm, inv)
+
+    for i, (groups, raw, seed, gm, inv) in enumerate(results):
+        logger.log(i, groups, raw, seed, gm, inv)
 
     logger.flush(cfg, samples)
 
