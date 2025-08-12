@@ -192,11 +192,11 @@ $$
 Intensity $I$ is taken from the current layer $\ell(v)$ at delivery.
 
 * **Q:** $I = \|\,U_e\,\psi\,\|_2^2 \le 1$.
-* **Theta:** $I = \|p\|_1$ (with $\sum p\le 1$ after mixing).  For
-  ``inject_mode="incoming"`` this per-packet value applies to each
-  delivered edge individually.  Multi-packet modes (``incident`` or
-  ``outgoing``) instead use the **mean** of per-packet $\|p\|_1$ over
-  the window or batch to avoid saturation under high fan-in.
+* **Theta:** $I = \|p\|_1$ (with $\sum p\le 1$ after mixing).
+  ``inject_mode="incoming"`` applies this intensity **per delivered edge**.
+  Non-incoming modes (``incident`` or ``outgoing``) instead inject using
+  the **mean** of per-edge $\|p\|_1$ over the window or batch to avoid
+  saturation under high fan-in.
 * **C:** $I = \text{bit}\in\{0,1\}$.
 
 ---
@@ -240,11 +240,14 @@ While in layer C the bit and confidence persist across window boundaries, with o
 
 On Q-delivery at $v$, emit **seeds** along outgoing edges with:
 
+*Default:* emit **one seed per window**.  Enabling
+``emit_per_delivery`` switches to a per-arrival emission mode.
+
 * **Ancestry prefix**: match key from $h_v$ (first $L$ bits).
 * **Angle tag**: local phase proxy $\theta_v$.
 * **Expiry by depth:** $d_\text{exp} = d_\text{emit} + \Delta$.
 
-*Implementation note*: Default emission is **one seed per (v, window)** using $\theta_v=\operatorname{atan2}(m_{v,y},m_{v,x})$. The seed depth for this emission equals the maximum arrival depth seen in the window, i.e. the depth of the last processed delivery. An optional `emit_per_delivery` mode emits per Q-arrival. Implementations may cap the seed pool per vertex at $N_\text{seed}$ (e.g., 64) to avoid unbounded growth.
+*Implementation note*: The default window seed uses $\theta_v=\operatorname{atan2}(m_{v,y},m_{v,x})$ and takes its depth from the maximum arrival depth seen in the window. An optional `emit_per_delivery` mode emits the same construct after each Q-arrival. Implementations may cap the seed pool per vertex at $N_\text{seed}$ (e.g., 64) to avoid unbounded growth.
 
 A seed forwarded across an edge uses that edge's current $d_\text{eff}$: $d_\text{next}=d_\text{curr}+d_\text{eff}$ and **continues only if** $d_\text{next}\le d_\text{exp}$. TTL advances by each traversed edge.
 
@@ -320,8 +323,9 @@ $h_3\leftarrow \mathrm{smix}\big(h_3\oplus \mathrm{bits}(\kappa)\big)$.
 At a pair source (vertex $S$), compute $\lambda=(u,\zeta)$ from $(h_S,m_S)$:
 
 * Blend $m_S$ with a hash-derived direction, weights $\beta_m,\beta_h$, normalize to get **unit** $u$.
-* $\zeta$ is a $[0,1)$ scalar from a split-mix of $h_S$.
-  Both halves of the pair carry the same $\lambda$.
+* $\zeta$ is a local hash-blended scalar in $[0,1)$ used later to
+  parameterize a deterministic rotation.  Both halves of the pair
+  carry the same $\lambda$.
 
 ## 8.3 Detector setting (toggle MI)
 
@@ -338,7 +342,9 @@ $$
 b=\operatorname{sgn}\!\big(\langle a_D,\ R(h_D,\zeta)\,u\rangle + \xi\big),
 $$
 
-with local noise $\xi\sim\mathcal N(0,\sigma(\kappa_\xi))$. $R$ is a hash-controlled local rotation, no signaling.
+with local noise $\xi\sim\mathcal N(0,\sigma(\kappa_\xi))$. $R$ rotates
+around an axis from $h_D$ by angle $2\pi\zeta$, remaining strictly
+local and signaling-free.
 
 **Prediction:**
 
