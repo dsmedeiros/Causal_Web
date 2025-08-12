@@ -139,14 +139,10 @@ class EPairs:
 
     # Internal helpers -------------------------------------------------
     def _log_seed(self, label: str, value: Dict[str, int | float]) -> None:
-        rate = Config.logging.get("sample_seed_rate", 1.0)
-        if self._rng.random() < rate:
-            log_record(category="event", label=label, value=value)
+        log_record(category="event", label=label, value=value)
 
     def _log_bridge(self, label: str, value: Dict[str, int | float]) -> None:
-        rate = Config.logging.get("sample_bridge_rate", 1.0)
-        if self._rng.random() < rate:
-            log_record(category="event", label=label, value=value)
+        log_record(category="event", label=label, value=value)
 
     def _add_adj(self, src: int, dst: int) -> None:
         arr = self.adjacency.setdefault(src, array("i"))
@@ -199,6 +195,7 @@ class EPairs:
         depth-based TTL that respects per-edge effective distance.
         """
 
+        log_seeds = self._rng.random() < Config.logging.get("sample_seed_rate", 1.0)
         prefix = self._prefix(h_value)
         expiry = depth_emit + self.delta_ttl
         for edge_id in edge_ids:
@@ -206,22 +203,24 @@ class EPairs:
             depth_next = depth_emit + d_eff
             dst = int(edges["dst"][edge_id])
             if depth_next > expiry:
-                self._log_seed(
-                    "seed_dropped",
-                    {"src": origin, "origin": origin, "reason": "expired"},
-                )
+                if log_seeds:
+                    self._log_seed(
+                        "seed_dropped",
+                        {"src": origin, "origin": origin, "reason": "expired"},
+                    )
                 continue
-            self._log_seed(
-                "seed_emitted",
-                {
-                    "src": origin,
-                    "dst": dst,
-                    "origin": origin,
-                    "expiry_depth": expiry,
-                    "h_prefix": prefix,
-                    "theta": theta,
-                },
-            )
+            if log_seeds:
+                self._log_seed(
+                    "seed_emitted",
+                    {
+                        "src": origin,
+                        "dst": dst,
+                        "origin": origin,
+                        "expiry_depth": expiry,
+                        "h_prefix": prefix,
+                        "theta": theta,
+                    },
+                )
             self._place_seed(
                 dst,
                 Seed(
@@ -230,6 +229,7 @@ class EPairs:
                     h_prefix=prefix,
                     theta=theta,
                 ),
+                log_seeds,
             )
 
     def carry(
@@ -246,29 +246,32 @@ class EPairs:
         seed's ``expiry_depth``.
         """
 
+        log_seeds = self._rng.random() < Config.logging.get("sample_seed_rate", 1.0)
         seeds = self.seeds.pop(site, [])
         for seed in seeds:
             for edge_id in edge_ids:
                 d_eff = int(edges["d_eff"][edge_id]) if "d_eff" in edges else 1
                 depth_next = depth_curr + d_eff
                 if depth_next > seed.expiry_depth:
-                    self._log_seed(
-                        "seed_dropped",
-                        {"src": site, "origin": seed.origin, "reason": "expired"},
-                    )
+                    if log_seeds:
+                        self._log_seed(
+                            "seed_dropped",
+                            {"src": site, "origin": seed.origin, "reason": "expired"},
+                        )
                     continue
                 dst = int(edges["dst"][edge_id])
-                self._log_seed(
-                    "seed_emitted",
-                    {
-                        "src": site,
-                        "dst": dst,
-                        "origin": seed.origin,
-                        "expiry_depth": seed.expiry_depth,
-                        "h_prefix": seed.h_prefix,
-                        "theta": seed.theta,
-                    },
-                )
+                if log_seeds:
+                    self._log_seed(
+                        "seed_emitted",
+                        {
+                            "src": site,
+                            "dst": dst,
+                            "origin": seed.origin,
+                            "expiry_depth": seed.expiry_depth,
+                            "h_prefix": seed.h_prefix,
+                            "theta": seed.theta,
+                        },
+                    )
                 self._place_seed(
                     dst,
                     Seed(
@@ -277,6 +280,7 @@ class EPairs:
                         h_prefix=seed.h_prefix,
                         theta=seed.theta,
                     ),
+                    log_seeds,
                 )
 
     # Internal helpers -------------------------------------------------
@@ -305,7 +309,15 @@ class EPairs:
         prefix = (h0 >> np.uint64(64 - self.L)) & np.uint64((1 << self.L) - 1)
         return int(prefix)
 
-    def _place_seed(self, site: int, seed: Seed) -> None:
+    def _place_seed(self, site: int, seed: Seed, log_seeds: bool) -> None:
+        """Insert ``seed`` at ``site`` respecting capacity limits.
+
+        Parameters
+        ----------
+        log_seeds:
+            When ``True`` emit logging records for drop events.
+        """
+
         seeds = self.seeds.setdefault(site, [])
         for other in list(seeds):
             if seed.h_prefix == other.h_prefix:
@@ -313,17 +325,19 @@ class EPairs:
                     self._create_bridge(seed.origin, other.origin)
                     seeds.remove(other)
                 else:
-                    self._log_seed(
-                        "seed_dropped",
-                        {"src": site, "origin": seed.origin, "reason": "angle"},
-                    )
+                    if log_seeds:
+                        self._log_seed(
+                            "seed_dropped",
+                            {"src": site, "origin": seed.origin, "reason": "angle"},
+                        )
                 return
         if len(seeds) >= self.max_seeds_per_site:
             evicted = seeds.pop(0)
-            self._log_seed(
-                "seed_dropped",
-                {"src": site, "origin": evicted.origin, "reason": "overflow"},
-            )
+            if log_seeds:
+                self._log_seed(
+                    "seed_dropped",
+                    {"src": site, "origin": evicted.origin, "reason": "overflow"},
+                )
             if site not in self._overflow_warned:
                 logging.warning(
                     "max seeds per site reached at %s; dropping oldest", site
@@ -369,15 +383,16 @@ class EPairs:
             self._next_bridge_id -= 1
             self._add_adj(a, b)
             self._add_adj(b, a)
-            self._log_bridge(
-                "bridge_created",
-                {
-                    "src": a,
-                    "dst": b,
-                    "sigma": self.sigma0,
-                    "bridge_id": edge_id,
-                },
-            )
+            if self._rng.random() < Config.logging.get("sample_bridge_rate", 1.0):
+                self._log_bridge(
+                    "bridge_created",
+                    {
+                        "src": a,
+                        "dst": b,
+                        "sigma": self.sigma0,
+                        "bridge_id": edge_id,
+                    },
+                )
 
     def _bridge_key(self, a: int, b: int) -> Tuple[int, int]:
         return (a, b) if a <= b else (b, a)
@@ -386,15 +401,16 @@ class EPairs:
         key = self._bridge_key(a, b)
         bridge = self.bridges.get(key)
         if bridge is not None:
-            self._log_bridge(
-                "bridge_removed",
-                {
-                    "src": a,
-                    "dst": b,
-                    "sigma": bridge.sigma,
-                    "bridge_id": bridge.edge_id,
-                },
-            )
+            if self._rng.random() < Config.logging.get("sample_bridge_rate", 1.0):
+                self._log_bridge(
+                    "bridge_removed",
+                    {
+                        "src": a,
+                        "dst": b,
+                        "sigma": bridge.sigma,
+                        "bridge_id": bridge.edge_id,
+                    },
+                )
             del self.bridges[key]
         for src, dst in ((a, b), (b, a)):
             self._del_adj(src, dst)

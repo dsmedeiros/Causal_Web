@@ -395,8 +395,6 @@ class EngineAdapter:
                     p_v,
                     (bit, conf),
                     intensities,
-                    mu,
-                    kappa,
                 ) = deliver_packets_batch(
                     lccm.depth,
                     vertex["psi_acc"],
@@ -432,8 +430,8 @@ class EngineAdapter:
                     p_v,
                     (bit, conf),
                     intensities,
-                    mu,
-                    kappa,
+                    _,
+                    _,
                 ) = deliver_packet(
                     lccm.depth,
                     vertex["psi_acc"],
