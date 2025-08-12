@@ -56,6 +56,8 @@ class EngineAdapter:
         self._packet_buf: Dict[str, Any] = {}
         self._edge_buf: Dict[str, Any] = {}
         self._payload_buf: Dict[str, Any] = {}
+        self._neigh_sums_cache: np.ndarray | None = None
+        self._neigh_sums_frame: int = -1
 
     # ------------------------------------------------------------------
     def _splitmix64(self, x: int) -> int:
@@ -359,13 +361,11 @@ class EngineAdapter:
 
             if edges and 0 <= edge_id < len(edges.get("alpha", [])):
                 alpha_val = float(edges["alpha"][edge_id])
-                phi_val = float(edges["phi"][edge_id])
-                A_val = float(edges["A"][edge_id])
+                phase_val = edges.get("phase", [1.0 + 0.0j])[edge_id]
                 U_val = edges["U"][edge_id]
             else:
                 alpha_val = 1.0
-                phi_val = 0.0
-                A_val = 0.0
+                phase_val = 1.0 + 0.0j
                 U_val = eye
 
             psi_list = [psi_val]
@@ -373,8 +373,7 @@ class EngineAdapter:
             bit_list = [bit_val]
             depth_list = [depth_val]
             alpha_list = [alpha_val]
-            phi_list = [phi_val]
-            A_list = [A_val]
+            phase_list = [phase_val]
             U_list = [U_val]
             pkt_list = [pkt]
             edge_id_list = [edge_id]
@@ -409,13 +408,11 @@ class EngineAdapter:
                 bit_list.append(int(pd2.get("bit", 0)))
                 if edges and 0 <= edge2 < len(edges.get("alpha", [])):
                     alpha_list.append(float(edges["alpha"][edge2]))
-                    phi_list.append(float(edges["phi"][edge2]))
-                    A_list.append(float(edges["A"][edge2]))
+                    phase_list.append(edges.get("phase", [1.0 + 0.0j])[edge2])
                     U_list.append(edges["U"][edge2])
                 else:
                     alpha_list.append(1.0)
-                    phi_list.append(0.0)
-                    A_list.append(0.0)
+                    phase_list.append(1.0 + 0.0j)
                     U_list.append(eye)
                 pkt_list.append(pkt2)
                 edge_id_list.append(edge2)
@@ -426,11 +423,11 @@ class EngineAdapter:
             mu_list: list[float] = []
             kappa_list: list[float] = []
             pkt_intensities: list[tuple[float, float, float]] = []
-            for psi_i, U_i, phi_i, A_i, p_i, b_i in zip(
-                psi_list, U_list, phi_list, A_list, p_list, bit_list
+            for psi_i, U_i, phase_i, p_i, b_i in zip(
+                psi_list, U_list, phase_list, p_list, bit_list
             ):
                 psi_out_i = U_i @ psi_i
-                psi_rot_i = np.exp(1j * (phi_i + A_i)) * psi_out_i
+                psi_rot_i = phase_i * psi_out_i
                 z_i = np.vdot(psi_rot_i, psi_i)
                 mu_list.append(float(np.angle(z_i)))
                 kappa_list.append(float(abs(z_i)))
@@ -439,13 +436,16 @@ class EngineAdapter:
                 c_int = float(b_i)
                 pkt_intensities.append((q_int, theta_int, c_int))
 
+            theta_vals = [float(np.sum(np.abs(p_i))) for p_i in p_list]
+            theta_mean = float(np.mean(theta_vals)) if theta_vals else 0.0
+            theta_mean = min(1.0, theta_mean)
+
             if len(pkt_list) > 1:
                 (
                     depth_v,
                     psi_acc,
                     p_v,
                     (bit, conf),
-                    intensities,
                 ) = deliver_packets_batch(
                     lccm.depth,
                     vertex["psi_acc"],
@@ -456,8 +456,7 @@ class EngineAdapter:
                     bit_list,
                     depth_list,
                     alpha_list,
-                    phi_list,
-                    A_list,
+                    phase_list,
                     U_list,
                     max_deque=Config.max_deque,
                     update_p=lccm.layer == "Θ",
@@ -468,15 +467,14 @@ class EngineAdapter:
                 packet_struct["bit"] = bit_list[0]
                 packet_struct["depth_arr"] = depth_list[0]
                 edge_struct["alpha"] = alpha_list[0]
-                edge_struct["phi"] = phi_list[0]
-                edge_struct["A"] = A_list[0]
+                edge_struct["phase"] = phase_list[0]
                 edge_struct["U"] = U_list[0]
                 (
                     depth_v,
                     psi_acc,
                     p_v,
                     (bit, conf),
-                    intensities,
+                    _,
                     _,
                     _,
                 ) = deliver_packet(
@@ -514,7 +512,9 @@ class EngineAdapter:
             for idx, eid in enumerate(edge_id_list):
                 edge_intensity[int(eid)] = pkt_intensities[idx]
 
-            if pkt_intensities:
+            if inject_mode != "incoming" and lccm.layer == "Θ":
+                intensity = theta_mean
+            elif pkt_intensities:
                 if lccm.layer in layer_idx_map:
                     idx = layer_idx_map[lccm.layer]
                     values = [pi[idx] for pi in pkt_intensities]
@@ -673,6 +673,11 @@ class EngineAdapter:
                         "H_p": H_pv,
                     },
                 )
+                if prev_layer == "C" and lccm.layer != "C":
+                    if self._arrays is not None:
+                        self._arrays.vertices["bit"][dst] = 0
+                        self._arrays.vertices["conf"][dst] = 0.0
+                    vertex["bit_deque"].clear()
 
             adj = self._arrays.adjacency if self._arrays else {}
             mode = inject_mode
@@ -701,16 +706,23 @@ class EngineAdapter:
             if inject_edges:
                 ptr = adj.get("nbr_ptr")
                 nbr = adj.get("nbr_idx")
+                rho_arr = edges["rho"]
                 if ptr is not None and nbr is not None and len(ptr) > 1:
+                    if self._neigh_sums_frame != self._frame:
+                        if nbr.size > 0:
+                            self._neigh_sums_cache = np.add.reduceat(
+                                rho_arr[nbr], ptr[:-1]
+                            )
+                        else:
+                            self._neigh_sums_cache = np.zeros(
+                                len(ptr) - 1, dtype=np.float32
+                            )
+                        self._neigh_sums_frame = self._frame
+                    neigh_sums_all = self._neigh_sums_cache
                     valid = [e for e in inject_edges if 0 <= e < len(ptr) - 1]
-                    if valid:
+                    if valid and neigh_sums_all is not None:
                         inject_arr = np.asarray(valid, dtype=np.int32)
-                        rho_before = edges["rho"][inject_arr]
-                        neigh_sums_all = (
-                            np.add.reduceat(edges["rho"][nbr], ptr[:-1])
-                            if nbr.size > 0
-                            else np.zeros(len(ptr) - 1, dtype=np.float32)
-                        )
+                        rho_before = rho_arr[inject_arr]
                         neigh_sums = neigh_sums_all[inject_arr]
                         counts = (ptr[1:] - ptr[:-1])[inject_arr]
                         mean = np.divide(
@@ -739,7 +751,7 @@ class EngineAdapter:
                             gamma=gamma,
                             rho0=rho0,
                         )
-                        edges["rho"][inject_arr] = rho_after
+                        rho_arr[inject_arr] = rho_after
                         if "d_eff" in edges:
                             edges["d_eff"][inject_arr] = d_eff
                         for idx, rb, ra, de in zip(
@@ -960,8 +972,9 @@ class EngineAdapter:
                         case _:
                             p_v.fill(1.0 / len(p_v))
                     self._arrays.vertices["p"][vid] = p_v
-                    self._arrays.vertices["bit"][vid] = 0
-                    self._arrays.vertices["conf"][vid] = 0.0
+                    if lccm.layer != "C":
+                        self._arrays.vertices["bit"][vid] = 0
+                        self._arrays.vertices["conf"][vid] = 0.0
                     v_arr["E_theta"][vid] = E_theta
                     v_arr["E_C"][vid] = E_C
                     data["bit_deque"].clear()
@@ -977,12 +990,16 @@ class EngineAdapter:
                         rho_mean = 0.0
                     self._arrays.vertices["rho_mean"][vid] = rho_mean
                     lccm.rho_mean = rho_mean
+                    k_rho = Config.windowing.get("k_rho", 1.0)
+                    E_rho = k_rho * rho_mean
+                    v_arr["E_rho"][vid] = E_rho
                     base_deg = data.get("base_deg", lccm.deg)
                     lccm.deg = base_deg + len(self._epairs.partners(vid))
                 else:
                     EQ = lccm._eq
                     E_theta = 0.0
                     E_C = 0.0
+                    E_rho = 0.0
                 log_record(
                     category="event",
                     label="vertex_window_close",
@@ -994,6 +1011,7 @@ class EngineAdapter:
                         "H_p": H_pv,
                         "E_theta": E_theta,
                         "E_C": E_C,
+                        "E_rho": E_rho,
                         "v_id": vid,
                     },
                     metadata={"window_idx": lccm.window_idx},

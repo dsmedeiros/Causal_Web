@@ -60,20 +60,25 @@ class MetricsLogger:
         self.records.append(entry)
 
     def flush(self, cfg, samples: Iterable[Dict[str, float]]) -> None:
-        """Write all stored metrics to ``metrics.csv`` and ``summary.json``."""
+        """Write all stored metrics and summaries to disk."""
 
         self.out_dir.mkdir(parents=True, exist_ok=True)
         csv_path = self.out_dir / "metrics.csv"
         if self.records:
+            fieldnames: List[str] = list(self.records[0].keys())
+            for rec in self.records[1:]:
+                for key in rec.keys():
+                    if key not in fieldnames:
+                        fieldnames.append(key)
             with csv_path.open("w", newline="") as fh:
-                writer = csv.DictWriter(fh, fieldnames=self.records[0].keys())
+                writer = csv.DictWriter(fh, fieldnames=fieldnames)
                 writer.writeheader()
                 writer.writerows(self.records)
 
         def _aggregate(rows: List[Dict[str, object]]) -> Dict[str, float]:
-            keys = [k for k in rows[0].keys() if k.startswith("G")]
+            keys = {k for row in rows for k in row.keys() if k.startswith("G")}
             agg: Dict[str, float] = {}
-            for k in keys:
+            for k in sorted(keys):
                 vals = [r[k] for r in rows if k in r]
                 agg[f"mean_{k}"] = float(np.mean(vals))
                 agg[f"std_{k}"] = float(np.std(vals))
@@ -87,3 +92,15 @@ class MetricsLogger:
             "metrics_agg": _aggregate(self.records) if self.records else {},
         }
         (self.out_dir / "summary.json").write_text(json.dumps(summary, indent=2))
+
+        inv_keys = {
+            k for row in self.records for k in row.keys() if k.startswith("inv_")
+        }
+        if inv_keys:
+            inv_summary: Dict[str, float] = {}
+            for k in sorted(inv_keys):
+                vals = [bool(r.get(k)) for r in self.records]
+                inv_summary[k] = float(np.mean(vals))
+            (self.out_dir / "summary_invariants.json").write_text(
+                json.dumps(inv_summary, indent=2)
+            )

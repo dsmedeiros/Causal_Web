@@ -51,11 +51,13 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 - Added DOE runner with invariant checks and metrics logging.
 - Runner CLI now accepts separate experiment (`--exp`) and base (`--base`)
   configs, persists per-sample seeds and gate metrics, and supports
-  parallel execution via `--parallel`.
+  parallel execution via `--parallel` (use `--processes` for a process pool).
 - DOE summaries now record selected gates and aggregate gate metrics
   (mean and standard deviation).
 - Introduced split-step quantum walk helpers with dispersion and lightcone
   experiment utilities and configuration knobs.
+- Metrics logger now emits `summary_invariants.json` with pass rates for gate
+  invariants.
 
 ## Table of Contents
 - [Quick Start](#quick-start)
@@ -167,7 +169,7 @@ mapping:
 {
   "engine_mode": "v2",
   "windowing": {"W0": 4, "zeta1": 0.3, "zeta2": 0.3, "a": 0.7, "b": 0.4,
-                 "T_hold": 2, "C_min": 0.1},
+                 "T_hold": 2, "C_min": 0.1, "k_rho": 1.0},
   "rho_delay": {"alpha_d": 0.1, "alpha_leak": 0.01, "eta": 0.2,
                 "gamma": 0.8, "rho0": 1.0, "inject_mode": "incoming"},
   "rho": {"update_mode": "heuristic", "variational": {"lambda_s": 0.2, "lambda_l": 0.01, "lambda_I": 1.0}},
@@ -190,6 +192,7 @@ mapping:
 The `windowing` values control vertex window advancement. `rho_delay` affects how edge density relaxes toward a baseline. The `rho` group selects the update rule for ρ while `lccm` chooses the Θ→C transition criterion.
 The `inject_mode` option selects
 whether ρ input applies to `"incoming"` (default), `"incident"` or `"outgoing"` edges.
+Non-incoming modes average per-packet Θ intensities over the window to set the injection intensity.
 `epsilon_pairs` governs dynamic
 ε-pair behaviour – seeds with a limited TTL can bind to form temporary bridge
 edges whose `sigma` values decay unless reinforced. The default `delta_ttl`
@@ -265,7 +268,7 @@ recomputes this ``d_eff`` on every packet delivery, storing it with the edge
 and using the updated value to schedule the next hop. When a vertex window
 closes the adapter normalises accumulated amplitudes and records ``EQ`` via
 ``engine.engine_v2.qtheta_c.close_window``. The Θ and C meters ``E_theta`` and
-``E_C`` are persisted to the vertex arrays for diagnostics. The post-window Θ
+``E_C`` along with the incident-density meter ``E_rho`` are persisted to the vertex arrays for diagnostics. If a vertex is in the C layer its bit and confidence persist across windows and are cleared only when leaving C. The post-window Θ
 distribution reset policy is governed by ``Config.theta_reset`` which accepts
 ``"uniform"`` for an even reset, ``"renorm"`` to normalise existing values or
 ``"hold"`` to leave the distribution unchanged (default ``"renorm"``).
