@@ -1,19 +1,16 @@
 # Developer Guide
 
-This project follows the Single Responsibility Principle and decomposes complex tasks into small service classes. Key services include:
+This project follows the Single Responsibility Principle and decomposes complex tasks into small service classes. The event/PQ kernel described in [theory.md](../theory.md) §11 is now the canonical execution model.
+
+Key services include:
 
 - **NodeInitializationService** – sets up node instances with runtime state and metadata.
-- **NodeTickService** – manages the tick emission lifecycle.
 - **GraphLoadService** – loads graphs from JSON files.
-- **NodeMetricsService** – collects metrics per tick.
-- **NodeTickDecisionService** – determines whether a node should emit.
-- **EdgePropagationService** – handles propagation across edges.
 - **GraphSerializationService** – writes graph snapshots to disk.
 - **NarrativeGeneratorService** – produces textual explanations from logs.
 - **ConnectionDisplayService** – visualises existing links in the GUI.
 - **GlobalDiagnosticsService** – exports run metrics.
 - **SIPRecombinationService** – manages recombination-based spawning.
-- **EntanglementService** – collapses ε-linked partners and manages entangled pairs.
 
 Logging helpers such as `LoggingMixin`, `OutputDirMixin` and `PathLoggingMixin` provide common functionality across the engine. Services reside under `Causal_Web/engine/services/` or within the GUI package.
 

@@ -3,7 +3,6 @@
 from .node_services import (
     NodeInitializationService,
     NodeTickService,
-    EdgePropagationService,
     NodeTickDecisionService,
 )
 from .sim_services import (
@@ -22,7 +21,6 @@ from .entanglement_service import EntanglementService
 __all__ = [
     "NodeInitializationService",
     "NodeTickService",
-    "EdgePropagationService",
     "NodeTickDecisionService",
     "NodeMetricsResultService",
     "NodeMetricsService",

@@ -137,7 +137,7 @@ expectation values. Any metadata fields found in `entangled_log.jsonl`, such as
 `mi_mode`, `kappa_a`, `kappa_xi`, `batch_id` or `h_prefix_len`, are displayed
 alongside the CHSH score.
 
-Runs produce a set of JSON logs in `output/`. The script `bundle_run.py` can be used after a simulation to archive the results. Full descriptions of each log file and their fields are available in [docs/log_schemas.md](docs/log_schemas.md).
+Runs produce a set of JSON logs in `output/`. Full descriptions of each log file and their fields are available in [docs/log_schemas.md](docs/log_schemas.md).
 
 ## Configuration
 Runtime parameters are loaded from `Causal_Web/input/config.json`. Any value can
