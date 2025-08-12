@@ -68,7 +68,7 @@ def log_json(
     record = dict(payload)
     if tick is not None:
         record["tick"] = tick
-    log_record(category, label, record)
+    log_record(category, label, value=record)
 
 
 class _LogManager:
