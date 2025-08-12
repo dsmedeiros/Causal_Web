@@ -237,7 +237,7 @@ On Q-delivery at $v$, emit **seeds** along outgoing edges with:
 * **Angle tag**: local phase proxy $\theta_v$.
 * **Expiry by depth:** $d_\text{exp} = d_\text{emit} + \Delta$.
 
-*Implementation note*: Default emission is **one seed per (v, window)** using $\theta_v=\operatorname{atan2}(m_{v,y},m_{v,x})$. An optional `emit_per_delivery` mode emits per Q-arrival. Implementations may cap the seed pool per vertex at $N_\text{seed}$ (e.g., 64) to avoid unbounded growth.
+*Implementation note*: Default emission is **one seed per (v, window)** using $\theta_v=\operatorname{atan2}(m_{v,y},m_{v,x})$. The seed depth for this emission equals the maximum arrival depth seen in the window, i.e. the depth of the last processed delivery. An optional `emit_per_delivery` mode emits per Q-arrival. Implementations may cap the seed pool per vertex at $N_\text{seed}$ (e.g., 64) to avoid unbounded growth.
 
 A seed forwarded across an edge uses that edge's current $d_\text{eff}$: $d_\text{next}=d_\text{curr}+d_\text{eff}$ and **continues only if** $d_\text{next}\le d_\text{exp}$. TTL advances by each traversed edge.
 
