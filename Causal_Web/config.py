@@ -138,6 +138,7 @@ class Config:
         "gamma": 0.8,
         "rho0": 1.0,
         "inject_mode": "incoming",
+        "vectorized": True,
     }
     rho = {
         "update_mode": "heuristic",

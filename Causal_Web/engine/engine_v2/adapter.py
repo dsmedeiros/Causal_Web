@@ -707,7 +707,14 @@ class EngineAdapter:
                 ptr = adj.get("nbr_ptr")
                 nbr = adj.get("nbr_idx")
                 rho_arr = edges["rho"]
-                if ptr is not None and nbr is not None and len(ptr) > 1:
+                # Use cached neighbour sums for vectorised ρ updates unless
+                # explicitly disabled for Gauss–Seidel semantics.
+                if (
+                    ptr is not None
+                    and nbr is not None
+                    and len(ptr) > 1
+                    and Config.rho_delay.get("vectorized", True)
+                ):
                     if self._neigh_sums_frame != self._frame:
                         if nbr.size > 0:
                             self._neigh_sums_cache = np.add.reduceat(

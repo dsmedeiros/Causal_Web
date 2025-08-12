@@ -53,6 +53,7 @@
         "gamma": 0.0,
         "rho0": 0.0,
         "inject_mode": "incoming",
+        "vectorized": true,
     },
     "rho": {
         "update_mode": "heuristic",
