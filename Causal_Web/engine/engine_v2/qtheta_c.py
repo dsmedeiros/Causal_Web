@@ -72,6 +72,7 @@ def deliver_packet(
     psi_out = U @ psi
     psi_rot = np.exp(1j * (phi + A)) * psi_out
     psi_acc = psi_acc + alpha * psi_rot
+    psi_acc = np.where(np.isfinite(psi_acc), psi_acc, np.zeros_like(psi_acc))
     z = np.vdot(psi_rot, psi)
     mu = float(np.angle(z))
     kappa = float(abs(z))
@@ -132,8 +133,6 @@ def deliver_packets_batch(
     np.ndarray,
     Tuple[int, float],
     Tuple[float, float, float],
-    float,
-    float,
 ]:
     """Vectorised delivery for packets sharing destination and window.
 
@@ -160,8 +159,7 @@ def deliver_packets_batch(
     -------
     tuple
         Updated ``depth_v``, ``psi_acc``, ``p_v``, ``(bit, conf)``,
-        per-layer intensity contributions ``(I_Q, I_Θ, I_C)`` each in ``[0, 1]`` and
-        the local phase statistics ``mu`` and ``kappa`` for the first packet.
+        per-layer intensity contributions ``(I_Q, I_Θ, I_C)`` each in ``[0, 1]``.
     """
 
     if depth_arr is not None:
@@ -180,9 +178,7 @@ def deliver_packets_batch(
     phase = np.exp(1j * (phi + A))[:, None]
     psi_rot = phase * out
     psi_acc = psi_acc + (alpha[:, None] * psi_rot).sum(axis=0)
-    z = np.vdot(psi_rot[0], psi[0]) if psi_rot.size else 0.0
-    mu = float(np.angle(z)) if psi_rot.size else 0.0
-    kappa = float(abs(z)) if psi_rot.size else 0.0
+    psi_acc = np.where(np.isfinite(psi_acc), psi_acc, np.zeros_like(psi_acc))
     if update_p:
         p_v = p_v + (alpha[:, None] * p).sum(axis=0)
         p_v = np.clip(p_v, 0.0, 1.0)
@@ -204,7 +200,7 @@ def deliver_packets_batch(
 
     intensities = (q_intensity, theta_intensity, c_intensity)
 
-    return depth_v, psi_acc, p_v, (bit, conf), intensities, mu, kappa
+    return depth_v, psi_acc, p_v, (bit, conf), intensities
 
 
 __all__ = ["deliver_packet", "deliver_packets_batch", "close_window"]

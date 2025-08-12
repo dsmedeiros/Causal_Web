@@ -112,7 +112,8 @@ def update_rho_delay_vec(
         Mean neighbour density for each edge.
     intensity:
         External input for each edge. May be a scalar shared across updates or
-        a vector matching the shape of ``rho`` for per-edge intensities.
+        a vector matching the shape of ``rho`` for per-edge intensities.  Values
+        are broadcast to ``rho``.
     d0:
         Baseline delays per edge.
 
@@ -121,7 +122,7 @@ def update_rho_delay_vec(
     tuple of arrays
         Updated densities and integer effective delays.
     """
-
+    intensity = np.asarray(intensity, dtype=np.float32)
     rho = (1 - alpha_d - alpha_leak) * rho + alpha_d * mean + eta * intensity
     rho = np.maximum(0.0, rho)
     d_eff = np.maximum(1, np.floor(d0 + gamma * np.log(1 + rho / rho0))).astype(
