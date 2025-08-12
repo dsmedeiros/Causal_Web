@@ -1,45 +1,32 @@
 from __future__ import annotations
 
-import numpy as np
+"""Minimal entanglement helpers for the v2 engine."""
+
+from typing import Any
 
 from ..models.node import Node
 
 
 class EntanglementService:
-    """Utilities for managing entanglement effects."""
+    """Placeholder utilities for epsilon-link behaviour.
+
+    The legacy engine supported ``\u03b5``-linked nodes that collapsed in
+    tandem. The event-driven v2 kernel has no direct equivalent, so these
+    helpers now perform no work but remain for API compatibility.
+    """
 
     @staticmethod
-    def collapse_epsilon(graph, node: Node, tick_time: int) -> None:
-        """Collapse epsilon-linked partners to the opposite eigenstate.
-
-        Both incoming and outgoing ``\u03b5`` edges are inspected so collapse
-        propagates even when only a single directed edge exists. The partner's
-        classical probabilities are mirrored to maintain coherent statistics.
+    def collapse_epsilon(graph: Any, node: Node, tick_time: int | None = None) -> None:
+        """No-op handler for collapsing epsilon-linked partners.
 
         Parameters
         ----------
         graph:
-            The :class:`~Causal_Web.engine.models.graph.CausalGraph` containing
-            the nodes.
+            Graph instance containing ``node``.
         node:
-            Node that has just collapsed.
+            Node that would have triggered a collapse.
         tick_time:
-            Global tick index of the collapse event.
+            Retained for backward compatibility; ignored.
         """
 
-        visited: set[str] = set()
-        edges = graph.get_edges_from(node.id) + graph.get_edges_to(node.id)
-        for edge in edges:
-            if not getattr(edge, "epsilon", False):
-                continue
-            partner_id = edge.target if edge.source == node.id else edge.source
-            if partner_id in visited:
-                continue
-            partner = graph.get_node(partner_id)
-            if partner is None or partner.collapse_origin.get(tick_time) is not None:
-                continue
-            partner.psi = np.array([node.psi[1], node.psi[0]], np.complex128)
-            partner.probabilities = node.probabilities[::-1]
-            partner.collapse_origin[tick_time] = "epsilon"
-            partner.incoming_tick_counts[tick_time] = 0
-            visited.add(partner_id)
+        return None
