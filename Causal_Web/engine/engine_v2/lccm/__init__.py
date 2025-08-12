@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from .free_energy import free_energy_score
 
 
 @dataclass
@@ -43,6 +44,9 @@ class LCCM:
     T_class: int
     k_theta: float = 1.0
     k_c: float = 0.5
+    mode: str = "thresholds"
+    k_q: float = 0.0
+    F_min: float = 0.0
     deg: int = 0  # incident degree (in + out) used in W(v)
     rho_mean: float = 0.0
     depth: int = 0
@@ -145,14 +149,28 @@ class LCCM:
                 return
 
             # Classical dominance toward C
-            if (
-                self._bit_fraction >= self.f_min
-                and self._confidence >= self.conf_min
-                and self._entropy <= self.H_max
-            ):
-                self._class_timer += 1
+            if self.mode == "free_energy":
+                score = free_energy_score(
+                    self._entropy,
+                    self._confidence,
+                    self._eq,
+                    k_theta=self.k_theta,
+                    k_c=self.k_c,
+                    k_q=self.k_q,
+                )
+                if score >= self.F_min:
+                    self._class_timer += 1
+                else:
+                    self._class_timer = 0
             else:
-                self._class_timer = 0
+                if (
+                    self._bit_fraction >= self.f_min
+                    and self._confidence >= self.conf_min
+                    and self._entropy <= self.H_max
+                ):
+                    self._class_timer += 1
+                else:
+                    self._class_timer = 0
             if self._class_timer >= self.T_class:
                 self.layer = "C"
                 self._class_timer = 0

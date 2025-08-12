@@ -170,6 +170,8 @@ mapping:
                  "T_hold": 2, "C_min": 0.1},
   "rho_delay": {"alpha_d": 0.1, "alpha_leak": 0.01, "eta": 0.2,
                 "gamma": 0.8, "rho0": 1.0, "inject_mode": "incoming"},
+  "rho": {"update_mode": "heuristic", "variational": {"lambda_s": 0.2, "lambda_l": 0.01, "lambda_I": 1.0}},
+  "lccm": {"mode": "thresholds", "free_energy": {"k_theta": 1.0, "k_c": 1.0, "k_q": 0.2, "F_min": 0.3}},
   "epsilon_pairs": {"delta_ttl": 8, "ancestry_prefix_L": 16,
                      "theta_max": 0.261799, "sigma0": 0.3,
                      "lambda_decay": 0.05, "sigma_reinforce": 0.1,
@@ -185,8 +187,8 @@ mapping:
 }
 ```
 
-The `windowing` values control vertex window advancement. `rho_delay` affects
-how edge density relaxes toward a baseline. The `inject_mode` option selects
+The `windowing` values control vertex window advancement. `rho_delay` affects how edge density relaxes toward a baseline. The `rho` group selects the update rule for ρ while `lccm` chooses the Θ→C transition criterion.
+The `inject_mode` option selects
 whether ρ input applies to `"incoming"` (default), `"incident"` or `"outgoing"` edges.
 `epsilon_pairs` governs dynamic
 ε-pair behaviour – seeds with a limited TTL can bind to form temporary bridge
