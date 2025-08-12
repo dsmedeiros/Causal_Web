@@ -1,5 +1,6 @@
 """Tests for the dynamic ε-pair utilities."""
 
+import logging
 import numpy as np
 
 from Causal_Web.engine.engine_v2.adapter import EngineAdapter
@@ -302,6 +303,61 @@ def test_seed_chain_respects_d_eff():
     mgr.carry(2, depth_curr=3, edge_ids=[0], edges=edges2)
 
     assert 3 not in mgr.seeds
+
+
+def test_seed_list_capped(monkeypatch, caplog):
+    events = []
+
+    def fake_log_record(category, label, *, value=None, **kwargs):
+        events.append((label, value))
+
+    monkeypatch.setattr(
+        "Causal_Web.engine.engine_v2.epairs.log_record", fake_log_record
+    )
+
+    mgr = EPairs(
+        delta_ttl=4,
+        ancestry_prefix_L=4,
+        theta_max=0.1,
+        sigma0=1.0,
+        lambda_decay=0.5,
+        sigma_reinforce=0.2,
+        sigma_min=0.1,
+        max_seeds_per_site=2,
+    )
+    edges = {"dst": [5], "d_eff": [1]}
+    with caplog.at_level(logging.WARNING):
+        mgr.emit(
+            origin=1,
+            h_value=0x0000000000000000,
+            theta=0.0,
+            depth_emit=0,
+            edge_ids=[0],
+            edges=edges,
+        )
+        mgr.emit(
+            origin=2,
+            h_value=0x1000000000000000,
+            theta=0.0,
+            depth_emit=0,
+            edge_ids=[0],
+            edges=edges,
+        )
+        mgr.emit(
+            origin=3,
+            h_value=0x2000000000000000,
+            theta=0.0,
+            depth_emit=0,
+            edge_ids=[0],
+            edges=edges,
+        )
+
+    assert [s.origin for s in mgr.seeds[5]] == [2, 3]
+    assert any("max seeds per site" in rec.message for rec in caplog.records)
+    assert sum(1 for rec in caplog.records if "max seeds per site" in rec.message) == 1
+    assert any(
+        lbl == "seed_dropped" and val["reason"] == "overflow" for lbl, val in events
+    )
 
 
 def test_bridge_delay_median_used_in_scheduler(monkeypatch):

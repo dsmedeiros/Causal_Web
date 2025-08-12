@@ -153,7 +153,8 @@ mapping:
                      "theta_max": 0.261799, "sigma0": 0.3,
                      "lambda_decay": 0.05, "sigma_reinforce": 0.1,
                      "sigma_min": 0.001, "decay_interval": 32,
-                     "decay_on_window_close": true},
+                     "decay_on_window_close": true,
+                     "max_seeds_per_site": 64},
   "ancestry": {"beta_m0": 0.1, "delta_m": 0.02},
   "bell": {"enabled": false, "mi_mode": "MI_strict", "kappa_a": 0.0,
             "kappa_xi": 0.0, "beta_m": 0.0, "beta_h": 0.0},
@@ -171,7 +172,8 @@ edges whose `sigma` values decay unless reinforced. The default `delta_ttl`
 scales with `W0` (`2*W0`) to simplify experiments, while the remaining
 parameters set decay and reinforcement dynamics. `decay_interval` controls how
 often bridges decay and `decay_on_window_close` toggles a decay step when a
-window closes. The `ancestry` group tunes
+window closes. `max_seeds_per_site` bounds how many unmatched seeds a vertex
+retains, evicting the oldest when full. The `ancestry` group tunes
 phase-moment updates and decay. `bell` sets mutual information gates for Bell
 pair matching. Bridge creation and removal now emit `bridge_created` and
 `bridge_removed` events (carrying a stable synthetic `bridge_id` and final `σ`),
