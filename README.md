@@ -38,6 +38,10 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 
 ### Recent Changes
 
+- Added local Forman curvature diagnostics with per-region statistics and
+  histogram logging.
+- Introduced a switchable delay mapping system with the existing logarithmic
+  rule (`log_scalar`) and a new Φ-linear variant (`phi_linear`).
 - Seed carrying now iterates through sorted depth arrivals, preserving
   per-depth causality within a batch.
 - Baseline edge delays are floored to integers and the initial effective delay
