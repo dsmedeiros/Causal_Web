@@ -875,6 +875,7 @@ class EngineAdapter:
                     metadata={"window_idx": lccm.window_idx},
                 )
                 if Config.epsilon_pairs.get("decay_on_window_close", True):
+                    # Decay bridges when vertices advance a window.
                     self._epairs.decay_all()
 
         return frame

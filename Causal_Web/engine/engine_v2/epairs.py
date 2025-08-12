@@ -15,10 +15,11 @@ still under development.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Callable, Dict, Iterable, List, Sequence, Tuple
+from typing import Callable, Dict, Iterable, List, Sequence, Set, Tuple
 from array import array
 
 import numpy as np
+import logging
 
 from ..logging.logger import log_record
 from ...config import Config
@@ -104,7 +105,16 @@ class EPairs:
         sigma_reinforce: float,
         sigma_min: float,
         seed: int | None = None,
+        max_seeds_per_site: int = 64,
     ) -> None:
+        """Initialize the manager.
+
+        Parameters
+        ----------
+        max_seeds_per_site:
+            Maximum seeds to retain per site before oldest are evicted.
+        """
+
         self.delta_ttl = delta_ttl
         self.L = ancestry_prefix_L
         self.theta_max = theta_max
@@ -112,6 +122,7 @@ class EPairs:
         self.lambda_decay = lambda_decay
         self.sigma_reinforce = sigma_reinforce
         self.sigma_min = sigma_min
+        self.max_seeds_per_site = max_seeds_per_site
         self.seeds: Dict[int, List[Seed]] = {}
         self.bridges: Dict[Tuple[int, int], Bridge] = {}
         # adjacency of active bridge partners stored in fixed arrays
@@ -123,6 +134,8 @@ class EPairs:
         # Source for incident edge delays used when estimating bridge latency.
         self._incident_delays: Dict[int, List[int]] = {}
         self._incident_delay_cb: Callable[[int], Iterable[int]] | None = None
+        # Track sites that have already emitted a capacity warning
+        self._overflow_warned: Set[int] = set()
 
     # Internal helpers -------------------------------------------------
     def _log_seed(self, label: str, value: Dict[str, int | float]) -> None:
@@ -305,6 +318,17 @@ class EPairs:
                         {"src": site, "origin": seed.origin, "reason": "angle"},
                     )
                 return
+        if len(seeds) >= self.max_seeds_per_site:
+            evicted = seeds.pop(0)
+            self._log_seed(
+                "seed_dropped",
+                {"src": site, "origin": evicted.origin, "reason": "overflow"},
+            )
+            if site not in self._overflow_warned:
+                logging.warning(
+                    "max seeds per site reached at %s; dropping oldest", site
+                )
+                self._overflow_warned.add(site)
         seeds.append(seed)
 
     def set_incident_delays(
