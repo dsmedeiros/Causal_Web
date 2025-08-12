@@ -7,8 +7,8 @@ from telemetry.metrics import MetricsLogger
 
 def test_metrics_logger(tmp_path: Path):
     logger = MetricsLogger(tmp_path)
-    logger.log(0, {"g": 1.0}, {"Delta": 1.0}, 0, {"G1": 1.0}, {})
-    logger.log(1, {"g": 2.0}, {"Delta": 2.0}, 1, {"G2": 2.0}, {})
+    logger.log(0, {"g": 1.0}, {"Delta": 1.0}, 0, {"G1": 1.0}, {"inv_ok": True})
+    logger.log(1, {"g": 2.0}, {"Delta": 2.0}, 1, {"G2": 2.0}, {"inv_ok": False})
     cfg = type(
         "Cfg",
         (),
@@ -25,3 +25,5 @@ def test_metrics_logger(tmp_path: Path):
     assert summary["metrics_agg"]["mean_G1"] == 1.0
     assert summary["metrics_agg"]["std_G1"] == 0.0
     assert summary["metrics_agg"]["mean_G2"] == 2.0
+    inv_summary = json.loads((tmp_path / "summary_invariants.json").read_text())
+    assert inv_summary["inv_ok"] == 0.5
