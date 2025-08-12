@@ -24,7 +24,12 @@ from .state import Packet, TelemetryFrame
 from .loader import GraphArrays, load_graph_arrays
 from .rho_delay import effective_delay, update_rho_delay, update_rho_delay_vec
 from .rho.variational import lambda_to_coeffs
-from .qtheta_c import close_window, deliver_packet, deliver_packets_batch
+from .qtheta_c import (
+    close_window,
+    deliver_packet,
+    deliver_packets_batch,
+    phase_stats_batch,
+)
 from .epairs import EPairs
 from .bell import BellHelpers, Ancestry
 from ...config import Config
@@ -420,25 +425,26 @@ class EngineAdapter:
             for item in requeue:
                 self._scheduler.push(*item)
 
-            mu_list: list[float] = []
-            kappa_list: list[float] = []
-            pkt_intensities: list[tuple[float, float, float]] = []
-            for psi_i, U_i, phase_i, p_i, b_i in zip(
-                psi_list, U_list, phase_list, p_list, bit_list
-            ):
-                psi_out_i = U_i @ psi_i
-                psi_rot_i = phase_i * psi_out_i
-                z_i = np.vdot(psi_rot_i, psi_i)
-                mu_list.append(float(np.angle(z_i)))
-                kappa_list.append(float(abs(z_i)))
-                q_int = min(1.0, float(np.linalg.norm(psi_rot_i) ** 2))
-                theta_int = min(1.0, float(np.sum(np.abs(p_i))))
-                c_int = float(b_i)
-                pkt_intensities.append((q_int, theta_int, c_int))
+            U_arr = np.asarray(U_list, dtype=np.complex64)
+            phase_arr = np.asarray(phase_list, dtype=np.complex64)
+            psi_arr = np.asarray(psi_list, dtype=np.complex64)
+            mu_arr, kappa_arr, psi_rot_arr = phase_stats_batch(
+                U_arr, phase_arr, psi_arr
+            )
+            mu_list = mu_arr.tolist()
+            kappa_list = kappa_arr.tolist()
 
-            theta_vals = [float(np.sum(np.abs(p_i))) for p_i in p_list]
-            theta_mean = float(np.mean(theta_vals)) if theta_vals else 0.0
+            p_arr = np.asarray(p_list, dtype=np.float32)
+            theta_vals = np.sum(np.abs(p_arr), axis=1)
+            theta_int_arr = np.minimum(1.0, theta_vals)
+            theta_mean = float(np.mean(theta_vals)) if len(theta_vals) else 0.0
             theta_mean = min(1.0, theta_mean)
+
+            q_int_arr = np.minimum(1.0, np.linalg.norm(psi_rot_arr, axis=1) ** 2)
+            c_int_arr = np.asarray(bit_list, dtype=float)
+            pkt_intensities = list(
+                zip(q_int_arr.tolist(), theta_int_arr.tolist(), c_int_arr.tolist())
+            )
 
             if len(pkt_list) > 1:
                 (

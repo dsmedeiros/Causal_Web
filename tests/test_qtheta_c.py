@@ -2,7 +2,12 @@ import numpy as np
 import pytest
 from collections import deque
 
-from Causal_Web.engine.engine_v2.qtheta_c import deliver_packet, close_window
+from Causal_Web.engine.engine_v2.qtheta_c import (
+    deliver_packet,
+    close_window,
+    phase_stats,
+    phase_stats_batch,
+)
 
 
 def test_deliver_packet_updates_fields():
@@ -65,3 +70,24 @@ def test_p_v_unchanged_when_update_p_false():
         depth, psi_acc, p_v, bits, packet, edge, update_p=False
     )
     assert np.allclose(p_out, p_v)
+
+
+def test_phase_stats_batch_matches_single():
+    U = [
+        np.eye(2, dtype=np.complex64),
+        np.array([[0.0, 1.0], [1.0, 0.0]], dtype=np.complex64),
+    ]
+    phase = [1.0 + 0.0j, np.exp(1j * 0.5)]
+    psi = [
+        np.array([1.0, 0.0], dtype=np.complex64),
+        np.array([1 / np.sqrt(2), 1 / np.sqrt(2)], dtype=np.complex64),
+    ]
+    mu_single, kappa_single = zip(
+        *(
+            phase_stats(U_i, phase_i, psi_i)[:2]
+            for U_i, phase_i, psi_i in zip(U, phase, psi)
+        )
+    )
+    mu_batch, kappa_batch, _ = phase_stats_batch(U, phase, psi)
+    assert np.allclose(mu_batch, mu_single)
+    assert np.allclose(kappa_batch, kappa_single)
