@@ -45,6 +45,9 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 - Non-incoming injection modes average per-packet intensities to avoid
   saturation with high fan-in.
 - Added DOE runner with invariant checks and metrics logging.
+- Runner CLI now accepts separate experiment (`--exp`) and base (`--base`)
+  configs, persists per-sample seeds and gate metrics, and supports
+  parallel execution via `--parallel`.
 
 ## Table of Contents
 - [Quick Start](#quick-start)
