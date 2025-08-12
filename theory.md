@@ -54,6 +54,7 @@ Each vertex $v$ may host a phase $\theta_v\in [0,2\pi)$ with intrinsic $\omega_v
 * **Theta-probabilities:** $p_v \in \Delta^{K-1}$ (simplex).
 * **C-bit & confidence:** $(\text{bit}_v\in\{0,1\},\, \text{conf}_v\in[0,1])$ via majority buffer.
 * **Fan-in this window:** $\Lambda_v\in\mathbb Z_{\ge0}$.
+* **Q-arrivals this window:** $\Lambda_v^{Q}\in\mathbb Z_{\ge0}$.
 * **Meters:** $E_Q(v),\,E_\Theta(v),\,E_C(v)$ at window close (Sec. 7).
 * **Ancestry fields (Bell):** rolling hash $h_v$ and phase-moment $m_v\in\mathbb R^3$.
 
@@ -85,7 +86,7 @@ $$
 (d_\text{arr},\, v_\text{dst},\, e,\, \text{seq})
 $$
 
-and repeatedly delivers the minimum. On delivery to $v$:
+and repeatedly delivers the minimum. Deterministic seeded RNG uses only local fields and these keys. On delivery to $v$:
 
 $$
 d(v)\;\leftarrow\;\max\{d(v),\, d_\text{arr}\}.
@@ -112,8 +113,9 @@ $$
 ```
  d(v) = max(d(v), d_arr)
  Lambda_v += 1
- 
+
  if layer(v) == "Q":
+     Lambda_v_Q += 1
      psi_acc[v] += alpha_e * exp(i * (phi_e + A_e)) * (U_e @ psi_packet)
  elif layer(v) == "Theta":
      p_v = normalize(p_v + alpha_e * p_packet)
@@ -144,6 +146,9 @@ psi_acc[v] = 0
 E_Theta(v) = kappa_Theta * (1 - H(p_v))     # H = Shannon entropy
 E_C(v) = kappa_C * conf_v
 Lambda_v = 0
+if Lambda_v_Q == 0:
+    m_v = normalize((1 - delta_m) * m_v)
+Lambda_v_Q = 0
 ```
 
 ---
@@ -169,7 +174,7 @@ $$
 
 *Implementation knob*: choose the injection set with
 `inject_mode \in \{\text{"incoming"},\text{"incident"},\text{"outgoing"}\}`
-(default `incoming`).
+(default `incoming`). Default is `inject_mode="incoming"`, updating only the delivered edge using the per-delivery intensity from Sec. 4.4. Other modes (`incident`,`outgoing`) are implementation variants for ablation, not the default.
 
 ## 4.3 Effective delay (saturating)
 
@@ -194,13 +199,11 @@ Intensity $I$ is taken from the current layer $\ell(v)$ at delivery.
 
 ## 5.1 Local window size
 
-$$
-W(v) = W_0
-+ \big\lfloor \zeta_1 \,\ln\big(1+\deg(v)\big)
-+ \zeta_2 \,\ln\big(1+\bar\rho_v/\rho_0\big) \big\rfloor,
-$$
+Let $\deg_\text{inc}(v)=\deg_\text{in}(v)+\deg_\text{out}(v)+\deg_\text{bridge}(v)$. Let $\bar\rho_v$ be the current mean of $\rho_e$ over edges incident to $v$, recomputed when the window closes. Then
 
-where $\bar\rho_v$ is the mean $\rho$ of edges incident to $v$. $W(v)\ge 1$.
+$$
+W(v)=W_0+\Big\lfloor \zeta_1\ln\big(1+\deg_\text{inc}(v)\big)+\zeta_2\ln\big(1+\bar\rho_v/\rho_0\big)\Big\rfloor,\quad W(v)\ge 1.
+$$
 
 * **Theta reset policy:** $\theta_\text{reset}\in\{\text{uniform},\text{renorm},\text{hold}\}$ chooses how $p_v$ is reset when the window closes (default $\text{renorm}$).
 
@@ -219,7 +222,7 @@ $$
 
 * **Q -> Theta** ("**decoh_threshold**"): when $\Lambda_v \ge N_\text{decoh}(v)$ within the current window. $\psi_v$ becomes **frozen** (read-only); $p_v$ activates.
 * **Theta -> Q** ("**recoh_threshold**"): when $\Lambda_v \le N_\text{recoh}(v)$ for $T_\text{hold}$ consecutive windows **and** $E_Q(v)\ge C_\text{min}$.
-* **Theta -> C** ("**classical_dominance**"): when $H(p_v)\le H_\text{max}$ **and** bit dominance/confidence exceed thresholds for $T_\text{class}$ windows.
+* **Theta -> C** ("**classical_dominance**"): when $H(p_v)\le H_\text{max}$ and $\text{bit\_frac}\ge f_\text{min}$ and $\text{conf}_v\ge \text{conf}_\text{min}$ for $T_\text{class}$ windows.
 * (Optional C->Theta can be added; not required for v1.2.)
 
 ---
@@ -234,10 +237,9 @@ On Q-delivery at $v$, emit **seeds** along outgoing edges with:
 * **Angle tag**: local phase proxy $\theta_v$.
 * **Expiry by depth:** $d_\text{exp} = d_\text{emit} + \Delta$.
 
-*Implementation note*: by default, a vertex emits one seed per window using its
-moment angle; enabling `emit_per_delivery` switches to per-delivery emission.
+*Implementation note*: Default emission is **one seed per (v, window)** using $\theta_v=\operatorname{atan2}(m_{v,y},m_{v,x})$. An optional `emit_per_delivery` mode emits per Q-arrival. Implementations may cap the seed pool per vertex at $N_\text{seed}$ (e.g., 64) to avoid unbounded growth.
 
-A seed forwarded across an edge with $d_\text{eff}$ computes $d_\text{next}=d_\text{curr}+d_\text{eff}$ and **continues only if** $d_\text{next}\le d_\text{exp}$. Otherwise it **drops** (strict locality in arrival-depth).
+A seed forwarded across an edge uses that edge's current $d_\text{eff}$: $d_\text{next}=d_\text{curr}+d_\text{eff}$ and **continues only if** $d_\text{next}\le d_\text{exp}$. TTL advances by each traversed edge.
 
 ## 6.2 Binding & bridges
 
@@ -251,7 +253,7 @@ Binding creates a **transient bridge edge** with:
 
 * initial $\sigma=\sigma_0$;
 * local effective delay
-  $d_\text{bridge}(u,v)=\max\!\Big\{1,\Big\lfloor\operatorname{median}\{d_\text{eff}(e): e\text{ incident to }u\text{ or }v\}\Big\rfloor\Big\}$;
+  $d_\text{bridge}(u,v)=\max\!\Big\{1,\Big\lfloor\operatorname{median}\{d_\text{eff}(e): e\text{ incident to }u\text{ or }v\}\Big\rfloor\Big\}$ (computed from current incident $d_\text{eff}$ at bind time);
 * **stable synthetic id** (negative id space) for determinism/logs.
 
 Bridges are scheduled **exactly like edges**.
@@ -289,24 +291,21 @@ where **leak** is controlled by $\alpha_{\text{leak}}$. This is a meter-level ch
 
 # 8. Bell / Shared-Ancestry Selector (SAS)
 
-## 8.1 Local ancestry fields
+## 8.1 Local ancestry fields (Q-arrivals only)
+Each vertex keeps a rolling hash $h_v=(h_0,h_1,h_2,h_3)\in(\mathbb{Z}_{2^{64}})^4$ and a unit moment $m_v\in\mathbb R^3$.
 
-Each vertex maintains:
+From the delivered packet $\psi$ on edge $e$ with phases $\phi_k$ and weights $w_k=|\psi_k|^2/(\sum|\psi|^2+\varepsilon)$, define $\tilde\phi_k=\phi_k+\phi_e+A_e$,
+$z=\sum_k w_k\,e^{i\tilde\phi_k}$, mean direction $\mu=\arg z$, concentration $\kappa=|z|\in[0,1]$, and $u_\text{local}=[\cos\mu,\sin\mu,\kappa]$.
 
-* **Hash** $h_v$ (rolling 256-bit; implementation uses 4x64).
-* **Moment** $m_v\in\mathbb R^3$ (phase-direction statistics).
+**Moment EMA:** $m_v\leftarrow \mathrm{normalize}\big((1-\beta_m)\,m_v+\beta_m\,u_\text{local}\big)$.
+**Window decay:** if the prior window had $\Lambda_v^{Q}=0$, decay $m_v\leftarrow \mathrm{normalize}\big((1-\delta_m)\,m_v\big)$.
 
-On each Q-layer delivery to $v$ with phase $\theta$ and arrival-depth $d_\text{arr}$:
-
-$$
-\begin{aligned}
-\text{seed} &= (v \ll 32) \oplus d_\text{arr} \oplus \operatorname{round}(\theta\cdot 1000), \\
-h_v &\leftarrow \operatorname{roll}(h_v) \oplus \operatorname{splitmix64}(\text{seed}), \\
-m_v &\leftarrow 0.9\, m_v + 0.1\,(\cos\theta,\sin\theta,0).
-\end{aligned}
-$$
-
-No updates occur on Theta or C deliveries.
+**Rolling hash (splitmix64 lanes, strictly local):**
+$h_0\leftarrow \mathrm{smix}\big(h_0\oplus v \oplus (d_\text{arr}\ll 1)\big)$,
+$h_1\leftarrow \mathrm{smix}\big(h_1\oplus e \oplus (\text{seq}\ll 1)\big)$,
+$h_2\leftarrow \mathrm{smix}\big(h_2\oplus \mathrm{bits}(\mu)\big)$,
+$h_3\leftarrow \mathrm{smix}\big(h_3\oplus \mathrm{bits}(\kappa)\big)$.
+**Seed prefix:** first $L$ MSBs of $h_0$.
 
 ## 8.2 Source hidden variable
 
@@ -377,6 +376,7 @@ $$
 * **Intensity:** derived per layer at delivery; drives $\rho$ and $d_\text{eff}$.
 * **epsilon-pairs:** seeds with **expiry by depth**; local bind; transient bridges with sigma-dynamics.
 * **Bell:** ancestry updates; $\lambda$ at source; local setting & readout at detectors.
+* **Interface knobs:** `emit_per_delivery`, `inject_mode`.
 
 (These are implementation notes, not additional physics.)
 
@@ -402,6 +402,9 @@ $$
 6. **Bell toggles (Gate 6):**
    MI\_strict => CHSH $\le 2$. MI\_conditioned => CHSH increases with $\kappa_a$; no signaling.
 
+7. **Ancestry determinism (Gate 7):**
+   Identical local Q-delivery sequences at $v$ produce identical $(h_v,m_v)$. Shuffling remote events leaves $(h_v,m_v)$ unchanged.
+
 ---
 
 # 13. Defaults (illustrative, tune per graph)
@@ -410,7 +413,9 @@ $$
 * $a=0.7,\ b=0.4,\ T_\text{hold}=2,\ C_\text{min}=0.1$.
 * $\alpha_d=0.1,\ \alpha_{\text{leak}}=0.01,\ \eta=0.2,\ \gamma=0.8,\ \rho_0=1.0$.
 * $\Delta\approx 2W_0,\ L=16,\ \theta_\text{max}\approx \pi/12,\ \sigma_0=0.3,\ \lambda_\text{decay}=0.05,\ \sigma_\text{reinforce}=0.1,\ \sigma_\text{min}=10^{-3}$.
-* $\beta_m=0.7,\ \beta_h=0.3,\ \kappa_a\in\{0,2,5,10\},\ \kappa_\xi=0.5$.
+* $\kappa_a\in\{0,2,5,10\},\ \kappa_\xi=0.5$.
+* $H_\text{max}=0.2,\ f_\text{min}=0.6,\ \text{conf}_\text{min}=0.7,\ T_\text{class}=2$.
+* Ancestry: $\beta_m=0.1,\ \beta_h=0.3,\ \delta_m=0.02$.
 
 ---
 
