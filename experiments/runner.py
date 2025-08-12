@@ -36,6 +36,26 @@ class ExperimentConfig:
 
     @classmethod
     def from_mapping(cls, data: Dict[str, object]) -> "ExperimentConfig":
+        """Construct an :class:`ExperimentConfig` from a generic mapping.
+
+        Parameters
+        ----------
+        data:
+            Mapping containing configuration fields.
+
+        Raises
+        ------
+        KeyError
+            If required configuration keys are missing.
+        """
+
+        required = {"samples", "groups", "gates"}
+        missing = required - data.keys()
+        if missing:
+            raise KeyError(
+                f"Experiment configuration missing keys: {', '.join(sorted(missing))}"
+            )
+
         groups = {k: tuple(v) for k, v in data["groups"].items()}
         seed = data.get("seed", 0)
         tol = {k: float(v) for k, v in data.get("tol", {}).items()}
@@ -77,7 +97,8 @@ def _sample_groups(
     names = list(cfg.groups.keys())
     ranges = np.array([cfg.groups[n] for n in names], dtype=float)
     unit = _latin_hypercube(cfg.samples, len(names), rng)
-    scaled = ranges[:, 0] + unit * (ranges[:, 1] - ranges[:, 0])
+    lows, highs = ranges[:, 0], ranges[:, 1]
+    scaled = lows[None, :] + unit * (highs - lows)[None, :]
     return [dict(zip(names, scaled[i])) for i in range(cfg.samples)]
 
 

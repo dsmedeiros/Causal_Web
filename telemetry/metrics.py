@@ -72,10 +72,12 @@ class MetricsLogger:
 
         def _aggregate(rows: List[Dict[str, object]]) -> Dict[str, float]:
             keys = [k for k in rows[0].keys() if k.startswith("G")]
-            return {
-                f"mean_{k}": float(np.mean([r[k] for r in rows if k in r]))
-                for k in keys
-            }
+            agg: Dict[str, float] = {}
+            for k in keys:
+                vals = [r[k] for r in rows if k in r]
+                agg[f"mean_{k}"] = float(np.mean(vals))
+                agg[f"std_{k}"] = float(np.std(vals))
+            return agg
 
         summary = {
             "samples": cfg.samples,
