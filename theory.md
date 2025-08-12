@@ -1,6 +1,6 @@
 # Causal Web Theory & Layered Causal Coherence Model (CWT/LCCM)
 
-**Version 1.2 — Strict-Local**
+**Version 1.2 - Strict-Local**
 **Status:** Research draft (2025-08-11).
 **Principle:** Every rule reads/writes only local state and messages on finite causal paths. No global tick; no nonlocal action.
 
@@ -8,11 +8,11 @@
 
 * Replaced global tick with **arrival-depth** scheduling (event-driven).
 * Resolved Q-layer normalization: **store energy, normalize state** at window close.
-* **LCCM hysteresis** with local fan-in counters & hold timers (Q↔Θ, Θ→C).
-* **Stress-energy ρ** and **delay map** $d_\text{eff}$ via a saturating log law.
-* **Dynamic ε-pairs** using **depth-based TTL** seeds and transient **bridges** with σ-decay/reinforcement.
+* **LCCM hysteresis** with local fan-in counters & hold timers (Q<->Theta, Theta->C).
+* **Stress-energy $\rho$** and **delay map** $d_\text{eff}$ via a saturating log law.
+* **Dynamic epsilon-pairs** using **depth-based TTL** seeds and transient **bridges** with sigma-decay/reinforcement.
 * **Bell / SAS**: strictly local, toggled **measurement-independence** (MI\_strict vs MI\_conditioned).
-* **Adaptive windows** $W(v)$ from local degree and local mean ρ.
+* **Adaptive windows** $W(v)$ from local degree and local mean $\rho$.
 * **Conservation meters** $E_Q,E_\Theta,E_C,E_\rho$ with leak accounting.
 * Deterministic scheduler tie-breakers; seeded RNG everywhere.
 
@@ -40,7 +40,7 @@ An **event** is delivery of a packet across an edge. Causal precedence $e_1\prec
 
 ## 1.4 Oscillators (optional)
 
-Each vertex $v$ may host a phase $\theta_v\in [0,2\pi)$ with intrinsic $\omega_v$. An oscillator “fires” when $\theta_v\to 2\pi$, emitting on each outgoing edge. In the event-driven kernel we simply consume emissions already queued by prior arrivals; the oscillator is an interpretation layer.
+Each vertex $v$ may host a phase $\theta_v\in [0,2\pi)$ with intrinsic $\omega_v$. An oscillator "fires" when $\theta_v\to 2\pi$, emitting on each outgoing edge. In the event-driven kernel we simply consume emissions already queued by prior arrivals; the oscillator is an interpretation layer.
 
 ## 1.5 State variables
 
@@ -51,7 +51,7 @@ Each vertex $v$ may host a phase $\theta_v\in [0,2\pi)$ with intrinsic $\omega_v
 * **Layer:** $\ell(v)\in\{\text{Q},\Theta,\text{C}\}$.
 * **Q-state:** $\psi_v \in \mathbb C^D$ (normalized at window close).
 * **Q-accumulator:** $\psi^\text{acc}_v\in \mathbb C^D$ (reset each window).
-* **Θ-probabilities:** $p_v \in \Delta^{K-1}$ (simplex).
+* **Theta-probabilities:** $p_v \in \Delta^{K-1}$ (simplex).
 * **C-bit & confidence:** $(\text{bit}_v\in\{0,1\},\, \text{conf}_v\in[0,1])$ via majority buffer.
 * **Fan-in this window:** $\Lambda_v\in\mathbb Z_{\ge0}$.
 * **Meters:** $E_Q(v),\,E_\Theta(v),\,E_C(v)$ at window close (Sec. 7).
@@ -65,15 +65,15 @@ Each vertex $v$ may host a phase $\theta_v\in [0,2\pi)$ with intrinsic $\omega_v
 * **Phase & gauge:** $\phi_e, A_e \in \mathbb R$.
 * **Unitary:** $U_e\in\mathbb C^{D\times D}$ (Q-layer).
 * **Stress-energy:** $\rho_e\in\mathbb R_{\ge0}$.
-* **Bridge strength (ε-pairs):** $\sigma_e\in\mathbb R_{\ge0}$ (0 if not a bridge).
+* **Bridge strength (epsilon-pairs):** $\sigma_e\in\mathbb R_{\ge0}$ (0 if not a bridge).
 
 ### Packet payload
 
-* **Layer payload:** one of $\psi$ (Q), $p$ (Θ), or bit (C).
+* **Layer payload:** one of $\psi$ (Q), $p$ (Theta), or bit (C).
 * **Intensity (derived at delivery):** $I\in[0,1]$ (Sec. 4.4).
 * **Arrival-depth:** $d_\text{arr}\in\mathbb Z_{\ge0}$.
 * **Bell hidden var (optional):** $\lambda=(u,\zeta)$.
-* **Optional ε-seed fields** (Sec. 6).
+* **Optional epsilon-seed fields** (Sec. 6).
 
 ---
 
@@ -110,40 +110,40 @@ $$
 **Delivery:** (to $v$, via $e$, payload $X$)
 
 ```
-d(v) = max(d(v), d_arr)
-Λ_v += 1
-
-if ℓ(v) == Q:
-    ψ_acc[v] += α_e · exp(i(φ_e + A_e)) · (U_e @ ψ_packet)
-elif ℓ(v) == Θ:
-    p_v ← normalize( p_v + α_e · p_packet )
-else:  # C
-    (bit_v, conf_v) ← majority_update(bit_v, conf_v, packet.bit)
-
-# compute intensity I for ρ/delay update (Sec. 4.4)
-I = intensity_from_layer(ℓ(v), e, payload)
-
-# stress-energy and delay update on edge e
-ρ_e, d_eff(e) ← ρ_update_and_delay(e, neighbors(e), I)
-
-# ε-seed emit on Q delivery (Sec. 6)
-if ℓ(v) == Q:
-    emit_epsilon_seed(v, e, d_arr)
-
-# update ancestry (Bell), then LCCM transitions (Sec. 5)
-update_ancestry(v, payload)
-maybe_transition_layer(v)
-```
+ d(v) = max(d(v), d_arr)
+ Lambda_v += 1
+ 
+ if layer(v) == "Q":
+     psi_acc[v] += alpha_e * exp(i * (phi_e + A_e)) * (U_e @ psi_packet)
+ elif layer(v) == "Theta":
+     p_v = normalize(p_v + alpha_e * p_packet)
+ else:  # C
+     (bit_v, conf_v) = majority_update(bit_v, conf_v, packet.bit)
+ 
+ # compute intensity I for rho/delay update (Sec. 4.4)
+ I = intensity_from_layer(layer(v), e, payload)
+ 
+ # stress-energy and delay update on edge e
+ rho_e, d_eff[e] = rho_update_and_delay(e, neighbors(e), I)
+ 
+ # epsilon-seed emit on Q delivery (Sec. 6)
+ if layer(v) == "Q":
+     emit_epsilon_seed(v, e, d_arr)
+ 
+ # update ancestry (Bell), then LCCM transitions (Sec. 5)
+ update_ancestry(v, payload)
+ maybe_transition_layer(v)
+ ```
 
 **Window close at $v$:**
 
 ```
-E_Q(v) = ||ψ_acc[v]||^2
-if E_Q(v) > 0: ψ[v] = ψ_acc[v] / sqrt(E_Q(v))
-ψ_acc[v] = 0
-E_Θ(v) = κ_Θ · (1 - H(p_v))     # H = Shannon entropy
-E_C(v) = κ_C · conf_v
-Λ_v = 0
+E_Q(v) = ||psi_acc[v]||^2
+if E_Q(v) > 0: psi[v] = psi_acc[v] / sqrt(E_Q(v))
+psi_acc[v] = 0
+E_Theta(v) = kappa_Theta * (1 - H(p_v))     # H = Shannon entropy
+E_C(v) = kappa_C * conf_v
+Lambda_v = 0
 ```
 
 ---
@@ -154,7 +154,7 @@ E_C(v) = κ_C · conf_v
 
 Edges are neighbors if they share a vertex (edge-adjacency). Let $\langle\rho\rangle_{\text{nbrs}(e)}$ be the mean over neighbors of $e$.
 
-## 4.2 ρ-update (per delivery through $e$)
+## 4.2 rho-update (per delivery through $e$)
 
 $$
 \rho_e\ \leftarrow\ (1-\alpha_d-\alpha_{\text{leak}})\,\rho_e
@@ -181,7 +181,7 @@ $$
 Intensity $I$ is taken from the current layer $\ell(v)$ at delivery.
 
 * **Q:** $I = \|\,U_e\,\psi\,\|_2^2 \le 1$.
-* **Θ:** $I = \|p\|_1$ (with $\sum p\le 1$ after mixing).
+* **Theta:** $I = \|p\|_1$ (with $\sum p\le 1$ after mixing).
 * **C:** $I = \text{bit}\in\{0,1\}$.
 
 ---
@@ -198,7 +198,7 @@ $$
 
 where $\bar\rho_v$ is the mean $\rho$ of edges incident to $v$. $W(v)\ge 1$.
 
-* **Θ reset policy:** $\theta_\text{reset}\in\{\text{uniform},\text{renorm},\text{hold}\}$ chooses how $p_v$ is reset when the window closes (default $\text{renorm}$).
+* **Theta reset policy:** $\theta_\text{reset}\in\{\text{uniform},\text{renorm},\text{hold}\}$ chooses how $p_v$ is reset when the window closes (default $\text{renorm}$).
 
 ## 5.2 Thresholds & timers
 
@@ -208,19 +208,19 @@ N_\text{recoh}(v)= b\,W(v),\qquad
 0<b<a<1.
 $$
 
-* **Hold** $T_\text{hold}$ windows for Θ→Q recovery.
-* **Dominance** for Θ→C uses entropy & confidence thresholds.
+* **Hold** $T_\text{hold}$ windows for Theta->Q recovery.
+* **Dominance** for Theta->C uses entropy & confidence thresholds.
 
 ## 5.3 Transitions (all strictly local)
 
-* **Q → Θ** (“**decoh_threshold**”): when $\Lambda_v \ge N_\text{decoh}(v)$ within the current window. $\psi_v$ becomes **frozen** (read-only); $p_v$ activates.
-* **Θ → Q** (“**recoh_threshold**”): when $\Lambda_v \le N_\text{recoh}(v)$ for $T_\text{hold}$ consecutive windows **and** $E_Q(v)\ge C_\text{min}$.
-* **Θ → C** (“**classical_dominance**”): when $H(p_v)\le H_\text{max}$ **and** bit dominance/confidence exceed thresholds for $T_\text{class}$ windows.
-* (Optional C→Θ can be added; not required for v1.2.)
+* **Q -> Theta** ("**decoh_threshold**"): when $\Lambda_v \ge N_\text{decoh}(v)$ within the current window. $\psi_v$ becomes **frozen** (read-only); $p_v$ activates.
+* **Theta -> Q** ("**recoh_threshold**"): when $\Lambda_v \le N_\text{recoh}(v)$ for $T_\text{hold}$ consecutive windows **and** $E_Q(v)\ge C_\text{min}$.
+* **Theta -> C** ("**classical_dominance**"): when $H(p_v)\le H_\text{max}$ **and** bit dominance/confidence exceed thresholds for $T_\text{class}$ windows.
+* (Optional C->Theta can be added; not required for v1.2.)
 
 ---
 
-# 6. ε-Pairs: local correlation channels
+# 6. Epsilon-Pairs: local correlation channels
 
 ## 6.1 Seeds (Q-layer only)
 
@@ -249,7 +249,7 @@ Binding creates a **transient bridge edge** with:
 
 Bridges are scheduled **exactly like edges**.
 
-## 6.3 σ-dynamics (use-dependent)
+## 6.3 sigma-dynamics (use-dependent)
 
 * On traversal: $\sigma\leftarrow (1-\lambda_\text{decay})\sigma + \sigma_\text{reinforce}$.
 * Each window (idle): $\sigma\leftarrow (1-\lambda_\text{decay})\sigma$.
@@ -264,7 +264,7 @@ All rules are local to the bridge endpoints.
 At each window close:
 
 * **Q meter:** $E_Q(v) = \|\psi^\text{acc}_v\|_2^2$.
-* **Θ meter:** $E_\Theta(v) = \kappa_\Theta\,(1 - H(p_v))$.
+* **Theta meter:** $E_\Theta(v) = \kappa_\Theta\,(1 - H(p_v))$.
 * **C meter:** $E_C(v) = \kappa_C\cdot \text{conf}_v$.
 
 Global/region balance (over any finite processed region $\mathcal R$):
@@ -286,7 +286,7 @@ where **leak** is controlled by $\alpha_{\text{leak}}$. This is a meter-level ch
 
 Each vertex maintains:
 
-* **Hash** $h_v$ (rolling 256-bit; implementation uses 4×64).
+* **Hash** $h_v$ (rolling 256-bit; implementation uses 4x64).
 * **Moment** $m_v\in\mathbb R^3$ (phase-direction statistics).
 
 On each Q-layer delivery to $v$ with phase $\theta$ and arrival-depth $d_\text{arr}$:
@@ -299,7 +299,7 @@ m_v &\leftarrow 0.9\, m_v + 0.1\,(\cos\theta,\sin\theta,0).
 \end{aligned}
 $$
 
-No updates occur on Θ or C deliveries.
+No updates occur on Theta or C deliveries.
 
 ## 8.2 Source hidden variable
 
@@ -328,8 +328,8 @@ with local noise $\xi\sim\mathcal N(0,\sigma(\kappa_\xi))$. $R$ is a hash-contro
 
 **Prediction:**
 
-* MI\_strict ⇒ CHSH $\le 2$.
-* MI\_conditioned ⇒ tunable violations with $\kappa_a$, still no superluminal signaling.
+* MI\_strict => CHSH $\le 2$.
+* MI\_conditioned => tunable violations with $\kappa_a$, still no superluminal signaling.
 
 ---
 
@@ -337,8 +337,8 @@ with local noise $\xi\sim\mathcal N(0,\sigma(\kappa_\xi))$. $R$ is a hash-contro
 
 * **Windows:** $W_0,\zeta_1,\zeta_2$ (local topology & $\bar\rho$).
 * **Decoherence:** $a,b,T_\text{hold},C_\text{min}$.
-* **ρ/delay:** $\alpha_d,\alpha_{\text{leak}},\eta,\gamma,\rho_0$.
-* **ε-pairs:** $\Delta, L, \theta_\text{max}, \sigma_0,\lambda_\text{decay},\sigma_\text{reinforce},\sigma_\text{min}$.
+* **rho/delay:** $\alpha_d,\alpha_{\text{leak}},\eta,\gamma,\rho_0$.
+* **epsilon-pairs:** $\Delta, L, \theta_\text{max}, \sigma_0,\lambda_\text{decay},\sigma_\text{reinforce},\sigma_\text{min}$.
 * **Bell:** $\beta_m,\beta_h,\kappa_a,\kappa_\xi$.
 
 Useful **dimensionless ratios** for DOE:
@@ -357,9 +357,9 @@ $$
 
 # 10. Emergence sketch (physics at scale)
 
-* **Wave transport:** Q-layer unitary accumulation over windows yields interference/diffraction; Θ/C layers provide local decoherence & classicalization under fan-in pressure.
+* **Wave transport:** Q-layer unitary accumulation over windows yields interference/diffraction; Theta/C layers provide local decoherence & classicalization under fan-in pressure.
 * **Geometry:** sustained intensities raise $\rho$, which **delays** edges via $d_\text{eff}$, bending causal paths (a discrete lensing analog).
-* **No-signaling:** all correlations arise via ancestry and depth-bounded ε-channels; no superluminal dependencies.
+* **No-signaling:** all correlations arise via ancestry and depth-bounded epsilon-channels; no superluminal dependencies.
 
 ---
 
@@ -367,8 +367,8 @@ $$
 
 * **Scheduler:** PQ keyed by $(d_\text{arr},v_\text{dst},e,\text{seq})$.
 * **Window rule:** close when $w(v)$ increments; compute meters; reset accumulators.
-* **Intensity:** derived per layer at delivery; drives $ρ$ and $d_\text{eff}$.
-* **ε-pairs:** seeds with **expiry by depth**; local bind; transient bridges with σ-dynamics.
+* **Intensity:** derived per layer at delivery; drives $\rho$ and $d_\text{eff}$.
+* **epsilon-pairs:** seeds with **expiry by depth**; local bind; transient bridges with sigma-dynamics.
 * **Bell:** ancestry updates; $\lambda$ at source; local setting & readout at detectors.
 
 (These are implementation notes, not additional physics.)
@@ -380,20 +380,20 @@ $$
 1. **Two-path interference (Gate 1):**
    Visibility depends on relative phases; **intra-window arrival order does not** affect $E_Q$ at close.
 
-2. **ρ→delay saturation (Gate 2):**
+2. **rho->delay saturation (Gate 2):**
    Under sustained traffic, $d_\text{eff}$ rises smoothly (log-like), then relaxes when traffic stops.
 
 3. **LCCM hysteresis (Gate 3):**
-   Q→Θ at $\Lambda_v \ge aW$; Θ→Q below $bW$ sustained for $T_\text{hold}$; Θ→C under dominance criteria.
+   Q->Theta at $\Lambda_v \ge aW$; Theta->Q below $bW$ sustained for $T_\text{hold}$; Theta->C under dominance criteria.
 
-4. **ε-pairs locality (Gate 4):**
-   Bridges form **only** within $\Delta$ (depth-TTL), and decay when unused (σ below $\sigma_\text{min}$).
+4. **epsilon-pairs locality (Gate 4):**
+   Bridges form **only** within $\Delta$ (depth-TTL), and decay when unused (sigma below $\sigma_\text{min}$).
 
 5. **Conservation (Gate 5):**
    $E_Q+E_\Theta+E_C+\kappa_\rho\sum\rho$ remains within leak-tolerance; residual tracks $\alpha_{\text{leak}}$.
 
 6. **Bell toggles (Gate 6):**
-   MI\_strict ⇒ CHSH $\le 2$. MI\_conditioned ⇒ CHSH increases with $\kappa_a$; no signaling.
+   MI\_strict => CHSH $\le 2$. MI\_conditioned => CHSH increases with $\kappa_a$; no signaling.
 
 ---
 
