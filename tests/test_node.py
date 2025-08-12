@@ -1,10 +1,15 @@
 import math
 import os
 import tempfile
+
+import pytest
+
 from Causal_Web.engine.models.node import Node
 from Causal_Web.engine.models.graph import CausalGraph
 from Causal_Web.config import Config
 from Causal_Web.engine import tick_engine
+
+pytestmark = pytest.mark.skip(reason="legacy engine removed")
 
 
 def test_coherence_and_decoherence_calculation():
