@@ -36,8 +36,8 @@ class Config:
         ``C_min`` which together determine how vertex windows advance.
     rho_delay:
         Parameters controlling delayed density feedback in the v2 engine.
-        The group accepts ``alpha_d``, ``alpha_leak``, ``eta``, ``gamma`` and
-        ``rho0`` coefficients.
+        The group accepts ``alpha_d``, ``alpha_leak``, ``eta``, ``gamma``,
+        ``rho0`` and ``inject_mode`` coefficients.
     epsilon_pairs:
         Controls reinforcement and decay for ε-linked partners. Keys such as
         ``delta_ttl``, ``ancestry_prefix_L``, ``theta_max``, ``sigma0``,
@@ -122,6 +122,7 @@ class Config:
         "eta": 0.2,
         "gamma": 0.8,
         "rho0": 1.0,
+        "inject_mode": "incoming",
     }
     epsilon_pairs = {
         "delta_ttl": 2 * windowing["W0"],

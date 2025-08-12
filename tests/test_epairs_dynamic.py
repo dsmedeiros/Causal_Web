@@ -223,7 +223,7 @@ def test_seed_logging(monkeypatch):
     edges2 = {"dst": [3], "d_eff": [1]}
     mgr.carry(2, depth_curr=1, edge_ids=[0], edges=edges2)
 
-    # prefix mismatch drop
+    # prefix mismatch seeds coexist
     edges3 = {"dst": [5], "d_eff": [1]}
     mgr.emit(
         origin=4,
@@ -241,6 +241,7 @@ def test_seed_logging(monkeypatch):
         edge_ids=[0],
         edges=edges3,
     )
+    assert len(mgr.seeds.get(5, [])) == 2
 
     # angle mismatch drop
     edges4 = {"dst": [7], "d_eff": [1]}
@@ -265,7 +266,7 @@ def test_seed_logging(monkeypatch):
     assert any(
         lbl == "seed_dropped" and val["reason"] == "expired" for lbl, val in events
     )
-    assert any(
+    assert not any(
         lbl == "seed_dropped" and val["reason"] == "prefix" for lbl, val in events
     )
     assert any(

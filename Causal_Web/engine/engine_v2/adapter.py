@@ -21,7 +21,7 @@ from .lccm import LCCM
 from .scheduler import DepthScheduler
 from .state import Packet, TelemetryFrame
 from .loader import GraphArrays, load_graph_arrays
-from .rho_delay import update_rho_delay
+from .rho_delay import effective_delay, update_rho_delay
 from .qtheta_c import close_window, deliver_packet, deliver_packets_batch
 from .epairs import EPairs
 from .bell import BellHelpers, Ancestry
@@ -581,7 +581,31 @@ class EngineAdapter:
                 )
 
             adj = self._arrays.adjacency if self._arrays else {}
-            for edge_idx in self._edges_by_src.get(dst, []):
+            rho_cfg = Config.rho_delay
+            mode = rho_cfg.get("inject_mode", "incoming")
+            inject_edges: Iterable[int]
+            if mode == "incoming":
+                inject_edges = [
+                    eid for eid in edge_id_list if 0 <= eid < len(edges.get("rho", []))
+                ]
+            elif mode == "incident" and adj:
+                ptr = adj.get("incident_ptr")
+                idx = adj.get("incident_idx")
+                if ptr is not None and idx is not None:
+                    start = ptr[dst]
+                    end = ptr[dst + 1]
+                    inject_edges = [int(i) for i in idx[start:end]]
+                else:
+                    inject_edges = []
+            elif mode == "outgoing":
+                inject_edges = list(self._edges_by_src.get(dst, []))
+            else:
+                inject_edges = [
+                    eid for eid in edge_id_list if 0 <= eid < len(edges.get("rho", []))
+                ]
+
+            injected: Dict[int, Tuple[float, float, int]] = {}
+            for edge_idx in inject_edges:
                 rho_before = float(edges["rho"][edge_idx])
                 ptr = adj["nbr_ptr"]
                 nbr = adj["nbr_idx"]
@@ -592,16 +616,34 @@ class EngineAdapter:
                     rho_before,
                     neighbours,
                     intensity,
-                    alpha_d=Config.rho_delay.get("alpha_d", 0.0),
-                    alpha_leak=Config.rho_delay.get("alpha_leak", 0.0),
-                    eta=Config.rho_delay.get("eta", 0.0),
+                    alpha_d=rho_cfg.get("alpha_d", 0.0),
+                    alpha_leak=rho_cfg.get("alpha_leak", 0.0),
+                    eta=rho_cfg.get("eta", 0.0),
                     d0=float(edges["d0"][edge_idx]),
-                    gamma=Config.rho_delay.get("gamma", 0.0),
-                    rho0=Config.rho_delay.get("rho0", 1.0),
+                    gamma=rho_cfg.get("gamma", 0.0),
+                    rho0=rho_cfg.get("rho0", 1.0),
                 )
                 edges["rho"][edge_idx] = rho_after
                 if "d_eff" in edges:
                     edges["d_eff"][edge_idx] = d_eff
+                injected[edge_idx] = (rho_before, rho_after, d_eff)
+
+            for edge_idx in self._edges_by_src.get(dst, []):
+                rho_before = float(edges["rho"][edge_idx])
+                if edge_idx in injected:
+                    rho_after, d_eff = injected[edge_idx][1], injected[edge_idx][2]
+                else:
+                    rho_after = rho_before
+                    d_eff = int(
+                        effective_delay(
+                            rho_before,
+                            d0=float(edges["d0"][edge_idx]),
+                            gamma=rho_cfg.get("gamma", 0.0),
+                            rho0=rho_cfg.get("rho0", 1.0),
+                        )
+                    )
+                    if "d_eff" in edges:
+                        edges["d_eff"][edge_idx] = d_eff
                 depth_next = depth_arr + d_eff
                 payload = {
                     "psi": self._arrays.vertices["psi"][dst],
