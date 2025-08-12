@@ -93,7 +93,7 @@ def update_rho_delay(
 def update_rho_delay_vec(
     rho: np.ndarray,
     mean: np.ndarray,
-    intensity: float,
+    intensity: np.ndarray | float,
     *,
     alpha_d: float,
     alpha_leak: float,
@@ -111,7 +111,8 @@ def update_rho_delay_vec(
     mean:
         Mean neighbour density for each edge.
     intensity:
-        External input shared across updates.
+        External input for each edge. May be a scalar shared across updates or
+        a vector matching the shape of ``rho`` for per-edge intensities.
     d0:
         Baseline delays per edge.
 

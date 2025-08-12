@@ -135,6 +135,7 @@ class Config:
         "decay_interval": 32,
         "decay_on_window_close": True,
         "max_seeds_per_site": 64,
+        "emit_per_delivery": False,
     }
     ancestry = {
         "beta_m0": 0.1,

@@ -13,6 +13,7 @@ from collections import deque
 import threading
 import time
 import random
+import math
 
 import numpy as np
 
@@ -42,6 +43,7 @@ class EngineAdapter:
         eps_cfg = dict(Config.epsilon_pairs)
         eps_cfg.pop("decay_interval", None)
         eps_cfg.pop("decay_on_window_close", None)
+        eps_cfg.pop("emit_per_delivery", None)
         eps_seed = eps_cfg.pop("seed", Config.run_seed)
         self._epairs = EPairs(seed=eps_seed, **eps_cfg)
         bell_seed = Config.bell.get("seed", Config.run_seed)
@@ -372,12 +374,19 @@ class EngineAdapter:
 
             mu_list: list[float] = []
             kappa_list: list[float] = []
-            for psi_i, U_i, phi_i, A_i in zip(psi_list, U_list, phi_list, A_list):
+            pkt_intensities: list[tuple[float, float, float]] = []
+            for psi_i, U_i, phi_i, A_i, p_i, b_i in zip(
+                psi_list, U_list, phi_list, A_list, p_list, bit_list
+            ):
                 psi_out_i = U_i @ psi_i
                 psi_rot_i = np.exp(1j * (phi_i + A_i)) * psi_out_i
                 z_i = np.vdot(psi_rot_i, psi_i)
                 mu_list.append(float(np.angle(z_i)))
                 kappa_list.append(float(abs(z_i)))
+                q_int = min(1.0, float(np.linalg.norm(psi_rot_i) ** 2))
+                theta_int = min(1.0, float(np.sum(np.abs(p_i))))
+                c_int = float(b_i)
+                pkt_intensities.append((q_int, theta_int, c_int))
 
             if len(pkt_list) > 1:
                 (
@@ -456,6 +465,10 @@ class EngineAdapter:
             lccm.deliver(is_q)
             packets.extend(pkt_list)
 
+            edge_intensity = {
+                eid: pkt_intensities[idx] for idx, eid in enumerate(edge_id_list)
+            }
+
             intensity_map = {
                 "Q": intensities[0],
                 "Θ": intensities[1],
@@ -463,10 +476,15 @@ class EngineAdapter:
             }
             intensity = intensity_map.get(lccm.layer, sum(intensities))
 
+            edges_arr = self._arrays.edges if self._arrays else {}
+            edge_ids_all = self._edges_by_src.get(dst, [])
             theta = 0.0
             if lccm.layer == "Q":
                 ancestry_arr = np.zeros(4, dtype=np.uint64)
                 m_arr = np.zeros(3, dtype=float)
+                depth_first = depth_list[0] if depth_list else 0
+                if self._arrays is not None:
+                    self._epairs.carry(dst, depth_first, edge_ids_all, edges_arr)
                 for e_id, seq_id, d_arr, mu_i, kappa_i in zip(
                     edge_id_list, seq_list, depth_list, mu_list, kappa_list
                 ):
@@ -478,7 +496,16 @@ class EngineAdapter:
                         mu_i,
                         kappa_i,
                     )
-                theta = mu
+                    if (
+                        Config.epsilon_pairs.get("emit_per_delivery", False)
+                        and self._arrays is not None
+                    ):
+                        h_val_i = int(ancestry_arr[0])
+                        theta_i = math.atan2(m_arr[1], m_arr[0])
+                        self._epairs.emit(
+                            dst, h_val_i, theta_i, d_arr, [e_id], edges_arr
+                        )
+                theta = math.atan2(m_arr[1], m_arr[0])
             else:
                 if self._arrays is not None:
                     v_arr = self._arrays.vertices
@@ -561,12 +588,14 @@ class EngineAdapter:
                     packet_data["ancestry"] = ancestry_arr
                     packet_data["m"] = m_arr
 
-            edges = self._arrays.edges if self._arrays else {}
-            if lccm.layer == "Q" and self._arrays is not None:
+            edges = edges_arr
+            if (
+                lccm.layer == "Q"
+                and self._arrays is not None
+                and not Config.epsilon_pairs.get("emit_per_delivery", False)
+            ):
                 h_val = int(ancestry_arr[0])
-                edge_ids = self._edges_by_src.get(dst, [])
-                self._epairs.carry(dst, depth_arr, edge_ids, edges)
-                self._epairs.emit(dst, h_val, theta, depth_arr, edge_ids, edges)
+                self._epairs.emit(dst, h_val, theta, depth_arr, edge_ids_all, edges)
 
             if lccm.layer != prev_layer:
                 if prev_layer == "Q" and lccm.layer == "Θ":
@@ -646,10 +675,23 @@ class EngineAdapter:
                             out=np.zeros_like(neigh_sums, dtype=np.float32),
                             where=counts > 0,
                         )
+                        if mode == "incoming":
+                            layer_idx = {"Q": 0, "Θ": 1, "C": 2}.get(lccm.layer, 0)
+                            intensity_vec = np.array(
+                                [
+                                    edge_intensity.get(int(e), (0.0, 0.0, 0.0))[
+                                        layer_idx
+                                    ]
+                                    for e in valid
+                                ],
+                                dtype=np.float32,
+                            )
+                        else:
+                            intensity_vec = intensity
                         rho_after, d_eff = update_rho_delay_vec(
                             rho_before,
                             mean,
-                            intensity,
+                            intensity_vec,
                             alpha_d=rho_cfg.get("alpha_d", 0.0),
                             alpha_leak=rho_cfg.get("alpha_leak", 0.0),
                             eta=rho_cfg.get("eta", 0.0),
@@ -664,6 +706,50 @@ class EngineAdapter:
                             inject_arr, rho_before, rho_after, d_eff
                         ):
                             injected[int(idx)] = (float(rb), float(ra), int(de))
+                else:
+                    layer_idx = {"Q": 0, "Θ": 1, "C": 2}.get(lccm.layer, 0)
+                    for edge_idx in inject_edges:
+                        if 0 <= edge_idx < len(edges.get("rho", [])):
+                            start = (
+                                ptr[edge_idx]
+                                if ptr is not None and edge_idx < len(ptr) - 1
+                                else 0
+                            )
+                            end = (
+                                ptr[edge_idx + 1]
+                                if ptr is not None and edge_idx < len(ptr) - 1
+                                else 0
+                            )
+                            neighbours = (
+                                edges["rho"][nbr[start:end]]
+                                if nbr is not None and end > start
+                                else []
+                            )
+                            intensity_val = intensity
+                            if mode == "incoming":
+                                intensity_val = edge_intensity.get(
+                                    int(edge_idx), (0.0, 0.0, 0.0)
+                                )[layer_idx]
+                            rho_before = float(edges["rho"][edge_idx])
+                            rho_after, d_eff = update_rho_delay(
+                                rho_before,
+                                neighbours,
+                                intensity_val,
+                                alpha_d=rho_cfg.get("alpha_d", 0.0),
+                                alpha_leak=rho_cfg.get("alpha_leak", 0.0),
+                                eta=rho_cfg.get("eta", 0.0),
+                                d0=float(edges["d0"][edge_idx]),
+                                gamma=rho_cfg.get("gamma", 0.0),
+                                rho0=rho_cfg.get("rho0", 1.0),
+                            )
+                            edges["rho"][edge_idx] = rho_after
+                            if "d_eff" in edges:
+                                edges["d_eff"][edge_idx] = d_eff
+                            injected[int(edge_idx)] = (
+                                float(rho_before),
+                                float(rho_after),
+                                int(d_eff),
+                            )
 
             log_rho_edges = self._rng.random() < Config.logging.get(
                 "sample_rho_rate", 0.0
