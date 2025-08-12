@@ -36,6 +36,15 @@ twin-paradox demonstration showcasing this time dilation. Run
 `python -m Causal_Web.analysis.lensing` to approximate lensing wedge amplitudes
 via a Monte-Carlo path sampler over the graph's causal structure.
 
+### Recent Changes
+
+- Seed carrying now iterates through sorted depth arrivals, preserving
+  per-depth causality within a batch.
+- Baseline edge delays are floored to integers and the initial effective delay
+  `d_eff` uses this coerced value.
+- Non-incoming injection modes average per-packet intensities to avoid
+  saturation with high fan-in.
+
 ## Table of Contents
 - [Quick Start](#quick-start)
 - [Installation](#installation)
