@@ -48,7 +48,9 @@ def deliver_packet(
     packet:
         Packet carrying ``depth_arr``, ``psi``, ``p`` and ``bit`` fields.
     edge:
-        Edge parameters ``alpha``, ``phi``, ``A`` and unitary ``U``.
+        Edge parameters ``alpha`` and unitary ``U`` with a precomputed
+        complex ``phase``. ``phase`` may be provided directly or derived
+        from ``phi`` and ``A`` if absent.
     max_deque:
         Maximum length of ``bit_deque``.
     update_p:
@@ -67,10 +69,14 @@ def deliver_packet(
     U = np.asarray(edge.get("U"), dtype=np.complex64)
     psi = np.asarray(packet.get("psi"), dtype=np.complex64)
     alpha = np.float32(edge.get("alpha", 1.0))
-    phi = np.float32(edge.get("phi", 0.0))
-    A = np.float32(edge.get("A", 0.0))
+    phase = edge.get("phase")
+    if phase is None:
+        phi = np.float32(edge.get("phi", 0.0))
+        A = np.float32(edge.get("A", 0.0))
+        phase = np.exp(1j * (phi + A))
+    phase = np.complex64(phase)
     psi_out = U @ psi
-    psi_rot = np.exp(1j * (phi + A)) * psi_out
+    psi_rot = phase * psi_out
     psi_acc = psi_acc + alpha * psi_rot
     psi_acc = np.where(np.isfinite(psi_acc), psi_acc, np.zeros_like(psi_acc))
     z = np.vdot(psi_rot, psi)
@@ -123,18 +129,11 @@ def deliver_packets_batch(
     bits: Iterable[int],
     depth_arr: Iterable[int] | None,
     alpha: Iterable[float],
-    phi: Iterable[float],
-    A: Iterable[float],
+    phase: Iterable[complex],
     U: Iterable[np.ndarray],
     max_deque: int = 8,
     update_p: bool = True,
-) -> Tuple[
-    int,
-    np.ndarray,
-    np.ndarray,
-    Tuple[int, float],
-    Tuple[float, float, float],
-]:
+) -> Tuple[int, np.ndarray, np.ndarray, Tuple[int, float]]:
     """Vectorised delivery for packets sharing destination and window.
 
     Parameters
@@ -149,7 +148,7 @@ def deliver_packets_batch(
         Recent bits used for majority voting.
     psi, p, bits, depth_arr:
         Packet fields supplied as sequences or arrays.
-    alpha, phi, A, U:
+    alpha, phase, U:
         Edge parameters supplied as sequences or arrays.
     max_deque:
         Maximum length of ``bit_deque``.
@@ -159,8 +158,7 @@ def deliver_packets_batch(
     Returns
     -------
     tuple
-        Updated ``depth_v``, ``psi_acc``, ``p_v``, ``(bit, conf)``,
-        per-layer intensity contributions ``(I_Q, I_Θ, I_C)`` each in ``[0, 1]``.
+        Updated ``depth_v``, ``psi_acc``, ``p_v``, ``(bit, conf)``.
     """
 
     if depth_arr is not None:
@@ -172,11 +170,9 @@ def deliver_packets_batch(
 
     U = np.asarray(list(U), dtype=np.complex64)
     alpha = np.asarray(list(alpha), dtype=np.float32)
-    phi = np.asarray(list(phi), dtype=np.float32)
-    A = np.asarray(list(A), dtype=np.float32)
+    phase = np.asarray(list(phase), dtype=np.complex64)[:, None]
 
     out = np.einsum("nij,nj->ni", U, psi)
-    phase = np.exp(1j * (phi + A))[:, None]
     psi_rot = phase * out
     psi_acc = psi_acc + (alpha[:, None] * psi_rot).sum(axis=0)
     psi_acc = np.where(np.isfinite(psi_acc), psi_acc, np.zeros_like(psi_acc))
@@ -195,13 +191,7 @@ def deliver_packets_batch(
     bit = 1 if ones >= zeros else 0
     conf = abs(ones - zeros) / len(bit_deque)
 
-    q_intensity = min(1.0, float(np.linalg.norm(psi_rot) ** 2))
-    theta_intensity = min(1.0, float(np.mean(np.abs(p))))
-    c_intensity = float(bit)
-
-    intensities = (q_intensity, theta_intensity, c_intensity)
-
-    return depth_v, psi_acc, p_v, (bit, conf), intensities
+    return depth_v, psi_acc, p_v, (bit, conf)
 
 
 __all__ = ["deliver_packet", "deliver_packets_batch", "close_window"]

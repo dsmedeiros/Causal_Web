@@ -56,6 +56,8 @@ via a Monte-Carlo path sampler over the graph's causal structure.
   (mean and standard deviation).
 - Introduced split-step quantum walk helpers with dispersion and lightcone
   experiment utilities and configuration knobs.
+- Metrics logger now emits `summary_invariants.json` with pass rates for gate
+  invariants.
 
 ## Table of Contents
 - [Quick Start](#quick-start)
