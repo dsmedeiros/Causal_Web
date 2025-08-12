@@ -148,7 +148,7 @@ mapping:
   "windowing": {"W0": 4, "zeta1": 0.3, "zeta2": 0.3, "a": 0.7, "b": 0.4,
                  "T_hold": 2, "C_min": 0.1},
   "rho_delay": {"alpha_d": 0.1, "alpha_leak": 0.01, "eta": 0.2,
-                "gamma": 0.8, "rho0": 1.0},
+                "gamma": 0.8, "rho0": 1.0, "inject_mode": "incoming"},
   "epsilon_pairs": {"delta_ttl": 8, "ancestry_prefix_L": 16,
                      "theta_max": 0.261799, "sigma0": 0.3,
                      "lambda_decay": 0.05, "sigma_reinforce": 0.1,
@@ -161,7 +161,9 @@ mapping:
 ```
 
 The `windowing` values control vertex window advancement. `rho_delay` affects
-how edge density relaxes toward a baseline. `epsilon_pairs` governs dynamic
+how edge density relaxes toward a baseline. The `inject_mode` option selects
+whether ρ input applies to `"incoming"` (default), `"incident"` or `"outgoing"` edges.
+`epsilon_pairs` governs dynamic
 ε-pair behaviour – seeds with a limited TTL can bind to form temporary bridge
 edges whose `sigma` values decay unless reinforced. The default `delta_ttl`
 scales with `W0` (`2*W0`) to simplify experiments, while the remaining

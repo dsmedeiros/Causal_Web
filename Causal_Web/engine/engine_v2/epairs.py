@@ -305,12 +305,6 @@ class EPairs:
                         {"src": site, "origin": seed.origin, "reason": "angle"},
                     )
                 return
-            else:
-                self._log_seed(
-                    "seed_dropped",
-                    {"src": site, "origin": seed.origin, "reason": "prefix"},
-                )
-                return
         seeds.append(seed)
 
     def set_incident_delays(

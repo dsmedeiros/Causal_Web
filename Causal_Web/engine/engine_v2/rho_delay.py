@@ -41,7 +41,7 @@ def effective_delay(
 ) -> float:
     """Map density to an effective delay using the saturating log rule."""
 
-    return float(max(1, d0 + round(gamma * math.log(1 + rho / rho0))))
+    return float(max(1, d0 + math.floor(gamma * math.log(1 + rho / rho0))))
 
 
 def update_rho_delay(
@@ -86,7 +86,7 @@ def update_rho_delay(
         mean = sum(nbr_list) / len(nbr_list) if nbr_list else 0.0
     rho = (1 - alpha_d - alpha_leak) * rho + alpha_d * mean + eta * intensity
     rho = max(0.0, rho)
-    d_eff = max(1, int(round(d0 + gamma * math.log(1 + rho / rho0))))
+    d_eff = max(1, int(d0 + math.floor(gamma * math.log(1 + rho / rho0))))
     return rho, d_eff
 
 
