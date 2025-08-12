@@ -15,48 +15,57 @@ from typing import Dict, List
 import numpy as np
 
 from invariants import checks
-from Causal_Web.engine.models.graph import CausalGraph
-from Causal_Web.engine.services.node_services import EdgePropagationService
-from Causal_Web.engine.models.tick import GLOBAL_TICK_POOL
 from Causal_Web.engine.engine_v2.qtheta_c import deliver_packet, close_window
 from Causal_Web.engine.engine_v2.lccm import LCCM
 
 
 def _gate1_visibility() -> float:
-    """Return detection probability at ``D1`` for a two-path graph."""
+    """Return detection probability at ``D1`` for a two-path interferometer."""
 
-    g = CausalGraph()
-    for nid in ["S", "A", "B", "D1", "D2"]:
-        g.add_node(nid)
-    g.add_edge("S", "A", attenuation=0.5)
-    g.add_edge("S", "B", attenuation=0.5)
-    g.add_edge("A", "D1")
-    g.add_edge("A", "D2")
-    g.add_edge("B", "D1")
-    g.add_edge("B", "D2", phase_shift=np.pi)
+    psi_acc = np.zeros(2, dtype=np.complex64)
+    p_v = np.zeros(2, dtype=np.float32)
 
-    for node in g.nodes.values():
-        node.psi = np.zeros(2, dtype=np.complex128)
-        node.incoming_tick_counts.clear()
+    # Path S → A → D1
+    _, psi_a, _, _, _, _, _ = deliver_packet(
+        0,
+        np.zeros(2, dtype=np.complex64),
+        p_v.copy(),
+        deque(),
+        {"psi": np.array([1, 0], np.complex64), "p": [0.0, 0.0], "bit": 0},
+        {"alpha": 0.5, "phi": 0.0, "U": np.eye(2, dtype=np.complex64)},
+        update_p=False,
+    )
+    _, psi_acc, _, _, _, _, _ = deliver_packet(
+        0,
+        psi_acc,
+        p_v.copy(),
+        deque(),
+        {"psi": psi_a, "p": [0.0, 0.0], "bit": 0},
+        {"alpha": 1.0, "phi": 0.0, "U": np.eye(2, dtype=np.complex64)},
+        update_p=False,
+    )
 
-    g.get_node("S").psi = np.array([1 + 0j, 0 + 0j])
-    tick = GLOBAL_TICK_POOL.acquire()
-    tick.origin = "self"
-    tick.time = 0
-    tick.phase = 0
-    tick.amplitude = 1
-    EdgePropagationService(g.get_node("S"), 0, 0, "self", g, tick).propagate()
-    GLOBAL_TICK_POOL.release(tick)
-    for sid in ["A", "B"]:
-        phase = 0.0 if sid == "A" else np.pi / 2
-        tick2 = GLOBAL_TICK_POOL.acquire()
-        tick2.origin = sid
-        tick2.time = 0
-        tick2.phase = phase
-        tick2.amplitude = 1
-        EdgePropagationService(g.get_node(sid), 0, phase, sid, g, tick2).propagate()
-        GLOBAL_TICK_POOL.release(tick2)
-    return float(abs(g.get_node("D1").psi[0]) ** 2)
+    # Path S → B → D1 with phase shift on the first hop
+    _, psi_b, _, _, _, _, _ = deliver_packet(
+        0,
+        np.zeros(2, dtype=np.complex64),
+        p_v.copy(),
+        deque(),
+        {"psi": np.array([1, 0], np.complex64), "p": [0.0, 0.0], "bit": 0},
+        {"alpha": 0.5, "phi": np.pi / 2, "U": np.eye(2, dtype=np.complex64)},
+        update_p=False,
+    )
+    _, psi_acc, _, _, _, _, _ = deliver_packet(
+        0,
+        psi_acc,
+        p_v.copy(),
+        deque(),
+        {"psi": psi_b, "p": [0.0, 0.0], "bit": 0},
+        {"alpha": 1.0, "phi": 0.0, "U": np.eye(2, dtype=np.complex64)},
+        update_p=False,
+    )
+
+    return float(abs(psi_acc[0]) ** 2)
 
 
 def _energy_total() -> float:

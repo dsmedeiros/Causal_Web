@@ -171,7 +171,8 @@ mapping:
   "windowing": {"W0": 4, "zeta1": 0.3, "zeta2": 0.3, "a": 0.7, "b": 0.4,
                  "T_hold": 2, "C_min": 0.1, "k_rho": 1.0},
   "rho_delay": {"alpha_d": 0.1, "alpha_leak": 0.01, "eta": 0.2,
-                "gamma": 0.8, "rho0": 1.0, "inject_mode": "incoming"},
+                "gamma": 0.8, "rho0": 1.0, "inject_mode": "incoming",
+                "vectorized": true},
   "rho": {"update_mode": "heuristic", "variational": {"lambda_s": 0.2, "lambda_l": 0.01, "lambda_I": 1.0}},
   "lccm": {"mode": "thresholds", "free_energy": {"k_theta": 1.0, "k_c": 1.0, "k_q": 0.2, "F_min": 0.3}},
   "epsilon_pairs": {"delta_ttl": 8, "ancestry_prefix_L": 16,
@@ -192,7 +193,9 @@ mapping:
 The `windowing` values control vertex window advancement. `rho_delay` affects how edge density relaxes toward a baseline. The `rho` group selects the update rule for ρ while `lccm` chooses the Θ→C transition criterion.
 The `inject_mode` option selects
 whether ρ input applies to `"incoming"` (default), `"incident"` or `"outgoing"` edges.
-Non-incoming modes average per-packet Θ intensities over the window to set the injection intensity.
+Non-incoming modes average per-packet Θ intensities over the window to set the injection intensity. The optional
+`vectorized` flag toggles batch updates: set it to `false` to apply per-delivery Gauss–Seidel ordering when studies
+require exact event sequencing.
 `epsilon_pairs` governs dynamic
 ε-pair behaviour – seeds with a limited TTL can bind to form temporary bridge
 edges whose `sigma` values decay unless reinforced. The default `delta_ttl`
@@ -206,7 +209,8 @@ many seeds are removed due to this limit for post-run diagnostics.
 Q-delivery instead of the default moment-angle emission once per
 vertex-window. The `ancestry` group tunes
 phase-moment updates and decay. `bell` sets mutual information gates for Bell
-pair matching. Bridge creation and removal now emit `bridge_created` and
+pair matching. The hidden variable ζ is drawn from the destination's ancestry
+hash with optional noise blended according to `beta_h`. Bridge creation and removal now emit `bridge_created` and
 `bridge_removed` events (carrying a stable synthetic `bridge_id` and final `σ`),
 providing additional telemetry for analysis.
 `seed_emitted` and `seed_dropped` events capture ε-pair propagation and
