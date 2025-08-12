@@ -467,12 +467,16 @@ class EngineAdapter:
                 eid: pkt_intensities[idx] for idx, eid in enumerate(edge_id_list)
             }
 
-            intensity_map = {
-                "Q": intensities[0],
-                "Θ": intensities[1],
-                "C": intensities[2],
-            }
-            intensity = intensity_map.get(lccm.layer, sum(intensities))
+            layer_idx_map = {"Q": 0, "Θ": 1, "C": 2}
+            if pkt_intensities:
+                if lccm.layer in layer_idx_map:
+                    idx = layer_idx_map[lccm.layer]
+                    values = [pi[idx] for pi in pkt_intensities]
+                else:
+                    values = [sum(pi) for pi in pkt_intensities]
+                intensity = float(np.mean(values))
+            else:
+                intensity = 0.0
 
             edges_arr = self._arrays.edges if self._arrays else {}
             edge_ids_all = self._edges_by_src.get(dst, [])
@@ -480,29 +484,31 @@ class EngineAdapter:
             if lccm.layer == "Q":
                 ancestry_arr = np.zeros(4, dtype=np.uint64)
                 m_arr = np.zeros(3, dtype=float)
-                depth_first = depth_list[0] if depth_list else 0
-                if self._arrays is not None:
-                    self._epairs.carry(dst, depth_first, edge_ids_all, edges_arr)
+                groups: Dict[int, list[tuple[int, int, float, float]]] = {}
                 for e_id, seq_id, d_arr, mu_i, kappa_i in zip(
                     edge_id_list, seq_list, depth_list, mu_list, kappa_list
                 ):
-                    ancestry_arr, m_arr = self._update_ancestry(
-                        dst,
-                        e_id,
-                        d_arr,
-                        seq_id,
-                        mu_i,
-                        kappa_i,
+                    groups.setdefault(int(d_arr), []).append(
+                        (e_id, seq_id, mu_i, kappa_i)
                     )
-                    if (
-                        Config.epsilon_pairs.get("emit_per_delivery", False)
-                        and self._arrays is not None
-                    ):
-                        h_val_i = int(ancestry_arr[0])
-                        theta_i = math.atan2(m_arr[1], m_arr[0])
-                        self._epairs.emit(
-                            dst, h_val_i, theta_i, d_arr, [e_id], edges_arr
+                depth_last = depth_arr
+                for d_curr in sorted(groups):
+                    if self._arrays is not None:
+                        self._epairs.carry(dst, d_curr, edge_ids_all, edges_arr)
+                    for e_id, seq_id, mu_i, kappa_i in groups[d_curr]:
+                        ancestry_arr, m_arr = self._update_ancestry(
+                            dst, e_id, d_curr, seq_id, mu_i, kappa_i
                         )
+                        if (
+                            Config.epsilon_pairs.get("emit_per_delivery", False)
+                            and self._arrays is not None
+                        ):
+                            h_val_i = int(ancestry_arr[0])
+                            theta_i = math.atan2(m_arr[1], m_arr[0])
+                            self._epairs.emit(
+                                dst, h_val_i, theta_i, d_curr, [e_id], edges_arr
+                            )
+                    depth_last = d_curr
                 theta = math.atan2(m_arr[1], m_arr[0])
             else:
                 if self._arrays is not None:
@@ -593,7 +599,7 @@ class EngineAdapter:
                 and not Config.epsilon_pairs.get("emit_per_delivery", False)
             ):
                 h_val = int(ancestry_arr[0])
-                self._epairs.emit(dst, h_val, theta, depth_arr, edge_ids_all, edges)
+                self._epairs.emit(dst, h_val, theta, depth_last, edge_ids_all, edges)
 
             if lccm.layer != prev_layer:
                 if prev_layer == "Q" and lccm.layer == "Θ":
