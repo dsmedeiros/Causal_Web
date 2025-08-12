@@ -10,6 +10,24 @@ from pathlib import Path
 import subprocess
 from typing import Dict, Iterable, List
 
+import numpy as np
+
+
+def _git_commit() -> str:
+    """Return the current git commit hash or ``"unknown"``."""
+
+    try:
+        return (
+            subprocess.check_output(["git", "rev-parse", "--short", "HEAD"])
+            .decode()
+            .strip()
+        )
+    except Exception:  # pragma: no cover - best effort only
+        return "unknown"
+
+
+_GIT = _git_commit()
+
 
 @dataclass
 class MetricsLogger:
@@ -32,7 +50,7 @@ class MetricsLogger:
         entry = {
             "sample": sample,
             "seed": seed,
-            "git": _git_commit(),
+            "git": _GIT,
             "ts": datetime.utcnow().isoformat() + "Z",
             **groups,
             **{f"raw_{k}": v for k, v in raw.items()},
@@ -51,22 +69,19 @@ class MetricsLogger:
                 writer = csv.DictWriter(fh, fieldnames=self.records[0].keys())
                 writer.writeheader()
                 writer.writerows(self.records)
+
+        def _aggregate(rows: List[Dict[str, object]]) -> Dict[str, float]:
+            keys = [k for k in rows[0].keys() if k.startswith("G")]
+            return {
+                f"mean_{k}": float(np.mean([r[k] for r in rows if k in r]))
+                for k in keys
+            }
+
         summary = {
             "samples": cfg.samples,
             "groups": cfg.groups,
             "seed": cfg.seed,
+            "gates": cfg.gates,
+            "metrics_agg": _aggregate(self.records) if self.records else {},
         }
         (self.out_dir / "summary.json").write_text(json.dumps(summary, indent=2))
-
-
-def _git_commit() -> str:
-    """Return the current git commit hash or ``"unknown"``."""
-
-    try:
-        return (
-            subprocess.check_output(["git", "rev-parse", "--short", "HEAD"])
-            .decode()
-            .strip()
-        )
-    except Exception:  # pragma: no cover - best effort only
-        return "unknown"

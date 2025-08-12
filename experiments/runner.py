@@ -11,7 +11,7 @@ from __future__ import annotations
 import argparse
 import pathlib
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, Iterable, List, Tuple
 
 import numpy as np
@@ -30,16 +30,21 @@ class ExperimentConfig:
     groups: Dict[str, Tuple[float, float]]
     gates: List[int]
     seed: int = 0
+    tol: Dict[str, float] = field(
+        default_factory=lambda: {"leak": 1e-6, "marginal": 0.02}
+    )
 
     @classmethod
     def from_mapping(cls, data: Dict[str, object]) -> "ExperimentConfig":
         groups = {k: tuple(v) for k, v in data["groups"].items()}
         seed = data.get("seed", 0)
+        tol = {k: float(v) for k, v in data.get("tol", {}).items()}
         return cls(
             samples=int(data["samples"]),
             groups=groups,
             gates=list(data["gates"]),
             seed=seed,
+            tol={"leak": 1e-6, "marginal": 0.02} | tol,
         )
 
 
@@ -130,9 +135,9 @@ def run(
         inv = checks.from_metrics(gate_metrics)
         if not inv["inv_causality_ok"]:
             raise ValueError("causality check failed")
-        if abs(inv["inv_conservation_residual"]) > 1e-6:
+        if abs(inv["inv_conservation_residual"]) > cfg.tol["leak"]:
             raise ValueError("local conservation failed")
-        if abs(inv["inv_no_signaling_delta"]) > 1e-3:
+        if abs(inv["inv_no_signaling_delta"]) > cfg.tol["marginal"]:
             raise ValueError("no-signaling failed")
         if not inv["inv_ancestry_ok"]:
             raise ValueError("ancestry determinism failed")

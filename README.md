@@ -48,6 +48,7 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 - Runner CLI now accepts separate experiment (`--exp`) and base (`--base`)
   configs, persists per-sample seeds and gate metrics, and supports
   parallel execution via `--parallel`.
+- DOE summaries now record selected gates and mean gate metrics.
 
 ## Table of Contents
 - [Quick Start](#quick-start)
