@@ -44,6 +44,7 @@ via a Monte-Carlo path sampler over the graph's causal structure.
   `d_eff` uses this coerced value.
 - Non-incoming injection modes average per-packet intensities to avoid
   saturation with high fan-in.
+- Added DOE runner with invariant checks and metrics logging.
 
 ## Table of Contents
 - [Quick Start](#quick-start)
