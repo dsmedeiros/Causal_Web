@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import pathlib
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from typing import Dict, Iterable, List, Tuple
 
@@ -18,6 +19,7 @@ import numpy as np
 from config.normalizer import Normalizer
 from invariants import checks
 from telemetry.metrics import MetricsLogger
+from .gates import run_gates
 
 
 @dataclass
@@ -74,48 +76,69 @@ def _sample_groups(
     return [dict(zip(names, scaled[i])) for i in range(cfg.samples)]
 
 
-def run(config_path: pathlib.Path, out_dir: pathlib.Path) -> None:
-    """Execute a design-of-experiments sweep.
+def _mix(seed: int, i: int) -> int:
+    x = (seed ^ (i + 0x9E3779B9)) & 0xFFFFFFFF
+    x ^= x >> 16
+    x = (x * 0x7FEB352D) & 0xFFFFFFFF
+    x ^= x >> 15
+    x = (x * 0x846CA68B) & 0xFFFFFFFF
+    return x
 
-    Parameters
-    ----------
-    config_path:
-        Path to a YAML or TOML configuration file.
-    out_dir:
-        Directory in which results will be written.
-    """
 
-    cfg = _load_config(config_path)
+def _write_yaml(path: pathlib.Path, data: Dict[str, float]) -> None:
+    import yaml
+    import numpy as np
+
+    clean = {k: float(v) if isinstance(v, np.floating) else v for k, v in data.items()}
+    path.write_text(yaml.safe_dump(clean))
+
+
+def run(
+    exp_path: pathlib.Path,
+    base_path: pathlib.Path,
+    out_dir: pathlib.Path,
+    parallel: int = 1,
+) -> None:
+    """Execute a design-of-experiments sweep."""
+
+    cfg = _load_config(exp_path)
     rng = np.random.default_rng(cfg.seed)
     samples = _sample_groups(cfg, rng)
 
     out_dir.mkdir(parents=True, exist_ok=True)
     logger = MetricsLogger(out_dir)
     normalizer = Normalizer()
+    base = _load_base_config(base_path)
 
-    for i, groups in enumerate(samples):
-        raw = normalizer.to_raw(groups)
-        logger.log(i, groups, raw, cfg.seed)
-        _check_invariants()
+    def process(i: int, groups: Dict[str, float]) -> None:
+        sample_seed = _mix(cfg.seed, i)
+        raw = normalizer.to_raw(base, groups)
+        raw["seed"] = sample_seed
+        _write_yaml(out_dir / f"cfg_{i:04d}.yaml", raw)
+        gate_metrics = run_gates(raw, cfg.gates)
+        inv = checks.from_metrics(gate_metrics)
+        if not inv["inv_causality_ok"]:
+            raise ValueError("causality check failed")
+        if abs(inv["inv_conservation_residual"]) > 1e-6:
+            raise ValueError("local conservation failed")
+        if abs(inv["inv_no_signaling_delta"]) > 1e-3:
+            raise ValueError("no-signaling failed")
+        if not inv["inv_ancestry_ok"]:
+            raise ValueError("ancestry determinism failed")
+        logger.log(i, groups, raw, sample_seed, gate_metrics, inv)
+
+    if parallel > 1:
+        with ThreadPoolExecutor(max_workers=parallel) as ex:
+            futures = [
+                ex.submit(process, i, groups) for i, groups in enumerate(samples)
+            ]
+            for f in futures:
+                f.result()
+    else:
+        for i, groups in enumerate(samples):
+            process(i, groups)
 
     logger.flush(cfg, samples)
-
-
-def _check_invariants() -> None:
-    """Run all invariant checks with dummy data.
-
-    The real system would supply appropriate measurements. These
-    lightweight checks guard against accidental regressions.
-    """
-
-    if not checks.causality([{"d_arr": 1.0, "d_src": 0.5}]):
-        raise ValueError("causality check failed")
-    if not checks.local_conservation(0.0, 0.0, 1e-6):
-        raise ValueError("local conservation failed")
-    if not checks.no_signaling(0.5, 1e-3):
-        raise ValueError("no-signaling failed")
-    if not checks.ancestry_determinism([("q", "h", "m")]):
-        raise ValueError("ancestry determinism failed")
 
 
 def _load_config(path: pathlib.Path) -> ExperimentConfig:
@@ -132,12 +155,27 @@ def _load_config(path: pathlib.Path) -> ExperimentConfig:
     return ExperimentConfig.from_mapping(data)
 
 
+def _load_base_config(path: pathlib.Path) -> Dict[str, float]:
+    if path.suffix in {".yaml", ".yml"}:
+        import yaml
+
+        return yaml.safe_load(path.read_text())
+    elif path.suffix == ".toml":
+        import tomllib
+
+        return tomllib.loads(path.read_text())
+    else:
+        raise ValueError(f"Unsupported config extension: {path.suffix}")
+
+
 def main(argv: Iterable[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description="Run DOE experiments")
-    parser.add_argument("--config", type=pathlib.Path, required=True)
+    parser.add_argument("--exp", type=pathlib.Path, required=True)
+    parser.add_argument("--base", type=pathlib.Path, required=True)
     parser.add_argument("--out", type=pathlib.Path, required=True)
+    parser.add_argument("--parallel", type=int, default=1)
     args = parser.parse_args(list(argv) if argv is not None else None)
-    run(args.config, args.out)
+    run(args.exp, args.base, args.out, args.parallel)
 
 
 if __name__ == "__main__":  # pragma: no cover

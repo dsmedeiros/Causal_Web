@@ -11,22 +11,19 @@ class Normalizer:
     def to_groups(self, raw: Dict[str, float]) -> Dict[str, float]:
         """Convert raw parameters to dimensionless groups."""
 
-        delta = raw["Delta"]
-        w0 = raw["W0"]
-        alpha_d = raw["alpha_d"]
-        leak = raw["leak"]
         return {
-            "Delta_over_W0": delta / w0,
-            "alpha_d_over_leak": alpha_d / leak,
+            "Delta_over_W0": raw["Delta"] / raw["W0"],
+            "alpha_d_over_leak": raw["alpha_d"] / raw["alpha_leak"],
         }
 
-    def to_raw(self, groups: Dict[str, float]) -> Dict[str, float]:
-        """Reconstruct raw parameters from groups using nominal scales."""
+    def to_raw(
+        self, base: Dict[str, float], groups: Dict[str, float]
+    ) -> Dict[str, float]:
+        """Reconstruct raw parameters from groups using a baseline config."""
 
-        # The nominal scales are arbitrary for demonstration purposes.
-        return {
-            "Delta": groups.get("Delta_over_W0", 0.0) * 1.0,
-            "W0": 1.0,
-            "alpha_d": groups.get("alpha_d_over_leak", 0.0) * 1.0,
-            "leak": 1.0,
-        }
+        raw = dict(base)
+        if "Delta_over_W0" in groups:
+            raw["Delta"] = groups["Delta_over_W0"] * raw["W0"]
+        if "alpha_d_over_leak" in groups:
+            raw["alpha_d"] = groups["alpha_d_over_leak"] * raw["alpha_leak"]
+        return raw

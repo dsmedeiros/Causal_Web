@@ -5,7 +5,9 @@ from __future__ import annotations
 import csv
 import json
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
+import subprocess
 from typing import Dict, Iterable, List
 
 
@@ -17,15 +19,25 @@ class MetricsLogger:
     records: List[Dict[str, object]] = field(default_factory=list)
 
     def log(
-        self, sample: int, groups: Dict[str, float], raw: Dict[str, float], seed: int
+        self,
+        sample: int,
+        groups: Dict[str, float],
+        raw: Dict[str, float],
+        seed: int,
+        gate_metrics: Dict[str, float | bool],
+        invariants: Dict[str, float | bool],
     ) -> None:
         """Store metrics for a single sample."""
 
         entry = {
             "sample": sample,
             "seed": seed,
+            "git": _git_commit(),
+            "ts": datetime.utcnow().isoformat() + "Z",
             **groups,
             **{f"raw_{k}": v for k, v in raw.items()},
+            **gate_metrics,
+            **invariants,
         }
         self.records.append(entry)
 
@@ -45,3 +57,16 @@ class MetricsLogger:
             "seed": cfg.seed,
         }
         (self.out_dir / "summary.json").write_text(json.dumps(summary, indent=2))
+
+
+def _git_commit() -> str:
+    """Return the current git commit hash or ``"unknown"``."""
+
+    try:
+        return (
+            subprocess.check_output(["git", "rev-parse", "--short", "HEAD"])
+            .decode()
+            .strip()
+        )
+    except Exception:  # pragma: no cover - best effort only
+        return "unknown"

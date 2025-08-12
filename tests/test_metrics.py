@@ -6,7 +6,7 @@ from telemetry.metrics import MetricsLogger
 
 def test_metrics_logger(tmp_path: Path):
     logger = MetricsLogger(tmp_path)
-    logger.log(0, {"g": 1.0}, {"Delta": 1.0}, 0)
+    logger.log(0, {"g": 1.0}, {"Delta": 1.0}, 0, {}, {})
     logger.flush(
         type("Cfg", (), {"samples": 1, "groups": {"g": (0, 1)}, "seed": 0})(),
         [{"g": 1.0}],

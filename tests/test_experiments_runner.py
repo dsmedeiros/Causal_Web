@@ -18,17 +18,40 @@ alpha_d_over_leak = [1.0, 2.0]
     return path
 
 
+def create_base(tmp_path: Path) -> Path:
+    base = {
+        "W0": 1.0,
+        "Delta": 1.0,
+        "alpha_d": 1.0,
+        "alpha_leak": 1.0,
+    }
+    path = tmp_path / "base.yaml"
+    import yaml
+
+    path.write_text(yaml.safe_dump(base))
+    return path
+
+
 def test_runner_deterministic(tmp_path: Path):
     cfg_path = create_config(tmp_path)
+    base_path = create_base(tmp_path)
     out_dir = tmp_path / "run"
-    run(cfg_path, out_dir)
+    run(cfg_path, base_path, out_dir)
     summary1 = json.loads((out_dir / "summary.json").read_text())
-    metrics1 = (out_dir / "metrics.csv").read_text()
+    import csv
+
+    with (out_dir / "metrics.csv").open() as fh:
+        metrics1 = list(csv.DictReader(fh))
+        for row in metrics1:
+            row.pop("ts", None)
 
     out_dir2 = tmp_path / "run2"
-    run(cfg_path, out_dir2)
+    run(cfg_path, base_path, out_dir2)
     summary2 = json.loads((out_dir2 / "summary.json").read_text())
-    metrics2 = (out_dir2 / "metrics.csv").read_text()
+    with (out_dir2 / "metrics.csv").open() as fh:
+        metrics2 = list(csv.DictReader(fh))
+        for row in metrics2:
+            row.pop("ts", None)
 
     assert summary1 == summary2
     assert metrics1 == metrics2

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Iterable, Mapping, Sequence, Tuple
+from typing import Dict, Iterable, Mapping, Sequence, Tuple
 
 
 def causality(deliveries: Iterable[Mapping[str, float]]) -> bool:
@@ -32,3 +32,14 @@ def ancestry_determinism(seq: Sequence[Tuple[str, str, str]]) -> bool:
             return False
         seen[q] = (h, m)
     return True
+
+
+def from_metrics(m: Mapping[str, float | bool]) -> Dict[str, float | bool]:
+    """Extract invariant fields from a metrics mapping."""
+
+    return {
+        "inv_causality_ok": bool(m.get("inv_causality_ok", True)),
+        "inv_conservation_residual": float(m.get("inv_conservation_residual", 0.0)),
+        "inv_no_signaling_delta": float(m.get("inv_no_signaling_delta", 0.0)),
+        "inv_ancestry_ok": bool(m.get("inv_ancestry_ok", True)),
+    }
