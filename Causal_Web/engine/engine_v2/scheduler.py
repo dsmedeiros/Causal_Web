@@ -35,8 +35,15 @@ class DepthScheduler:
         heapq.heappush(bucket, (key, payload))
         self._seq += 1
 
-    def pop(self) -> Tuple[int, int, int, Any]:
-        """Remove and return the next scheduled payload and metadata."""
+    def pop(self) -> Tuple[int, int, int, int, Any]:
+        """Remove and return the next scheduled payload and metadata.
+
+        Returns
+        -------
+        tuple
+            ``(depth, dst_id, edge_id, seq, payload)`` where ``seq`` is the
+            insertion order used as a local tie-breaker.
+        """
 
         if not self._depths:
             raise IndexError("pop from empty scheduler")
@@ -46,8 +53,8 @@ class DepthScheduler:
         if not bucket:
             heapq.heappop(self._depths)
             del self._buckets[depth]
-        dst_id, edge_id, _ = key
-        return depth, dst_id, edge_id, payload
+        dst_id, edge_id, seq = key
+        return depth, dst_id, edge_id, seq, payload
 
     def peek_depth(self) -> int:
         """Return the arrival depth of the next payload without removing it."""
