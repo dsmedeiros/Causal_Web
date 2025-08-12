@@ -52,6 +52,9 @@ class EngineAdapter:
         self._eye_cache: Dict[int, np.ndarray] = {}
         self._psi_zero: Dict[int, np.ndarray] = {}
         self._p_zero: Dict[int, np.ndarray] = {}
+        self._packet_buf: Dict[str, Any] = {}
+        self._edge_buf: Dict[str, Any] = {}
+        self._payload_buf: Dict[str, Any] = {}
 
     # ------------------------------------------------------------------
     def _splitmix64(self, x: int) -> int:
@@ -277,6 +280,9 @@ class EngineAdapter:
         edge_logs = 0
         decay_counter = 0
         decay_interval = Config.epsilon_pairs.get("decay_interval", 32)
+        packet_struct = self._packet_buf
+        edge_struct = self._edge_buf
+        payload_buf = self._payload_buf
 
         while self._scheduler and events < limit:
             if decay_counter == 0:
@@ -412,18 +418,14 @@ class EngineAdapter:
                     update_p=lccm.layer == "Θ",
                 )
             else:
-                packet_struct = {
-                    "psi": psi_list[0],
-                    "p": p_list[0],
-                    "bit": bit_list[0],
-                    "depth_arr": depth_list[0],
-                }
-                edge_struct = {
-                    "alpha": alpha_list[0],
-                    "phi": phi_list[0],
-                    "A": A_list[0],
-                    "U": U_list[0],
-                }
+                packet_struct["psi"] = psi_list[0]
+                packet_struct["p"] = p_list[0]
+                packet_struct["bit"] = bit_list[0]
+                packet_struct["depth_arr"] = depth_list[0]
+                edge_struct["alpha"] = alpha_list[0]
+                edge_struct["phi"] = phi_list[0]
+                edge_struct["A"] = A_list[0]
+                edge_struct["U"] = U_list[0]
                 (
                     depth_v,
                     psi_acc,
@@ -771,17 +773,17 @@ class EngineAdapter:
                             )
                         )
                 depth_next = depth_arr + d_eff
-                payload = {
-                    "psi": self._arrays.vertices["psi"][dst],
-                    "p": self._arrays.vertices["p"][dst],
-                    "bit": int(self._arrays.vertices["bit"][dst]),
-                    "lambda_u": packet_data.get("lambda_u"),
-                    "zeta": packet_data.get("zeta"),
-                    "ancestry": packet_data.get("ancestry"),
-                    "m": packet_data.get("m"),
-                }
+                payload_buf["psi"] = self._arrays.vertices["psi"][dst]
+                payload_buf["p"] = self._arrays.vertices["p"][dst]
+                payload_buf["bit"] = int(self._arrays.vertices["bit"][dst])
+                payload_buf["lambda_u"] = packet_data.get("lambda_u")
+                payload_buf["zeta"] = packet_data.get("zeta")
+                payload_buf["ancestry"] = packet_data.get("ancestry")
+                payload_buf["m"] = packet_data.get("m")
                 new_pkt = Packet(
-                    src=dst, dst=int(edges["dst"][edge_idx]), payload=payload
+                    src=dst,
+                    dst=int(edges["dst"][edge_idx]),
+                    payload=payload_buf.copy(),
                 )
                 edge_logs += 1
                 if log_rho_edges:
@@ -806,15 +808,13 @@ class EngineAdapter:
             for other in self._epairs.partners(dst):
                 bridge = self._epairs.bridges[self._epairs._bridge_key(dst, other)]
                 depth_next = depth_arr + bridge.d_bridge
-                payload = {
-                    "psi": self._arrays.vertices["psi"][dst],
-                    "p": self._arrays.vertices["p"][dst],
-                    "bit": int(self._arrays.vertices["bit"][dst]),
-                    "lambda_u": packet_data.get("lambda_u"),
-                    "zeta": packet_data.get("zeta"),
-                    "ancestry": packet_data.get("ancestry"),
-                    "m": packet_data.get("m"),
-                }
+                payload_buf["psi"] = self._arrays.vertices["psi"][dst]
+                payload_buf["p"] = self._arrays.vertices["p"][dst]
+                payload_buf["bit"] = int(self._arrays.vertices["bit"][dst])
+                payload_buf["lambda_u"] = packet_data.get("lambda_u")
+                payload_buf["zeta"] = packet_data.get("zeta")
+                payload_buf["ancestry"] = packet_data.get("ancestry")
+                payload_buf["m"] = packet_data.get("m")
                 edge_logs += 1
                 rate = Config.logging.get("sample_rho_rate", 0.0)
                 if rate > 0.0 and self._rng.random() < rate:
@@ -836,7 +836,7 @@ class EngineAdapter:
                     depth_next,
                     other,
                     bridge.edge_id,
-                    Packet(src=dst, dst=other, payload=payload),
+                    Packet(src=dst, dst=other, payload=payload_buf.copy()),
                 )
                 self._epairs.reinforce(dst, other)
             events += len(pkt_list)

@@ -195,7 +195,7 @@ def deliver_packets_batch(
     conf = abs(ones - zeros) / len(bit_deque)
 
     q_intensity = min(1.0, float(np.linalg.norm(psi_rot) ** 2))
-    theta_intensity = min(1.0, float(np.sum(np.abs(p))))
+    theta_intensity = min(1.0, float(np.mean(np.abs(p))))
     c_intensity = float(bit)
 
     intensities = (q_intensity, theta_intensity, c_intensity)

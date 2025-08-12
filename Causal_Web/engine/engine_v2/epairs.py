@@ -85,6 +85,9 @@ class EPairs:
     ``bridges``
         Mapping of ``(a, b)`` node id pairs to :class:`Bridge` objects.
 
+    ``overflow_drops``
+        Counter of seeds dropped when a site's capacity limit is exceeded.
+
     ``bridge_created`` and ``bridge_removed`` events are logged via the
     global logger when bridges form or decay below ``sigma_min``.
 
@@ -136,6 +139,7 @@ class EPairs:
         self._incident_delay_cb: Callable[[int], Iterable[int]] | None = None
         # Track sites that have already emitted a capacity warning
         self._overflow_warned: Set[int] = set()
+        self.overflow_drops: int = 0
 
     # Internal helpers -------------------------------------------------
     def _log_seed(self, label: str, value: Dict[str, int | float]) -> None:
@@ -333,6 +337,7 @@ class EPairs:
                 return
         if len(seeds) >= self.max_seeds_per_site:
             evicted = seeds.pop(0)
+            self.overflow_drops += 1
             if log_seeds:
                 self._log_seed(
                     "seed_dropped",
