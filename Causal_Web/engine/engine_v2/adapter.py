@@ -271,6 +271,27 @@ class EngineAdapter:
 
         if limit is None:
             limit = float("inf")
+        rho_cfg = Config.rho_delay
+        alpha_d = rho_cfg.get("alpha_d", 0.0)
+        alpha_leak = rho_cfg.get("alpha_leak", 0.0)
+        eta = rho_cfg.get("eta", 0.0)
+        gamma = rho_cfg.get("gamma", 0.0)
+        rho0 = rho_cfg.get("rho0", 1.0)
+        inject_mode = rho_cfg.get("inject_mode", "incoming")
+
+        bell_cfg = Config.bell
+        bell_enabled = bell_cfg.get("enabled", False)
+        mi_mode_default = (
+            "strict"
+            if bell_cfg.get("mi_mode", "MI_strict") == "MI_strict"
+            else "conditioned"
+        )
+        kappa_a = bell_cfg.get("kappa_a", 0.0)
+        kappa_xi = bell_cfg.get("kappa_xi", 0.0)
+        beta_m = bell_cfg.get("beta_m", 0.0)
+        beta_h = bell_cfg.get("beta_h", 0.0)
+
+        layer_idx_map = {"Q": 0, "Θ": 1, "C": 2}
 
         start_windows = {
             vid: data["lccm"].window_idx for vid, data in self._vertices.items()
@@ -469,7 +490,6 @@ class EngineAdapter:
             for idx, eid in enumerate(edge_id_list):
                 edge_intensity[int(eid)] = pkt_intensities[idx]
 
-            layer_idx_map = {"Q": 0, "Θ": 1, "C": 2}
             if pkt_intensities:
                 if lccm.layer in layer_idx_map:
                     idx = layer_idx_map[lccm.layer]
@@ -532,13 +552,8 @@ class EngineAdapter:
                     ancestry_arr = np.zeros(4, dtype=np.uint64)
                     m_arr = np.zeros(3, dtype=float)
 
-            bell_cfg = Config.bell
-            if bell_cfg.get("enabled", False):
-                mi_mode = (
-                    "strict"
-                    if bell_cfg.get("mi_mode", "MI_strict") == "MI_strict"
-                    else "conditioned"
-                )
+            if bell_enabled:
+                mi_mode = mi_mode_default
 
                 if "lambda_u" in packet_data:
                     detector_anc = Ancestry(ancestry_arr.copy(), m_arr.copy())
@@ -550,7 +565,7 @@ class EngineAdapter:
                         mi_mode,
                         detector_anc,
                         packet_data["lambda_u"],
-                        bell_cfg.get("kappa_a", 0.0),
+                        kappa_a,
                     )
                     outcome, meta = self._bell.contextual_readout(
                         mi_mode,
@@ -558,9 +573,9 @@ class EngineAdapter:
                         detector_anc,
                         packet_data["lambda_u"],
                         packet_data.get("zeta", 0),
-                        bell_cfg.get("kappa_xi", 0.0),
+                        kappa_xi,
                         source_anc,
-                        bell_cfg.get("kappa_a", 0.0),
+                        kappa_a,
                         batch=self._frame,
                     )
                     log_record(
@@ -571,8 +586,8 @@ class EngineAdapter:
                             "setting": a_D.tolist(),
                             "outcome": int(outcome),
                             "mi_mode": mi_mode,
-                            "kappa_a": bell_cfg.get("kappa_a", 0.0),
-                            "kappa_xi": bell_cfg.get("kappa_xi", 0.0),
+                            "kappa_a": kappa_a,
+                            "kappa_xi": kappa_xi,
                             "batch_id": self._frame,
                             "h_prefix_len": Config.epsilon_pairs.get(
                                 "ancestry_prefix_L", 0
@@ -586,8 +601,8 @@ class EngineAdapter:
                     source_anc = Ancestry(ancestry_arr.copy(), m_arr.copy())
                     lam_u, zeta = self._bell.lambda_at_source(
                         source_anc,
-                        bell_cfg.get("beta_m", 0.0),
-                        bell_cfg.get("beta_h", 0.0),
+                        beta_m,
+                        beta_h,
                     )
                     packet_data["lambda_u"] = lam_u
                     packet_data["zeta"] = zeta
@@ -636,8 +651,7 @@ class EngineAdapter:
                 )
 
             adj = self._arrays.adjacency if self._arrays else {}
-            rho_cfg = Config.rho_delay
-            mode = rho_cfg.get("inject_mode", "incoming")
+            mode = inject_mode
             inject_edges: Iterable[int]
             if mode == "incoming":
                 inject_edges = [
@@ -682,7 +696,7 @@ class EngineAdapter:
                             where=counts > 0,
                         )
                         if mode == "incoming":
-                            layer_idx = {"Q": 0, "Θ": 1, "C": 2}.get(lccm.layer, 0)
+                            layer_idx = layer_idx_map.get(lccm.layer, 0)
                             intensity_vec = np.empty(len(valid), dtype=np.float32)
                             for i, e in enumerate(valid):
                                 intensity_vec[i] = edge_intensity[int(e)][layer_idx]
@@ -694,12 +708,12 @@ class EngineAdapter:
                             rho_before,
                             mean,
                             intensity_vec,
-                            alpha_d=rho_cfg.get("alpha_d", 0.0),
-                            alpha_leak=rho_cfg.get("alpha_leak", 0.0),
-                            eta=rho_cfg.get("eta", 0.0),
+                            alpha_d=alpha_d,
+                            alpha_leak=alpha_leak,
+                            eta=eta,
                             d0=edges["d0"][inject_arr],
-                            gamma=rho_cfg.get("gamma", 0.0),
-                            rho0=rho_cfg.get("rho0", 1.0),
+                            gamma=gamma,
+                            rho0=rho0,
                         )
                         edges["rho"][inject_arr] = rho_after
                         if "d_eff" in edges:
@@ -709,7 +723,7 @@ class EngineAdapter:
                         ):
                             injected[int(idx)] = (float(rb), float(ra), int(de))
                 else:
-                    layer_idx = {"Q": 0, "Θ": 1, "C": 2}.get(lccm.layer, 0)
+                    layer_idx = layer_idx_map.get(lccm.layer, 0)
                     for edge_idx in inject_edges:
                         if 0 <= edge_idx < len(edges.get("rho", [])):
                             start = (
@@ -736,12 +750,12 @@ class EngineAdapter:
                                 rho_before,
                                 neighbours,
                                 intensity_val,
-                                alpha_d=rho_cfg.get("alpha_d", 0.0),
-                                alpha_leak=rho_cfg.get("alpha_leak", 0.0),
-                                eta=rho_cfg.get("eta", 0.0),
+                                alpha_d=alpha_d,
+                                alpha_leak=alpha_leak,
+                                eta=eta,
                                 d0=float(edges["d0"][edge_idx]),
-                                gamma=rho_cfg.get("gamma", 0.0),
-                                rho0=rho_cfg.get("rho0", 1.0),
+                                gamma=gamma,
+                                rho0=rho0,
                             )
                             edges["rho"][edge_idx] = rho_after
                             if "d_eff" in edges:
@@ -768,8 +782,8 @@ class EngineAdapter:
                             effective_delay(
                                 rho_before,
                                 d0=float(edges["d0"][edge_idx]),
-                                gamma=rho_cfg.get("gamma", 0.0),
-                                rho0=rho_cfg.get("rho0", 1.0),
+                                gamma=gamma,
+                                rho0=rho0,
                             )
                         )
                 depth_next = depth_arr + d_eff
