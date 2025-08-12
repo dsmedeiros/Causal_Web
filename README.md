@@ -50,6 +50,8 @@ via a Monte-Carlo path sampler over the graph's causal structure.
   parallel execution via `--parallel`.
 - DOE summaries now record selected gates and aggregate gate metrics
   (mean and standard deviation).
+- Introduced split-step quantum walk helpers with dispersion and lightcone
+  experiment utilities and configuration knobs.
 
 ## Table of Contents
 - [Quick Start](#quick-start)
@@ -272,6 +274,20 @@ The scheduler also supports a quantum micro layer via
 ``scheduler.run_multi_layer``. This helper executes ``micro_ticks`` quantum
 steps before each classical update and calls a user-provided ``flush`` callback
 to synchronise state between layers.
+
+The ``qwalk`` configuration group toggles a lightweight split-step quantum
+walk mode. When enabled, the ``thetas`` mapping provides the two rotation
+angles used by the coin operators. Dispersion analysis samples wave numbers
+from ``dispersion.k_values``:
+
+```json
+"qwalk": {"enabled": true,
+          "thetas": {"theta1": 0.35, "theta2": 0.2}},
+"dispersion": {"k_values": [0.0, 0.1, 0.2]}
+```
+
+These settings drive the helper modules in ``experiments.dispersion`` and
+``experiments.lightcone``.
 
 ## GPU and Distributed Acceleration
 The engine optionally accelerates per-edge calculations on the GPU when [Cupy](https://cupy.dev) is installed and can shard classical zones across a [Ray](https://www.ray.io) cluster. Classical nodes are partitioned into coherent zones and dispatched in parallel to Ray workers; if Ray is unavailable an info-level message is logged and processing continues locally. Select the backend with `Config.backend` or `--backend` (`cpu` by default, `cupy` for CUDA).

@@ -38,6 +38,14 @@ class Config:
         Parameters controlling delayed density feedback in the v2 engine.
         The group accepts ``alpha_d``, ``alpha_leak``, ``eta``, ``gamma``,
         ``rho0`` and ``inject_mode`` coefficients.
+    qwalk:
+        Parameters controlling the split-step quantum walk. Includes an
+        ``enabled`` flag and ``thetas`` mapping with ``theta1`` and
+        ``theta2`` rotation angles.
+    dispersion:
+        Configuration for dispersion analysis. The ``k_values`` list
+        specifies the wave numbers sampled when estimating
+        ``ω(k)`` and group velocity.
     epsilon_pairs:
         Controls reinforcement and decay for ε-linked partners. Keys such as
         ``delta_ttl``, ``ancestry_prefix_L``, ``theta_max``, ``sigma0``,
@@ -100,6 +108,12 @@ class Config:
     hawking_delta_e = 1.0  # Energy quantum for horizon emissions
     #: Compute backend; ``"cpu"`` or ``"cupy"``
     backend = "cpu"
+
+    # Split-step quantum walk configuration
+    qwalk = {"enabled": False, "thetas": {"theta1": 0.35, "theta2": 0.2}}
+
+    # Parameters for dispersion experiments
+    dispersion = {"k_values": [0.0, 0.1]}
 
     #: Selected engine implementation: ``"v2"`` (strict-local) or ``"tick"``
     engine_mode = "v2"
