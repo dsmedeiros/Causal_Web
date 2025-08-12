@@ -62,7 +62,6 @@ class EngineAdapter:
         self._edge_buf: Dict[str, Any] = {}
         self._payload_buf: Dict[str, Any] = {}
         self._neigh_sums_cache: np.ndarray | None = None
-        self._neigh_sums_frame: int = -1
 
     # ------------------------------------------------------------------
     def _splitmix64(self, x: int) -> int:
@@ -714,14 +713,19 @@ class EngineAdapter:
                 nbr = adj.get("nbr_idx")
                 rho_arr = edges["rho"]
                 # Use cached neighbour sums for vectorised ρ updates unless
-                # explicitly disabled for Gauss–Seidel semantics.
+                # explicitly disabled for Gauss–Seidel semantics. The cache is
+                # incrementally maintained for touched edges to avoid full
+                # recomputation when only a few buckets change.
                 if (
                     ptr is not None
                     and nbr is not None
                     and len(ptr) > 1
                     and Config.rho_delay.get("vectorized", True)
                 ):
-                    if self._neigh_sums_frame != self._frame:
+                    if (
+                        self._neigh_sums_cache is None
+                        or self._neigh_sums_cache.size != len(ptr) - 1
+                    ):
                         if nbr.size > 0:
                             self._neigh_sums_cache = np.add.reduceat(
                                 rho_arr[nbr], ptr[:-1]
@@ -730,7 +734,6 @@ class EngineAdapter:
                             self._neigh_sums_cache = np.zeros(
                                 len(ptr) - 1, dtype=np.float32
                             )
-                        self._neigh_sums_frame = self._frame
                     neigh_sums_all = self._neigh_sums_cache
                     valid = [e for e in inject_edges if 0 <= e < len(ptr) - 1]
                     if valid and neigh_sums_all is not None:
@@ -765,6 +768,13 @@ class EngineAdapter:
                             rho0=rho0,
                         )
                         rho_arr[inject_arr] = rho_after
+                        if self._neigh_sums_cache is not None:
+                            for idx, rb, ra in zip(inject_arr, rho_before, rho_after):
+                                delta = ra - rb
+                                if delta != 0 and ptr is not None and nbr is not None:
+                                    start = ptr[int(idx)]
+                                    end = ptr[int(idx) + 1]
+                                    self._neigh_sums_cache[nbr[start:end]] += delta
                         if "d_eff" in edges:
                             edges["d_eff"][inject_arr] = d_eff
                         for idx, rb, ra, de in zip(
@@ -807,6 +817,14 @@ class EngineAdapter:
                                 rho0=rho0,
                             )
                             edges["rho"][edge_idx] = rho_after
+                            if (
+                                self._neigh_sums_cache is not None
+                                and ptr is not None
+                                and nbr is not None
+                            ):
+                                delta = rho_after - rho_before
+                                if delta != 0:
+                                    self._neigh_sums_cache[nbr[start:end]] += delta
                             if "d_eff" in edges:
                                 edges["d_eff"][edge_idx] = d_eff
                             injected[int(edge_idx)] = (

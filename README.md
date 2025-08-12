@@ -54,6 +54,8 @@ via a Monte-Carlo path sampler over the graph's causal structure.
   parallel execution via `--parallel` (use `--processes` for a process pool).
 - DOE summaries now record selected gates and aggregate gate metrics
   (mean and standard deviation).
+- Gate harness now executes Gates 1–6 via engine primitives rather than
+  returning proxy metrics.
 - Introduced split-step quantum walk helpers with dispersion and lightcone
   experiment utilities and configuration knobs.
 - Metrics logger now emits `summary_invariants.json` with pass rates for gate
