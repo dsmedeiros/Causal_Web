@@ -12,7 +12,7 @@ def test_scheduler_deterministic_order_and_peek():
     assert sched.peek_depth() == 1
     depths = []
     while sched:
-        depth, dst, edge, pkt = sched.pop()
+        depth, dst, edge, _seq, pkt = sched.pop()
         depths.append(depth)
     assert depths == [1, 2, 3]
 
@@ -25,7 +25,7 @@ def test_scheduler_tie_breaking():
 
     results = []
     while sched:
-        depth, dst, edge, pkt = sched.pop()
+        depth, dst, edge, _seq, pkt = sched.pop()
         results.append((depth, dst, edge))
 
     assert results == [(5, 1, 1), (5, 1, 2), (5, 2, 1)]
@@ -48,7 +48,7 @@ def test_scheduler_same_dst_edge_seq_order():
 
     popped = []
     while sched:
-        depth, dst, edge, pkt = sched.pop()
+        depth, dst, edge, _seq, pkt = sched.pop()
         popped.append((dst, edge, pkt.payload))
 
     assert popped == [(1, 1, "b"), (1, 1, "c"), (1, 2, "a")]
@@ -63,7 +63,7 @@ def test_scheduler_two_packet_edge_order():
 
     popped = []
     while sched:
-        depth, dst, edge, pkt = sched.pop()
+        depth, dst, edge, _seq, pkt = sched.pop()
         popped.append((dst, edge))
 
     assert popped == [(1, 1), (1, 2)]

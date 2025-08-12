@@ -278,7 +278,7 @@ class EngineAdapter:
             if decay_counter == 0:
                 self._epairs.decay_all()
             decay_counter = (decay_counter + 1) % DECAY_INTERVAL
-            depth_arr, dst, edge_id, pkt = self._scheduler.pop()
+            depth_arr, dst, edge_id, seq, pkt = self._scheduler.pop()
             vertex = self._vertices.get(dst)
             if vertex is None:
                 continue
@@ -323,10 +323,11 @@ class EngineAdapter:
             U_list = [U_val]
             pkt_list = [pkt]
             edge_id_list = [edge_id]
+            seq_list = [seq]
             window_idx = lccm.window_idx
             requeue: list[tuple[int, int, int, Packet]] = []
             while self._scheduler and events + len(pkt_list) < limit:
-                d2, dst2, edge2, pkt2 = self._scheduler.pop()
+                d2, dst2, edge2, seq2, pkt2 = self._scheduler.pop()
                 if dst2 != dst:
                     requeue.append((d2, dst2, edge2, pkt2))
                     continue
@@ -363,8 +364,18 @@ class EngineAdapter:
                     U_list.append(eye)
                 pkt_list.append(pkt2)
                 edge_id_list.append(edge2)
+                seq_list.append(seq2)
             for item in requeue:
                 self._scheduler.push(*item)
+
+            mu_list: list[float] = []
+            kappa_list: list[float] = []
+            for psi_i, U_i, phi_i, A_i in zip(psi_list, U_list, phi_list, A_list):
+                psi_out_i = U_i @ psi_i
+                psi_rot_i = np.exp(1j * (phi_i + A_i)) * psi_out_i
+                z_i = np.vdot(psi_rot_i, psi_i)
+                mu_list.append(float(np.angle(z_i)))
+                kappa_list.append(float(abs(z_i)))
 
             if len(pkt_list) > 1:
                 (
@@ -450,14 +461,19 @@ class EngineAdapter:
 
             theta = 0.0
             if lccm.layer == "Q":
-                ancestry_arr, m_arr = self._update_ancestry(
-                    dst,
-                    edge_id_list[0],
-                    depth_arr,
-                    0,
-                    mu,
-                    kappa,
-                )
+                ancestry_arr = np.zeros(4, dtype=np.uint64)
+                m_arr = np.zeros(3, dtype=float)
+                for e_id, seq_id, d_arr, mu_i, kappa_i in zip(
+                    edge_id_list, seq_list, depth_list, mu_list, kappa_list
+                ):
+                    ancestry_arr, m_arr = self._update_ancestry(
+                        dst,
+                        e_id,
+                        d_arr,
+                        seq_id,
+                        mu_i,
+                        kappa_i,
+                    )
                 theta = mu
             else:
                 if self._arrays is not None:
@@ -835,6 +851,7 @@ class EngineAdapter:
                     },
                     metadata={"window_idx": lccm.window_idx},
                 )
+                self._epairs.decay_all()
 
         return frame
 
