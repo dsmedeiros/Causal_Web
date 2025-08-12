@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import argparse
 import pathlib
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from dataclasses import dataclass, field
 from typing import Dict, Iterable, List, Tuple
 
@@ -124,9 +124,24 @@ def run(
     base_path: pathlib.Path,
     out_dir: pathlib.Path,
     parallel: int = 1,
+    use_processes: bool = False,
 ) -> None:
     """Execute a design-of-experiments sweep.
 
+    Parameters
+    ----------
+    exp_path, base_path, out_dir:
+        Paths to the experiment configuration, base configuration and output
+        directory.
+    parallel:
+        Number of parallel workers. Uses a thread pool by default.
+    use_processes:
+        If ``True`` and ``parallel > 1``, a ``ProcessPoolExecutor`` is used
+        instead of a thread pool. This helps when gate code is Python-heavy
+        while preserving determinism via per-sample seeds.
+
+    Notes
+    -----
     Parameters are sampled from dimensionless groups and converted to raw
     configurations before the experiment is executed. Results are logged in
     a deterministic order even when processed in parallel.
@@ -143,9 +158,14 @@ def run(
 
     results: List[
         Tuple[
-            Dict[str, float], Dict[str, float], int, Dict[str, float], Dict[str, float]
+            int,
+            Dict[str, float],
+            Dict[str, float],
+            int,
+            Dict[str, float],
+            Dict[str, float],
         ]
-    ] = [None] * len(samples)
+    ] = []
 
     def process(i: int, groups: Dict[str, float]):
         sample_seed = _mix(cfg.seed, i)
@@ -165,17 +185,16 @@ def run(
         return i, groups, raw, sample_seed, gate_metrics, inv
 
     if parallel > 1:
-        with ThreadPoolExecutor(max_workers=parallel) as ex:
+        executor_cls = ProcessPoolExecutor if use_processes else ThreadPoolExecutor
+        with executor_cls(max_workers=parallel) as ex:
             futs = [ex.submit(process, i, g) for i, g in enumerate(samples)]
             for f in futs:
-                i, groups, raw, seed, gm, inv = f.result()
-                results[i] = (groups, raw, seed, gm, inv)
+                results.append(f.result())
     else:
         for i, g in enumerate(samples):
-            _, groups, raw, seed, gm, inv = process(i, g)
-            results[i] = (groups, raw, seed, gm, inv)
+            results.append(process(i, g))
 
-    for i, (groups, raw, seed, gm, inv) in enumerate(results):
+    for i, groups, raw, seed, gm, inv in sorted(results, key=lambda x: x[0]):
         logger.log(i, groups, raw, seed, gm, inv)
 
     logger.flush(cfg, samples)
@@ -214,8 +233,13 @@ def main(argv: Iterable[str] | None = None) -> None:
     parser.add_argument("--base", type=pathlib.Path, required=True)
     parser.add_argument("--out", type=pathlib.Path, required=True)
     parser.add_argument("--parallel", type=int, default=1)
+    parser.add_argument(
+        "--processes",
+        action="store_true",
+        help="Use a process pool instead of threads for parallel execution",
+    )
     args = parser.parse_args(list(argv) if argv is not None else None)
-    run(args.exp, args.base, args.out, args.parallel)
+    run(args.exp, args.base, args.out, args.parallel, args.processes)
 
 
 if __name__ == "__main__":  # pragma: no cover
