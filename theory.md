@@ -192,8 +192,11 @@ $$
 Intensity $I$ is taken from the current layer $\ell(v)$ at delivery.
 
 * **Q:** $I = \|\,U_e\,\psi\,\|_2^2 \le 1$.
-* **Theta:** $I = \|p\|_1$ (with $\sum p\le 1$ after mixing).
-  For `inject_mode` $\neq$ ``"incoming"`` the ρ update uses the mean of per-packet $\|p\|_1$ over the window or batch to avoid saturation under high fan-in.
+* **Theta:** $I = \|p\|_1$ (with $\sum p\le 1$ after mixing).  For
+  ``inject_mode="incoming"`` this per-packet value applies to each
+  delivered edge individually.  Multi-packet modes (``incident`` or
+  ``outgoing``) instead use the **mean** of per-packet $\|p\|_1$ over
+  the window or batch to avoid saturation under high fan-in.
 * **C:** $I = \text{bit}\in\{0,1\}$.
 
 ---

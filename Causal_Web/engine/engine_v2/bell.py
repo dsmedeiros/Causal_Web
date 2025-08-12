@@ -70,10 +70,23 @@ class BellHelpers:
         sample = self._rng.normal(size=3) + kappa * mu
         return self._unit_vector(sample)
 
-    def _rotate(self, u: np.ndarray, zeta: int) -> np.ndarray:
-        """Rotate ``u`` using a simple component roll keyed by ``zeta``."""
+    def _rotate(self, u: np.ndarray, h: np.ndarray, zeta: float) -> np.ndarray:
+        """Rotate ``u`` around a hash-derived axis by ``2πζ``.
 
-        return np.roll(u, int(zeta % 3))
+        The axis is deterministically sampled from ``h`` so that the
+        transformation remains strictly local while providing a richer
+        rotation than a simple component roll.
+        """
+
+        seed = int(np.bitwise_xor.reduce(h))
+        axis_rng = np.random.default_rng(seed)
+        axis = self._unit_vector(axis_rng.normal(size=3))
+        angle = 2 * np.pi * (zeta % 1.0)
+        cos_a = np.cos(angle)
+        sin_a = np.sin(angle)
+        return (
+            u * cos_a + np.cross(axis, u) * sin_a + axis * np.dot(axis, u) * (1 - cos_a)
+        )
 
     def _ancestry_overlap(self, a: Ancestry, b: Ancestry) -> float:
         """Return fraction of matching ``h`` segments between ancestries."""
@@ -84,7 +97,7 @@ class BellHelpers:
     # Public API
     def lambda_at_source(
         self, ancestry: Ancestry, beta_m: float, beta_h: float
-    ) -> Tuple[np.ndarray, int]:
+    ) -> Tuple[np.ndarray, float]:
         """Create the shared hidden variable ``lambda`` for a new pair.
 
         Parameters
@@ -95,6 +108,13 @@ class BellHelpers:
             Blend factor for phase moments.
         beta_h:
             Blend factor for hash contribution to ``zeta``.
+
+        Returns
+        -------
+        tuple
+            ``(u, zeta)`` where ``u`` is a unit direction vector and
+            ``zeta`` is a scalar in ``[0, 1)`` derived from the ancestry
+            hash blended with RNG.
         """
 
         u_rand = self._random_unit()
@@ -102,9 +122,10 @@ class BellHelpers:
         u = self._unit_vector(u)
 
         h_int = int.from_bytes(ancestry.h.tobytes(), "little")
-        zeta_rand = int(self._rng.integers(0, 2**32))
-        zeta = int(beta_h * h_int) ^ zeta_rand
-        return u, zeta
+        h_norm = (h_int % (1 << 53)) / float(1 << 53)
+        zeta_rand = self._rng.random()
+        zeta = (beta_h * h_norm + (1.0 - beta_h) * zeta_rand) % 1.0
+        return u, float(zeta)
 
     def setting_draw(
         self,
@@ -140,7 +161,7 @@ class BellHelpers:
         a_D: np.ndarray,
         detector_ancestry: Ancestry,
         lam_u: np.ndarray,
-        zeta: int,
+        zeta: float,
         kappa_xi: float,
         source_ancestry: Ancestry,
         kappa_a: float,
@@ -148,7 +169,7 @@ class BellHelpers:
     ) -> Tuple[int, Dict[str, float]]:
         """Compute the detector readout and associated log values."""
 
-        rotated = self._rotate(lam_u, zeta)
+        rotated = self._rotate(lam_u, detector_ancestry.h, zeta)
         noise = self._rng.normal(scale=1.0 / max(kappa_xi, 1e-9))
         outcome = 1 if float(np.dot(a_D, rotated) + noise) > 0 else -1
 
