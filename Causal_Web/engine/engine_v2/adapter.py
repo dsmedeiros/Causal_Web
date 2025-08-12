@@ -9,7 +9,7 @@ according to the local causal consistency math.
 from __future__ import annotations
 
 from typing import Any, Dict, Iterable, List, Optional
-from collections import deque
+from collections import deque, defaultdict
 import threading
 import time
 import random
@@ -463,9 +463,9 @@ class EngineAdapter:
             lccm.deliver(is_q)
             packets.extend(pkt_list)
 
-            edge_intensity = {
-                eid: pkt_intensities[idx] for idx, eid in enumerate(edge_id_list)
-            }
+            edge_intensity = defaultdict(lambda: (0.0, 0.0, 0.0))
+            for idx, eid in enumerate(edge_id_list):
+                edge_intensity[int(eid)] = pkt_intensities[idx]
 
             layer_idx_map = {"Q": 0, "Θ": 1, "C": 2}
             if pkt_intensities:
@@ -681,17 +681,13 @@ class EngineAdapter:
                         )
                         if mode == "incoming":
                             layer_idx = {"Q": 0, "Θ": 1, "C": 2}.get(lccm.layer, 0)
-                            intensity_vec = np.array(
-                                [
-                                    edge_intensity.get(int(e), (0.0, 0.0, 0.0))[
-                                        layer_idx
-                                    ]
-                                    for e in valid
-                                ],
-                                dtype=np.float32,
-                            )
+                            intensity_vec = np.empty(len(valid), dtype=np.float32)
+                            for i, e in enumerate(valid):
+                                intensity_vec[i] = edge_intensity[int(e)][layer_idx]
                         else:
-                            intensity_vec = intensity
+                            intensity_vec = np.full(
+                                len(valid), intensity, dtype=np.float32
+                            )
                         rho_after, d_eff = update_rho_delay_vec(
                             rho_before,
                             mean,
@@ -729,11 +725,10 @@ class EngineAdapter:
                                 if nbr is not None and end > start
                                 else []
                             )
-                            intensity_val = intensity
                             if mode == "incoming":
-                                intensity_val = edge_intensity.get(
-                                    int(edge_idx), (0.0, 0.0, 0.0)
-                                )[layer_idx]
+                                intensity_val = edge_intensity[int(edge_idx)][layer_idx]
+                            else:
+                                intensity_val = intensity
                             rho_before = float(edges["rho"][edge_idx])
                             rho_after, d_eff = update_rho_delay(
                                 rho_before,
@@ -764,16 +759,17 @@ class EngineAdapter:
                     rho_after, d_eff = injected[edge_idx][1], injected[edge_idx][2]
                 else:
                     rho_after = rho_before
-                    d_eff = int(
-                        effective_delay(
-                            rho_before,
-                            d0=float(edges["d0"][edge_idx]),
-                            gamma=rho_cfg.get("gamma", 0.0),
-                            rho0=rho_cfg.get("rho0", 1.0),
-                        )
-                    )
                     if "d_eff" in edges:
-                        edges["d_eff"][edge_idx] = d_eff
+                        d_eff = int(edges["d_eff"][edge_idx])
+                    else:
+                        d_eff = int(
+                            effective_delay(
+                                rho_before,
+                                d0=float(edges["d0"][edge_idx]),
+                                gamma=rho_cfg.get("gamma", 0.0),
+                                rho0=rho_cfg.get("rho0", 1.0),
+                            )
+                        )
                 depth_next = depth_arr + d_eff
                 payload = {
                     "psi": self._arrays.vertices["psi"][dst],
