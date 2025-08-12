@@ -13,6 +13,7 @@ def test_setting_draw_modes() -> None:
     assert conditioned.shape == (3,)
     assert np.isclose(np.linalg.norm(strict), 1.0)
     assert np.isclose(np.linalg.norm(conditioned), 1.0)
+    assert isinstance(zeta, float) and 0.0 <= zeta < 1.0
 
 
 def test_contextual_readout_logging() -> None:
@@ -36,3 +37,4 @@ def test_contextual_readout_logging() -> None:
     assert log["mode"] == "strict"
     assert log["batch"] == 1
     assert 0.0 <= log["L"] <= 1.0
+    assert isinstance(zeta, float) and 0.0 <= zeta < 1.0
