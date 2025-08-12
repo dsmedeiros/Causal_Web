@@ -1,5 +1,6 @@
 # config.py
 
+import math
 import os
 import shutil
 import threading
@@ -26,6 +27,36 @@ class Config:
         Max MPS bond dimension used for tensor chain compression.
     backend:
         Compute backend to use: ``"cpu"`` (default) or ``"cupy"``.
+    engine_mode:
+        Selects the simulation engine: ``"tick"`` for the legacy engine or
+        ``"v2"`` for the strict-local core.
+    windowing:
+        Mapping of windowing coefficients used by the v2 engine. Expected keys
+        include ``W0``, ``zeta1``, ``zeta2``, ``a``, ``b``, ``T_hold`` and
+        ``C_min`` which together determine how vertex windows advance.
+    rho_delay:
+        Parameters controlling delayed density feedback in the v2 engine.
+        The group accepts ``alpha_d``, ``alpha_leak``, ``eta``, ``gamma``,
+        ``rho0`` and ``inject_mode`` coefficients.
+    epsilon_pairs:
+        Controls reinforcement and decay for ε-linked partners. Keys such as
+        ``delta_ttl``, ``ancestry_prefix_L``, ``theta_max``, ``sigma0``,
+        ``lambda_decay``, ``sigma_reinforce`` and ``sigma_min`` shape the
+        dynamics.
+    ancestry:
+        Parameters for local ancestry fields. ``beta_m0`` sets the base
+        down-weight applied to the phase moment while ``delta_m`` controls the
+        decay applied when a window closes without any quantum arrivals.
+    bell:
+        Mutual information gate parameters for Bell pair matching. Supported
+        keys include ``mi_mode``, ``kappa_a``, ``kappa_xi``, ``beta_m`` and
+        ``beta_h``.
+    theta_reset:
+        Policy controlling how the Θ distribution ``p_v`` is reset when a
+        vertex window closes. Supported values are ``"uniform"`` to reset to
+        an even distribution, ``"renorm"`` to normalise the existing values
+        and ``"hold"`` to leave the distribution untouched. Defaults to
+        ``"renorm"``.
     """
 
     # Base directories for package resources
@@ -60,6 +91,7 @@ class Config:
     tick_limit = 10000
     allow_tick_override = True
     current_tick = 0  # Counter to display progress
+    run_seed = 0  # Seed for reproducible runs
     # Preallocated ticks for object pool
     TICK_POOL_SIZE = 10000
     N_DECOH = 3  # Fan-in threshold for thermodynamic behaviour
@@ -68,6 +100,71 @@ class Config:
     hawking_delta_e = 1.0  # Energy quantum for horizon emissions
     #: Compute backend; ``"cpu"`` or ``"cupy"``
     backend = "cpu"
+
+    #: Selected engine implementation: ``"v2"`` (strict-local) or ``"tick"``
+    engine_mode = "v2"
+
+    # Parameters for the experimental strict-local engine (``engine_mode = "v2"``)
+    windowing = {
+        "W0": 4.0,
+        "zeta1": 0.3,
+        "zeta2": 0.3,
+        "a": 0.7,
+        "b": 0.4,
+        "k_theta": 0.7,
+        "k_c": 0.4,
+        "T_hold": 2.0,
+        "C_min": 0.1,
+    }
+    rho_delay = {
+        "alpha_d": 0.1,
+        "alpha_leak": 0.01,
+        "eta": 0.2,
+        "gamma": 0.8,
+        "rho0": 1.0,
+        "inject_mode": "incoming",
+    }
+    epsilon_pairs = {
+        "delta_ttl": 2 * windowing["W0"],
+        "ancestry_prefix_L": 16,
+        "theta_max": math.pi / 12,
+        "sigma0": 0.3,
+        "lambda_decay": 0.05,
+        "sigma_reinforce": 0.1,
+        "sigma_min": 1e-3,
+        "decay_interval": 32,
+        "decay_on_window_close": True,
+        "max_seeds_per_site": 64,
+        "emit_per_delivery": False,
+    }
+    ancestry = {
+        "beta_m0": 0.1,
+        "delta_m": 0.02,
+    }
+    bell = {
+        "enabled": False,
+        "mi_mode": "MI_strict",
+        "kappa_a": 0.0,
+        # ``kappa_xi`` controls measurement noise; ``0`` means maximal noise.
+        "kappa_xi": 0.0,
+        "beta_m": 0.0,
+        "beta_h": 0.0,
+    }
+
+    # Maximum length of the classical bit deque used for majority voting.
+    max_deque: int = 8
+
+    #: Reset policy for Θ distribution after window closure
+    theta_reset = "renorm"
+
+    #: Logging related settings used by the experimental engine.
+    logging = {
+        # Probability that a per-edge ρ/delay update is recorded.
+        # A value of 0.0 disables per-edge logs while 1.0 logs all updates.
+        "sample_rho_rate": 0.0,
+        "sample_seed_rate": 1.0,
+        "sample_bridge_rate": 1.0,
+    }
 
     # Mapping of ``category`` -> {``label``: bool} controlling which logs are
     # written. Categories correspond to consolidated output files and the labels
@@ -140,6 +237,9 @@ class Config:
 
     # Default runtime copy
     log_files = {k: dict(v) for k, v in DEFAULT_LOG_FILES.items()}
+
+    #: Sampling probability for throttled delivery logs
+    log_delivery_sample_rate: float = 0.0
 
     #: Allowed logging modes. ``diagnostic`` enables all logs. ``tick`` enables
     #: per-tick metrics, ``phenomena`` enables aggregated summaries and
@@ -481,6 +581,11 @@ class Config:
                 current.update(value)
             else:
                 setattr(cls, key, value)
+
+        if "delta_ttl" not in data.get("epsilon_pairs", {}):
+            cls.epsilon_pairs["delta_ttl"] = 2 * cls.windowing.get(
+                "W0", cls.windowing["W0"]
+            )
 
 
 def load_config(path: str | None = None) -> dict:

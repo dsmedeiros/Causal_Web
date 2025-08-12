@@ -36,7 +36,13 @@ from ..gui.state import (
 from .canvas_widget import CanvasWidget
 from .toolbar_builder import build_toolbar
 from ..gui.command_stack import AddNodeCommand, AddObserverCommand
-from ..engine import tick_engine
+
+if getattr(Config, "engine_mode", "tick") == "v2":
+    from ..engine.engine_v2.adapter import EngineAdapter
+
+    tick_engine = EngineAdapter()
+else:
+    from ..engine import tick_engine
 from .shared import TooltipCheckBox, TOOLTIPS
 
 
@@ -209,6 +215,12 @@ class MainWindow(QMainWindow):
         self.tick_label = QLabel("0")
         layout.addRow("Current Tick", self.tick_label)
 
+        if getattr(Config, "engine_mode", "tick") == "v2":
+            self.depth_label = QLabel("0")
+            layout.addRow("Depth", self.depth_label)
+            self.window_label = QLabel("0")
+            layout.addRow("Window", self.window_label)
+
         self.limit_spin = QSpinBox()
         self.limit_spin.setMinimum(1)
         self.limit_spin.setMaximum(100000)
@@ -297,8 +309,35 @@ class MainWindow(QMainWindow):
         with Config.state_lock:
             running = Config.is_running
             tick = Config.current_tick
-        model_dict = tick_engine.graph.to_dict() if running else get_graph().to_dict()
-        self.tick_label.setText(str(tick))
+        if getattr(Config, "engine_mode", "tick") == "v2" and running:
+            frame = tick_engine.step()
+            tick = tick_engine.current_frame()
+            Config.current_tick = tick
+            self.tick_label.setText(str(tick))
+            if hasattr(self, "depth_label"):
+                self.depth_label.setText(str(frame.depth))
+            if hasattr(self, "window_label"):
+                self.window_label.setText(str(frame.window))
+            if hasattr(self.sim_canvas, "update_hud"):
+                self.sim_canvas.update_hud(tick, frame.depth, frame.window)
+            model_dict = get_graph().to_dict()
+        else:
+            model_dict = (
+                tick_engine.graph.to_dict() if running else get_graph().to_dict()
+            )
+            self.tick_label.setText(str(tick))
+            if getattr(Config, "engine_mode", "tick") == "v2":
+                snap = tick_engine.snapshot_for_ui()
+                if hasattr(self, "depth_label"):
+                    self.depth_label.setText(str(snap.get("depth", 0)))
+                if hasattr(self, "window_label"):
+                    self.window_label.setText(str(snap.get("window", 0)))
+                if hasattr(self.sim_canvas, "update_hud"):
+                    self.sim_canvas.update_hud(
+                        tick,
+                        snap.get("depth", 0),
+                        snap.get("window", 0),
+                    )
         self.sim_canvas.load_model(GraphModel.from_dict(model_dict))
         if not running:
             self.start_button.setEnabled(get_active_file() is not None)
@@ -356,32 +395,61 @@ class MainWindow(QMainWindow):
             strategy = f"modular-{self.modular_combo.currentText()}"
         Config.density_calc = strategy
         Config.max_ticks = self.limit_spin.value()
-        tick_engine.build_graph()
-        with Config.state_lock:
-            if Config.is_running:
-                return
-            Config.is_running = True
-            tick = Config.current_tick
-        tick_engine.simulation_loop()
-        self.start_button.setEnabled(False)
-        self.pause_button.setEnabled(True)
-        self.stop_button.setEnabled(True)
-        tick_engine._update_simulation_state(False, False, tick, None)
+        if getattr(Config, "engine_mode", "tick") == "v2":
+            tick_engine.build_graph(Config.graph_file)
+            with Config.state_lock:
+                if Config.is_running:
+                    return
+                Config.is_running = True
+                Config.current_tick = 0
+            tick_engine.start()
+            self.start_button.setEnabled(False)
+            self.pause_button.setEnabled(True)
+            self.stop_button.setEnabled(True)
+        else:
+            tick_engine.build_graph()
+            with Config.state_lock:
+                if Config.is_running:
+                    return
+                Config.is_running = True
+                tick = Config.current_tick
+            tick_engine.simulation_loop()
+            self.start_button.setEnabled(False)
+            self.pause_button.setEnabled(True)
+            self.stop_button.setEnabled(True)
+            tick_engine._update_simulation_state(False, False, tick, None)
 
     def pause_or_resume(self) -> None:
         """Toggle between pausing and resuming the simulation."""
         with Config.state_lock:
             running = Config.is_running
-        if running:
-            tick_engine.pause_simulation()
-            self.pause_button.setText("Resume")
+        if getattr(Config, "engine_mode", "tick") == "v2":
+            if running:
+                tick_engine.pause()
+                with Config.state_lock:
+                    Config.is_running = False
+                self.pause_button.setText("Resume")
+            else:
+                tick_engine.start()
+                with Config.state_lock:
+                    Config.is_running = True
+                self.pause_button.setText("Pause")
         else:
-            tick_engine.resume_simulation()
-            self.pause_button.setText("Pause")
+            if running:
+                tick_engine.pause_simulation()
+                self.pause_button.setText("Resume")
+            else:
+                tick_engine.resume_simulation()
+                self.pause_button.setText("Pause")
 
     def stop_simulation(self) -> None:
         """Stop the simulation immediately."""
-        tick_engine.stop_simulation()
+        if getattr(Config, "engine_mode", "tick") == "v2":
+            tick_engine.stop()
+            with Config.state_lock:
+                Config.is_running = False
+        else:
+            tick_engine.stop_simulation()
         self.start_button.setEnabled(get_active_file() is not None)
         self.pause_button.setEnabled(False)
         self.pause_button.setText("Pause")

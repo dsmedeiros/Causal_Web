@@ -105,7 +105,7 @@ def bell_score(epsilon: bool, runs: int = 200, seed: int | None = None) -> float
             for i in range(2, runs + 2):
                 emit(i, rng.choice(settings_a), rng.choice(settings_b))
             logger.flush()
-            s_val, _ = compute_bell_statistics(Path(tmp) / "entangled_log.jsonl")
+            s_val, _, _ = compute_bell_statistics(Path(tmp) / "entangled_log.jsonl")
             return s_val
         finally:
             Config.output_dir = original_dir

@@ -13,6 +13,17 @@ collapses a node to an eigenstate using the Born rule, while the decoherence
 threshold preserves ``psi`` but freezes unitary evolution and records only the
 resulting probability distribution.
 
+Engine v2 stores graph data in a struct-of-arrays format using `float32` and
+`complex64` types and batches deliveries by destination to vectorise quantum
+accumulation. A bucketed scheduler keyed by integer depth reduces heap
+operations to amortised *O*(1) and delivery logs may be sampled via
+`Config.log_delivery_sample_rate` to reduce I/O overhead. Per-edge
+ρ/delay updates can also be throttled by setting `Config.logging.sample_rho_rate`
+(0.0–1.0) which records only a fraction of per-hop `edge_delivery`
+events; a value of `0.0` disables per-edge logs while still emitting a
+per-window summary of edge activity. Seed and bridge events can be sampled in the same way using
+`Config.logging.sample_seed_rate` and `Config.logging.sample_bridge_rate`.
+
 To cap memory growth for long coherent lines, the engine detects tensor clusters
 and represents them as Matrix Product States. Local edge unitaries contract with
 these tensors and singular values beyond ``Config.chi_max`` are truncated. A
@@ -63,6 +74,9 @@ Graphs are stored as JSON files under `Causal_Web/input/`. Each file defines
 schema and an example.
 
 The GUI allows interactive editing of graphs. Drag nodes to reposition them and use the toolbar to add connections or observers. After editing, click **Apply Changes** in the Graph View to update the simulation and save the file. Details on all GUI actions are provided in [docs/gui_usage.md](docs/gui_usage.md).
+During simulation a small HUD overlay reports the current tick, depth and
+window when using the v2 engine, offering immediate feedback on scheduler
+progress.
 Nodes can optionally enable self-connections via a checkbox in the node panel. When enabled, dragging from a node back onto itself creates a curved edge.
 Bridges now support an `Entanglement Enabled` option. When selected, the bridge
 is tagged with an `entangled_id` used by observers to generate deterministic
@@ -73,6 +87,12 @@ Bridge propagation now occurs before observers handle a tick so detector events
 reflect entangled activity in the same cycle.
 These detector events are additionally written to `entangled_log.jsonl` for
 Bell inequality analysis.
+The underlying Bell helpers now track explicit 256-bit ancestry hash lanes
+(`h0`–`h3`) and a three-component moment vector (`m0`–`m2`) with an
+associated normalisation (`m_norm`). Detector settings can be drawn either
+strictly independently or from a von Mises–Fisher distribution conditioned on
+shared ancestry.  This toggle enables controlled measurement dependence
+studies.
 Graphs may also define ``epsilon`` edges linking two nodes in a singlet state.
 When one node collapses, its ``epsilon`` partner is projected onto the opposite
 eigenvector, enabling Bell-test correlations without a bridge. Collapse now
@@ -86,7 +106,9 @@ preserve ``cnot_source`` flags and their resulting ``epsilon`` pairings on
 reload.
 The GUI now includes an **Analysis** menu with a *Bell Inequality Analysis...*
 action that opens a window showing CHSH statistics and a histogram of
-expectation values.
+expectation values. Any metadata fields found in `entangled_log.jsonl`, such as
+`mi_mode`, `kappa_a`, `kappa_xi`, `batch_id` or `h_prefix_len`, are displayed
+alongside the CHSH score.
 
 Runs produce a set of JSON logs in `output/`. The script `bundle_run.py` can be used after a simulation to archive the results. Full descriptions of each log file and their fields are available in [docs/log_schemas.md](docs/log_schemas.md).
 
@@ -114,6 +136,89 @@ cost of memory.
 The `backend` option selects the compute backend. It defaults to `cpu` but
 may be set to `cupy` for CUDA acceleration.
 
+The `engine_mode` flag selects the simulation core. The default `v2` value
+enables the strict-local engine while `tick` selects the legacy implementation.
+Parameter groups `windowing`, `rho_delay`, `epsilon_pairs`, `ancestry`, and
+`bell` provide advanced controls for the v2 engine.  Each group is a nested
+mapping:
+
+```json
+{
+  "engine_mode": "v2",
+  "windowing": {"W0": 4, "zeta1": 0.3, "zeta2": 0.3, "a": 0.7, "b": 0.4,
+                 "T_hold": 2, "C_min": 0.1},
+  "rho_delay": {"alpha_d": 0.1, "alpha_leak": 0.01, "eta": 0.2,
+                "gamma": 0.8, "rho0": 1.0, "inject_mode": "incoming"},
+  "epsilon_pairs": {"delta_ttl": 8, "ancestry_prefix_L": 16,
+                     "theta_max": 0.261799, "sigma0": 0.3,
+                     "lambda_decay": 0.05, "sigma_reinforce": 0.1,
+                     "sigma_min": 0.001, "decay_interval": 32,
+                     "decay_on_window_close": true,
+                     "max_seeds_per_site": 64,
+                     "emit_per_delivery": false},
+  "ancestry": {"beta_m0": 0.1, "delta_m": 0.02},
+  "bell": {"enabled": false, "mi_mode": "MI_strict", "kappa_a": 0.0,
+            "kappa_xi": 0.0, "beta_m": 0.0, "beta_h": 0.0},
+  "theta_reset": "renorm",
+  "max_deque": 8
+}
+```
+
+The `windowing` values control vertex window advancement. `rho_delay` affects
+how edge density relaxes toward a baseline. The `inject_mode` option selects
+whether ρ input applies to `"incoming"` (default), `"incident"` or `"outgoing"` edges.
+`epsilon_pairs` governs dynamic
+ε-pair behaviour – seeds with a limited TTL can bind to form temporary bridge
+edges whose `sigma` values decay unless reinforced. The default `delta_ttl`
+scales with `W0` (`2*W0`) to simplify experiments, while the remaining
+parameters set decay and reinforcement dynamics. `decay_interval` controls how
+often bridges decay and `decay_on_window_close` toggles a decay step when a
+window closes. `max_seeds_per_site` bounds how many unmatched seeds a vertex
+retains, evicting the oldest when full. `emit_per_delivery` enables a
+high-fidelity mode where seeds emit on each Q-delivery instead of once per
+batch. The `ancestry` group tunes
+phase-moment updates and decay. `bell` sets mutual information gates for Bell
+pair matching. Bridge creation and removal now emit `bridge_created` and
+`bridge_removed` events (carrying a stable synthetic `bridge_id` and final `σ`),
+providing additional telemetry for analysis.
+`seed_emitted` and `seed_dropped` events capture ε-pair propagation and
+expiry reasons (`expired`, `angle`, `prefix`), aiding locality tests. The
+Bell block is disabled by default;
+set `"enabled": true` to activate measurement-interaction modes.
+
+The top-level `max_deque` knob sets the length of the classical majority buffer.
+Within the Bell block, setting `"kappa_xi": 0` yields maximal measurement noise.
+
+`run_seed` provides a deterministic seed used by sampling, Bell helpers and
+ε-pair routines, allowing reproducible runs.
+
+An adapter in ``engine_v2`` mirrors a subset of the legacy tick engine API and
+generates *synthetic telemetry frames* so the GUI can tick while the new
+physics is under development.  A telemetry frame is a simple structure:
+
+```json
+{"depth": 3, "events": 5, "packets": [{"src": 1, "dst": 2, "payload": null}]}
+```
+
+Each frame is also logged to `ticks_log.jsonl` with its sequential frame number,
+coarse ``depth_bucket`` and the highest ``window_idx`` encountered. Additional
+edge and vertex telemetry fields are appended without renaming existing keys so
+existing ingestion remains compatible.
+
+The adapter exposes methods like `build_graph`, `step`, `pause` and
+`snapshot_for_ui` to remain drop-in compatible.  Internally a depth-based
+scheduler orders packets by their arrival depth and advances vertex windows
+using the Local Causal Consistency Model (LCCM).  The LCCM computes a window
+size ``W(v)`` from the vertex's incident degree (fan-in plus fan-out) and local
+density and transitions between
+quantum ``Q``, decohered ``Θ`` and classical ``C`` layers with simple hysteresis
+timers.  A lightweight loader converts graph JSON into struct-of-arrays via
+``engine_v2.loader.load_graph_arrays`` to prime this core.
+The LCCM recomputes the mean incident edge density ``ρ`` at every window
+boundary so that subsequent window sizes adapt to current traffic.  Classical
+dominance (Θ→C) additionally requires the majority-vote confidence to exceed
+``conf_min`` alongside the existing bit fraction and entropy thresholds.
+
 The `density_calc` option controls how edge density is computed. Set one of:
 
 - `local_tick_saturation` (default) – density increases with recent traffic
@@ -127,6 +232,18 @@ The `density_calc` option controls how edge density is computed. Set one of:
 Amplitude energy now feeds a stress–energy field that scales edge delay by
 ``1 + κρ``. This density diffuses each scheduler step with weight
 ``Config.density_diffusion_weight`` (``α``).
+
+The helper ``engine.engine_v2.rho_delay.update_rho_delay`` applies this rule
+per edge, adding leakage and layer-scoped external intensity and mapping the
+resulting density to a logarithmically scaled effective delay. The engine v2 adapter
+recomputes this ``d_eff`` on every packet delivery, storing it with the edge
+and using the updated value to schedule the next hop. When a vertex window
+closes the adapter normalises accumulated amplitudes and records ``EQ`` via
+``engine.engine_v2.qtheta_c.close_window``. The Θ and C meters ``E_theta`` and
+``E_C`` are persisted to the vertex arrays for diagnostics. The post-window Θ
+distribution reset policy is governed by ``Config.theta_reset`` which accepts
+``"uniform"`` for an even reset, ``"renorm"`` to normalise existing values or
+``"hold"`` to leave the distribution unchanged (default ``"renorm"``).
 
 Scheduler steps also integrate a toy horizon thermodynamics model. Interior
 nodes may emit Hawking pairs with probability ``exp(-ΔE/T_H)``, and the

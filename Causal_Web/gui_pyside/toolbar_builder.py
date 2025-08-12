@@ -44,6 +44,10 @@ EVENT_TYPES = [
     "coherence",
     "phase",
     "region",
+    "EQ",
+    "ρ",
+    "d_eff",
+    "σ",
 ]
 
 

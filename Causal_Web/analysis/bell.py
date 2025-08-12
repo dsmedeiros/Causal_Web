@@ -5,14 +5,14 @@ from __future__ import annotations
 import json
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, Tuple, List
+from typing import Any, Dict, Tuple, List
 
 from ..config import Config
 
 
 def compute_bell_statistics(
     log_file: str | None = None,
-) -> Tuple[float, Dict[Tuple[str, str], float]]:
+) -> Tuple[float, Dict[Tuple[str, str], float], Dict[str, Any]]:
     """Return CHSH ``S`` value from ``entangled_log.jsonl``.
 
     Parameters
@@ -27,13 +27,16 @@ def compute_bell_statistics(
         The calculated ``S`` value.
     Dict[Tuple[str, str], float]
         Mapping of setting pair to expectation value ``E(A_i,B_j)``.
+    Dict[str, Any]
+        Optional metadata fields captured from the log.
     """
 
     log_path = Path(log_file or Config.output_path("entangled_log.jsonl"))
     if not log_path.exists():
-        return 0.0, {}
+        return 0.0, {}, {}
 
     events: List[dict] = []
+    metadata: Dict[str, Any] = {}
     with log_path.open() as fh:
         for line in fh:
             if not line.strip():
@@ -44,6 +47,17 @@ def compute_bell_statistics(
                 or obj.get("label") == "measurement"
             ):
                 payload = obj.get("payload") or obj.get("value") or {}
+                if not metadata:
+                    for key in [
+                        "mi_mode",
+                        "kappa_a",
+                        "kappa_xi",
+                        "h_prefix_len",
+                        "delta_ttl",
+                        "batch_id",
+                    ]:
+                        if key in payload:
+                            metadata[key] = payload[key]
                 events.append(
                     {
                         "tick": obj.get("tick"),
@@ -55,12 +69,12 @@ def compute_bell_statistics(
                 )
 
     if not events:
-        return 0.0, {}
+        return 0.0, {}, metadata
 
     # Determine observers and setting labels
     observer_ids = sorted({e["observer_id"] for e in events})[:2]
     if len(observer_ids) < 2:
-        return 0.0, {}
+        return 0.0, {}, metadata
     obs_map = {observer_ids[0]: "A", observer_ids[1]: "B"}
     setting_names: Dict[str, Dict[float, str]] = defaultdict(dict)
 
@@ -112,4 +126,4 @@ def compute_bell_statistics(
     e_a2_b2 = expectations.get(("A2", "B2"), 0.0)
     s_value = e_a1_b1 - e_a1_b2 + e_a2_b1 + e_a2_b2
 
-    return s_value, expectations
+    return s_value, expectations, metadata
