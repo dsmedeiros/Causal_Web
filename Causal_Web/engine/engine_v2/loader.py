@@ -2,7 +2,7 @@
 
 The :func:`load_graph_arrays` helper converts a graph JSON dictionary
 into arrays suitable for the experimental engine. Missing fields are
-filled from :mod:`Causal_Web.config.Config` defaults. Edge dictionaries
+filled from the provided configuration snapshot. Edge dictionaries
 include a cached ``phase`` value; if not provided but ``phi``/``A`` are
 present it is computed once as ``exp(1j * (phi + A))`` so packet
 delivery routines can skip per-event exponentiation.
@@ -14,8 +14,6 @@ from dataclasses import dataclass
 from typing import Any, Dict, List
 
 import numpy as np
-
-from ...config import Config
 
 
 @dataclass
@@ -39,13 +37,21 @@ def _identity_matrix(dim: int) -> List[List[float]]:
     return [[1.0 if i == j else 0.0 for j in range(dim)] for i in range(dim)]
 
 
-def load_graph_arrays(graph_json: Dict[str, Any]) -> GraphArrays:
+def load_graph_arrays(
+    graph_json: Dict[str, Any],
+    windowing: Dict[str, Any],
+    unitary_map: Dict[str, Any] | None = None,
+) -> GraphArrays:
     """Convert ``graph_json`` into struct-of-arrays collections.
 
     Parameters
     ----------
     graph_json:
         Graph description as a dictionary following the JSON schema.
+    windowing:
+        Windowing configuration copied from :class:`RunConfig`.
+    unitary_map:
+        Optional mapping of unitary identifiers to matrices.
 
     Returns
     -------
@@ -62,10 +68,10 @@ def load_graph_arrays(graph_json: Dict[str, Any]) -> GraphArrays:
     id_map = {nid: i for i, nid in enumerate(nodes)}
     n_vert = len(id_map)
 
-    W0 = Config.windowing.get("W0", 0.0)
-    Q = Config.windowing.get("Q", 0)
-    Dq = int(Config.windowing.get("Dq", 1))
-    Dp = int(Config.windowing.get("Dp", 1))
+    W0 = windowing.get("W0", 0.0)
+    Q = windowing.get("Q", 0)
+    Dq = int(windowing.get("Dq", 1))
+    Dp = int(windowing.get("Dp", 1))
 
     psi_init = np.zeros((n_vert, Dq), dtype=np.complex64)
     psi_init[:, 0] = 1.0
@@ -143,7 +149,7 @@ def load_graph_arrays(graph_json: Dict[str, Any]) -> GraphArrays:
     }
 
     default_u = _identity_matrix(Dq)
-    unitary_map = getattr(Config, "unitaries", {})
+    unitary_map = unitary_map or {}
 
     for edge in edges_data:
         src_idx = id_map.get(edge.get("from"))

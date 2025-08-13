@@ -22,7 +22,6 @@ import numpy as np
 import logging
 
 from ..logging.logger import log_record
-from ...config import Config
 
 
 @dataclass
@@ -94,8 +93,7 @@ class EPairs:
     Parameters are supplied on construction to avoid global state and to
     make the component easy to test. A ``seed`` may be provided for
     deterministic behaviour in routines that rely on randomness. When
-    omitted, the manager defaults to :data:`Config.run_seed` so runs are
-    reproducible without additional wiring.
+    omitted, the RNG is initialised nondeterministically.
     """
 
     def __init__(
@@ -109,6 +107,8 @@ class EPairs:
         sigma_min: float,
         seed: int | None = None,
         max_seeds_per_site: int = 64,
+        sample_seed_rate: float = 1.0,
+        sample_bridge_rate: float = 1.0,
     ) -> None:
         """Initialize the manager.
 
@@ -116,6 +116,10 @@ class EPairs:
         ----------
         max_seeds_per_site:
             Maximum seeds to retain per site before oldest are evicted.
+        sample_seed_rate:
+            Probability that seed events are logged.
+        sample_bridge_rate:
+            Probability that bridge events are logged.
         """
 
         self.delta_ttl = delta_ttl
@@ -126,12 +130,14 @@ class EPairs:
         self.sigma_reinforce = sigma_reinforce
         self.sigma_min = sigma_min
         self.max_seeds_per_site = max_seeds_per_site
+        self.sample_seed_rate = sample_seed_rate
+        self.sample_bridge_rate = sample_bridge_rate
         self.seeds: Dict[int, List[Seed]] = {}
         self.bridges: Dict[Tuple[int, int], Bridge] = {}
         # adjacency of active bridge partners stored in fixed arrays
         self.adjacency: Dict[int, array] = {}
         self._adj_free: Dict[int, List[int]] = {}
-        self._rng = np.random.default_rng(seed if seed is not None else Config.run_seed)
+        self._rng = np.random.default_rng(seed)
         # Synthetic edge identifier allocation for bridges
         self._next_bridge_id = -1
         # Source for incident edge delays used when estimating bridge latency.
@@ -199,7 +205,7 @@ class EPairs:
         depth-based TTL that respects per-edge effective distance.
         """
 
-        log_seeds = self._rng.random() < Config.logging.get("sample_seed_rate", 1.0)
+        log_seeds = self._rng.random() < self.sample_seed_rate
         prefix = self._prefix(h_value)
         expiry = depth_emit + self.delta_ttl
         for edge_id in edge_ids:
@@ -250,7 +256,7 @@ class EPairs:
         seed's ``expiry_depth``.
         """
 
-        log_seeds = self._rng.random() < Config.logging.get("sample_seed_rate", 1.0)
+        log_seeds = self._rng.random() < self.sample_seed_rate
         seeds = self.seeds.pop(site, [])
         for seed in seeds:
             for edge_id in edge_ids:
@@ -388,7 +394,7 @@ class EPairs:
             self._next_bridge_id -= 1
             self._add_adj(a, b)
             self._add_adj(b, a)
-            if self._rng.random() < Config.logging.get("sample_bridge_rate", 1.0):
+            if self._rng.random() < self.sample_bridge_rate:
                 self._log_bridge(
                     "bridge_created",
                     {
@@ -406,7 +412,7 @@ class EPairs:
         key = self._bridge_key(a, b)
         bridge = self.bridges.get(key)
         if bridge is not None:
-            if self._rng.random() < Config.logging.get("sample_bridge_rate", 1.0):
+            if self._rng.random() < self.sample_bridge_rate:
                 self._log_bridge(
                     "bridge_removed",
                     {

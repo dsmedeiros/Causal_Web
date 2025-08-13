@@ -5,6 +5,8 @@ import os
 import shutil
 import threading
 from enum import Enum
+from dataclasses import dataclass
+import copy
 
 
 class EngineMode(str, Enum):
@@ -12,6 +14,24 @@ class EngineMode(str, Enum):
 
     TICK = "tick"
     V2 = "v2"
+
+
+@dataclass(frozen=True)
+class RunConfig:
+    """Immutable snapshot of runtime configuration used by the engine."""
+
+    run_seed: int
+    epsilon_pairs: dict
+    bell: dict
+    ancestry: dict
+    windowing: dict
+    lccm: dict
+    rho_delay: dict
+    rho: dict
+    logging: dict
+    max_deque: int
+    theta_reset: str
+    unitaries: dict | None = None
 
 
 class Config:
@@ -101,12 +121,23 @@ class Config:
     # Synchronization lock for cross-thread state access
     state_lock = threading.Lock()
 
-    tick_rate = 1.0  # Seconds between ticks (adjustable via GUI)
+    # Simulation progress is tracked in ``frames`` rather than global ticks to
+    # emphasise that the outer loop is a UI convenience and carries no physical
+    # meaning.  The former tick based attributes are maintained for backwards
+    # compatibility but are aliases of the frame oriented values.
+
+    frame_rate = 1.0  # Seconds between frames (adjustable via GUI)
     is_running = False  # Whether the simulation loop is active
-    max_ticks = 100  # Stop after this many ticks unless set to 0 for infinite
-    tick_limit = 10000
-    allow_tick_override = True
-    current_tick = 0  # Counter to display progress
+    max_frames = 100  # Stop after this many frames unless set to 0 for infinite
+    frame_limit = 10000
+    allow_frame_override = True
+    current_frame = 0  # Counter to display progress
+    # Backwards compatible tick aliases
+    tick_rate = frame_rate
+    max_ticks = max_frames
+    tick_limit = frame_limit
+    allow_tick_override = allow_frame_override
+    current_tick = current_frame
     run_seed = 0  # Seed for reproducible runs
     # Preallocated ticks for object pool
     TICK_POOL_SIZE = 10000
@@ -623,6 +654,25 @@ class Config:
             cls.epsilon_pairs["delta_ttl"] = 2 * cls.windowing.get(
                 "W0", cls.windowing["W0"]
             )
+
+    @classmethod
+    def snapshot(cls) -> RunConfig:
+        """Return an immutable copy of selected runtime configuration."""
+
+        return RunConfig(
+            run_seed=cls.run_seed,
+            epsilon_pairs=copy.deepcopy(cls.epsilon_pairs),
+            bell=copy.deepcopy(cls.bell),
+            ancestry=copy.deepcopy(cls.ancestry),
+            windowing=copy.deepcopy(cls.windowing),
+            lccm=copy.deepcopy(cls.lccm),
+            rho_delay=copy.deepcopy(cls.rho_delay),
+            rho=copy.deepcopy(cls.rho),
+            logging=copy.deepcopy(cls.logging),
+            max_deque=cls.max_deque,
+            theta_reset=cls.theta_reset,
+            unitaries=copy.deepcopy(getattr(cls, "unitaries", {})),
+        )
 
 
 def load_config(path: str | None = None) -> dict:

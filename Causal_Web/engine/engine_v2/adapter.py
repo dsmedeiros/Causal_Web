@@ -33,7 +33,7 @@ from .qtheta_c import (
 )
 from .epairs import EPairs
 from .bell import BellHelpers, Ancestry
-from ...config import Config
+from ...config import Config, RunConfig
 
 
 class EngineAdapter:
@@ -46,15 +46,10 @@ class EngineAdapter:
         self._arrays: GraphArrays | None = None
         self._edges_by_src: Dict[int, np.ndarray] = {}
         self._frame = 0
-        self._rng = random.Random(Config.run_seed)
-        eps_cfg = dict(Config.epsilon_pairs)
-        eps_cfg.pop("decay_interval", None)
-        eps_cfg.pop("decay_on_window_close", None)
-        eps_cfg.pop("emit_per_delivery", None)
-        eps_seed = eps_cfg.pop("seed", Config.run_seed)
-        self._epairs = EPairs(seed=eps_seed, **eps_cfg)
-        bell_seed = Config.bell.get("seed", Config.run_seed)
-        self._bell = BellHelpers(seed=bell_seed)
+        self._cfg: RunConfig | None = None
+        self._rng: random.Random | None = None
+        self._epairs: EPairs | None = None
+        self._bell: BellHelpers | None = None
         # Preallocated helpers to avoid per-event allocations
         self._eye_cache: Dict[int, np.ndarray] = {}
         self._psi_zero: Dict[int, np.ndarray] = {}
@@ -86,12 +81,12 @@ class EngineAdapter:
         """Update ancestry hash and phase moment for ``dst``.
 
         The update uses only local information from the arriving packet and is
-        deterministic given :data:`Config.run_seed`. The phase moment ``m`` is
+        deterministic given :data:`self._cfg.run_seed`. The phase moment ``m`` is
         biased toward the destination's unitary via the supplied phase
         ``mu`` (``arg(<U ψ, ψ>)``) and coherence ``kappa`` and is
         down-weighted under heavy fan-in using ``β_m = β_m0 / (1 + Λ_v)`` where
         ``Λ_v`` counts quantum arrivals in the current window. The coefficient
-        ``β_m0`` is sourced from :data:`Config.ancestry` so it can be adjusted via
+        ``β_m0`` is sourced from :data:`self._cfg.ancestry` so it can be adjusted via
         configuration.
         """
 
@@ -118,7 +113,7 @@ class EngineAdapter:
         lambda_v = 0
         if dst in self._vertices:
             lambda_v = getattr(self._vertices[dst]["lccm"], "_lambda_q", 0)
-        beta_m0 = Config.ancestry.get("beta_m0", 0.1)
+        beta_m0 = self._cfg.ancestry.get("beta_m0", 0.1)
         beta_m = beta_m0 / (1.0 + float(lambda_v))
         m = (1.0 - beta_m) * m + beta_m * u_local
         norm = float(np.linalg.norm(m))
@@ -172,10 +167,27 @@ class EngineAdapter:
             with open(graph_json_path, "r", encoding="utf-8") as fh:
                 graph = json.load(fh)
 
+        # Freeze configuration for this run
+        self._cfg = Config.snapshot()
+        self._rng = random.Random(self._cfg.run_seed)
+        eps_cfg = dict(self._cfg.epsilon_pairs)
+        eps_cfg.pop("decay_interval", None)
+        eps_cfg.pop("decay_on_window_close", None)
+        eps_cfg.pop("emit_per_delivery", None)
+        eps_seed = eps_cfg.pop("seed", self._cfg.run_seed)
+        self._epairs = EPairs(
+            seed=eps_seed,
+            sample_seed_rate=self._cfg.logging.get("sample_seed_rate", 1.0),
+            sample_bridge_rate=self._cfg.logging.get("sample_bridge_rate", 1.0),
+            **eps_cfg,
+        )
+        bell_seed = self._cfg.bell.get("seed", self._cfg.run_seed)
+        self._bell = BellHelpers(self._cfg.bell, seed=bell_seed)
+
         params = graph.get("params", {})
-        window_defaults = dict(Config.windowing)
+        window_defaults = dict(self._cfg.windowing)
         window_defaults.update(params)
-        lccm_cfg = Config.lccm
+        lccm_cfg = self._cfg.lccm
         mode = lccm_cfg.get("mode", "thresholds")
         fe_cfg = lccm_cfg.get("free_energy", {})
         W0 = window_defaults.get("W0", 4)
@@ -201,7 +213,9 @@ class EngineAdapter:
         T_hold = window_defaults.get("T_hold", 1)
         T_class = params.get("T_class", 1)
 
-        self._arrays = load_graph_arrays(graph)
+        self._arrays = load_graph_arrays(
+            graph, self._cfg.windowing, getattr(self._cfg, "unitaries", {})
+        )
         self._vertices.clear()
         edges = self._arrays.edges
         adj = self._arrays.adjacency
@@ -293,9 +307,9 @@ class EngineAdapter:
 
         if limit is None:
             limit = float("inf")
-        rho_cfg = Config.rho_delay
-        rho_mode = Config.rho.get("update_mode", "heuristic")
-        lambda_cfg = Config.rho.get("variational", {})
+        rho_cfg = self._cfg.rho_delay
+        rho_mode = self._cfg.rho.get("update_mode", "heuristic")
+        lambda_cfg = self._cfg.rho.get("variational", {})
         alpha_d = rho_cfg.get("alpha_d", 0.0)
         alpha_leak = rho_cfg.get("alpha_leak", 0.0)
         eta = rho_cfg.get("eta", 0.0)
@@ -310,7 +324,7 @@ class EngineAdapter:
         rho0 = rho_cfg.get("rho0", 1.0)
         inject_mode = rho_cfg.get("inject_mode", "incoming")
 
-        bell_cfg = Config.bell
+        bell_cfg = self._cfg.bell
         bell_enabled = bell_cfg.get("enabled", False)
         mi_mode_default = (
             "strict"
@@ -331,7 +345,7 @@ class EngineAdapter:
         packets = []
         edge_logs = 0
         decay_counter = 0
-        decay_interval = Config.epsilon_pairs.get("decay_interval", 32)
+        decay_interval = self._cfg.epsilon_pairs.get("decay_interval", 32)
         packet_struct = self._packet_buf
         edge_struct = self._edge_buf
         payload_buf = self._payload_buf
@@ -464,7 +478,7 @@ class EngineAdapter:
                     alpha_list,
                     phase_list,
                     U_list,
-                    max_deque=Config.max_deque,
+                    max_deque=self._cfg.max_deque,
                     update_p=lccm.layer == "Θ",
                 )
             else:
@@ -490,7 +504,7 @@ class EngineAdapter:
                     vertex["bit_deque"],
                     packet_struct,
                     edge_struct,
-                    max_deque=Config.max_deque,
+                    max_deque=self._cfg.max_deque,
                     update_p=lccm.layer == "Θ",
                 )
 
@@ -552,7 +566,7 @@ class EngineAdapter:
                             dst, e_id, d_curr, seq_id, mu_i, kappa_i
                         )
                         if (
-                            Config.epsilon_pairs.get("emit_per_delivery", False)
+                            self._cfg.epsilon_pairs.get("emit_per_delivery", False)
                             and self._arrays is not None
                         ):
                             h_val_i = int(ancestry_arr[0])
@@ -619,7 +633,7 @@ class EngineAdapter:
                             "kappa_a": kappa_a,
                             "kappa_xi": kappa_xi,
                             "batch_id": self._frame,
-                            "h_prefix_len": Config.epsilon_pairs.get(
+                            "h_prefix_len": self._cfg.epsilon_pairs.get(
                                 "ancestry_prefix_L", 0
                             ),
                         },
@@ -643,7 +657,7 @@ class EngineAdapter:
             if (
                 lccm.layer == "Q"
                 and self._arrays is not None
-                and not Config.epsilon_pairs.get("emit_per_delivery", False)
+                and not self._cfg.epsilon_pairs.get("emit_per_delivery", False)
             ):
                 h_val = int(ancestry_arr[0])
                 self._epairs.emit(dst, h_val, theta, depth_last, edge_ids_all, edges)
@@ -721,7 +735,7 @@ class EngineAdapter:
                     ptr is not None
                     and nbr is not None
                     and len(ptr) > 1
-                    and Config.rho_delay.get("vectorized", True)
+                    and self._cfg.rho_delay.get("vectorized", True)
                 ):
                     if (
                         self._neigh_sums_cache is None
@@ -834,7 +848,7 @@ class EngineAdapter:
                                 int(d_eff),
                             )
 
-            log_rho_edges = self._rng.random() < Config.logging.get(
+            log_rho_edges = self._rng.random() < self._cfg.logging.get(
                 "sample_rho_rate", 0.0
             )
             for edge_idx in self._edges_by_src.get(dst, []):
@@ -898,7 +912,7 @@ class EngineAdapter:
                 payload_buf["ancestry"] = packet_data.get("ancestry")
                 payload_buf["m"] = packet_data.get("m")
                 edge_logs += 1
-                rate = Config.logging.get("sample_rho_rate", 0.0)
+                rate = self._cfg.logging.get("sample_rho_rate", 0.0)
                 if rate > 0.0 and self._rng.random() < rate:
                     log_record(
                         category="event",
@@ -984,7 +998,7 @@ class EngineAdapter:
                             [v_arr["m0"][vid], v_arr["m1"][vid], v_arr["m2"][vid]],
                             dtype=np.float32,
                         )
-                        delta = Config.ancestry.get("delta_m", 0.02)
+                        delta = self._cfg.ancestry.get("delta_m", 0.02)
                         m *= 1.0 - delta
                         norm = float(np.linalg.norm(m))
                         m /= max(norm, 1e-12)
@@ -992,7 +1006,7 @@ class EngineAdapter:
                         v_arr["m1"][vid] = m[1]
                         v_arr["m2"][vid] = m[2]
                         v_arr["m_norm"][vid] = norm
-                    match Config.theta_reset:
+                    match self._cfg.theta_reset:
                         case "uniform":
                             p_v.fill(1.0 / len(p_v))
                         case "renorm":
@@ -1022,7 +1036,7 @@ class EngineAdapter:
                         rho_mean = 0.0
                     self._arrays.vertices["rho_mean"][vid] = rho_mean
                     lccm.rho_mean = rho_mean
-                    k_rho = Config.windowing.get("k_rho", 1.0)
+                    k_rho = self._cfg.windowing.get("k_rho", 1.0)
                     E_rho = k_rho * rho_mean
                     v_arr["E_rho"][vid] = E_rho
                     base_deg = data.get("base_deg", lccm.deg)
@@ -1048,7 +1062,7 @@ class EngineAdapter:
                     },
                     metadata={"window_idx": lccm.window_idx},
                 )
-                if Config.epsilon_pairs.get("decay_on_window_close", True):
+                if self._cfg.epsilon_pairs.get("decay_on_window_close", True):
                     # Decay bridges when vertices advance a window.
                     self._epairs.decay_all()
 
@@ -1100,13 +1114,14 @@ def simulation_loop() -> None:
         while True:
             with Config.state_lock:
                 if not Config.is_running or (
-                    Config.tick_limit and Config.current_tick >= Config.tick_limit
+                    Config.frame_limit and Config.current_frame >= Config.frame_limit
                 ):
                     Config.is_running = False
                     break
             _ENGINE.step()
             with Config.state_lock:
-                Config.current_tick += 1
+                Config.current_frame += 1
+                Config.current_tick = Config.current_frame
             time.sleep(0)
 
     threading.Thread(target=_run, daemon=True).start()
