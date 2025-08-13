@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 from experiments.runner import run
+import logging
 
 
 def create_config(tmp_path: Path) -> Path:
@@ -94,3 +95,12 @@ def test_runner_process_pool_determinism(tmp_path: Path):
             row.pop("ts", None)
 
     assert metrics1 == metrics2
+
+
+def test_variance_guard_emits_warning(tmp_path: Path, caplog):
+    cfg_path = create_config(tmp_path)
+    base_path = create_base(tmp_path)
+    out_dir = tmp_path / "warn"
+    with caplog.at_level(logging.WARNING):
+        run(cfg_path, base_path, out_dir)
+    assert any("no variation across DOE" in rec.message for rec in caplog.records)
