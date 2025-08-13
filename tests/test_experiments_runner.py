@@ -66,7 +66,7 @@ def test_metrics_csv_has_gate_and_invariants(tmp_path: Path):
 
     with (out_dir / "metrics.csv").open() as fh:
         rows = list(csv.DictReader(fh))
-    assert "G1" in rows[0]
+    assert "G1_visibility" in rows[0]
     assert "inv_causality_ok" in rows[0]
     assert "inv_conservation_residual" in rows[0]
     assert "inv_no_signaling_delta" in rows[0]
