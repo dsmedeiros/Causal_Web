@@ -34,7 +34,11 @@ def _gate1_visibility() -> float:
         p_v.copy(),
         deque(),
         {"psi": np.array([1, 0], np.complex64), "p": [0.0, 0.0], "bit": 0},
-        {"alpha": 0.5, "phi": 0.0, "U": np.eye(2, dtype=np.complex64)},
+        {
+            "alpha": 0.5,
+            "phase": 1.0 + 0.0j,
+            "U": np.eye(2, dtype=np.complex64),
+        },
         update_p=False,
     )
     _, psi_acc, _, _, _, _, _ = deliver_packet(
@@ -43,7 +47,11 @@ def _gate1_visibility() -> float:
         p_v.copy(),
         deque(),
         {"psi": psi_a, "p": [0.0, 0.0], "bit": 0},
-        {"alpha": 1.0, "phi": 0.0, "U": np.eye(2, dtype=np.complex64)},
+        {
+            "alpha": 1.0,
+            "phase": 1.0 + 0.0j,
+            "U": np.eye(2, dtype=np.complex64),
+        },
         update_p=False,
     )
 
@@ -54,7 +62,11 @@ def _gate1_visibility() -> float:
         p_v.copy(),
         deque(),
         {"psi": np.array([1, 0], np.complex64), "p": [0.0, 0.0], "bit": 0},
-        {"alpha": 0.5, "phi": np.pi / 2, "U": np.eye(2, dtype=np.complex64)},
+        {
+            "alpha": 0.5,
+            "phase": np.exp(1j * (np.pi / 2)),
+            "U": np.eye(2, dtype=np.complex64),
+        },
         update_p=False,
     )
     _, psi_acc, _, _, _, _, _ = deliver_packet(
@@ -63,7 +75,11 @@ def _gate1_visibility() -> float:
         p_v.copy(),
         deque(),
         {"psi": psi_b, "p": [0.0, 0.0], "bit": 0},
-        {"alpha": 1.0, "phi": 0.0, "U": np.eye(2, dtype=np.complex64)},
+        {
+            "alpha": 1.0,
+            "phase": 1.0 + 0.0j,
+            "U": np.eye(2, dtype=np.complex64),
+        },
         update_p=False,
     )
 
@@ -161,7 +177,11 @@ def _energy_total() -> float:
     p_v = np.zeros(2, dtype=np.float32)
     bit_deque: deque[int] = deque()
     packet = {"psi": np.array([1, 0], np.complex64), "p": [0.4, 0.6], "bit": 1}
-    edge = {"alpha": 1.0, "phi": 0.0, "A": 0.0, "U": np.eye(2, dtype=np.complex64)}
+    edge = {
+        "alpha": 1.0,
+        "phase": 1.0 + 0.0j,
+        "U": np.eye(2, dtype=np.complex64),
+    }
     _, psi_acc, p_v, (bit, conf), *_ = deliver_packet(
         0, psi_acc, p_v, bit_deque, packet, edge
     )

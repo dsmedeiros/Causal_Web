@@ -199,7 +199,7 @@ The `inject_mode` option selects
 whether ρ input applies to `"incoming"` (default), `"incident"` or `"outgoing"` edges.
 Non-incoming modes average per-packet Θ intensities over the window to set the injection intensity. The optional
 `vectorized` flag toggles batch updates: set it to `false` to apply per-delivery Gauss–Seidel ordering when studies
-require exact event sequencing.
+require exact event sequencing. With vectorized updates enabled (the default) neighbour sums are maintained incrementally so large fan-in bursts avoid full recomputation while approximating Gauss–Seidel behaviour.
 `epsilon_pairs` governs dynamic
 ε-pair behaviour – seeds with a limited TTL can bind to form temporary bridge
 edges whose `sigma` values decay unless reinforced. The default `delta_ttl`
@@ -325,6 +325,8 @@ Edge propagation now batches phase factors and attenuations before offloading th
 complex multiply to CuPy, falling back to vectorised NumPy when CUDA is
 unavailable. A micro-benchmark under `tests/perf_edge_kernel.py` asserts the
 kernel processes one million edges in under 100 ms on compatible hardware.
+Edge phases ``exp(1j * (phi + A))`` are cached during graph loading so packet
+delivery avoids redundant exponentials.
 
 ## Output Logs
 Each run creates a timestamped directory under `output/runs` containing the graph, configuration and logs. Logging can be enabled or disabled via the GUI **Log Files** window or the `log_files` section of `config.json`. In `config.json` the keys are the categories (`tick`, `phenomena`, `event`) containing individual label flags. The `log_interval` option controls how often metrics and graph snapshots are written, while `logging_mode` selects which categories are written: `diagnostic` (all logs), `tick`, `phenomena` and `events`.

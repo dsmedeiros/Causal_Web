@@ -2,7 +2,9 @@
 
 The :func:`load_graph_arrays` helper converts a graph JSON dictionary
 into arrays suitable for the experimental engine. Missing fields are
-filled from :mod:`Causal_Web.config.Config` defaults.
+filled from :mod:`Causal_Web.config.Config` defaults. Edge dictionaries
+include a cached ``phase`` value computed as ``exp(1j * (phi + A))`` so
+packet delivery routines can skip per-event exponentiation.
 """
 
 from __future__ import annotations
@@ -195,6 +197,7 @@ def load_graph_arrays(graph_json: Dict[str, Any]) -> GraphArrays:
     d0_int = np.floor(d0_arr).astype(np.int32)
     phi_arr = np.asarray(edges["phi"], dtype=np.float32)
     A_arr = np.asarray(edges["A"], dtype=np.float32)
+    phase_arr = np.exp(1j * (phi_arr + A_arr)).astype(np.complex64)
     edges = {
         "src": np.asarray(edges["src"], dtype=np.int32),
         "dst": np.asarray(edges["dst"], dtype=np.int32),
@@ -203,7 +206,7 @@ def load_graph_arrays(graph_json: Dict[str, Any]) -> GraphArrays:
         "alpha": np.asarray(edges["alpha"], dtype=np.float32),
         "phi": phi_arr,
         "A": A_arr,
-        "phase": np.exp(1j * (phi_arr + A_arr)).astype(np.complex64),
+        "phase": phase_arr,
         "U": np.asarray(edges["U"], dtype=np.complex64),
         "sigma": np.asarray(edges["sigma"], dtype=np.float32),
         "d_eff": np.maximum(1, d0_int),
