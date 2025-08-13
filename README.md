@@ -58,6 +58,11 @@ via a Monte-Carlo path sampler over the graph's causal structure.
   returning proxy metrics.
 - Gate metrics now capture interference visibility, delay slopes and
   relaxation times, LCCM hysteresis transition depths, ε-pair locality
+  statistics and CHSH scores.
+- Gate harness parameters are sourced from run configuration, removing
+  hard-coded defaults.
+- CI workflow automatically bumps the project version using semantic
+  versioning rules derived from Conventional Commits.
   statistics, conservation residuals and CHSH outcomes with marginal
   bias for Gates 1–6.
 - Introduced split-step quantum walk helpers with dispersion and lightcone
