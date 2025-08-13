@@ -21,7 +21,7 @@ from PySide6.QtWidgets import (
     QComboBox,
 )
 
-from ..config import Config
+from ..config import Config, EngineMode
 from ..graph.io import load_graph, save_graph, new_graph
 from ..graph.model import GraphModel
 from ..gui.state import (
@@ -211,7 +211,7 @@ class MainWindow(QMainWindow):
         self.tick_label = QLabel("0")
         layout.addRow("Arrival Depth", self.tick_label)
 
-        if getattr(Config, "engine_mode", "tick") == "v2":
+        if Config.engine_mode == EngineMode.V2:
             self.depth_label = QLabel("0")
             layout.addRow("Depth", self.depth_label)
             self.window_label = QLabel("0")
@@ -305,7 +305,7 @@ class MainWindow(QMainWindow):
         with Config.state_lock:
             running = Config.is_running
             tick = Config.current_tick
-        if getattr(Config, "engine_mode", "tick") == "v2" and running:
+        if Config.engine_mode == EngineMode.V2 and running:
             frame = tick_engine.step()
             tick = tick_engine.current_frame()
             Config.current_tick = tick
@@ -322,7 +322,7 @@ class MainWindow(QMainWindow):
                 tick_engine.graph.to_dict() if running else get_graph().to_dict()
             )
             self.tick_label.setText(str(tick))
-            if getattr(Config, "engine_mode", "tick") == "v2":
+            if Config.engine_mode == EngineMode.V2:
                 snap = tick_engine.snapshot_for_ui()
                 if hasattr(self, "depth_label"):
                     self.depth_label.setText(str(snap.get("depth", 0)))
@@ -391,7 +391,7 @@ class MainWindow(QMainWindow):
             strategy = f"modular-{self.modular_combo.currentText()}"
         Config.density_calc = strategy
         Config.max_ticks = self.limit_spin.value()
-        if getattr(Config, "engine_mode", "tick") == "v2":
+        if Config.engine_mode == EngineMode.V2:
             tick_engine.build_graph(Config.graph_file)
             with Config.state_lock:
                 if Config.is_running:
@@ -419,7 +419,7 @@ class MainWindow(QMainWindow):
         """Toggle between pausing and resuming the simulation."""
         with Config.state_lock:
             running = Config.is_running
-        if getattr(Config, "engine_mode", "tick") == "v2":
+        if Config.engine_mode == EngineMode.V2:
             if running:
                 tick_engine.pause()
                 with Config.state_lock:
@@ -440,7 +440,7 @@ class MainWindow(QMainWindow):
 
     def stop_simulation(self) -> None:
         """Stop the simulation immediately."""
-        if getattr(Config, "engine_mode", "tick") == "v2":
+        if Config.engine_mode == EngineMode.V2:
             tick_engine.stop()
             with Config.state_lock:
                 Config.is_running = False

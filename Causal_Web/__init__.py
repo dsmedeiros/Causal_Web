@@ -15,6 +15,3 @@ def __getattr__(name: str) -> Any:  # pragma: no cover - attribute access
     if name == "NodeManager":
         raise RuntimeError("NodeManager has been removed; use EngineAdapter instead")
     raise AttributeError(name)
-
-
-# TODO: legacy refactor
