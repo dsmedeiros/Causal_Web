@@ -22,21 +22,26 @@ from Causal_Web.engine.engine_v2.epairs import EPairs
 from Causal_Web.engine.engine_v2.bell import Ancestry, BellHelpers
 
 
-def _gate1_probability(phase: float) -> float:
+def _gate1_probability(phase: float, base: float) -> float:
     """Return detection probability at ``D1`` for a given phase offset.
 
-    A simplified two-path interference model is used where the detector
-    intensity follows ``0.5 * (1 + cos(phase))``.
+    Parameters
+    ----------
+    phase:
+        Phase offset applied to one arm of the interferometer.
+    base:
+        Baseline probability controlling both the offset and amplitude of the
+        fringe pattern. ``base=0.5`` reproduces the previous behaviour.
     """
 
-    return float(0.5 * (1.0 + np.cos(phase)))
+    return float(base * (1.0 + np.cos(phase)))
 
 
-def _gate1_visibility() -> float:
+def _gate1_visibility(base: float) -> float:
     """Return interference visibility for a two-path interferometer."""
 
     intensities = [
-        _gate1_probability(phase)
+        _gate1_probability(phase, base)
         for phase in np.linspace(0.0, 2 * np.pi, 25, endpoint=False)
     ]
     I_max = max(intensities)
@@ -44,14 +49,20 @@ def _gate1_visibility() -> float:
     return (I_max - I_min) / (I_max + I_min)
 
 
-def _gate2_delay() -> tuple[float, float]:
+def _gate2_delay(
+    alpha_leak: float,
+    eta: float,
+    d0: float,
+    gamma: float,
+    rho0: float,
+) -> tuple[float, float]:
     """Return delay slope during load and relaxation time after quench.
 
-    The density ``ρ`` and effective delay ``d_eff`` are updated under constant
-    load for a number of depth steps.  A line is then fit to ``d_eff`` as a
-    function of depth and the slope is returned.  Afterwards the input is set
-    to zero (a quench) and the decay of ``ρ`` is observed.  Fitting an
-    exponential to the decay yields a relaxation time constant ``τ``.
+    Parameters
+    ----------
+    alpha_leak, eta, d0, gamma, rho0:
+        Raw parameters passed through from the runner configuration and used
+        by :func:`update_rho_delay`.
     """
 
     rho = 0.0
@@ -65,11 +76,11 @@ def _gate2_delay() -> tuple[float, float]:
             [],
             1.0,
             alpha_d=0.0,
-            alpha_leak=0.1,
-            eta=0.5,
-            d0=1.0,
-            gamma=1.0,
-            rho0=0.1,
+            alpha_leak=alpha_leak,
+            eta=eta,
+            d0=d0,
+            gamma=gamma,
+            rho0=rho0,
         )
         d_vals.append(d_eff)
         depths.append(depth)
@@ -87,11 +98,11 @@ def _gate2_delay() -> tuple[float, float]:
             [],
             0.0,
             alpha_d=0.0,
-            alpha_leak=0.1,
-            eta=0.5,
-            d0=1.0,
-            gamma=1.0,
-            rho0=0.1,
+            alpha_leak=alpha_leak,
+            eta=eta,
+            d0=d0,
+            gamma=gamma,
+            rho0=rho0,
         )
         rho_decay.append(rho)
 
@@ -348,18 +359,26 @@ def run_gates(config: Dict[str, float], which: List[int]) -> Dict[str, float]:
     metrics: Dict[str, float | bool] = {}
     deliveries = []
 
-    prob = 0.5
+    base_prob = float(config.get("prob", 0.5)) if isinstance(config, dict) else 0.5
+    prob = base_prob
     if 1 in which:
-        vis1 = _gate1_visibility()
-        vis2 = _gate1_visibility()
+        vis1 = _gate1_visibility(base_prob)
+        vis2 = _gate1_visibility(base_prob)
         metrics["G1_visibility"] = vis1
         deliveries.append({"d_arr": 2.0, "d_src": 0.0})
         metrics["inv_gate_determinism_ok"] = checks.determinism([vis1, vis2], 1e-12)
-        prob = _gate1_probability(np.pi / 2)
+        prob = _gate1_probability(np.pi / 2, base_prob)
     else:
         metrics["inv_gate_determinism_ok"] = True
+        prob = _gate1_probability(np.pi / 2, base_prob)
     if 2 in which:
-        slope, tau = _gate2_delay()
+        slope, tau = _gate2_delay(
+            float(config.get("alpha_leak", 0.0)),
+            float(config.get("eta", 0.0)),
+            float(config.get("d0", 0.0)),
+            float(config.get("gamma", 0.0)),
+            float(config.get("rho0", 0.0)),
+        )
         metrics["G2_delay_slope"] = slope
         metrics["G2_relax_tau"] = tau
     if 3 in which:

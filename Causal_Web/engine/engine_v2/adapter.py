@@ -113,7 +113,7 @@ class EngineAdapter:
         lambda_v = 0
         if dst in self._vertices:
             lambda_v = getattr(self._vertices[dst]["lccm"], "_lambda_q", 0)
-        beta_m0 = self._cfg.ancestry.get("beta_m0", 0.1)
+        beta_m0 = self._cfg.ancestry.get("beta_m0", 0.0)
         beta_m = beta_m0 / (1.0 + float(lambda_v))
         m = (1.0 - beta_m) * m + beta_m * u_local
         norm = float(np.linalg.norm(m))
@@ -195,7 +195,7 @@ class EngineAdapter:
         zeta2 = window_defaults.get("zeta2", 0.0)
         rho0 = params.get("rho0", 1.0)
         a = window_defaults.get("a", 1.0)
-        b = window_defaults.get("b", 0.5)
+        b = float(window_defaults.get("b", 0.0))
         if mode == "free_energy":
             k_theta = fe_cfg.get("k_theta", window_defaults.get("k_theta", a))
             k_c = fe_cfg.get("k_c", window_defaults.get("k_c", b))
@@ -998,7 +998,7 @@ class EngineAdapter:
                             [v_arr["m0"][vid], v_arr["m1"][vid], v_arr["m2"][vid]],
                             dtype=np.float32,
                         )
-                        delta = self._cfg.ancestry.get("delta_m", 0.02)
+                        delta = self._cfg.ancestry.get("delta_m", 0.0)
                         m *= 1.0 - delta
                         norm = float(np.linalg.norm(m))
                         m /= max(norm, 1e-12)
