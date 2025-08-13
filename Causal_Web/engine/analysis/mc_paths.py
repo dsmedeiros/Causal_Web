@@ -85,6 +85,8 @@ def accumulate_path(graph: nx.DiGraph, path: Sequence[Hashable]) -> PathInfo:
         Sequence of node identifiers representing a simple path.
     """
 
+    # TODO: legacy refactor
+
     delay = 0.0
     phase = 0.0
     attenuation = 1.0

@@ -6,6 +6,8 @@ adapter processes packets ordered by arrival depth and advances vertex windows
 according to the local causal consistency math.
 """
 
+# TODO: legacy refactor
+
 from __future__ import annotations
 
 from typing import Any, Dict, Iterable, List, Optional

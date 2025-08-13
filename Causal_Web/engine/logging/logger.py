@@ -2,6 +2,8 @@ from __future__ import annotations
 
 """Lightweight JSON line logger for the v2 engine."""
 
+# TODO: legacy refactor
+
 import json
 from pathlib import Path
 from typing import Any
