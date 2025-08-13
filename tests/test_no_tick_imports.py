@@ -22,6 +22,11 @@ def test_no_tick_engine_import_outside_legacy():
                         raise AssertionError(f"{path} imports {alias.name}")
             elif isinstance(node, ast.ImportFrom):
                 module = node.module or ""
+                if node.level > 0:
+                    if module.endswith("tick") or any(
+                        alias.name == "tick" for alias in node.names
+                    ):
+                        raise AssertionError(f"{path} uses relative import of tick")
                 if module in FORBIDDEN:
                     raise AssertionError(f"{path} imports {module}")
                 for alias in node.names:

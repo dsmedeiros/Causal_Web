@@ -71,3 +71,26 @@ def test_metrics_csv_has_gate_and_invariants(tmp_path: Path):
     assert "inv_conservation_residual" in rows[0]
     assert "inv_no_signaling_delta" in rows[0]
     assert "inv_ancestry_ok" in rows[0]
+    assert "inv_gate_determinism_ok" in rows[0]
+
+
+def test_runner_process_pool_determinism(tmp_path: Path):
+    cfg_path = create_config(tmp_path)
+    base_path = create_base(tmp_path)
+    out1 = tmp_path / "p1"
+    run(cfg_path, base_path, out1, parallel=1)
+    import csv
+
+    with (out1 / "metrics.csv").open() as fh:
+        metrics1 = list(csv.DictReader(fh))
+        for row in metrics1:
+            row.pop("ts", None)
+
+    out2 = tmp_path / "p8"
+    run(cfg_path, base_path, out2, parallel=8, use_processes=True)
+    with (out2 / "metrics.csv").open() as fh:
+        metrics2 = list(csv.DictReader(fh))
+        for row in metrics2:
+            row.pop("ts", None)
+
+    assert metrics1 == metrics2

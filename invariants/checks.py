@@ -34,6 +34,12 @@ def ancestry_determinism(seq: Sequence[Tuple[str, str, str]]) -> bool:
     return True
 
 
+def determinism(vals: Sequence[float], tolerance: float) -> bool:
+    """Return ``True`` if all values agree within ``tolerance``."""
+
+    return max(vals) - min(vals) <= tolerance
+
+
 def from_metrics(m: Mapping[str, float | bool]) -> Dict[str, float | bool]:
     """Extract invariant fields from a metrics mapping."""
 
