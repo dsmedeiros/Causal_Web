@@ -70,6 +70,16 @@ def yen_k_shortest_paths(
     return paths
 
 
+def _edge_attr(data: dict, name: str, legacy: str, default: float) -> float:
+    """Return edge attribute ``name`` falling back to ``legacy``."""
+
+    if name in data:
+        return float(data[name])
+    if legacy in data:
+        return float(data[legacy])
+    return float(default)
+
+
 def accumulate_path(graph: nx.DiGraph, path: Sequence[Hashable]) -> PathInfo:
     """Accumulate delay, phase and attenuation for ``path``.
 
@@ -85,8 +95,6 @@ def accumulate_path(graph: nx.DiGraph, path: Sequence[Hashable]) -> PathInfo:
         Sequence of node identifiers representing a simple path.
     """
 
-    # TODO: legacy refactor
-
     delay = 0.0
     phase = 0.0
     attenuation = 1.0
@@ -94,8 +102,8 @@ def accumulate_path(graph: nx.DiGraph, path: Sequence[Hashable]) -> PathInfo:
     for u, v in nx.utils.pairwise(path):
         data = graph[u][v]
         delay += float(data.get("delay", 0.0))
-        phase += float(data.get("phase", data.get("phase_shift", 0.0)))
-        attenuation *= float(data.get("atten", data.get("attenuation", 1.0)))
+        phase += _edge_attr(data, "phase", "phase_shift", 0.0)
+        attenuation *= _edge_attr(data, "atten", "attenuation", 1.0)
 
     return PathInfo(list(path), delay, phase, attenuation)
 

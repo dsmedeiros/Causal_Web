@@ -2,7 +2,7 @@ import json
 from copy import deepcopy
 import math
 import pytest
-from Causal_Web.config import Config
+from Causal_Web.config import Config, EngineMode
 
 
 def test_load_from_file_resolves_graph_file(tmp_path):
@@ -77,7 +77,7 @@ def test_load_engine_mode_and_param_groups(tmp_path):
     original_bell = Config.bell.copy()
     Config.load_from_file(str(cfg))
     try:
-        assert Config.engine_mode == "v2"
+        assert Config.engine_mode == EngineMode.V2
         assert Config.windowing["W0"] == 5
         assert Config.rho_delay["rho0"] == 1.2
         assert Config.epsilon_pairs["theta_max"] == 0.5

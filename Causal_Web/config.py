@@ -4,6 +4,14 @@ import math
 import os
 import shutil
 import threading
+from enum import Enum
+
+
+class EngineMode(str, Enum):
+    """Enumeration of available simulation engines."""
+
+    TICK = "tick"
+    V2 = "v2"
 
 
 class Config:
@@ -28,8 +36,8 @@ class Config:
     backend:
         Compute backend to use: ``"cpu"`` (default) or ``"cupy"``.
     engine_mode:
-        Selects the simulation engine: ``"tick"`` for the legacy engine or
-        ``"v2"`` for the strict-local core.
+        Selects the simulation engine via :class:`EngineMode`. ``TICK`` refers
+        to the legacy engine while ``V2`` enables the strict-local core.
     windowing:
         Mapping of windowing coefficients used by the v2 engine. Expected keys
         include ``W0``, ``zeta1``, ``zeta2``, ``a``, ``b``, ``T_hold`` and
@@ -115,8 +123,8 @@ class Config:
     # Parameters for dispersion experiments
     dispersion = {"k_values": [0.0, 0.1]}
 
-    #: Selected engine implementation: ``"v2"`` (strict-local) or ``"tick"``
-    engine_mode = "v2"  # TODO: legacy refactor
+    #: Selected engine implementation.
+    engine_mode: EngineMode = EngineMode.V2
 
     # Parameters for the experimental strict-local engine (``engine_mode = "v2"``)
     windowing = {
@@ -601,6 +609,8 @@ class Config:
         for key, value in data.items():
             if not hasattr(cls, key):
                 continue
+            if key == "engine_mode":
+                value = EngineMode(value)
             if key == "graph_file" and not os.path.isabs(value):
                 value = os.path.join(base_dir, value)
             current = getattr(cls, key)
