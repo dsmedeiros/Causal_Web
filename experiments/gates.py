@@ -19,6 +19,7 @@ from Causal_Web.engine.engine_v2.qtheta_c import deliver_packet, close_window
 from Causal_Web.engine.engine_v2.lccm import LCCM
 from Causal_Web.engine.engine_v2.rho_delay import update_rho_delay
 from Causal_Web.engine.engine_v2.epairs import EPairs
+from Causal_Web.engine.engine_v2.bell import Ancestry, BellHelpers
 
 
 def _gate1_probability(phase: float) -> float:
@@ -157,8 +158,13 @@ def _gate3_hysteresis() -> tuple[int, int, int]:
     return q_to_theta_at, theta_to_q_at, width
 
 
-def _gate4_bridge_delta() -> float:
-    """Return number of bridges removed after decay."""
+def _gate4_metrics() -> Dict[str, float]:
+    """Return basic ε-pair locality statistics.
+
+    A small network is initialised and two seeds emitted so that a single
+    bridge forms.  The bridge is then decayed while tracking its ``sigma``
+    lifetime.  TTL compliance is verified during emission.
+    """
 
     mgr = EPairs(
         delta_ttl=1,
@@ -170,27 +176,43 @@ def _gate4_bridge_delta() -> float:
         sigma_min=0.1,
     )
     edges = {"dst": [3], "d_eff": [1]}
-    mgr.emit(
-        origin=1,
-        h_value=0b1101_0000,
-        theta=0.1,
-        depth_emit=0,
-        edge_ids=[0],
-        edges=edges,
-    )
-    mgr.emit(
-        origin=2,
-        h_value=0b1101_1111,
-        theta=0.1,
-        depth_emit=0,
-        edge_ids=[0],
-        edges=edges,
-    )
-    before = len(mgr.bridges)
-    mgr.lambda_decay = 1.0
-    mgr.decay_all()
-    after = len(mgr.bridges)
-    return float(before - after)
+    depth_emit = 0
+    ttl_violations = 0
+    bind_depths: List[int] = []
+    for origin, h_val in ((1, 0b1101_0000), (2, 0b1101_1111)):
+        d_eff = edges["d_eff"][0]
+        expiry = depth_emit + mgr.delta_ttl
+        depth_next = depth_emit + d_eff
+        if depth_next > expiry:
+            ttl_violations += 1
+            continue
+        mgr.emit(
+            origin=origin,
+            h_value=h_val,
+            theta=0.1,
+            depth_emit=depth_emit,
+            edge_ids=[0],
+            edges=edges,
+        )
+        bind_depths.append(depth_next)
+
+    bridge_count = len(mgr.bridges)
+    lifetimes = {key: 0 for key in mgr.bridges.keys()}
+    while mgr.bridges:
+        mgr.decay_all()
+        for key in list(lifetimes.keys()):
+            if key in mgr.bridges:
+                lifetimes[key] += 1
+
+    sigma_mean = float(np.mean(list(lifetimes.values()))) if lifetimes else 0.0
+    max_bind_depth = float(max(bind_depths)) if bind_depths else 0.0
+
+    return {
+        "G4_bridge_count": float(bridge_count),
+        "G4_max_bind_depth": max_bind_depth,
+        "G4_ttl_violations": float(ttl_violations),
+        "G4_sigma_lifetime_mean": sigma_mean,
+    }
 
 
 def _energy_total() -> float:
@@ -230,16 +252,73 @@ def _energy_total() -> float:
     return EQ + E_theta + E_C + E_rho
 
 
-def _simulate_chsh(kappa_a: float) -> float:
-    """Return CHSH statistic for a biased detector setting."""
+def _gate5_conservation_residual() -> float:
+    """Return average absolute energy residual across windows."""
 
-    return 2.0 + 2.0 * kappa_a
+    totals = [_energy_total() for _ in range(3)]
+    diffs = [totals[i + 1] - totals[i] for i in range(len(totals) - 1)]
+    return float(np.mean(np.abs(diffs))) if diffs else 0.0
 
 
-def _gate6_chsh() -> float:
-    """Return CHSH ``S`` value for a biased configuration."""
+def _gate6_chsh(mi_mode: str, kappa_a: float) -> Dict[str, float]:
+    """Return CHSH statistics and marginal bias for Bell tests."""
 
-    return _simulate_chsh(0.5)
+    helper = BellHelpers()
+    trials = 256
+    pairs = {"00": [], "01": [], "10": [], "11": []}
+    count_a = 0
+    count_b = 0
+    total = 0
+    for _ in range(trials):
+        lam_u, _ = helper.lambda_at_source(Ancestry(), 0.0, 0.0)
+        a0 = helper.setting_draw(
+            "conditioned" if mi_mode == "MI_conditioned" else "strict",
+            Ancestry(),
+            lam_u,
+            kappa_a,
+        )
+        a1 = helper.setting_draw(
+            "conditioned" if mi_mode == "MI_conditioned" else "strict",
+            Ancestry(),
+            lam_u,
+            kappa_a,
+        )
+        b0 = helper.setting_draw(
+            "conditioned" if mi_mode == "MI_conditioned" else "strict",
+            Ancestry(),
+            lam_u,
+            kappa_a,
+        )
+        b1 = helper.setting_draw(
+            "conditioned" if mi_mode == "MI_conditioned" else "strict",
+            Ancestry(),
+            lam_u,
+            kappa_a,
+        )
+        for a_set, b_set, key in (
+            (a0, b0, "00"),
+            (a0, b1, "01"),
+            (a1, b0, "10"),
+            (a1, b1, "11"),
+        ):
+            A = 1 if float(np.dot(a_set, lam_u)) >= 0 else -1
+            B = 1 if float(np.dot(b_set, lam_u)) >= 0 else -1
+            pairs[key].append(A * B)
+            count_a += A == 1
+            count_b += B == 1
+            total += 1
+
+    expectations = {k: float(np.mean(v)) for k, v in pairs.items()}
+    S = (
+        expectations["00"]
+        + expectations["01"]
+        + expectations["10"]
+        - expectations["11"]
+    )
+    p_a = count_a / total if total else 0.5
+    p_b = count_b / total if total else 0.5
+    marginal_delta = float(max(abs(p_a - 0.5), abs(p_b - 0.5)))
+    return {"G6_CHSH": S, "G6_marginal_delta": marginal_delta}
 
 
 def run_gates(config: Dict[str, float], which: List[int]) -> Dict[str, float]:
@@ -248,7 +327,8 @@ def run_gates(config: Dict[str, float], which: List[int]) -> Dict[str, float]:
     Parameters
     ----------
     config:
-        Engine configuration passed to the gate harness (unused).
+        Engine configuration passed to the gate harness. ``config['bell']`` may
+        contain Bell experiment parameters used by Gate 6.
     which:
         List of gate identifiers to execute. Supports gate IDs 1–6.
 
@@ -281,21 +361,32 @@ def run_gates(config: Dict[str, float], which: List[int]) -> Dict[str, float]:
         metrics["G3_theta_to_q_at"] = float(t2q)
         metrics["G3_hysteresis_width"] = float(width)
     if 4 in which:
-        metrics["G4"] = _gate4_bridge_delta()
+        metrics.update(_gate4_metrics())
 
     energy1 = _energy_total()
     energy2 = _energy_total()
     if 5 in which:
-        metrics["G5"] = energy1
+        residual = _gate5_conservation_residual()
+        metrics["G5_conservation_residual"] = residual
+    else:
+        residual = energy2 - energy1
+    bell_cfg = config.get("bell", {}) if isinstance(config, dict) else {}
     if 6 in which:
-        metrics["G6"] = _gate6_chsh()
+        metrics.update(
+            _gate6_chsh(
+                bell_cfg.get("mi_mode", "MI_strict"),
+                float(bell_cfg.get("kappa_a", 0.0)),
+            )
+        )
     seq = [("q1", "h1", "m1")]
 
     metrics.update(
         {
             "inv_causality_ok": checks.causality(deliveries) if deliveries else True,
-            "inv_conservation_residual": energy2 - energy1,
-            "inv_no_signaling_delta": abs(prob - 0.5),
+            "inv_conservation_residual": metrics.get(
+                "G5_conservation_residual", residual
+            ),
+            "inv_no_signaling_delta": metrics.get("G6_marginal_delta", abs(prob - 0.5)),
             "inv_ancestry_ok": checks.ancestry_determinism(seq),
         }
     )

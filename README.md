@@ -57,7 +57,9 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 - Gate harness now executes Gates 1–6 via engine primitives rather than
   returning proxy metrics.
 - Gate metrics now capture interference visibility, delay slopes and
-  relaxation times, and LCCM hysteresis transition depths for Gates 1–3.
+  relaxation times, LCCM hysteresis transition depths, ε-pair locality
+  statistics, conservation residuals and CHSH outcomes with marginal
+  bias for Gates 1–6.
 - Introduced split-step quantum walk helpers with dispersion and lightcone
   experiment utilities and configuration knobs.
 - Metrics logger now emits `summary_invariants.json` with pass rates for gate
