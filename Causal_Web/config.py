@@ -173,6 +173,9 @@ class Config:
         "kappa_xi": 0.0,
         "beta_m": 0.0,
         "beta_h": 0.0,
+        "zeta_mode": "float",
+        "alpha_R": 1.0,
+        "k_mod": 3,
     }
 
     # Maximum length of the classical bit deque used for majority voting.
