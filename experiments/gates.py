@@ -342,9 +342,8 @@ def run_gates(config: Dict[str, float], which: List[int]) -> Dict[str, float]:
     For backward compatibility the legacy short names ``G1``–``G6`` are
     also emitted when a gate produces a single primary metric. These mirror
     the more descriptive entries such as ``G1_visibility`` or
-    ``G6_CHSH``.
+    ``G6_CHSH`` and are derived automatically via :func:`_add_legacy_aliases`.
     """
-    # TODO: legacy refactor
 
     metrics: Dict[str, float | bool] = {}
     deliveries = []
@@ -354,7 +353,6 @@ def run_gates(config: Dict[str, float], which: List[int]) -> Dict[str, float]:
         vis1 = _gate1_visibility()
         vis2 = _gate1_visibility()
         metrics["G1_visibility"] = vis1
-        metrics["G1"] = vis1
         deliveries.append({"d_arr": 2.0, "d_src": 0.0})
         metrics["inv_gate_determinism_ok"] = checks.determinism([vis1, vis2], 1e-12)
         prob = _gate1_probability(np.pi / 2)
@@ -364,24 +362,20 @@ def run_gates(config: Dict[str, float], which: List[int]) -> Dict[str, float]:
         slope, tau = _gate2_delay()
         metrics["G2_delay_slope"] = slope
         metrics["G2_relax_tau"] = tau
-        metrics["G2"] = slope
     if 3 in which:
         q2t, t2q, width = _gate3_hysteresis()
         metrics["G3_q_to_theta_at"] = float(q2t)
         metrics["G3_theta_to_q_at"] = float(t2q)
         metrics["G3_hysteresis_width"] = float(width)
-        metrics["G3"] = float(width)
     if 4 in which:
         gate4 = _gate4_metrics()
         metrics.update(gate4)
-        metrics["G4"] = gate4.get("G4_bridge_count", 0.0)
 
     energy1 = _energy_total()
     energy2 = _energy_total()
     if 5 in which:
         residual = _gate5_conservation_residual()
         metrics["G5_conservation_residual"] = residual
-        metrics["G5"] = residual
     else:
         residual = energy2 - energy1
     bell_cfg = config.get("bell", {}) if isinstance(config, dict) else {}
@@ -391,7 +385,6 @@ def run_gates(config: Dict[str, float], which: List[int]) -> Dict[str, float]:
             float(bell_cfg.get("kappa_a", 0.0)),
         )
         metrics.update(gate6)
-        metrics["G6"] = gate6.get("G6_CHSH", 0.0)
     seq = [("q1", "h1", "m1")]
 
     metrics.update(
@@ -404,4 +397,29 @@ def run_gates(config: Dict[str, float], which: List[int]) -> Dict[str, float]:
             "inv_ancestry_ok": checks.ancestry_determinism(seq),
         }
     )
+    _add_legacy_aliases(metrics)
     return metrics
+
+
+LEGACY_ALIASES = {
+    "G1_visibility": "G1",
+    "G2_delay_slope": "G2",
+    "G3_hysteresis_width": "G3",
+    "G4_bridge_count": "G4",
+    "G5_conservation_residual": "G5",
+    "G6_CHSH": "G6",
+}
+
+
+def _add_legacy_aliases(metrics: Dict[str, float | bool]) -> None:
+    """Populate short legacy metric names.
+
+    Parameters
+    ----------
+    metrics:
+        Metric mapping to augment in-place.
+    """
+
+    for canonical, legacy in LEGACY_ALIASES.items():
+        if canonical in metrics and legacy not in metrics:
+            metrics[legacy] = metrics[canonical]
