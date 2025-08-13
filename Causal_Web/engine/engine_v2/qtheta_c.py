@@ -113,8 +113,9 @@ def deliver_packet(
         Packet carrying ``depth_arr``, ``psi``, ``p`` and ``bit`` fields.
     edge:
         Edge parameters ``alpha`` and unitary ``U`` with a precomputed
-        complex ``phase``. ``phase`` may be provided directly or derived
-        from ``phi`` and ``A`` if absent.
+        complex ``phase``. The loader precomputes ``phase`` as
+        ``exp(1j * (phi + A))`` so the delivery hot path avoids repeated
+        exponentiation.
     max_deque:
         Maximum length of ``bit_deque``.
     update_p:
@@ -133,12 +134,7 @@ def deliver_packet(
     U = np.asarray(edge.get("U"), dtype=np.complex64)
     psi = np.asarray(packet.get("psi"), dtype=np.complex64)
     alpha = np.float32(edge.get("alpha", 1.0))
-    phase = edge.get("phase")
-    if phase is None:
-        phi = np.float32(edge.get("phi", 0.0))
-        A = np.float32(edge.get("A", 0.0))
-        phase = np.exp(1j * (phi + A))
-    phase = np.complex64(phase)
+    phase = np.complex64(edge.get("phase", 1.0 + 0.0j))
     mu, kappa, psi_rot = phase_stats(U, phase, psi)
     psi_acc = psi_acc + alpha * psi_rot
     psi_acc = np.where(np.isfinite(psi_acc), psi_acc, np.zeros_like(psi_acc))

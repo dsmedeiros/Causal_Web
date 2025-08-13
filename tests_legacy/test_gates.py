@@ -183,7 +183,11 @@ def _energy_total():
     p_v = np.zeros(2, dtype=np.float32)
     bit_deque: deque[int] = deque()
     packet = {"psi": np.array([1, 0], np.complex64), "p": [0.4, 0.6], "bit": 1}
-    edge = {"alpha": 1.0, "phi": 0.0, "A": 0.0, "U": np.eye(2, dtype=np.complex64)}
+    edge = {
+        "alpha": 1.0,
+        "phase": 1.0 + 0.0j,
+        "U": np.eye(2, dtype=np.complex64),
+    }
     depth, psi_acc, p_v, (bit, conf), intensities, mu, kappa = deliver_packet(
         0, psi_acc, p_v, bit_deque, packet, edge
     )

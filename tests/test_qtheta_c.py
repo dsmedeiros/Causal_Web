@@ -16,8 +16,7 @@ def test_deliver_packet_updates_fields():
     packet = {"depth_arr": 2, "psi": [1.0, 0.0], "p": [0.2, 0.8], "bit": 1}
     edge = {
         "alpha": 0.5,
-        "phi": 0.1,
-        "A": 0.2,
+        "phase": np.exp(1j * (0.1 + 0.2)),
         "U": [[1.0, 0.0], [0.0, 1.0]],
     }
 
@@ -40,7 +39,11 @@ def test_intensity_theta_layer_ignores_other_contributions():
     depth, psi_acc, p_v = 0, np.zeros(2, dtype=np.complex128), np.array([0.5, 0.5])
     bits = deque()
     packet = {"depth_arr": 1, "psi": [1.0, 0.0], "p": [0.1, 0.2], "bit": 1}
-    edge = {"alpha": 1.0, "phi": 0.0, "A": 0.0, "U": [[1.0, 0.0], [0.0, 1.0]]}
+    edge = {
+        "alpha": 1.0,
+        "phase": 1.0 + 0.0j,
+        "U": [[1.0, 0.0], [0.0, 1.0]],
+    }
 
     _, _, _, _, intensities, mu, kappa = deliver_packet(
         depth, psi_acc, p_v, bits, packet, edge
@@ -52,7 +55,11 @@ def test_intensity_c_layer_only_counts_bits():
     depth, psi_acc, p_v = 0, np.zeros(2, dtype=np.complex128), np.array([0.5, 0.5])
     bits = deque()
     packet = {"depth_arr": 1, "psi": [1.0, 0.0], "p": [0.1, 0.2], "bit": 0}
-    edge = {"alpha": 1.0, "phi": 0.0, "A": 0.0, "U": [[1.0, 0.0], [0.0, 1.0]]}
+    edge = {
+        "alpha": 1.0,
+        "phase": 1.0 + 0.0j,
+        "U": [[1.0, 0.0], [0.0, 1.0]],
+    }
 
     _, _, _, _, intensities, mu, kappa = deliver_packet(
         depth, psi_acc, p_v, bits, packet, edge
@@ -64,7 +71,11 @@ def test_p_v_unchanged_when_update_p_false():
     depth, psi_acc, p_v = 0, np.zeros(2, dtype=np.complex128), np.array([0.7, 0.3])
     bits = deque()
     packet = {"depth_arr": 1, "psi": [1.0, 0.0], "p": [0.1, 0.9], "bit": 1}
-    edge = {"alpha": 1.0, "phi": 0.0, "A": 0.0, "U": [[1.0, 0.0], [0.0, 1.0]]}
+    edge = {
+        "alpha": 1.0,
+        "phase": 1.0 + 0.0j,
+        "U": [[1.0, 0.0], [0.0, 1.0]],
+    }
 
     _, _, p_out, _, _, _, _ = deliver_packet(
         depth, psi_acc, p_v, bits, packet, edge, update_p=False
