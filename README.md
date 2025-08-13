@@ -318,6 +318,9 @@ These settings drive the helper modules in ``experiments.dispersion`` and
 ## GPU and Distributed Acceleration
 The engine optionally accelerates per-edge calculations on the GPU when [Cupy](https://cupy.dev) is installed and can shard classical zones across a [Ray](https://www.ray.io) cluster. Classical nodes are partitioned into coherent zones and dispatched in parallel to Ray workers; if Ray is unavailable an info-level message is logged and processing continues locally. Select the backend with `Config.backend` or `--backend` (`cpu` by default, `cupy` for CUDA).
 
+Density accumulation and matrix-product-state propagation also leverage CuPy
+when the backend is set to `cupy`, keeping computation on the GPU.
+
 Ray cluster initialisation can be customised via the `--ray-init` flag. Pass a JSON string of keyword arguments forwarded to `ray.init`, for example:
 
 ```bash
