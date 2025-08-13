@@ -19,7 +19,7 @@ import math
 import numpy as np
 
 from ..logging.logger import log_record, flush_metrics
-from .lccm import LCCM
+from .lccm import LCCM, WindowParams, WindowState, on_window_close
 from .scheduler import DepthScheduler
 from .state import Packet, TelemetryFrame
 from .loader import GraphArrays, load_graph_arrays
@@ -262,12 +262,14 @@ class EngineAdapter:
                 deg=deg,
                 rho_mean=rho_mean,
             )
+            w_init = lccm._window_size()
             vertex_state = {
                 "lccm": lccm,
                 "psi_acc": self._arrays.vertices["psi_acc"][vid],
                 "p_v": self._arrays.vertices["p"][vid],
                 "bit_deque": deque(maxlen=8),
                 "base_deg": deg,
+                "win_state": WindowState(M_v=rho_mean, W_v=w_init),
             }
             self._vertices[vid] = vertex_state
 
@@ -1044,18 +1046,47 @@ class EngineAdapter:
                     adj = self._arrays.adjacency
                     start = int(adj["incident_ptr"][vid])
                     end = int(adj["incident_ptr"][vid + 1])
-                    if end > start:
-                        idxs = adj["incident_idx"][start:end]
-                        rho_mean = float(edges_arr["rho"][idxs].mean())
+                    idxs = (
+                        adj["incident_idx"][start:end]
+                        if end > start
+                        else np.array([], dtype=int)
+                    )
+                    if len(idxs) > 0:
+                        rhos = edges_arr["rho"][idxs]
+                        weights = (
+                            edges_arr["alpha"][idxs]
+                            if "alpha" in edges_arr
+                            else np.ones_like(rhos)
+                        )
                     else:
-                        rho_mean = 0.0
+                        rhos = np.array([], dtype=float)
+                        weights = np.array([], dtype=float)
+                    base_deg = data.get("base_deg", lccm.deg)
+                    deg = base_deg + len(self._epairs.partners(vid))
+                    st = data["win_state"]
+                    alpha_rho = self._cfg.windowing.get("alpha_rho", 0.1)
+                    half_life = math.log(2.0) / max(alpha_rho, 1e-9)
+                    params = WindowParams(
+                        W0=lccm.W0,
+                        brho=lccm.zeta2,
+                        rho0=lccm.rho0,
+                        bdeg=lccm.zeta1,
+                        deg0=self._cfg.windowing.get("deg0", 3.0),
+                        half_life_windows=half_life,
+                        beta=self._cfg.windowing.get("beta_W", 0.5),
+                        mu=self._cfg.windowing.get("mu_W", None),
+                    )
+                    on_window_close(rhos, weights, params, st, k=1, deg_v=deg)
+                    rho_mean = float(st.M_v)
+                    W_smoothed = int(max(1, round(st.W_v)))
                     self._arrays.vertices["rho_mean"][vid] = rho_mean
                     lccm.rho_mean = rho_mean
+                    lccm.window_override = W_smoothed
+                    lccm.window_idx = lccm.depth // W_smoothed
                     k_rho = self._cfg.windowing.get("k_rho", 1.0)
                     E_rho = k_rho * rho_mean
                     v_arr["E_rho"][vid] = E_rho
-                    base_deg = data.get("base_deg", lccm.deg)
-                    lccm.deg = base_deg + len(self._epairs.partners(vid))
+                    lccm.deg = deg
                 else:
                     EQ = lccm._eq
                     E_theta = 0.0
