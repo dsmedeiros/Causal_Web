@@ -1,5 +1,7 @@
 """No-op utilities for legacy logging hooks."""
 
+# TODO: legacy refactor
+
 from __future__ import annotations
 from typing import Any
 

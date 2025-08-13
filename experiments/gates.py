@@ -344,6 +344,7 @@ def run_gates(config: Dict[str, float], which: List[int]) -> Dict[str, float]:
     the more descriptive entries such as ``G1_visibility`` or
     ``G6_CHSH``.
     """
+    # TODO: legacy refactor
 
     metrics: Dict[str, float | bool] = {}
     deliveries = []

@@ -116,7 +116,7 @@ class Config:
     dispersion = {"k_values": [0.0, 0.1]}
 
     #: Selected engine implementation: ``"v2"`` (strict-local) or ``"tick"``
-    engine_mode = "v2"
+    engine_mode = "v2"  # TODO: legacy refactor
 
     # Parameters for the experimental strict-local engine (``engine_mode = "v2"``)
     windowing = {

@@ -1,5 +1,7 @@
 """Stub interpreter for legacy log files."""
 
+# TODO: legacy refactor
+
 from __future__ import annotations
 from typing import Any
 
