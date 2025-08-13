@@ -1,9 +1,14 @@
 """Stub interpreter for legacy log files."""
 
-# TODO: legacy refactor
-
 from __future__ import annotations
+import warnings
 from typing import Any
+
+warnings.warn(
+    "Causal_Web.legacy.logging.log_interpreter is deprecated and will be removed",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 
 def run_interpreter(*args: Any, **kwargs: Any) -> None:
