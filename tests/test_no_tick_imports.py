@@ -3,7 +3,7 @@ from pathlib import Path
 
 FORBIDDEN = {"legacy.engine.tick_engine", "legacy.engine.models.tick"}
 
-# TODO: legacy refactor
+# The legacy tick engine should remain isolated within legacy modules.
 
 
 def test_no_tick_engine_import_outside_legacy():
