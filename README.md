@@ -262,7 +262,6 @@ The adapter exposes methods like `build_graph`, `step`, `pause` and
 scheduler orders packets by their arrival depth and advances vertex windows
 using the Local Causal Consistency Model (LCCM).  The LCCM computes a window
 size ``W(v)`` from the vertex's incident degree (fan-in plus fan-out) and local
-density and transitions between
 quantum ``Q``, decohered ``Θ`` and classical ``C`` layers with simple hysteresis
 timers.  A lightweight loader converts graph JSON into struct-of-arrays via
 ``engine_v2.loader.load_graph_arrays`` to prime this core.
@@ -270,6 +269,11 @@ The LCCM recomputes the mean incident edge density ``ρ`` at every window
 boundary so that subsequent window sizes adapt to current traffic.  Classical
 dominance (Θ→C) additionally requires the majority-vote confidence to exceed
 ``conf_min`` alongside the existing bit fraction and entropy thresholds.
+
+An event-driven helper ``on_window_close`` provides adaptive window sizing
+using an exponentially weighted moving average of neighbour densities.  The
+function maintains ``M_v`` and ``W_v`` per vertex and rate-limits adjustments to
+avoid oscillation while keeping memory usage ``O(1)``.
 
 The `density_calc` option controls how edge density is computed. Set one of:
 
