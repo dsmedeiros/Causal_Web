@@ -398,3 +398,4 @@ FodyWeavers.xsd
 /Causal_Web/output/tick_evaluation_log.json
 /Causal_Web/output/tick_propagation_log.json
 /Causal_Web/output/tick_seed_log.json
+/pkgs

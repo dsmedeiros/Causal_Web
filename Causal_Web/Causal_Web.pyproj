@@ -58,8 +58,6 @@
     <Compile Include="database\run_meta.py" />
     <Compile Include="database\__init__.py" />
     <Compile Include="engine\logging\logger.py" />
-    <Compile Include="engine\logging\log_interpreter.py" />
-    <Compile Include="engine\logging\log_utils.py" />
     <Compile Include="engine\__init__.py" />
     <Compile Include="graph\io.py" />
     <Compile Include="graph\model.py" />
