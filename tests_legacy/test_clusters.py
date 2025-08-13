@@ -1,6 +1,6 @@
 import math
-from Causal_Web.engine.models.graph import CausalGraph
-from Causal_Web.engine.models.node import Node
+from legacy.engine.models.graph import CausalGraph
+from legacy.engine.models.node import Node
 
 
 def test_hierarchical_cluster_assignment():

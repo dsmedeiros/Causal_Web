@@ -21,10 +21,9 @@ from __future__ import annotations
 
 import math
 import random
-from typing import Dict, Iterable, List
+from typing import Any, Dict, Iterable, List
 
 from ..config import Config
-from .models.node import Node
 
 
 class HorizonThermodynamics:
@@ -54,7 +53,7 @@ class HorizonThermodynamics:
         self.total_quanta = 0.0
         self.outside_entropy: List[float] = []
 
-    def register(self, node: Node, energy: float) -> None:
+    def register(self, node: Any, energy: float) -> None:
         """Mark ``node`` as inside the horizon with available ``energy``.
 
         Parameters
@@ -68,7 +67,7 @@ class HorizonThermodynamics:
         self.interior_energy[node.id] = energy
         self.total_quanta += energy / self.delta_e
 
-    def step(self, nodes: Iterable[Node]) -> None:
+    def step(self, nodes: Iterable[Any]) -> None:
         """Attempt Hawking emission for ``nodes`` and update entropy.
 
         Parameters
@@ -123,7 +122,7 @@ def get_horizon() -> HorizonThermodynamics:
     return _horizon
 
 
-def register_interior(node: Node, energy: float) -> None:
+def register_interior(node: Any, energy: float) -> None:
     """Register ``node`` as interior using the global horizon model.
 
     Parameters
@@ -137,7 +136,7 @@ def register_interior(node: Node, energy: float) -> None:
     get_horizon().register(node, energy)
 
 
-def step(nodes: Iterable[Node]) -> None:
+def step(nodes: Iterable[Any]) -> None:
     """Advance the global horizon model for ``nodes``.
 
     Parameters

@@ -6,11 +6,16 @@ Track energy accumulated on edges and allow diffusion across the graph.
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import Dict, Tuple
+from typing import Dict, Protocol, Tuple
 
 import numpy as np
 
-from ..models.node import Edge
+
+class EdgeProto(Protocol):
+    """Protocol capturing the minimal edge interface."""
+
+    source: str
+    target: str
 
 
 class DensityField:
@@ -24,7 +29,7 @@ class DensityField:
         self._rho: Dict[Tuple[str, str], float] = defaultdict(float)
 
     # ------------------------------------------------------------------
-    def deposit(self, edge: Edge, amplitude: complex) -> None:
+    def deposit(self, edge: EdgeProto, amplitude: complex) -> None:
         """Accumulate density on ``edge`` from ``amplitude``.
 
         Parameters
@@ -46,7 +51,7 @@ class DensityField:
         self._rho[(edge.source, edge.target)] += energy
 
     # ------------------------------------------------------------------
-    def get(self, edge: Edge) -> float:
+    def get(self, edge: EdgeProto) -> float:
         """Return current density value for ``edge``."""
 
         return self._rho.get((edge.source, edge.target), 0.0)
@@ -68,7 +73,7 @@ class DensityField:
         new_rho: Dict[Tuple[str, str], float] = defaultdict(float, self._rho)
         for edge in graph.edges:
             key = (edge.source, edge.target)
-            neighbours: set[Edge] = set()
+            neighbours: set[EdgeProto] = set()
             for nid in (edge.source, edge.target):
                 neighbours.update(graph.get_edges_from(nid))
                 neighbours.update(graph.get_edges_to(nid))

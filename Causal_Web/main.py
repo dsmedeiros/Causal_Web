@@ -259,11 +259,7 @@ class MainService:
     def _run_headless(self) -> None:
         """Run the simulation without launching the GUI."""
         from .config import Config
-
-        if getattr(Config, "engine_mode", "tick") == "v2":
-            from .engine.engine_v2 import adapter as tick_engine
-        else:
-            from .engine import tick_engine
+        from .engine.engine_v2 import adapter as tick_engine
 
         tick_engine.build_graph()
         with Config.state_lock:

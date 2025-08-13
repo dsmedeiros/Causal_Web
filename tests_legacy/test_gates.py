@@ -3,9 +3,9 @@ from collections import deque
 
 import numpy as np
 
-from Causal_Web.engine.models.graph import CausalGraph
-from Causal_Web.engine.services.node_services import EdgePropagationService
-from Causal_Web.engine.models.tick import GLOBAL_TICK_POOL
+from legacy.engine.models.graph import CausalGraph
+from legacy.engine.services.node_services import EdgePropagationService
+from legacy.engine.models.tick import GLOBAL_TICK_POOL
 from Causal_Web.engine.engine_v2.rho_delay import update_rho_delay
 from Causal_Web.engine.engine_v2.lccm import LCCM
 from Causal_Web.engine.engine_v2.epairs import EPairs

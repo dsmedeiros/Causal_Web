@@ -11,14 +11,14 @@ from pathlib import Path
 
 import numpy as np
 
-from Causal_Web.engine.models.graph import CausalGraph
-from Causal_Web.engine.services.entanglement_service import EntanglementService
-from Causal_Web.engine.logging.logger import log_json, logger
+from legacy.engine.models.graph import CausalGraph
+from legacy.engine.services.entanglement_service import EntanglementService
+from legacy.engine.logging.logger import log_json, logger
 from Causal_Web.analysis.bell import compute_bell_statistics
 from Causal_Web.config import Config
-from Causal_Web.engine.services.node_services import EdgePropagationService
-from Causal_Web.engine.models.tick import GLOBAL_TICK_POOL
-from Causal_Web.engine.tick_engine.tick_router import TickRouter
+from legacy.engine.services.node_services import EdgePropagationService
+from legacy.engine.models.tick import GLOBAL_TICK_POOL
+from legacy.engine.tick_engine.tick_router import TickRouter
 
 
 @dataclass

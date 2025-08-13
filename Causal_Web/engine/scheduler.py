@@ -1,23 +1,22 @@
 from __future__ import annotations
 
 import math
-from typing import Callable, Iterable, Mapping
+from typing import Any, Callable, Iterable, Mapping
 
 from ..config import Config
-from .models.node import Node
 from .fields.density import get_field
 from .horizon import step as horizon_step
 from .backend import ray_cluster
 from .backend.zone_partitioner import partition_zones
 
 
-def update_proper_time(node: Node, dt: float, rho: float, kappa: float) -> float:
+def update_proper_time(node: Any, dt: float, rho: float, kappa: float) -> float:
     """Advance ``node.tau`` using velocity and local density.
 
     Parameters
     ----------
     node:
-        Node being updated.
+        Object with ``x``, ``y`` and ``tau`` attributes being updated.
     dt:
         Coordinate time step.
     rho:
@@ -44,7 +43,7 @@ def update_proper_time(node: Node, dt: float, rho: float, kappa: float) -> float
 
 
 def step(
-    nodes: Iterable[Node],
+    nodes: Iterable[Any],
     dt: float,
     rho_map: Mapping[str, float] | None = None,
     *,

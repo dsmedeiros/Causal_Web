@@ -1,9 +1,19 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Tuple
 
-from ..engine.models.node import Node
 from ..engine import scheduler
+
+
+@dataclass
+class TwinNode:
+    """Minimal node representation for twin-paradox demos."""
+
+    id: str
+    x: float = 0.0
+    y: float = 0.0
+    tau: float = 0.0
 
 
 def run_demo(
@@ -26,8 +36,8 @@ def run_demo(
         Proper times ``(tau_home, tau_traveller)`` accumulated by each twin.
     """
 
-    home = Node("home")
-    traveller = Node("traveller")
+    home = TwinNode("home")
+    traveller = TwinNode("traveller")
     half_steps = int(total_time / (2 * dt))
     for _ in range(half_steps):
         traveller.x += velocity * dt

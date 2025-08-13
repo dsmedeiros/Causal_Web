@@ -36,14 +36,10 @@ from ..gui.state import (
 from .canvas_widget import CanvasWidget
 from .toolbar_builder import build_toolbar
 from ..gui.command_stack import AddNodeCommand, AddObserverCommand
-
-if getattr(Config, "engine_mode", "tick") == "v2":
-    from ..engine.engine_v2.adapter import EngineAdapter
-
-    tick_engine = EngineAdapter()
-else:
-    from ..engine import tick_engine
+from ..engine.engine_v2.adapter import EngineAdapter
 from .shared import TooltipCheckBox, TOOLTIPS
+
+tick_engine = EngineAdapter()
 
 
 class GraphDockWidget(QDockWidget):

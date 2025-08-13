@@ -1,13 +1,13 @@
 import random
 
+from Causal_Web.analysis.twin import TwinNode
 from Causal_Web.engine.horizon import HorizonThermodynamics
-from Causal_Web.engine.models.node import Node
 
 
 def test_page_curve_behavior():
     rng = random.Random(0)
     horizon = HorizonThermodynamics(temperature=2.0, rng=rng)
-    nodes = [Node(str(i)) for i in range(3)]
+    nodes = [TwinNode(str(i)) for i in range(3)]
     for n in nodes:
         horizon.register(n, energy=2.0)
 

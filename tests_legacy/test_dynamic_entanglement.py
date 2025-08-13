@@ -3,8 +3,8 @@ import math
 
 import numpy as np
 
-from Causal_Web.engine.models.graph import CausalGraph
-from Causal_Web.engine.services import (
+from legacy.engine.models.graph import CausalGraph
+from legacy.engine.services import (
     EntanglementService,
     GraphLoadService,
 )
