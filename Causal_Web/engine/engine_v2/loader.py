@@ -3,8 +3,9 @@
 The :func:`load_graph_arrays` helper converts a graph JSON dictionary
 into arrays suitable for the experimental engine. Missing fields are
 filled from :mod:`Causal_Web.config.Config` defaults. Edge dictionaries
-include a cached ``phase`` value computed as ``exp(1j * (phi + A))`` so
-packet delivery routines can skip per-event exponentiation.
+include a cached ``phase`` value; if not provided but ``phi``/``A`` are
+present it is computed once as ``exp(1j * (phi + A))`` so packet
+delivery routines can skip per-event exponentiation.
 """
 
 from __future__ import annotations
@@ -136,6 +137,7 @@ def load_graph_arrays(graph_json: Dict[str, Any]) -> GraphArrays:
         "alpha": [],
         "phi": [],
         "A": [],
+        "phase": [],
         "U": [],
         "sigma": [],
     }
@@ -153,8 +155,18 @@ def load_graph_arrays(graph_json: Dict[str, Any]) -> GraphArrays:
         edges["d0"].append(edge.get("delay", 0.0))
         edges["rho"].append(edge.get("density", 0.0))
         edges["alpha"].append(edge.get("weight", 1.0))
-        edges["phi"].append(edge.get("phase_shift", 0.0))
-        edges["A"].append(edge.get("A_phase", 0.0))
+        phi = edge.get("phase_shift", 0.0)
+        A = edge.get("A_phase", 0.0)
+        phase = edge.get("phase")
+        if phase is None:
+            if "phase_shift" in edge or "A_phase" in edge:
+                phase = complex(np.exp(1j * (phi + A)))
+                edge["phase"] = phase
+            else:
+                phase = 1.0 + 0.0j
+        edges["phi"].append(phi)
+        edges["A"].append(A)
+        edges["phase"].append(phase)
         u_id = edge.get("u_id")
         if u_id is not None and isinstance(unitary_map, dict) and u_id in unitary_map:
             edges["U"].append(unitary_map[u_id])
@@ -197,7 +209,7 @@ def load_graph_arrays(graph_json: Dict[str, Any]) -> GraphArrays:
     d0_int = np.floor(d0_arr).astype(np.int32)
     phi_arr = np.asarray(edges["phi"], dtype=np.float32)
     A_arr = np.asarray(edges["A"], dtype=np.float32)
-    phase_arr = np.exp(1j * (phi_arr + A_arr)).astype(np.complex64)
+    phase_arr = np.asarray(edges["phase"], dtype=np.complex64)
     edges = {
         "src": np.asarray(edges["src"], dtype=np.int32),
         "dst": np.asarray(edges["dst"], dtype=np.int32),

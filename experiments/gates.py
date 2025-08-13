@@ -239,9 +239,13 @@ def run_gates(config: Dict[str, float], which: List[int]) -> Dict[str, float]:
     deliveries = []
 
     if 1 in which:
-        prob = _gate1_visibility()
-        metrics["G1"] = prob
+        prob1 = _gate1_visibility()
+        prob2 = _gate1_visibility()
+        metrics["G1"] = prob1
         deliveries.append({"d_arr": 2.0, "d_src": 0.0})
+        metrics["inv_gate_determinism_ok"] = checks.determinism([prob1, prob2], 1e-12)
+    else:
+        metrics["inv_gate_determinism_ok"] = True
     if 2 in which:
         metrics["G2"] = _gate2_d_eff()
     if 3 in which:

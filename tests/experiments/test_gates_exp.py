@@ -9,6 +9,7 @@ def test_run_gates_invariants_ok():
     assert metrics["inv_conservation_residual"] == pytest.approx(0.0, abs=1e-6)
     assert metrics["inv_no_signaling_delta"] == pytest.approx(0.0, abs=1e-6)
     assert metrics["inv_ancestry_ok"] is True
+    assert metrics["inv_gate_determinism_ok"] is True
 
 
 def test_run_gates_detects_bad_causality(monkeypatch):
@@ -46,3 +47,10 @@ def test_run_gates_detects_bad_ancestry(monkeypatch):
     monkeypatch.setattr(gates.checks, "ancestry_determinism", bad_ancestry)
     metrics = gates.run_gates({}, [1])
     assert metrics["inv_ancestry_ok"] is False
+
+
+def test_run_gates_detects_non_determinism(monkeypatch):
+    vals = iter([0.4, 0.6])
+    monkeypatch.setattr(gates, "_gate1_visibility", lambda: next(vals))
+    metrics = gates.run_gates({}, [1])
+    assert metrics["inv_gate_determinism_ok"] is False

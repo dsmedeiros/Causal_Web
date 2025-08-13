@@ -119,6 +119,35 @@ def _write_yaml(path: pathlib.Path, data: Dict[str, float]) -> None:
     path.write_text(yaml.safe_dump(clean))
 
 
+def _process_sample(
+    i: int,
+    groups: Dict[str, float],
+    cfg: ExperimentConfig,
+    normalizer: Normalizer,
+    base: Dict[str, float],
+    out_dir: pathlib.Path,
+) -> Tuple[
+    int, Dict[str, float], Dict[str, float], int, Dict[str, float], Dict[str, float]
+]:
+    """Materialise a sample, execute gates and return metrics."""
+
+    sample_seed = _mix(cfg.seed, i)
+    raw = normalizer.to_raw(base, groups)
+    raw["seed"] = sample_seed
+    _write_yaml(out_dir / f"cfg_{i:04d}.yaml", raw)
+    gate_metrics = run_gates(raw, cfg.gates)
+    inv = checks.from_metrics(gate_metrics)
+    if not inv["inv_causality_ok"]:
+        raise ValueError("causality check failed")
+    if abs(inv["inv_conservation_residual"]) > cfg.tol["leak"]:
+        raise ValueError("local conservation failed")
+    if abs(inv["inv_no_signaling_delta"]) > cfg.tol["marginal"]:
+        raise ValueError("no-signaling failed")
+    if not inv["inv_ancestry_ok"]:
+        raise ValueError("ancestry determinism failed")
+    return i, groups, raw, sample_seed, gate_metrics, inv
+
+
 def run(
     exp_path: pathlib.Path,
     base_path: pathlib.Path,
@@ -167,32 +196,18 @@ def run(
         ]
     ] = []
 
-    def process(i: int, groups: Dict[str, float]):
-        sample_seed = _mix(cfg.seed, i)
-        raw = normalizer.to_raw(base, groups)
-        raw["seed"] = sample_seed
-        _write_yaml(out_dir / f"cfg_{i:04d}.yaml", raw)
-        gate_metrics = run_gates(raw, cfg.gates)
-        inv = checks.from_metrics(gate_metrics)
-        if not inv["inv_causality_ok"]:
-            raise ValueError("causality check failed")
-        if abs(inv["inv_conservation_residual"]) > cfg.tol["leak"]:
-            raise ValueError("local conservation failed")
-        if abs(inv["inv_no_signaling_delta"]) > cfg.tol["marginal"]:
-            raise ValueError("no-signaling failed")
-        if not inv["inv_ancestry_ok"]:
-            raise ValueError("ancestry determinism failed")
-        return i, groups, raw, sample_seed, gate_metrics, inv
-
     if parallel > 1:
         executor_cls = ProcessPoolExecutor if use_processes else ThreadPoolExecutor
         with executor_cls(max_workers=parallel) as ex:
-            futs = [ex.submit(process, i, g) for i, g in enumerate(samples)]
+            futs = [
+                ex.submit(_process_sample, i, g, cfg, normalizer, base, out_dir)
+                for i, g in enumerate(samples)
+            ]
             for f in futs:
                 results.append(f.result())
     else:
         for i, g in enumerate(samples):
-            results.append(process(i, g))
+            results.append(_process_sample(i, g, cfg, normalizer, base, out_dir))
 
     for i, groups, raw, seed, gm, inv in sorted(results, key=lambda x: x[0]):
         logger.log(i, groups, raw, seed, gm, inv)
