@@ -3,10 +3,9 @@
 The :class:`EngineAdapter` exposes a subset of the legacy tick engine API but
 drives a new depth-based scheduler and the lightweight :mod:`lccm` model.  The
 adapter processes packets ordered by arrival depth and advances vertex windows
-according to the local causal consistency math.
+according to the local causal consistency math. The module has been refactored
+to remove outdated hooks from the legacy engine.
 """
-
-# TODO: legacy refactor
 
 from __future__ import annotations
 
