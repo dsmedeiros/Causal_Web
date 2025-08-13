@@ -337,7 +337,7 @@ Edge phases ``exp(1j * (phi + A))`` are cached during graph loading so packet
 delivery avoids redundant exponentials.
 
 ## Output Logs
-Each run creates a timestamped directory under `output/runs` containing the graph, configuration and logs. Logging can be enabled or disabled via the GUI **Log Files** window or the `log_files` section of `config.json`. In `config.json` the keys are the categories (`tick`, `phenomena`, `event`) containing individual label flags. The `log_interval` option controls how often metrics and graph snapshots are written, while `logging_mode` selects which categories are written: `diagnostic` (all logs), `tick`, `phenomena` and `events`.
+Each run creates a timestamped directory under `output/runs` containing the graph, configuration and logs. Logging can be enabled or disabled via the GUI **Log Files** window or the `log_files` section of `config.json`. In `config.json` the keys are the categories (`tick`, `phenomena`, `event`) containing individual label flags. Logging cadence is event-driven; metrics and graph snapshots are written when windows advance or other triggers occur. The `logging_mode` option selects which categories are written: `diagnostic` (all logs), `tick`, `phenomena` and `events`.
 Logs are consolidated by category into `ticks_log.jsonl`, `phenomena_log.jsonl` and `events_log.jsonl`.
 Individual files can still be toggled via `log_files` for advanced filtering.
 Entangled tick metadata and detector outcomes are stored separately in

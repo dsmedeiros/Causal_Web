@@ -14,8 +14,6 @@ from typing import Dict, Tuple
 
 import numpy as np
 
-from ...config import Config
-
 
 def _splitmix64(x: np.uint64) -> np.uint64:
     """Return SplitMix64 hash of ``x``.
@@ -70,15 +68,13 @@ class Ancestry:
 class BellHelpers:
     """Utility methods for Bell experiment simulations."""
 
-    def __init__(self, seed: int | None = None) -> None:
-        """Initialise the helper with an optional RNG ``seed``.
+    def __init__(
+        self, cfg: Dict[str, float] | None = None, seed: int | None = None
+    ) -> None:
+        """Initialise the helper with an optional RNG ``seed`` and config."""
 
-        When ``seed`` is ``None`` the global :data:`Config.run_seed` is used
-        so that helper invocations remain reproducible without explicit
-        seeding.
-        """
-
-        self._rng = np.random.default_rng(seed if seed is not None else Config.run_seed)
+        self._cfg = cfg or {}
+        self._rng = np.random.default_rng(seed)
 
     # ------------------------------------------------------------------
     # Helpers
@@ -117,9 +113,9 @@ class BellHelpers:
         axis = ax_u32.astype(np.int64) - 2**31
         axis = self._unit_vector(axis.astype(float))
 
-        alpha_R = Config.bell.get("alpha_R", 1.0)
-        if Config.bell.get("zeta_mode", "float") == "int_mod_k":
-            k = Config.bell.get("k_mod", 3)
+        alpha_R = self._cfg.get("alpha_R", 1.0)
+        if self._cfg.get("zeta_mode", "float") == "int_mod_k":
+            k = self._cfg.get("k_mod", 3)
             theta = 2 * np.pi * (zeta / max(k, 1)) * alpha_R
         else:
             theta = 2 * np.pi * float(zeta) * alpha_R
@@ -156,7 +152,7 @@ class BellHelpers:
         tuple
             ``(u, zeta)`` where ``u`` is a unit direction vector and ``zeta``
             is derived from the ancestry hash. When
-            ``Config.bell['zeta_mode']`` is ``"float"`` (default) ``zeta``
+            When ``cfg['zeta_mode']`` is ``"float"`` (default) ``zeta``
             lies in ``[0, 1)``. If ``"int_mod_k"`` is selected ``zeta`` is an
             integer in ``[0, k_mod)``.
         """
@@ -170,8 +166,8 @@ class BellHelpers:
         zeta_rand = self._rng.random()
         zeta_float = beta_h * zeta_hash + (1.0 - beta_h) * zeta_rand
 
-        if Config.bell.get("zeta_mode", "float") == "int_mod_k":
-            k = Config.bell.get("k_mod", 3)
+        if self._cfg.get("zeta_mode", "float") == "int_mod_k":
+            k = self._cfg.get("k_mod", 3)
             zeta_val: float | int = int(zeta_u64 % max(k, 1))
         else:
             zeta_val = float(zeta_float % 1.0)
