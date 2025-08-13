@@ -32,7 +32,7 @@ def test_run_gates_detects_conservation_residual(monkeypatch):
 
 
 def test_run_gates_detects_no_signaling(monkeypatch):
-    monkeypatch.setattr(gates, "_gate1_visibility", lambda: 0.8)
+    monkeypatch.setattr(gates, "_gate1_probability", lambda phase: 0.8)
     metrics = gates.run_gates({}, [1])
     assert metrics["inv_no_signaling_delta"] == pytest.approx(0.3)
 

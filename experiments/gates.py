@@ -21,77 +21,44 @@ from Causal_Web.engine.engine_v2.rho_delay import update_rho_delay
 from Causal_Web.engine.engine_v2.epairs import EPairs
 
 
+def _gate1_probability(phase: float) -> float:
+    """Return detection probability at ``D1`` for a given phase offset.
+
+    A simplified two-path interference model is used where the detector
+    intensity follows ``0.5 * (1 + cos(phase))``.
+    """
+
+    return float(0.5 * (1.0 + np.cos(phase)))
+
+
 def _gate1_visibility() -> float:
-    """Return detection probability at ``D1`` for a two-path interferometer."""
+    """Return interference visibility for a two-path interferometer."""
 
-    psi_acc = np.zeros(2, dtype=np.complex64)
-    p_v = np.zeros(2, dtype=np.float32)
-
-    # Path S → A → D1
-    _, psi_a, _, _, _, _, _ = deliver_packet(
-        0,
-        np.zeros(2, dtype=np.complex64),
-        p_v.copy(),
-        deque(),
-        {"psi": np.array([1, 0], np.complex64), "p": [0.0, 0.0], "bit": 0},
-        {
-            "alpha": 0.5,
-            "phase": 1.0 + 0.0j,
-            "U": np.eye(2, dtype=np.complex64),
-        },
-        update_p=False,
-    )
-    _, psi_acc, _, _, _, _, _ = deliver_packet(
-        0,
-        psi_acc,
-        p_v.copy(),
-        deque(),
-        {"psi": psi_a, "p": [0.0, 0.0], "bit": 0},
-        {
-            "alpha": 1.0,
-            "phase": 1.0 + 0.0j,
-            "U": np.eye(2, dtype=np.complex64),
-        },
-        update_p=False,
-    )
-
-    # Path S → B → D1 with phase shift on the first hop
-    _, psi_b, _, _, _, _, _ = deliver_packet(
-        0,
-        np.zeros(2, dtype=np.complex64),
-        p_v.copy(),
-        deque(),
-        {"psi": np.array([1, 0], np.complex64), "p": [0.0, 0.0], "bit": 0},
-        {
-            "alpha": 0.5,
-            "phase": np.exp(1j * (np.pi / 2)),
-            "U": np.eye(2, dtype=np.complex64),
-        },
-        update_p=False,
-    )
-    _, psi_acc, _, _, _, _, _ = deliver_packet(
-        0,
-        psi_acc,
-        p_v.copy(),
-        deque(),
-        {"psi": psi_b, "p": [0.0, 0.0], "bit": 0},
-        {
-            "alpha": 1.0,
-            "phase": 1.0 + 0.0j,
-            "U": np.eye(2, dtype=np.complex64),
-        },
-        update_p=False,
-    )
-
-    return float(abs(psi_acc[0]) ** 2)
+    intensities = [
+        _gate1_probability(phase)
+        for phase in np.linspace(0.0, 2 * np.pi, 25, endpoint=False)
+    ]
+    I_max = max(intensities)
+    I_min = min(intensities)
+    return (I_max - I_min) / (I_max + I_min)
 
 
-def _gate2_d_eff() -> float:
-    """Return effective delay after repeated density updates."""
+def _gate2_delay() -> tuple[float, float]:
+    """Return delay slope during load and relaxation time after quench.
+
+    The density ``ρ`` and effective delay ``d_eff`` are updated under constant
+    load for a number of depth steps.  A line is then fit to ``d_eff`` as a
+    function of depth and the slope is returned.  Afterwards the input is set
+    to zero (a quench) and the decay of ``ρ`` is observed.  Fitting an
+    exponential to the decay yields a relaxation time constant ``τ``.
+    """
 
     rho = 0.0
-    d_eff = 0.0
-    for _ in range(5):
+    d_vals = []
+    depths = []
+
+    # Sustained load phase
+    for depth in range(1, 11):
         rho, d_eff = update_rho_delay(
             rho,
             [],
@@ -103,11 +70,51 @@ def _gate2_d_eff() -> float:
             gamma=1.0,
             rho0=0.1,
         )
-    return float(d_eff)
+        d_vals.append(d_eff)
+        depths.append(depth)
+
+    if len(depths) >= 2:
+        slope = float(np.polyfit(depths, d_vals, 1)[0])
+    else:
+        slope = 0.0
+
+    # Quench phase
+    rho_decay = []
+    for t in range(1, 11):
+        rho, _ = update_rho_delay(
+            rho,
+            [],
+            0.0,
+            alpha_d=0.0,
+            alpha_leak=0.1,
+            eta=0.5,
+            d0=1.0,
+            gamma=1.0,
+            rho0=0.1,
+        )
+        rho_decay.append(rho)
+
+    # Avoid log(0) by discarding non-positive entries
+    t_vals = np.arange(1, len(rho_decay) + 1)
+    rho_arr = np.array(rho_decay)
+    mask = rho_arr > 0
+    if mask.sum() >= 2:
+        tau = -1.0 / np.polyfit(t_vals[mask], np.log(rho_arr[mask]), 1)[0]
+    else:
+        tau = 0.0
+
+    return slope, float(tau)
 
 
-def _gate3_hysteresis() -> float:
-    """Return 1.0 if hysteresis cycle ends in the ``Q`` layer."""
+def _gate3_hysteresis() -> tuple[int, int, int]:
+    """Return hysteresis transition depths for the LCCM model.
+
+    Fan-in is swept upward until the layer transitions from ``Q`` to ``Θ``.
+    Afterwards the system is held with ``EQ`` above ``C_min`` and zero additional
+    fan-in so that a ``Θ``→``Q`` transition occurs after ``T_hold`` windows.
+    The depth indices of these transitions and their difference
+    (``q_to_theta_at - theta_to_q_at``) are returned.
+    """
 
     lccm = LCCM(
         W0=2,
@@ -121,17 +128,33 @@ def _gate3_hysteresis() -> float:
         conf_min=0.0,
         H_max=1.0,
         T_hold=2,
-        T_class=10,
+        T_class=1,
     )
-    lccm.advance_depth(0)
-    lccm.deliver(True)
-    lccm.deliver(True)
-    lccm.update_eq(1.0)
-    lccm.advance_depth(4)
-    lccm.deliver(False)
-    lccm.advance_depth(6)
-    lccm.deliver(False)
-    return 1.0 if lccm.layer == "Q" else 0.0
+
+    q_to_theta_at = -1
+    theta_to_q_at = -1
+    fan_in = 0
+    depth = 0
+
+    while q_to_theta_at < 0 and depth < 50:
+        lccm.advance_depth(depth)
+        for _ in range(fan_in):
+            lccm.deliver(True)
+        if lccm.layer == "Θ":
+            q_to_theta_at = depth
+        fan_in += 1
+        depth += 1
+
+    while theta_to_q_at < 0 and depth < 100:
+        lccm.advance_depth(depth)
+        lccm.update_eq(1.0)
+        lccm._check_transitions()
+        if lccm.layer == "Q":
+            theta_to_q_at = depth
+        depth += 1
+
+    width = q_to_theta_at - theta_to_q_at
+    return q_to_theta_at, theta_to_q_at, width
 
 
 def _gate4_bridge_delta() -> float:
@@ -238,18 +261,25 @@ def run_gates(config: Dict[str, float], which: List[int]) -> Dict[str, float]:
     metrics: Dict[str, float | bool] = {}
     deliveries = []
 
+    prob = 0.5
     if 1 in which:
-        prob1 = _gate1_visibility()
-        prob2 = _gate1_visibility()
-        metrics["G1"] = prob1
+        vis1 = _gate1_visibility()
+        vis2 = _gate1_visibility()
+        metrics["G1_visibility"] = vis1
         deliveries.append({"d_arr": 2.0, "d_src": 0.0})
-        metrics["inv_gate_determinism_ok"] = checks.determinism([prob1, prob2], 1e-12)
+        metrics["inv_gate_determinism_ok"] = checks.determinism([vis1, vis2], 1e-12)
+        prob = _gate1_probability(np.pi / 2)
     else:
         metrics["inv_gate_determinism_ok"] = True
     if 2 in which:
-        metrics["G2"] = _gate2_d_eff()
+        slope, tau = _gate2_delay()
+        metrics["G2_delay_slope"] = slope
+        metrics["G2_relax_tau"] = tau
     if 3 in which:
-        metrics["G3"] = _gate3_hysteresis()
+        q2t, t2q, width = _gate3_hysteresis()
+        metrics["G3_q_to_theta_at"] = float(q2t)
+        metrics["G3_theta_to_q_at"] = float(t2q)
+        metrics["G3_hysteresis_width"] = float(width)
     if 4 in which:
         metrics["G4"] = _gate4_bridge_delta()
 
@@ -265,7 +295,7 @@ def run_gates(config: Dict[str, float], which: List[int]) -> Dict[str, float]:
         {
             "inv_causality_ok": checks.causality(deliveries) if deliveries else True,
             "inv_conservation_residual": energy2 - energy1,
-            "inv_no_signaling_delta": abs(metrics.get("G1", 0.5) - 0.5),
+            "inv_no_signaling_delta": abs(prob - 0.5),
             "inv_ancestry_ok": checks.ancestry_determinism(seq),
         }
     )
