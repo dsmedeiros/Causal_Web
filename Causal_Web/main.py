@@ -259,12 +259,12 @@ class MainService:
     def _run_headless(self) -> None:
         """Run the simulation without launching the GUI."""
         from .config import Config
-        from .engine.engine_v2 import adapter as tick_engine
+        from .engine.engine_v2 import adapter as eng
 
-        tick_engine.build_graph()
+        eng.build_graph()
         with Config.state_lock:
             Config.is_running = True
-        tick_engine.simulation_loop()
+        eng.simulation_loop()
         limit = Config.max_ticks if Config.allow_tick_override else Config.tick_limit
         try:
             while True:
@@ -272,12 +272,12 @@ class MainService:
                     running = Config.is_running
                     tick = Config.current_tick
                 if limit and limit != -1 and tick >= limit:
-                    tick_engine.stop_simulation()
+                    eng.stop_simulation()
                 if not running:
                     break
                 time.sleep(0.1)
         except KeyboardInterrupt:
-            tick_engine.stop_simulation()
+            eng.stop_simulation()
 
     # ------------------------------------------------------------------
     @staticmethod

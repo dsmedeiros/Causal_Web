@@ -430,7 +430,9 @@ class CanvasWidget(QGraphicsView):
         """Update the on-canvas HUD text."""
 
         if self._hud_item is not None:
-            self._hud_item.setText(f"tick {tick} | depth {depth} | window {window}")
+            self._hud_item.setText(
+                f"arrival-depth {tick} | depth {depth} | depth limit {window}"
+            )
 
     # ---- interaction -------------------------------------------------
     def wheelEvent(self, event: QWheelEvent) -> None:

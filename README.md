@@ -101,17 +101,17 @@ Graphs are stored as JSON files under `Causal_Web/input/`. Each file defines
 schema and an example.
 
 The GUI allows interactive editing of graphs. Drag nodes to reposition them and use the toolbar to add connections or observers. After editing, click **Apply Changes** in the Graph View to update the simulation and save the file. Details on all GUI actions are provided in [docs/gui_usage.md](docs/gui_usage.md).
-During simulation a small HUD overlay reports the current tick, depth and
-window when using the v2 engine, offering immediate feedback on scheduler
-progress.
+During simulation a small HUD overlay reports the current arrival-depth, depth
+and depth limit when using the v2 engine, offering immediate feedback on
+scheduler progress.
 Nodes can optionally enable self-connections via a checkbox in the node panel. When enabled, dragging from a node back onto itself creates a curved edge.
 Bridges now support an `Entanglement Enabled` option. When selected, the bridge
 is tagged with an `entangled_id` used by observers to generate deterministic
 measurement outcomes for Bell-type experiments.
-Observers can enable a *Detector Mode* that records a binary outcome whenever a
-tick from an entangled bridge is detected.
-Bridge propagation now occurs before observers handle a tick so detector events
-reflect entangled activity in the same cycle.
+Observers can enable a *Detector Mode* that records a binary outcome whenever an
+arrival-depth from an entangled bridge is detected. Bridge propagation now
+occurs before observers handle an arrival-depth so detector events reflect
+entangled activity in the same cycle.
 These detector events are additionally written to `entangled_log.jsonl` for
 Bell inequality analysis.
 The underlying Bell helpers now track explicit 256-bit ancestry hash lanes
@@ -145,6 +145,7 @@ be overridden with CLI flags using dot notation for nested keys, for example:
 ```bash
 python -m Causal_Web.main --no-gui --max_ticks 20
 ```
+sets a depth limit of 20 for a headless run.
 CLI flags for nested `log_files` entries now include the full path prefix to avoid duplicate
 argument names. For example, use `--log_files.tick.coherence_log false` to disable a single tick log.
 Use `--init-db` to create PostgreSQL tables defined in the configuration and exit.
@@ -163,11 +164,11 @@ cost of memory.
 The `backend` option selects the compute backend. It defaults to `cpu` but
 may be set to `cupy` for CUDA acceleration.
 
-The `engine_mode` flag selects the simulation core. The default `v2` value
-enables the strict-local engine while `tick` selects the legacy implementation.
-Parameter groups `windowing`, `rho_delay`, `epsilon_pairs`, `ancestry`, and
-`bell` provide advanced controls for the v2 engine.  Each group is a nested
-mapping:
+The `engine_mode` flag selects the simulation core. The default and only
+supported value `v2` enables the strict-local engine; the legacy `tick` engine
+has been removed. Parameter groups `windowing`, `rho_delay`, `epsilon_pairs`,
+`ancestry`, and `bell` provide advanced controls for the v2 engine. Each group
+is a nested mapping:
 
 ```json
 {

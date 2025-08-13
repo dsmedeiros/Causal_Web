@@ -209,7 +209,7 @@ class MainWindow(QMainWindow):
         layout.addRow("Tick Rate", tick_rate_row)
 
         self.tick_label = QLabel("0")
-        layout.addRow("Current Tick", self.tick_label)
+        layout.addRow("Arrival Depth", self.tick_label)
 
         if getattr(Config, "engine_mode", "tick") == "v2":
             self.depth_label = QLabel("0")
@@ -221,7 +221,7 @@ class MainWindow(QMainWindow):
         self.limit_spin.setMinimum(1)
         self.limit_spin.setMaximum(100000)
         self.limit_spin.setValue(Config.max_ticks)
-        layout.addRow("Tick Limit", self.limit_spin)
+        layout.addRow("Depth Limit", self.limit_spin)
 
         self.smooth_phase_cb = TooltipCheckBox(
             "Smooth Phase", TOOLTIPS.get("smooth_phase")
