@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import pathlib
+import logging
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from dataclasses import dataclass, field
 from typing import Dict, Iterable, List, Tuple
@@ -173,7 +174,9 @@ def run(
     -----
     Parameters are sampled from dimensionless groups and converted to raw
     configurations before the experiment is executed. Results are logged in
-    a deterministic order even when processed in parallel.
+    a deterministic order even when processed in parallel. If at least two
+    samples are collected the standard deviation of each gate metric is
+    analysed and a warning is emitted when any metric shows zero variation.
     """
 
     cfg = _load_config(exp_path)
@@ -211,6 +214,16 @@ def run(
 
     for i, groups, raw, seed, gm, inv in sorted(results, key=lambda x: x[0]):
         logger.log(i, groups, raw, seed, gm, inv)
+    if len(results) >= 2:
+        metric_vals: Dict[str, List[float]] = {}
+        for _, _, _, _, gm, _ in results:
+            for k, v in gm.items():
+                if isinstance(v, (int, float)):
+                    metric_vals.setdefault(k, []).append(float(v))
+        if any(np.std(vals) == 0.0 for vals in metric_vals.values()):
+            logging.warning(
+                "no variation across DOE — check gate wiring/groups mapping."
+            )
 
     logger.flush(cfg, samples)
 
