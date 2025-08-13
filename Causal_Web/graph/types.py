@@ -1,8 +1,22 @@
 from __future__ import annotations
 
+from enum import Enum
 from typing import Any, Dict, List, TypedDict
 
-from ..engine.models.bridge import BridgeType, MediumType
+
+class BridgeType(Enum):
+    """Available bridging mechanisms between nodes."""
+
+    BRAIDED = "braided"
+    MIRROR = "mirror"
+    UNIDIRECTIONAL = "unidirectional"
+
+
+class MediumType(Enum):
+    """Transport mediums for bridge propagation."""
+
+    STANDARD = "standard"
+
 
 # Reusable typed mappings for graph JSON files
 

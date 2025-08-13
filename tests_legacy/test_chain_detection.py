@@ -1,9 +1,9 @@
 import numpy as np
 
 from Causal_Web.config import Config
-from Causal_Web.engine.models.graph import CausalGraph
-from Causal_Web.engine.models.tick import Tick
-from Causal_Web.engine.services.node_services import EdgePropagationService
+from legacy.engine.models.graph import CausalGraph
+from legacy.engine.models.tick import Tick
+from legacy.engine.services.node_services import EdgePropagationService
 
 
 def test_collect_chain_handles_cycles():

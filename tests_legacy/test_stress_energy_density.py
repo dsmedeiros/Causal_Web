@@ -1,7 +1,7 @@
 import math
 
 from Causal_Web.engine.fields.density import get_field
-from Causal_Web.engine.models.graph import CausalGraph
+from legacy.engine.models.graph import CausalGraph
 
 
 def test_density_increases_delay():

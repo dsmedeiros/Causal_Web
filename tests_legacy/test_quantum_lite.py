@@ -3,10 +3,10 @@ import random
 
 import pytest
 
-from Causal_Web.engine.models.graph import CausalGraph
-from Causal_Web.engine.services.node_services import EdgePropagationService
-from Causal_Web.engine.models.tick import GLOBAL_TICK_POOL
-from Causal_Web.engine.tick_engine.tick_router import TickRouter
+from legacy.engine.models.graph import CausalGraph
+from legacy.engine.services.node_services import EdgePropagationService
+from legacy.engine.models.tick import GLOBAL_TICK_POOL
+from legacy.engine.tick_engine.tick_router import TickRouter
 from Causal_Web.config import Config
 
 pytestmark = pytest.mark.skip(reason="legacy engine removed")

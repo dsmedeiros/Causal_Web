@@ -1,7 +1,7 @@
 import ast
 from pathlib import Path
 
-FORBIDDEN = {"Causal_Web.engine.tick_engine", "Causal_Web.engine.models.tick"}
+FORBIDDEN = {"legacy.engine.tick_engine", "legacy.engine.models.tick"}
 
 
 def test_no_tick_engine_import_outside_legacy():

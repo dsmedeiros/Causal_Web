@@ -1,10 +1,10 @@
-from Causal_Web.engine.models.node import Node
+from Causal_Web.analysis.twin import TwinNode
 from Causal_Web.engine import scheduler
 
 
 def test_proper_time_dilation():
-    stationary = Node("A")
-    traveller = Node("B")
+    stationary = TwinNode("A")
+    traveller = TwinNode("B")
     dt = 1.0
     steps = 5
     v = 0.6

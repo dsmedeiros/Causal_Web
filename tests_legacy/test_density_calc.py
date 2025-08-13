@@ -1,5 +1,5 @@
 import math
-from Causal_Web.engine.models.graph import CausalGraph
+from legacy.engine.models.graph import CausalGraph
 from Causal_Web.config import Config
 
 
@@ -13,4 +13,3 @@ def test_tick_saturation_density():
     edge.propagate_phase(0.0, 0, g)
     rho = g.compute_edge_density(edge)
     assert rho > 0
-

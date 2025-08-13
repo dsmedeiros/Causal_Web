@@ -4,9 +4,9 @@ import uuid
 
 import numpy as np
 
-from Causal_Web.engine.models.graph import CausalGraph
-from Causal_Web.engine.services.entanglement_service import EntanglementService
-from Causal_Web.engine.logging.logger import log_json, logger
+from legacy.engine.models.graph import CausalGraph
+from legacy.engine.services.entanglement_service import EntanglementService
+from legacy.engine.logging.logger import log_json, logger
 from Causal_Web.analysis.bell import compute_bell_statistics
 from Causal_Web.config import Config
 
@@ -73,4 +73,3 @@ def test_chsh_epsilon(tmp_path, monkeypatch):
     logger.flush()
     s, _, _ = compute_bell_statistics(tmp_path / "entangled_log.jsonl")
     assert s > 2.6
-
