@@ -528,6 +528,7 @@ class EngineAdapter:
                 if vertex["bit_deque"]
                 else 0.0
             )
+            p_v = np.where(np.isfinite(p_v), p_v, np.zeros_like(p_v))
             entropy = float(-(p_v * np.log2(p_v + 1e-12)).sum()) if len(p_v) else 0.0
             lccm.update_classical_metrics(bit_fraction, entropy, conf)
             is_q = lccm.layer == "Q"
@@ -1030,6 +1031,7 @@ class EngineAdapter:
                             pass
                         case _:
                             p_v.fill(1.0 / len(p_v))
+                    p_v = np.where(np.isfinite(p_v), p_v, np.zeros_like(p_v))
                     self._arrays.vertices["p"][vid] = p_v
                     if lccm.layer != "C":
                         self._arrays.vertices["bit"][vid] = 0
@@ -1108,7 +1110,24 @@ class EngineAdapter:
         return self._frame
 
 
-_ENGINE = EngineAdapter()
+# Lazily constructed engine instance; GUI code may read this handle but
+# should not mutate it.  External callers must obtain the adapter via
+# :func:`get_engine` to avoid import-time side effects.
+_ENGINE: EngineAdapter | None = None
+
+
+def get_engine() -> EngineAdapter:
+    """Return the module-level :class:`EngineAdapter` instance.
+
+    The adapter is constructed lazily on first use to avoid import-time
+    side effects.  Callers should use this factory rather than relying on
+    implicit creation when the module is imported.
+    """
+
+    global _ENGINE
+    if _ENGINE is None:
+        _ENGINE = EngineAdapter()
+    return _ENGINE
 
 
 def build_graph(graph_json_path: str | Dict[str, Any] | None = None) -> None:
@@ -1116,14 +1135,17 @@ def build_graph(graph_json_path: str | Dict[str, Any] | None = None) -> None:
 
     from ...config import Config
 
+    engine = get_engine()
     path = graph_json_path or Config.graph_file
-    _ENGINE.build_graph(path)
+    engine.build_graph(path)
 
 
 def simulation_loop() -> None:
     """Start a background loop advancing the engine while running."""
 
     from ...config import Config
+
+    engine = get_engine()
 
     def _run() -> None:
         while True:
@@ -1133,7 +1155,7 @@ def simulation_loop() -> None:
                 ):
                     Config.is_running = False
                     break
-            _ENGINE.step()
+            engine.step()
             with Config.state_lock:
                 Config.current_frame += 1
                 Config.current_tick = Config.current_frame
@@ -1147,7 +1169,8 @@ def pause_simulation() -> None:
 
     from ...config import Config
 
-    _ENGINE.pause()
+    engine = get_engine()
+    engine.pause()
     with Config.state_lock:
         Config.is_running = False
 
@@ -1157,7 +1180,8 @@ def resume_simulation() -> None:
 
     from ...config import Config
 
-    _ENGINE.start()
+    engine = get_engine()
+    engine.start()
     with Config.state_lock:
         Config.is_running = True
     simulation_loop()
@@ -1168,7 +1192,8 @@ def stop_simulation() -> None:
 
     from ...config import Config
 
-    _ENGINE.stop()
+    engine = get_engine()
+    engine.stop()
     with Config.state_lock:
         Config.is_running = False
 
@@ -1176,11 +1201,13 @@ def stop_simulation() -> None:
 def get_snapshot() -> dict:
     """Return a minimal snapshot for the UI."""
 
-    return _ENGINE.snapshot_for_ui()
+    engine = get_engine()
+    return engine.snapshot_for_ui()
 
 
 __all__ = [
     "EngineAdapter",
+    "get_engine",
     "build_graph",
     "simulation_loop",
     "pause_simulation",

@@ -430,7 +430,13 @@ class EPairs:
     # bridge handling
 
     def reinforce(self, a: int, b: int) -> None:
-        """Reinforce the bridge between ``a`` and ``b`` if present."""
+        """Reinforce the bridge between ``a`` and ``b`` if present.
+
+        On each reinforcement the bridge delay is slowly recalibrated
+        towards the current median of the incident edge delays for the two
+        endpoints.  This allows long-lived bridges to track background
+        drift in edge latency without rebuilding the bridge.
+        """
 
         key = self._bridge_key(a, b)
         bridge = self.bridges.get(key)
@@ -439,6 +445,21 @@ class EPairs:
         bridge.sigma += self.sigma_reinforce
         if bridge.sigma < self.sigma_min:
             self._remove_bridge(a, b)
+            return
+
+        if self._incident_delay_cb is not None:
+            delays_a = list(self._incident_delay_cb(a))
+            delays_b = list(self._incident_delay_cb(b))
+        else:
+            delays_a = self._incident_delays.get(a, [])
+            delays_b = self._incident_delays.get(b, [])
+        delays = delays_a + delays_b
+        if delays:
+            target = max(1, int(np.median(delays)))
+            if target > bridge.d_bridge:
+                bridge.d_bridge += 1
+            elif target < bridge.d_bridge:
+                bridge.d_bridge -= 1
 
     def decay_all(self) -> None:
         """Decay all bridges, removing those below :attr:`sigma_min`."""

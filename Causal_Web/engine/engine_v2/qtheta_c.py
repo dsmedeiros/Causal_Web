@@ -106,7 +106,10 @@ def deliver_packet(
     psi_acc:
         Accumulator for quantum amplitudes.
     p_v:
-        Classical probability vector for the vertex.
+        Classical probability vector for the vertex. After accumulation the
+        vector is clipped to ``[0, 1]``, renormalised and any non-finite
+        values are replaced with zeros so empty or NaN inputs yield an
+        all-zero vector.
     bit_deque:
         Recent bits used for majority voting.
     packet:
@@ -145,6 +148,7 @@ def deliver_packet(
         total = float(np.sum(p_v))
         if total > 0:
             p_v = p_v / total
+        p_v = np.where(np.isfinite(p_v), p_v, np.zeros_like(p_v))
 
     bit_deque.append(int(packet.get("bit", 0)))
     while len(bit_deque) > max_deque:
@@ -199,7 +203,10 @@ def deliver_packets_batch(
     psi_acc:
         Accumulator for quantum amplitudes.
     p_v:
-        Classical probability vector for the vertex.
+        Classical probability vector for the vertex. After accumulation the
+        vector is clipped to ``[0, 1]``, renormalised and non-finite values
+        are replaced with zeros so empty or NaN inputs yield an all-zero
+        vector.
     bit_deque:
         Recent bits used for majority voting.
     psi, p, bits, depth_arr:
@@ -238,6 +245,7 @@ def deliver_packets_batch(
         total = float(np.sum(p_v))
         if total > 0:
             p_v = p_v / total
+        p_v = np.where(np.isfinite(p_v), p_v, np.zeros_like(p_v))
 
     bit_deque.extend(bits.tolist())
     while len(bit_deque) > max_deque:
