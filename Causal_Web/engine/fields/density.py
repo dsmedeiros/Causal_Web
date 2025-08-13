@@ -10,6 +10,11 @@ from typing import Dict, Protocol, Tuple
 
 import numpy as np
 
+try:  # pragma: no cover - optional dependency
+    import cupy as cp
+except Exception:  # cupy is optional and may be unavailable
+    cp = None
+
 
 class EdgeProto(Protocol):
     """Protocol capturing the minimal edge interface."""
@@ -37,7 +42,8 @@ class DensityField:
         edge:
             Edge receiving the energy contribution.
         amplitude:
-            Complex amplitude whose squared magnitude represents energy.
+            Complex amplitude whose squared magnitude represents energy. May
+            be a NumPy or CuPy scalar/array.
 
         Note
         ----
@@ -46,8 +52,11 @@ class DensityField:
         or accelerator backends may require atomic updates or per-thread
         accumulation.
         """
-        # TODO: Implement CuPy kernel for energy accumulation
-        energy = float(np.sum(np.abs(amplitude) ** 2))
+        if cp is not None and isinstance(amplitude, cp.ndarray):
+            amp = cp.asarray(amplitude)
+            energy = float(cp.sum(cp.abs(amp) ** 2).get())
+        else:
+            energy = float(np.sum(np.abs(amplitude) ** 2))
         self._rho[(edge.source, edge.target)] += energy
 
     # ------------------------------------------------------------------
