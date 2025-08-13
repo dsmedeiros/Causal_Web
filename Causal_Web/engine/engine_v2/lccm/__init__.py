@@ -12,6 +12,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from .free_energy import free_energy_score
+from .window import WindowParams, WindowState, on_window_close
 
 
 @dataclass
@@ -177,4 +178,4 @@ class LCCM:
                 self._eq_hold = 0
 
 
-__all__ = ["LCCM"]
+__all__ = ["LCCM", "WindowParams", "WindowState", "on_window_close"]
