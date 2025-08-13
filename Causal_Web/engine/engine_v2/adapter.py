@@ -18,7 +18,7 @@ import math
 
 import numpy as np
 
-from ..logging.logger import log_record
+from ..logging.logger import log_record, flush_metrics
 from .lccm import LCCM
 from .scheduler import DepthScheduler
 from .state import Packet, TelemetryFrame
@@ -58,6 +58,7 @@ class EngineAdapter:
         self._edge_buf: Dict[str, Any] = {}
         self._payload_buf: Dict[str, Any] = {}
         self._neigh_sums_cache: np.ndarray | None = None
+        self._lock = threading.RLock()
 
     # ------------------------------------------------------------------
     def _splitmix64(self, x: int) -> int:
@@ -288,9 +289,14 @@ class EngineAdapter:
         self._scheduler.clear()
 
     def step(self, max_events: int | None = None) -> TelemetryFrame:
-        """Advance the simulation until a window rolls or ``max_events``."""
+        """Advance the simulation until a window rolls or ``max_events``.
 
-        return self.run_until_next_window_or(max_events)
+        This call is thread-safe so the UI can request snapshots while the
+        simulation advances in a background thread.
+        """
+
+        with self._lock:
+            return self.run_until_next_window_or(max_events)
 
     def run_until_next_window_or(self, limit: int | None) -> TelemetryFrame:
         """Run until the next window boundary or until ``limit`` events.
@@ -625,6 +631,7 @@ class EngineAdapter:
                     log_record(
                         category="entangled",
                         label="measurement",
+                        frame=self._frame,
                         tick=self._frame,
                         value={
                             "setting": a_D.tolist(),
@@ -678,21 +685,22 @@ class EngineAdapter:
                 else:
                     H_pv = 0.0
                     EQ = lccm._eq
-                log_record(
-                    category="event",
-                    label="layer_transition",
-                    tick=self._frame,
-                    value={
-                        "v_id": dst,
-                        "from_layer": prev_layer,
-                        "to_layer": lccm.layer,
-                        "reason": reason,
-                        "window_idx": lccm.window_idx,
-                        "Lambda_v": lccm._lambda,
-                        "EQ": EQ,
-                        "H_p": H_pv,
-                    },
-                )
+                    log_record(
+                        category="event",
+                        label="layer_transition",
+                        frame=self._frame,
+                        tick=self._frame,
+                        value={
+                            "v_id": dst,
+                            "from_layer": prev_layer,
+                            "to_layer": lccm.layer,
+                            "reason": reason,
+                            "window_idx": lccm.window_idx,
+                            "Lambda_v": lccm._lambda,
+                            "EQ": EQ,
+                            "H_p": H_pv,
+                        },
+                    )
                 if prev_layer == "C" and lccm.layer != "C":
                     if self._arrays is not None:
                         self._arrays.vertices["bit"][dst] = 0
@@ -886,6 +894,7 @@ class EngineAdapter:
                     log_record(
                         category="event",
                         label="edge_delivery",
+                        frame=self._frame,
                         tick=self._frame,
                         value={
                             "rho_before": rho_before,
@@ -917,6 +926,7 @@ class EngineAdapter:
                     log_record(
                         category="event",
                         label="edge_delivery",
+                        frame=self._frame,
                         tick=self._frame,
                         value={
                             "rho_before": 0.0,
@@ -955,10 +965,12 @@ class EngineAdapter:
         )
 
         depth_bucket = max_depth // 10
+        flush_metrics(self._frame)
         self._frame += 1
         log_record(
             category="tick",
             label="adapter_frame",
+            frame=self._frame,
             tick=self._frame,
             value={"depth": max_depth, "events": events},
             metadata={
@@ -971,6 +983,7 @@ class EngineAdapter:
         log_record(
             category="tick",
             label="edge_window_summary",
+            frame=self._frame,
             tick=self._frame,
             value={"count": edge_logs},
             metadata={"window_idx": max_window},
@@ -1049,6 +1062,7 @@ class EngineAdapter:
                 log_record(
                     category="event",
                     label="vertex_window_close",
+                    frame=self._frame,
                     tick=self._frame,
                     value={
                         "layer": lccm.layer,
@@ -1071,13 +1085,14 @@ class EngineAdapter:
     def snapshot_for_ui(self) -> dict:
         """Return a minimal snapshot for the GUI."""
 
-        max_depth = 0
-        max_window = 0
-        for data in self._vertices.values():
-            lccm = data["lccm"]
-            max_depth = max(max_depth, lccm.depth)
-            max_window = max(max_window, lccm.window_idx)
-        return {"depth": max_depth, "window": max_window}
+        with self._lock:
+            max_depth = 0
+            max_window = 0
+            for data in self._vertices.values():
+                lccm = data["lccm"]
+                max_depth = max(max_depth, lccm.depth)
+                max_window = max(max_window, lccm.window_idx)
+            return {"depth": max_depth, "window": max_window}
 
     def current_depth(self) -> int:
         """Return the current depth of the simulation."""
