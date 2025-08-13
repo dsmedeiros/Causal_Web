@@ -71,6 +71,8 @@ via a Monte-Carlo path sampler over the graph's causal structure.
   invariants.
 - Replaced legacy `NodeManager` with v2 `EngineAdapter` and removed the former
   from the public API.
+- `EngineAdapter` now exposes a `get_engine()` factory; the module no longer
+  instantiates a global engine at import time.
 
 ## Table of Contents
 - [Quick Start](#quick-start)
