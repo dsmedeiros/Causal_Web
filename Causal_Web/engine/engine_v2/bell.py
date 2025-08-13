@@ -17,6 +17,40 @@ import numpy as np
 from ...config import Config
 
 
+def _splitmix64(x: np.uint64) -> np.uint64:
+    """Return SplitMix64 hash of ``x``.
+
+    Parameters
+    ----------
+    x:
+        64-bit input value.
+
+    Returns
+    -------
+    np.uint64
+        Hashed output value.
+    """
+
+    z = x + np.uint64(0x9E3779B97F4A7C15)
+    z = (z ^ (z >> 30)) * np.uint64(0xBF58476D1CE4E5B9)
+    z = (z ^ (z >> 27)) * np.uint64(0x94D049BB133111EB)
+    return z ^ (z >> 31)
+
+
+def _splitmix_vec3(seed: np.ndarray) -> np.ndarray:
+    """Return three ``uint32`` values derived from ``seed``.
+
+    The input ``seed`` is reduced to a single ``uint64`` and expanded via
+    sequential SplitMix64 applications.
+    """
+
+    s = np.uint64(int(np.bitwise_xor.reduce(seed)))
+    return np.array(
+        [_splitmix64(s + np.uint64(i)) & np.uint64(0xFFFFFFFF) for i in range(3)],
+        dtype=np.uint32,
+    )
+
+
 @dataclass
 class Ancestry:
     """Track ancestry information for a packet.
@@ -71,19 +105,27 @@ class BellHelpers:
         return self._unit_vector(sample)
 
     def _rotate(self, u: np.ndarray, h: np.ndarray, zeta: float) -> np.ndarray:
-        """Rotate ``u`` around a hash-derived axis by ``2πζ``.
+        """Rotate ``u`` about a deterministic axis by ``2πζα_R``.
 
-        The axis is deterministically sampled from ``h`` so that the
-        transformation remains strictly local while providing a richer
-        rotation than a simple component roll.
+        The axis is derived locally from ``h`` using :func:`_splitmix_vec3`
+        ensuring strict locality. The rotation angle is scaled by the
+        ``alpha_R`` configuration parameter and supports both continuous and
+        discrete ``zeta`` values.
         """
 
-        seed = int(np.bitwise_xor.reduce(h))
-        axis_rng = np.random.default_rng(seed)
-        axis = self._unit_vector(axis_rng.normal(size=3))
-        angle = 2 * np.pi * (zeta % 1.0)
-        cos_a = np.cos(angle)
-        sin_a = np.sin(angle)
+        ax_u32 = _splitmix_vec3(h)
+        axis = ax_u32.astype(np.int64) - 2**31
+        axis = self._unit_vector(axis.astype(float))
+
+        alpha_R = Config.bell.get("alpha_R", 1.0)
+        if Config.bell.get("zeta_mode", "float") == "int_mod_k":
+            k = Config.bell.get("k_mod", 3)
+            theta = 2 * np.pi * (zeta / max(k, 1)) * alpha_R
+        else:
+            theta = 2 * np.pi * float(zeta) * alpha_R
+
+        cos_a = np.cos(theta)
+        sin_a = np.sin(theta)
         return (
             u * cos_a + np.cross(axis, u) * sin_a + axis * np.dot(axis, u) * (1 - cos_a)
         )
@@ -112,20 +154,29 @@ class BellHelpers:
         Returns
         -------
         tuple
-            ``(u, zeta)`` where ``u`` is a unit direction vector and
-            ``zeta`` is a scalar in ``[0, 1)`` derived from the ancestry
-            hash blended with RNG.
+            ``(u, zeta)`` where ``u`` is a unit direction vector and ``zeta``
+            is derived from the ancestry hash. When
+            ``Config.bell['zeta_mode']`` is ``"float"`` (default) ``zeta``
+            lies in ``[0, 1)``. If ``"int_mod_k"`` is selected ``zeta`` is an
+            integer in ``[0, k_mod)``.
         """
 
         u_rand = self._random_unit()
         u = beta_m * ancestry.m + (1.0 - beta_m) * u_rand
         u = self._unit_vector(u)
 
-        h_int = int.from_bytes(ancestry.h.tobytes(), "little")
-        h_norm = (h_int % (1 << 53)) / float(1 << 53)
+        zeta_u64 = _splitmix64(ancestry.h[0])
+        zeta_hash = np.float64(zeta_u64) / np.float64(2**64)
         zeta_rand = self._rng.random()
-        zeta = (beta_h * h_norm + (1.0 - beta_h) * zeta_rand) % 1.0
-        return u, float(zeta)
+        zeta_float = beta_h * zeta_hash + (1.0 - beta_h) * zeta_rand
+
+        if Config.bell.get("zeta_mode", "float") == "int_mod_k":
+            k = Config.bell.get("k_mod", 3)
+            zeta_val: float | int = int(zeta_u64 % max(k, 1))
+        else:
+            zeta_val = float(zeta_float % 1.0)
+
+        return u, float(zeta_val)
 
     def setting_draw(
         self,

@@ -342,9 +342,9 @@ $$
 b=\operatorname{sgn}\!\big(\langle a_D,\ R(h_D,\zeta)\,u\rangle + \xi\big),
 $$
 
-with local noise $\xi\sim\mathcal N(0,\sigma(\kappa_\xi))$. $R$ rotates
-around an axis from $h_D$ by angle $2\pi\zeta$, remaining strictly
-local and signaling-free.
+with local noise $\xi\sim\mathcal N(0,\sigma(\kappa_\xi))$. $R$ is a
+deterministic local rotation about a hash-derived axis with angle
+$2\pi\zeta\,\alpha_R$, remaining strictly local and signaling-free.
 
 **Prediction:**
 

@@ -224,6 +224,10 @@ set `"enabled": true` to activate measurement-interaction modes.
 
 The top-level `max_deque` knob sets the length of the classical majority buffer.
 Within the Bell block, setting `"kappa_xi": 0` yields maximal measurement noise.
+`zeta_mode` selects how the hidden scalar is computed: the default
+`"float"` maps a 64‑bit hash to `[0,1)` while `"int_mod_k"` preserves the
+previous discrete modulo behaviour via `k_mod`.  Detector rotations are scaled
+by `alpha_R`.
 
 `run_seed` provides a deterministic seed used by sampling, Bell helpers and
 ε-pair routines, allowing reproducible runs.
