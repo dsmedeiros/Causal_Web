@@ -53,6 +53,10 @@ class LCCM:
     depth: int = 0
     window_idx: int = 0
     layer: str = "Q"
+    # When set the LCCM will use this value for ``W(v)`` instead of computing
+    # it from ``deg`` and ``rho_mean``.  The engine updates this field using the
+    # smoothed window size reported by :func:`on_window_close`.
+    window_override: int | None = None
 
     _lambda: int = 0
     _lambda_q: int = 0
@@ -66,6 +70,8 @@ class LCCM:
 
     # ------------------------------------------------------------------
     def _window_size(self) -> int:
+        if self.window_override is not None:
+            return int(self.window_override)
         term = self.zeta1 * math.log(1 + self.deg) + self.zeta2 * math.log(
             1 + self.rho_mean / self.rho0
         )
