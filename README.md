@@ -350,7 +350,8 @@ delivery avoids redundant exponentials.
 ## Output Logs
 Each run creates a timestamped directory under `output/runs` containing the graph, configuration and logs. Logging can be enabled or disabled via the GUI **Log Files** window or the `log_files` section of `config.json`. In `config.json` the keys are the categories (`tick`, `phenomena`, `event`) containing individual label flags. Logging cadence is event-driven; metrics and graph snapshots are written when windows advance or other triggers occur. The `logging_mode` option selects which categories are written: `diagnostic` (all logs), `tick`, `phenomena` and `events`.
 Logs are consolidated by category into `ticks_log.jsonl`, `phenomena_log.jsonl` and `events_log.jsonl`.
-An accompanying `metrics.csv` summarises event counts per frame.
+An accompanying `metrics.csv` summarises event counts per frame in a tall format
+with columns ``frame``, ``category`` and ``count``.
 Individual files can still be toggled via `log_files` for advanced filtering.
 Entangled tick metadata and detector outcomes are stored separately in
 `entangled_log.jsonl`.
