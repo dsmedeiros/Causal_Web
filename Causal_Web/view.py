@@ -25,6 +25,7 @@ class EdgeView:
 class WindowEvent:
     """Event describing a closed window in the simulation."""
 
+    v_id: str
     window_idx: int
 
 

@@ -18,7 +18,7 @@ import math
 
 import numpy as np
 
-from Causal_Web.view import ViewSnapshot
+from Causal_Web.view import EdgeView, NodeView, ViewSnapshot, WindowEvent
 
 from ..logging.logger import log_record, flush_metrics
 from .lccm import LCCM, WindowParams, WindowState, on_window_close
@@ -64,6 +64,11 @@ class EngineAdapter:
         self._lock = threading.RLock()
         self._last_snapshot_time = time.time()
         self._last_frame = 0
+        self._changed_nodes: Set[str] = set()
+        self._changed_edges: Set[tuple[str, str]] = set()
+        self._closed_windows: list[WindowEvent] = []
+        self._energy_totals: Dict[int, float] = {}
+        self._residual: float = 0.0
 
     # ------------------------------------------------------------------
     def _splitmix64(self, x: int) -> int:
@@ -371,6 +376,7 @@ class EngineAdapter:
             vertex = self._vertices.get(dst)
             if vertex is None:
                 continue
+            self._changed_nodes.add(str(dst))
             lccm = vertex["lccm"]
             lccm.advance_depth(depth_arr)
             prev_layer = lccm.layer
@@ -907,6 +913,8 @@ class EngineAdapter:
                     payload=payload_buf.copy(),
                 )
                 edge_logs += 1
+                self._changed_nodes.add(str(int(edges["dst"][edge_idx])))
+                self._changed_edges.add((str(dst), str(int(edges["dst"][edge_idx]))))
                 if log_rho_edges:
                     log_record(
                         category="event",
@@ -938,6 +946,8 @@ class EngineAdapter:
                 payload_buf["ancestry"] = packet_data.get("ancestry")
                 payload_buf["m"] = packet_data.get("m")
                 edge_logs += 1
+                self._changed_nodes.update({str(dst), str(other)})
+                self._changed_edges.add((str(dst), str(other)))
                 rate = self._cfg.logging.get("sample_rho_rate", 0.0)
                 if rate > 0.0 and self._rng.random() < rate:
                     log_record(
@@ -1123,6 +1133,15 @@ class EngineAdapter:
                     },
                     metadata={"window_idx": lccm.window_idx},
                 )
+                E_total = EQ + E_theta + E_C + E_rho
+                prev = self._energy_totals.get(vid)
+                if prev is not None:
+                    self._residual = abs(E_total - prev)
+                self._energy_totals[vid] = E_total
+                self._closed_windows.append(
+                    WindowEvent(v_id=str(vid), window_idx=lccm.window_idx)
+                )
+                self._changed_nodes.add(str(vid))
                 if self._cfg.epsilon_pairs.get("decay_on_window_close", True):
                     # Decay bridges when vertices advance a window.
                     self._epairs.decay_all()
@@ -1135,7 +1154,7 @@ class EngineAdapter:
         return frame
 
     def snapshot_for_ui(self) -> ViewSnapshot:
-        """Return a minimal :class:`ViewSnapshot` for the GUI."""
+        """Return a :class:`ViewSnapshot` capturing recent changes for the GUI."""
 
         with self._lock:
             max_depth = 0
@@ -1156,9 +1175,21 @@ class EngineAdapter:
                 "events_per_sec": events_per_sec,
                 "gates_fired": getattr(self._epairs, "gates_fired", 0),
                 "active_bridges": len(getattr(self._epairs, "active_bridges", [])),
-                "residual": getattr(self._epairs, "residual", 0.0),
+                "residual": self._residual,
             }
-            return ViewSnapshot(frame=max_depth, counters=counters)
+            nodes = [NodeView(id=n) for n in self._changed_nodes]
+            edges = [EdgeView(src=s, dst=d) for s, d in self._changed_edges]
+            closed = list(self._closed_windows)
+            self._changed_nodes.clear()
+            self._changed_edges.clear()
+            self._closed_windows.clear()
+            return ViewSnapshot(
+                frame=max_depth,
+                changed_nodes=nodes,
+                changed_edges=edges,
+                closed_windows=closed,
+                counters=counters,
+            )
 
     def current_depth(self) -> int:
         """Return the current depth of the simulation."""
