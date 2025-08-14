@@ -9,7 +9,7 @@ to remove outdated hooks from the legacy engine.
 
 from __future__ import annotations
 
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Set
 from collections import deque, defaultdict
 import threading
 import time
@@ -58,6 +58,7 @@ class EngineAdapter:
         self._edge_buf: Dict[str, Any] = {}
         self._payload_buf: Dict[str, Any] = {}
         self._neigh_sums_cache: np.ndarray | None = None
+        self._delay_changed: Set[int] = set()
         self._lock = threading.RLock()
 
     # ------------------------------------------------------------------
@@ -801,12 +802,17 @@ class EngineAdapter:
                                     start = ptr[int(idx)]
                                     end = ptr[int(idx) + 1]
                                     self._neigh_sums_cache[nbr[start:end]] += delta
+                        prev_d_eff: np.ndarray | None = None
                         if "d_eff" in edges:
+                            prev_d_eff = edges["d_eff"][inject_arr].astype(int).copy()
                             edges["d_eff"][inject_arr] = d_eff
-                        for idx, rb, ra, de in zip(
-                            inject_arr, rho_before, rho_after, d_eff
+                        for i, (idx, rb, ra, de) in enumerate(
+                            zip(inject_arr, rho_before, rho_after, d_eff)
                         ):
                             injected[int(idx)] = (float(rb), float(ra), int(de))
+                            if prev_d_eff is not None and int(prev_d_eff[i]) != int(de):
+                                self._delay_changed.add(dst)
+                                self._delay_changed.add(int(edges["dst"][int(idx)]))
                 else:
                     layer_idx = layer_idx_map.get(lccm.layer, 0)
                     for edge_idx in inject_edges:
@@ -852,7 +858,11 @@ class EngineAdapter:
                                 if delta != 0:
                                     self._neigh_sums_cache[nbr[start:end]] += delta
                             if "d_eff" in edges:
+                                old_de = int(edges["d_eff"][edge_idx])
                                 edges["d_eff"][edge_idx] = d_eff
+                                if old_de != int(d_eff):
+                                    self._delay_changed.add(dst)
+                                    self._delay_changed.add(int(edges["dst"][edge_idx]))
                             injected[int(edge_idx)] = (
                                 float(rho_before),
                                 float(rho_after),
@@ -1112,6 +1122,11 @@ class EngineAdapter:
                 if self._cfg.epsilon_pairs.get("decay_on_window_close", True):
                     # Decay bridges when vertices advance a window.
                     self._epairs.decay_all()
+
+        if self._delay_changed and self._epairs is not None:
+            for vid in self._delay_changed:
+                self._epairs.adjust_d_bridge(vid)
+            self._delay_changed.clear()
 
         return frame
 

@@ -206,7 +206,7 @@ class MainWindow(QMainWindow):
         tick_rate_layout.addWidget(self.tick_slider)
         tick_rate_layout.addWidget(self.tick_edit)
 
-        layout.addRow("Tick Rate", tick_rate_row)
+        layout.addRow("Frame Rate", tick_rate_row)
 
         self.tick_label = QLabel("0")
         layout.addRow("Arrival Depth", self.tick_label)

@@ -90,6 +90,9 @@ An example periodic log entry might look like:
 These schemas unify log processing by distinguishing fine-grained diagnostic
 records from coarser periodic summaries.
 
+Entries labelled ``adapter_frame`` are skipped by the metrics aggregator and
+therefore do not appear in frame count summaries.
+
 ## Log file fields
 The following lists describe the JSON keys recorded in each output file.
 

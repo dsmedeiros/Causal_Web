@@ -75,14 +75,14 @@ class NodePanelSetupService:
     def _build_tick_source(self, layout) -> None:
         p = self.panel
         p.tick_source_cb = QCheckBox()
-        layout.addRow(TooltipLabel("Tick Source"), p.tick_source_cb)
+        layout.addRow(TooltipLabel("Frame Source"), p.tick_source_cb)
         p.tick_source_cb.toggled.connect(p._mark_dirty)
 
         p.ts_fields = {}
         for field, label_text in [
-            ("tick_interval", "Tick Interval"),
+            ("tick_interval", "Frame Interval"),
             ("tick_phase", "Phase"),
-            ("end_tick", "End Tick"),
+            ("end_tick", "End Frame"),
         ]:
             spin = QDoubleSpinBox()
             spin.setDecimals(3)
@@ -305,7 +305,7 @@ class MetaNodePanelSetupService:
 
         p.shared_tick = QCheckBox()
         layout.addRow(
-            TooltipLabel("Shared Tick Input", TOOLTIPS.get("shared_tick_input")),
+            TooltipLabel("Shared Frame Input", TOOLTIPS.get("shared_tick_input")),
             p.shared_tick,
         )
         p.shared_tick.toggled.connect(p._mark_dirty)
