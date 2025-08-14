@@ -453,10 +453,8 @@ class MainWindow(QMainWindow):
         if "events_per_sec" in snap.counters:
             self._telemetry_x.append(snap.frame)
             self._telemetry_y.append(snap.counters["events_per_sec"])
-            max_points = 3000
-            if len(self._telemetry_x) > max_points:
-                self._telemetry_x = self._telemetry_x[-max_points:]
-                self._telemetry_y = self._telemetry_y[-max_points:]
+            self._telemetry_x = self._telemetry_x[-3000:]
+            self._telemetry_y = self._telemetry_y[-3000:]
             self._telemetry_curve.setData(self._telemetry_x, self._telemetry_y)
 
     def start_simulation(self) -> None:

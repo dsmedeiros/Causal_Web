@@ -77,6 +77,7 @@ class NodeItem(QGraphicsEllipseItem):
         self.setPos(QPointF(x, y))
         self.setBrush(QBrush(Qt.gray))
         self.setPen(QPen(Qt.lightGray))
+        self.setCacheMode(QGraphicsItem.DeviceCoordinateCache)
         # ensure itemChange is triggered so connected edges update while moving
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges)
         if canvas.editable:
@@ -85,6 +86,14 @@ class NodeItem(QGraphicsEllipseItem):
         self.setZValue(1)
         self.edges: list[EdgeItem] = []
         self._drag_start: Optional[QPointF] = None
+        self.label = QGraphicsSimpleTextItem(node_id, self)
+        self.label.setBrush(QBrush(Qt.white))
+        self.label.setCacheMode(QGraphicsItem.DeviceCoordinateCache)
+        self.label.setFlag(QGraphicsItem.ItemIgnoresTransformations)
+        self.label.setPos(
+            -self.label.boundingRect().width() / 2,
+            -radius - self.label.boundingRect().height(),
+        )
 
     def itemChange(
         self,
@@ -143,6 +152,7 @@ class EdgeItem(QGraphicsLineItem):
         pen.setWidth(2)
         self.setPen(pen)
         self.setZValue(0)
+        self.setCacheMode(QGraphicsItem.DeviceCoordinateCache)
         self.update_position()
         if canvas.editable:
             self.setFlag(QGraphicsItem.ItemIsSelectable)
@@ -171,6 +181,7 @@ class SelfEdgeItem(QGraphicsPathItem):
         pen.setWidth(2)
         self.setPen(pen)
         self.setZValue(0)
+        self.setCacheMode(QGraphicsItem.DeviceCoordinateCache)
         if canvas.editable:
             self.setFlag(QGraphicsItem.ItemIsSelectable)
         node.edges.append(self)
@@ -358,6 +369,7 @@ class CanvasWidget(QGraphicsView):
     ) -> None:
         """Initialize the canvas widget."""
         super().__init__(parent)
+        self.setViewportUpdateMode(QGraphicsView.MinimalViewportUpdate)
         self.editable = editable
         self.setScene(QGraphicsScene(self))
         self.setRenderHint(QPainter.Antialiasing)
@@ -432,6 +444,8 @@ class CanvasWidget(QGraphicsView):
             scene.addItem(item)
             item.update_lines()
         self.observers[idx] = item
+
+        self._update_label_visibility()
 
     def apply_diff(self, snapshot: ViewSnapshot) -> None:
         """Apply incremental updates from ``snapshot`` to the scene.
@@ -526,19 +540,18 @@ class CanvasWidget(QGraphicsView):
                 item.index = idx
                 item.update_position()
 
-    def update_hud(self, tick: int, depth: int, window: int) -> None:
+        self._update_label_visibility()
+
+    def update_hud(self, frame: int, depth: int, window: int) -> None:
         """Update the on-canvas HUD text."""
 
         if self._hud_item is not None:
-            self._hud_item.setText(
-                f"arrival-depth {tick} | depth {depth} | depth limit {window}"
-            )
+            self._hud_item.setText(f"frame {frame} | depth {depth} | window {window}")
 
     def highlight_closed_windows(self, events: list) -> None:
         """Temporarily highlight nodes referenced by closed window events."""
         for ev in events:
-            node_id = str(getattr(ev, "window_idx", ""))
-            item = self.nodes.get(node_id)
+            item = self.nodes.get(ev.v_id)
             if item is None:
                 continue
             original = item.brush()
@@ -549,6 +562,7 @@ class CanvasWidget(QGraphicsView):
     def wheelEvent(self, event: QWheelEvent) -> None:
         factor = 1.15 if event.angleDelta().y() > 0 else 1 / 1.15
         self.scale(factor, factor)
+        self._update_label_visibility()
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
         if event.button() == Qt.MiddleButton or (
@@ -623,6 +637,12 @@ class CanvasWidget(QGraphicsView):
                 scene_pos.x(),
                 scene_pos.y(),
             )
+
+    def _update_label_visibility(self) -> None:
+        scale = self.transform().m11()
+        visible = scale >= 0.5
+        for node in self.nodes.values():
+            node.label.setVisible(visible)
 
     def _finalize_connection(self, item: NodeItem, view_pos: QPoint) -> None:
         """Create a connection from ``_connect_start`` to ``item`` if allowed."""
