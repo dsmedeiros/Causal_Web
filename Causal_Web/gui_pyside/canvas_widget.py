@@ -370,6 +370,7 @@ class CanvasWidget(QGraphicsView):
         """Initialize the canvas widget."""
         super().__init__(parent)
         self.setViewportUpdateMode(QGraphicsView.MinimalViewportUpdate)
+        self.setOptimizationFlag(QGraphicsView.DontSavePainterState, True)
         self.editable = editable
         self.setScene(QGraphicsScene(self))
         self.setRenderHint(QPainter.Antialiasing)
@@ -560,9 +561,12 @@ class CanvasWidget(QGraphicsView):
 
     # ---- interaction -------------------------------------------------
     def wheelEvent(self, event: QWheelEvent) -> None:
+        """Zoom the view and disable antialiasing when zoomed far out."""
         factor = 1.15 if event.angleDelta().y() > 0 else 1 / 1.15
         self.scale(factor, factor)
         self._update_label_visibility()
+        scale_level = self.transform().m11()
+        self.setRenderHint(QPainter.Antialiasing, scale_level > 0.3)
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
         if event.button() == Qt.MiddleButton or (

@@ -301,7 +301,9 @@ class EngineAdapter:
         self._vertices.clear()
         self._scheduler.clear()
 
-    def step(self, max_events: int | None = None) -> TelemetryFrame:
+    def step(
+        self, max_events: int | None = None, *, collect_packets: bool = False
+    ) -> TelemetryFrame:
         """Advance the simulation until a window rolls or ``max_events``.
 
         This call is thread-safe so the UI can request snapshots while the
@@ -309,9 +311,13 @@ class EngineAdapter:
         """
 
         with self._lock:
-            return self.run_until_next_window_or(max_events)
+            return self.run_until_next_window_or(
+                max_events, collect_packets=collect_packets
+            )
 
-    def run_until_next_window_or(self, limit: int | None) -> TelemetryFrame:
+    def run_until_next_window_or(
+        self, limit: int | None, *, collect_packets: bool = False
+    ) -> TelemetryFrame:
         """Run until the next window boundary or until ``limit`` events.
 
         Arrivals targeting the same destination and window are grouped so that
@@ -361,7 +367,7 @@ class EngineAdapter:
             vid: data["lccm"].window_idx for vid, data in self._vertices.items()
         }
         events = 0
-        packets = []
+        packets: list[Packet] | None = [] if collect_packets else None
         edge_logs = 0
         decay_counter = 0
         decay_interval = self._cfg.epsilon_pairs.get("decay_interval", 32)
@@ -414,12 +420,13 @@ class EngineAdapter:
             alpha_list = [alpha_val]
             phase_list = [phase_val]
             U_list = [U_val]
-            pkt_list = [pkt]
+            pkt_list = [pkt] if collect_packets else []
+            pkt_count = 1
             edge_id_list = [edge_id]
             seq_list = [seq]
             window_idx = lccm.window_idx
             requeue: list[tuple[int, int, int, Packet]] = []
-            while self._scheduler and events + len(pkt_list) < limit:
+            while self._scheduler and events + pkt_count < limit:
                 d2, dst2, edge2, seq2, pkt2 = self._scheduler.pop()
                 if dst2 != dst:
                     requeue.append((d2, dst2, edge2, pkt2))
@@ -453,9 +460,11 @@ class EngineAdapter:
                     alpha_list.append(1.0)
                     phase_list.append(1.0 + 0.0j)
                     U_list.append(eye)
-                pkt_list.append(pkt2)
+                if collect_packets:
+                    pkt_list.append(pkt2)
                 edge_id_list.append(edge2)
                 seq_list.append(seq2)
+                pkt_count += 1
             for item in requeue:
                 self._scheduler.push(*item)
 
@@ -480,7 +489,7 @@ class EngineAdapter:
                 zip(q_int_arr.tolist(), theta_int_arr.tolist(), c_int_arr.tolist())
             )
 
-            if len(pkt_list) > 1:
+            if pkt_count > 1:
                 (
                     depth_v,
                     psi_acc,
@@ -547,7 +556,8 @@ class EngineAdapter:
             lccm.update_classical_metrics(bit_fraction, entropy, conf)
             is_q = lccm.layer == "Q"
             lccm.deliver(is_q)
-            packets.extend(pkt_list)
+            if collect_packets and packets is not None:
+                packets.extend(pkt_list)
 
             edge_intensity = defaultdict(lambda: (0.0, 0.0, 0.0))
             for idx, eid in enumerate(edge_id_list):
@@ -973,7 +983,7 @@ class EngineAdapter:
                     Packet(src=dst, dst=other, payload=payload_buf.copy()),
                 )
                 self._epairs.reinforce(dst, other)
-            events += len(pkt_list)
+            events += pkt_count
 
             if any(
                 data["lccm"].window_idx != start_windows[vid]
@@ -989,7 +999,10 @@ class EngineAdapter:
             max_window = max(max_window, lccm.window_idx)
 
         frame = TelemetryFrame(
-            depth=max_depth, events=events, packets=packets, window=max_window
+            depth=max_depth,
+            events=events,
+            packets=packets if collect_packets else None,
+            window=max_window,
         )
 
         depth_bucket = max_depth // 10
