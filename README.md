@@ -95,7 +95,6 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 1. Install dependencies:
    ```bash
    pip install -r requirements.txt
-   pip install pyside6 pyqtgraph
    ```
 2. Run the GUI:
    ```bash
@@ -112,7 +111,7 @@ via a Monte-Carlo path sampler over the graph's causal structure.
    - `--backend cupy` to enable GPU acceleration when available.
 
 ## Installation
-Clone the repository and install the packages listed in `requirements.txt`. The GUI requires PySide6 and an X11 compatible display.
+Clone the repository and install the packages listed in `requirements.txt`. The GUI requires an X11 compatible display.
 
 ## Usage
 Graphs are stored as JSON files under `Causal_Web/input/`. Each file defines
