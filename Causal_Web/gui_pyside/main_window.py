@@ -20,8 +20,10 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QComboBox,
 )
+import pyqtgraph as pg
 
 from ..config import Config, EngineMode
+from ..view import ViewSnapshot
 from ..graph.io import load_graph, save_graph, new_graph
 from ..graph.model import GraphModel
 from ..gui.state import (
@@ -34,6 +36,7 @@ from ..gui.state import (
     mark_graph_dirty,
 )
 from .canvas_widget import CanvasWidget
+from .engine_profile_panel import EngineProfileDock
 from .toolbar_builder import build_toolbar
 from ..gui.command_stack import AddNodeCommand, AddObserverCommand
 from ..engine.engine_v2.adapter import EngineAdapter
@@ -139,6 +142,9 @@ class MainWindow(QMainWindow):
         self._create_menus()
         self.edit_action.setEnabled(bool(get_graph().nodes))
         self._create_docks()
+        self._init_status_bar()
+        self._init_engine_profile()
+        self._init_telemetry()
         self._start_refresh_timer()
 
     # ---- UI setup ----
@@ -293,6 +299,34 @@ class MainWindow(QMainWindow):
         dock.setWidget(panel)
         self.addDockWidget(Qt.LeftDockWidgetArea, dock)
 
+    def _init_status_bar(self) -> None:
+        """Initialise the status bar with telemetry counters."""
+        bar = self.statusBar()
+        self._status_labels: dict[str, QLabel] = {
+            "frame": QLabel("Frame: 0"),
+            "events": QLabel("Events/sec: 0"),
+            "gates": QLabel("Gates: 0"),
+            "bridges": QLabel("Bridges: 0"),
+            "residual": QLabel("Residual: 0"),
+        }
+        for lbl in self._status_labels.values():
+            bar.addPermanentWidget(lbl)
+
+    def _init_engine_profile(self) -> None:
+        """Create dock showing the current engine configuration."""
+        self.engine_profile = EngineProfileDock(self)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.engine_profile)
+
+    def _init_telemetry(self) -> None:
+        """Set up lightweight real-time plots for counters."""
+        self.telemetry_dock = QDockWidget("Telemetry", self)
+        self.telemetry_plot = pg.PlotWidget(title="Events/sec")
+        self._telemetry_curve = self.telemetry_plot.plot(pen="y")
+        self._telemetry_x: list[int] = []
+        self._telemetry_y: list[float] = []
+        self.telemetry_dock.setWidget(self.telemetry_plot)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.telemetry_dock)
+
     def _start_refresh_timer(self) -> None:
         """Begin periodic updates of the simulation canvas."""
         self._refresh_timer = QTimer(self)
@@ -316,6 +350,14 @@ class MainWindow(QMainWindow):
                 self.window_label.setText(str(frame.window))
             if hasattr(self.sim_canvas, "update_hud"):
                 self.sim_canvas.update_hud(tick, frame.depth, frame.window)
+            snap = tick_engine.snapshot_for_ui()
+            self._update_status_bar(snap)
+            self.engine_profile.update_snapshot()
+            self._update_telemetry(snap)
+            if snap.closed_windows and hasattr(
+                self.sim_canvas, "highlight_closed_windows"
+            ):
+                self.sim_canvas.highlight_closed_windows(snap.closed_windows)
             model_dict = get_graph().to_dict()
         else:
             model_dict = (
@@ -335,6 +377,13 @@ class MainWindow(QMainWindow):
                         snap.frame,
                         window,
                     )
+                self._update_status_bar(snap)
+                self.engine_profile.update_snapshot()
+                self._update_telemetry(snap)
+                if snap.closed_windows and hasattr(
+                    self.sim_canvas, "highlight_closed_windows"
+                ):
+                    self.sim_canvas.highlight_closed_windows(snap.closed_windows)
         self.sim_canvas.load_model(GraphModel.from_dict(model_dict))
         if not running:
             self.start_button.setEnabled(get_active_file() is not None)
@@ -363,6 +412,29 @@ class MainWindow(QMainWindow):
     def _toggle_modular(self, value: str) -> None:
         """Show or hide the modular density selection."""
         self.modular_combo.setVisible(value == "modular")
+
+    def _update_status_bar(self, snap: ViewSnapshot) -> None:
+        """Refresh status bar telemetry from ``snap``."""
+        self._status_labels["frame"].setText(f"Frame: {snap.frame}")
+        self._status_labels["events"].setText(
+            f"Events/sec: {snap.counters.get('events_per_sec', 0):.1f}"
+        )
+        self._status_labels["gates"].setText(
+            f"Gates: {snap.counters.get('gates_fired', 0)}"
+        )
+        self._status_labels["bridges"].setText(
+            f"Bridges: {snap.counters.get('active_bridges', 0)}"
+        )
+        self._status_labels["residual"].setText(
+            f"Residual: {snap.counters.get('residual', 0):.2f}"
+        )
+
+    def _update_telemetry(self, snap: ViewSnapshot) -> None:
+        """Append counters to real-time plots."""
+        if "events_per_sec" in snap.counters:
+            self._telemetry_x.append(snap.frame)
+            self._telemetry_y.append(snap.counters["events_per_sec"])
+            self._telemetry_curve.setData(self._telemetry_x, self._telemetry_y)
 
     def start_simulation(self) -> None:
         """Persist the active graph and launch the simulation thread.

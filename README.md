@@ -1,8 +1,8 @@
 # Causal Web
 
-Causal Web is a simulation engine and GUI for experimenting with causal graphs. Nodes emit ticks that propagate through edges with delay and attenuation while observers infer hidden state from the resulting activity. Delays now retain sub-tick precision and are quantised only when scheduled, enabling finer-grained simulations. The project is written in Python and uses [PySide6](https://doc.qt.io/qtforpython/) for the graphical interface.
+Causal Web is a simulation engine and GUI for experimenting with causal graphs. Nodes emit frames that propagate through edges with delay and attenuation while observers infer hidden state from the resulting activity. Delays now retain sub-frame precision and are quantised only when scheduled, enabling finer-grained simulations. The project is written in Python and uses [PySide6](https://doc.qt.io/qtforpython/) for the graphical interface.
 
-Ticks carry both phase and amplitude. Their influence on interference and coherence is weighted by amplitude and each tick records the local `generation_tick` at which it was emitted.
+Frames carry both phase and amplitude. Their influence on interference and coherence is weighted by amplitude and each frame records the local `generation_tick` at which it was emitted.
 
 The engine now includes a lightweight quantum upgrade. Each node maintains a
 two-component complex state vector `psi` instead of a single phase, edges can
@@ -38,6 +38,10 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 
 ### Recent Changes
 
+- GUI now includes a status bar with frame metrics, an engine profile panel
+  and lightweight real-time plots using ``pyqtgraph``.
+- Visible "Tick" terminology has been replaced with "Frame" throughout the
+  interface and tooltips.
 - Added local Forman curvature diagnostics with per-region statistics and
   histogram logging.
 - Introduced a switchable delay mapping system with the existing logarithmic
@@ -86,7 +90,7 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 1. Install dependencies:
    ```bash
    pip install -r requirements.txt
-   pip install pyside6
+   pip install pyside6 pyqtgraph
    ```
 2. Run the GUI:
    ```bash
