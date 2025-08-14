@@ -66,10 +66,6 @@
   "tick_evaluation_log.json": "Evaluation results for each potential frame",
   "tick_propagation_log.json": "Frames travelling across edges",
   "tick_seed_log.json": "Activity injected by the seeder",
-  "smooth_phase": "Apply exponential smoothing to oscillator phases",
-  "enable_sip_child": "Enable SIP budding propagation",
-  "enable_sip_recomb": "Enable SIP recombination propagation",
-  "enable_csp": "Enable collapse seeded propagation",
   "detector_mode": "Perform binary measurements on entangled frames",
   "measurement_settings": "Comma separated list of measurement angles"
 }
