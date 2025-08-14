@@ -5,7 +5,7 @@
         "runs_dir": "../output/runs",
         "archive_dir": "../output/archive",
         "analysis_dir": "../output/analysis",
-        "ingest_dir": "../output/ingest",
+        "ingest_dir": "../output/ingest"
     },
     "graph_file": "graph.json",
     "tick_rate": 0.5,
@@ -44,7 +44,7 @@
         "b": 0.5,
         "k_rho": 0.0,
         "T_hold": 0.0,
-        "C_min": 0.0,
+        "C_min": 0.0
     },
     "rho_delay": {
         "alpha_d": 0.0,
@@ -53,15 +53,15 @@
         "gamma": 0.0,
         "rho0": 0.0,
         "inject_mode": "incoming",
-        "vectorized": true,
+        "vectorized": true
     },
     "rho": {
         "update_mode": "heuristic",
-        "variational": {"lambda_s": 0.2, "lambda_l": 0.01, "lambda_I": 1.0},
+        "variational": {"lambda_s": 0.2, "lambda_l": 0.01, "lambda_I": 1.0}
     },
     "lccm": {
         "mode": "thresholds",
-        "free_energy": {"k_theta": 1.0, "k_c": 1.0, "k_q": 0.2, "F_min": 0.3},
+        "free_energy": {"k_theta": 1.0, "k_c": 1.0, "k_q": 0.2, "F_min": 0.3}
     },
     "epsilon_pairs": {
         "delta_ttl": 8,
@@ -74,7 +74,7 @@
         "decay_interval": 32,
         "decay_on_window_close": true,
         "max_seeds_per_site": 64,
-        "emit_per_delivery": false,
+        "emit_per_delivery": false
     },
     "bell": {
         "mi_mode": "MI_strict",
@@ -84,7 +84,7 @@
         "beta_h": 0.0,
         "zeta_mode": "float",
         "alpha_R": 1.0,
-        "k_mod": 3,
+        "k_mod": 3
     },
     "ancestry": {"beta_m0": 0.1, "delta_m": 0.02},
     "theta_reset": "renorm",
@@ -92,14 +92,14 @@
     "propagation_control": {
         "enable_sip_child": true,
         "enable_sip_recomb": true,
-        "enable_csp": true,
+        "enable_csp": true
     },
     "database": {
         "host": "localhost",
         "port": 5432,
         "user": "postgres",
         "password": "P@th0B1027",
-        "dbname": "cwt_simulation",
+        "dbname": "cwt_simulation"
     },
     "log_files": {
         "tick": {
@@ -122,7 +122,7 @@
             "cluster_log": true,
             "classicalization_map": true,
             "structural_growth_log": true,
-            "bridge_state": true,
+            "bridge_state": true
         },
         "phenomena": {
             "bridge_state": true,
@@ -132,7 +132,7 @@
             "regional_pressure_map": true,
             "meta_node_ticks": true,
             "global_diagnostics": true,
-            "cluster_influence_matrix": true,
+            "cluster_influence_matrix": true
         },
         "event": {
             "bridge_rupture_log": true,
@@ -158,7 +158,7 @@
             "tick_propagation_log": true,
             "tick_delivery_log": true,
             "tick_seed_log": true,
-            "event_log": true,
-        },
-    },
+            "event_log": true
+        }
+    }
 }
