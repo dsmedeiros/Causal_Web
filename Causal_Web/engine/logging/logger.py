@@ -12,7 +12,11 @@ from ...config import Config
 
 
 class MetricAggregator:
-    """Aggregate event counts per frame and write ``metrics.csv``."""
+    """Aggregate event counts per frame and write ``metrics.csv``.
+
+    The CSV uses a *tall* layout with one row per ``(frame, category, count)``
+    tuple so the header remains stable across flushes.
+    """
 
     def __init__(self, path: Path) -> None:
         self.path = path
@@ -24,16 +28,16 @@ class MetricAggregator:
         self.counts[category] += 1
 
     def flush(self, frame: int) -> None:
-        """Write accumulated counts for ``frame`` to ``metrics.csv``."""
+        """Write tall ``(frame, category, count)`` rows to ``metrics.csv``."""
 
         self.path.parent.mkdir(parents=True, exist_ok=True)
         file_exists = self.path.exists()
-        with self.path.open("a", newline="") as fh:
-            fieldnames = ["frame", *sorted(self.counts.keys())]
-            writer = csv.DictWriter(fh, fieldnames=fieldnames)
+        with (self.path).open("a", newline="") as fh:
+            writer = csv.DictWriter(fh, fieldnames=["frame", "category", "count"])
             if not file_exists:
                 writer.writeheader()
-            writer.writerow({"frame": frame, **self.counts})
+            for category, count in sorted(self.counts.items()):
+                writer.writerow({"frame": frame, "category": category, "count": count})
         self.counts.clear()
 
 
