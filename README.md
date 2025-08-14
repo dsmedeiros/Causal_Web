@@ -40,6 +40,8 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 
 - GUI now includes a status bar with frame metrics, an engine profile panel
   and lightweight real-time plots using ``pyqtgraph``.
+- Canvas performance improved with minimal viewport updates, item caching and
+  label level-of-detail. HUD wording clarified and telemetry buffers capped.
 - Visible "Tick" terminology has been replaced with "Frame" throughout the
   interface and tooltips.
 - Added local Forman curvature diagnostics with per-region statistics and
@@ -116,9 +118,7 @@ Graphs are stored as JSON files under `Causal_Web/input/`. Each file defines
 schema and an example.
 
 The GUI allows interactive editing of graphs. Drag nodes to reposition them and use the toolbar to add connections or observers. After editing, click **Apply Changes** in the Graph View to update the simulation and save the file. Details on all GUI actions are provided in [docs/gui_usage.md](docs/gui_usage.md).
-During simulation a small HUD overlay reports the current arrival-depth, depth
-and depth limit when using the v2 engine, offering immediate feedback on
-scheduler progress.
+During simulation a small HUD overlay reports the current frame, depth and window when using the v2 engine, offering immediate feedback on scheduler progress.
 Nodes can optionally enable self-connections via a checkbox in the node panel. When enabled, dragging from a node back onto itself creates a curved edge.
 Bridges now support an `Entanglement Enabled` option. When selected, the bridge
 is tagged with an `entangled_id` used by observers to generate deterministic
