@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import Qt, QTimer, QThread
 from PySide6.QtGui import QAction, QKeySequence, QShortcut, QCloseEvent
 from PySide6.QtWidgets import (
     QApplication,
@@ -40,6 +40,7 @@ from .engine_profile_panel import EngineProfileDock
 from .toolbar_builder import build_toolbar
 from ..gui.command_stack import AddNodeCommand, AddObserverCommand
 from ..engine.engine_v2.adapter import EngineAdapter
+from .engine_worker import EngineWorker
 from .shared import TooltipCheckBox, TOOLTIPS
 
 tick_engine = EngineAdapter()
@@ -147,7 +148,20 @@ class MainWindow(QMainWindow):
         self._init_telemetry()
         self._start_refresh_timer()
 
+        self._engine_thread = QThread(self)
+        self._engine_worker = EngineWorker(tick_engine)
+        self._engine_worker.moveToThread(self._engine_thread)
+        self._engine_thread.started.connect(self._engine_worker.run)
+        self._engine_worker.snapshot_ready.connect(self._handle_engine_update)
+        self._engine_thread.start()
+
     # ---- UI setup ----
+
+    def closeEvent(self, event: QCloseEvent) -> None:  # type: ignore[override]
+        """Stop the engine worker before closing."""
+        self._engine_worker.stop()
+        self._engine_thread.wait()
+        super().closeEvent(event)
 
     def _create_menus(self) -> None:
         menubar = self.menuBar()
@@ -334,23 +348,49 @@ class MainWindow(QMainWindow):
         self._refresh_timer.timeout.connect(self._refresh_sim_canvas)
         self._refresh_timer.start()
 
+    def _handle_engine_update(self) -> None:
+        """Update the UI when the worker emits a new snapshot."""
+        snap = self._engine_worker.latest_snapshot()
+        if snap is None:
+            return
+        tick = tick_engine.current_frame()
+        Config.current_tick = tick
+        self.tick_label.setText(str(tick))
+        if hasattr(self, "depth_label"):
+            self.depth_label.setText(str(snap.frame))
+        window = snap.counters.get("window", 0)
+        if hasattr(self, "window_label"):
+            self.window_label.setText(str(window))
+        if hasattr(self.sim_canvas, "update_hud"):
+            self.sim_canvas.update_hud(tick, snap.frame, window)
+        self._update_status_bar(snap)
+        self.engine_profile.update_snapshot()
+        self._update_telemetry(snap)
+        if snap.closed_windows and hasattr(self.sim_canvas, "highlight_closed_windows"):
+            self.sim_canvas.highlight_closed_windows(snap.closed_windows)
+        model_dict = (
+            tick_engine.graph.to_dict() if Config.is_running else get_graph().to_dict()
+        )
+        self.sim_canvas.load_model(GraphModel.from_dict(model_dict))
+
     def _refresh_sim_canvas(self) -> None:
-        """Reload the canvas from the appropriate graph and update tick label."""
+        """Reload the canvas from the appropriate graph when idle."""
         with Config.state_lock:
             running = Config.is_running
             tick = Config.current_tick
         if Config.engine_mode == EngineMode.V2 and running:
-            frame = tick_engine.step()
-            tick = tick_engine.current_frame()
-            Config.current_tick = tick
-            self.tick_label.setText(str(tick))
-            if hasattr(self, "depth_label"):
-                self.depth_label.setText(str(frame.depth))
-            if hasattr(self, "window_label"):
-                self.window_label.setText(str(frame.window))
-            if hasattr(self.sim_canvas, "update_hud"):
-                self.sim_canvas.update_hud(tick, frame.depth, frame.window)
+            return
+        model_dict = tick_engine.graph.to_dict() if running else get_graph().to_dict()
+        self.tick_label.setText(str(tick))
+        if Config.engine_mode == EngineMode.V2:
             snap = tick_engine.snapshot_for_ui()
+            if hasattr(self, "depth_label"):
+                self.depth_label.setText(str(snap.frame))
+            window = snap.counters.get("window", 0)
+            if hasattr(self, "window_label"):
+                self.window_label.setText(str(window))
+            if hasattr(self.sim_canvas, "update_hud"):
+                self.sim_canvas.update_hud(tick, snap.frame, window)
             self._update_status_bar(snap)
             self.engine_profile.update_snapshot()
             self._update_telemetry(snap)
@@ -358,32 +398,6 @@ class MainWindow(QMainWindow):
                 self.sim_canvas, "highlight_closed_windows"
             ):
                 self.sim_canvas.highlight_closed_windows(snap.closed_windows)
-            model_dict = get_graph().to_dict()
-        else:
-            model_dict = (
-                tick_engine.graph.to_dict() if running else get_graph().to_dict()
-            )
-            self.tick_label.setText(str(tick))
-            if Config.engine_mode == EngineMode.V2:
-                snap = tick_engine.snapshot_for_ui()
-                if hasattr(self, "depth_label"):
-                    self.depth_label.setText(str(snap.frame))
-                window = snap.counters.get("window", 0)
-                if hasattr(self, "window_label"):
-                    self.window_label.setText(str(window))
-                if hasattr(self.sim_canvas, "update_hud"):
-                    self.sim_canvas.update_hud(
-                        tick,
-                        snap.frame,
-                        window,
-                    )
-                self._update_status_bar(snap)
-                self.engine_profile.update_snapshot()
-                self._update_telemetry(snap)
-                if snap.closed_windows and hasattr(
-                    self.sim_canvas, "highlight_closed_windows"
-                ):
-                    self.sim_canvas.highlight_closed_windows(snap.closed_windows)
         self.sim_canvas.load_model(GraphModel.from_dict(model_dict))
         if not running:
             self.start_button.setEnabled(get_active_file() is not None)
