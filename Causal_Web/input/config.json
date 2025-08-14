@@ -24,18 +24,9 @@
     "tick_threshold": 1,
     "refractory_period": 2.0,
     "tick_decay_factor": 1.0,
-    "smooth_phase": false,
-    "phase_smoothing_alpha": 0.1,
     "total_max_concurrent_firings": 0,
     "max_concurrent_firings_per_cluster": 0,
     "edge_weight_range": [1.0, 1.0],
-    "use_dynamic_density": false,
-    "density_radius": 1,
-    "delay_density_scaling": 1.0,
-    "density_calc": "local_tick_saturation",
-    "traffic_decay": 0.9,
-    "traffic_weight": 0.1,
-    "density_overlay_file": null,
     "windowing": {
         "W0": 0.0,
         "zeta1": 0.0,
@@ -89,11 +80,6 @@
     "ancestry": {"beta_m0": 0.1, "delta_m": 0.02},
     "theta_reset": "renorm",
     "max_deque": 8,
-    "propagation_control": {
-        "enable_sip_child": true,
-        "enable_sip_recomb": true,
-        "enable_csp": true
-    },
     "database": {
         "host": "localhost",
         "port": 5432,

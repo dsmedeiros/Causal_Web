@@ -287,16 +287,6 @@ using an exponentially weighted moving average of neighbour densities.  The
 function maintains ``M_v`` and ``W_v`` per vertex and rate-limits adjustments to
 avoid oscillation while keeping memory usage ``O(1)``.
 
-The `density_calc` option controls how edge density is computed. Set one of:
-
-- `local_tick_saturation` (default) – density increases with recent traffic
-- `modular-<mode>` – use a registered modular function (`tick_history`,
-  `node_coherence`, `spatial_field`, `bridge_saturation`)
-- `manual_overlay` – sample values from an external overlay file defined by
-  `density_overlay_file`.
-
-`density_calc` can also be specified via `--density-calc` on the command line.
-
 Amplitude energy now feeds a stress–energy field that scales edge delay by
 ``1 + κρ``. This density diffuses each scheduler step with weight
 ``Config.density_diffusion_weight`` (``α``).
@@ -404,21 +394,6 @@ The resulting `*_sweep.csv` and `*_heatmap.png` files summarise Bell scores,
 interference visibility and proper-time ratios. Sweeps seed module-level random
 generators, so parallel sweeps should run in separate processes to avoid
 contention.
-
-### Phase smoothing
-
-The `smooth_phase` option applies exponential decay to each node's internal
-oscillator phase. Enable it from the GUI control panel or set `"smooth_phase":
-true` in `Causal_Web/input/config.json`.
-
-### Propagation control
-
-Check boxes on the control panel allow SIP budding, SIP recombination and
-collapse seeded propagation to be disabled independently. The
-`propagation_control` section of `Causal_Web/input/config.json` contains
-`enable_sip_child`, `enable_sip_recomb` and `enable_csp` flags. These can also
-be toggled via the CLI using `--disable-sip-child`, `--disable-sip-recomb` and
-`--disable-csp`.
 
 ## Contributing
 Unit tests live under `tests/` and can be run with `pytest`. Coding guidelines and packaging instructions are documented in [AGENTS.md](AGENTS.md) and [docs/developer_guide.md](docs/developer_guide.md).

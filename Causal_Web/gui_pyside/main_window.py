@@ -18,7 +18,6 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QWidget,
     QVBoxLayout,
-    QComboBox,
 )
 import pyqtgraph as pg
 
@@ -41,7 +40,6 @@ from .toolbar_builder import build_toolbar
 from ..gui.command_stack import AddNodeCommand, AddObserverCommand
 from ..engine.engine_v2.adapter import EngineAdapter
 from .engine_worker import EngineWorker
-from .shared import TooltipCheckBox, TOOLTIPS
 
 tick_engine = EngineAdapter()
 
@@ -243,58 +241,6 @@ class MainWindow(QMainWindow):
         self.limit_spin.setValue(Config.max_ticks)
         layout.addRow("Depth Limit", self.limit_spin)
 
-        self.smooth_phase_cb = TooltipCheckBox(
-            "Smooth Phase", TOOLTIPS.get("smooth_phase")
-        )
-        self.smooth_phase_cb.setChecked(getattr(Config, "smooth_phase", False))
-        layout.addRow(self.smooth_phase_cb)
-
-        self.sip_child_cb = TooltipCheckBox(
-            "SIP Budding", TOOLTIPS.get("enable_sip_child")
-        )
-        self.sip_child_cb.setChecked(
-            Config.propagation_control.get("enable_sip_child", True)
-        )
-        layout.addRow(self.sip_child_cb)
-
-        self.sip_recomb_cb = TooltipCheckBox(
-            "SIP Recombination", TOOLTIPS.get("enable_sip_recomb")
-        )
-        self.sip_recomb_cb.setChecked(
-            Config.propagation_control.get("enable_sip_recomb", True)
-        )
-        layout.addRow(self.sip_recomb_cb)
-
-        self.csp_cb = TooltipCheckBox("CSP", TOOLTIPS.get("enable_csp"))
-        self.csp_cb.setChecked(Config.propagation_control.get("enable_csp", True))
-        layout.addRow(self.csp_cb)
-
-        self.density_combo = QComboBox()
-        self.density_combo.addItems(
-            [
-                "local_tick_saturation",
-                "manual_overlay",
-                "modular",
-            ]
-        )
-        self.density_combo.setCurrentText(
-            getattr(Config, "density_calc", "local_tick_saturation")
-        )
-        self.density_combo.currentTextChanged.connect(self._toggle_modular)
-        layout.addRow("Density Strategy", self.density_combo)
-
-        self.modular_combo = QComboBox()
-        self.modular_combo.addItems(
-            [
-                "tick_history",
-                "node_coherence",
-                "spatial_field",
-                "bridge_saturation",
-            ]
-        )
-        self.modular_combo.setVisible(self.density_combo.currentText() == "modular")
-        layout.addRow("Modular Mode", self.modular_combo)
-
         self.start_button = QPushButton("Start Simulation")
         self.start_button.clicked.connect(self.start_simulation)
         self.start_button.setEnabled(get_active_file() is not None)
@@ -433,10 +379,6 @@ class MainWindow(QMainWindow):
         Config.tick_rate = value
         self.tick_slider.setValue(int(value))
 
-    def _toggle_modular(self, value: str) -> None:
-        """Show or hide the modular density selection."""
-        self.modular_combo.setVisible(value == "modular")
-
     def _update_status_bar(self, snap: ViewSnapshot) -> None:
         """Refresh status bar telemetry from ``snap``."""
         self._status_labels["frame"].setText(f"Frame: {snap.frame}")
@@ -481,14 +423,6 @@ class MainWindow(QMainWindow):
         clear_graph_dirty()
         mark_graph_dirty()
         Config.new_run()
-        Config.smooth_phase = self.smooth_phase_cb.isChecked()
-        Config.propagation_control["enable_sip_child"] = self.sip_child_cb.isChecked()
-        Config.propagation_control["enable_sip_recomb"] = self.sip_recomb_cb.isChecked()
-        Config.propagation_control["enable_csp"] = self.csp_cb.isChecked()
-        strategy = self.density_combo.currentText()
-        if strategy == "modular":
-            strategy = f"modular-{self.modular_combo.currentText()}"
-        Config.density_calc = strategy
         Config.max_ticks = self.limit_spin.value()
         if Config.engine_mode == EngineMode.V2:
             tick_engine.build_graph(Config.graph_file)

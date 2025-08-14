@@ -39,9 +39,6 @@ class Config:
 
     Attributes
     ----------
-    propagation_control:
-        Dictionary containing ``enable_sip`` and ``enable_csp`` flags used to
-        toggle the two propagation mechanisms.
     log_interval:
         Number of ticks between metric log writes and graph snapshots.
     headless:
@@ -460,13 +457,6 @@ class Config:
     random_seed: int | None = None
     thread_count = 1
     log_verbosity = "info"
-    use_dynamic_density = False
-    density_radius = 1
-    delay_density_scaling = 1.0
-    density_calc = "local_tick_saturation"
-    traffic_decay = 0.9
-    traffic_weight = 0.1
-    density_overlay_file: str | None = None
     # interval between metric logs
     log_interval = 1
     # disable observers and intermediate logging when True
@@ -489,23 +479,6 @@ class Config:
         "phase_offsets": {},  # per-node phase offsets when strategy == "static"
     }
 
-    # SIP recombination
-    SIP_RECOMB_MIN_TRUST = 0.75
-    SIP_MUTATION_SCALE = 0.005
-
-    # SIP failure
-    SIP_STABILIZATION_WINDOW = 5
-    SIP_FAILURE_ENTROPY_INJECTION = 0.1
-
-    # CSP
-    CSP_RADIUS = 80
-    CSP_MAX_NODES = 3
-    CSP_TICK_BURST = 25
-    CSP_STABILIZATION_WINDOW = 6
-    CSP_COLLAPSE_INTENSITY_THRESHOLD = 0.4
-    CSP_DECOHERENCE_THRESHOLD = 0.3
-    CSP_ENTROPY_INJECTION = 0.2
-
     # Propagation limits
     max_children_per_node = 0  # 0 disables limit
 
@@ -514,10 +487,6 @@ class Config:
 
     # Decay factor for stored tick energy per tick
     tick_decay_factor = 1.0
-
-    # Phase smoothing
-    smooth_phase = False
-    phase_smoothing_alpha = 0.1
 
     # Natural propagation limits
     max_cumulative_delay = 25
@@ -540,13 +509,6 @@ class Config:
 
     # Range for per-edge weights influencing delay/attenuation
     edge_weight_range = [1.0, 1.0]
-
-    # Toggle propagation mechanisms
-    propagation_control = {
-        "enable_sip_child": True,
-        "enable_sip_recomb": True,
-        "enable_csp": True,
-    }
 
     # Database connection details
     database = {

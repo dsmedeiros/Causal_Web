@@ -35,28 +35,6 @@ def test_logging_mode_filters_categories():
         Config.log_files = original_files
 
 
-def test_load_smooth_phase_flag(tmp_path):
-    cfg = tmp_path / "config.json"
-    cfg.write_text(json.dumps({"smooth_phase": True}))
-    original = getattr(Config, "smooth_phase", False)
-    Config.load_from_file(str(cfg))
-    try:
-        assert Config.smooth_phase is True
-    finally:
-        Config.smooth_phase = original
-
-
-def test_load_propagation_flags(tmp_path):
-    cfg = tmp_path / "config.json"
-    cfg.write_text(json.dumps({"propagation_control": {"enable_sip_child": False}}))
-    original = Config.propagation_control.copy()
-    Config.load_from_file(str(cfg))
-    try:
-        assert Config.propagation_control["enable_sip_child"] is False
-    finally:
-        Config.propagation_control = original
-
-
 def test_load_engine_mode_and_param_groups(tmp_path):
     cfg = tmp_path / "config.json"
     cfg.write_text(
