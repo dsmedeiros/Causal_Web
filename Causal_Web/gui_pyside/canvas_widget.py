@@ -46,6 +46,7 @@ from ..gui.command_stack import (
     DeleteObserverCommand,
     DeleteMetaNodeCommand,
 )
+from ..view import ViewSnapshot
 
 
 def make_dashed_line(x1: float, y1: float, x2: float, y2: float) -> QGraphicsLineItem:
@@ -361,6 +362,7 @@ class CanvasWidget(QGraphicsView):
         self.setScene(QGraphicsScene(self))
         self.setRenderHint(QPainter.Antialiasing)
         self.nodes: Dict[str, NodeItem] = {}
+        self.edges: Dict[tuple[str, str], EdgeItem | SelfEdgeItem] = {}
         self.meta_nodes: Dict[str, MetaNodeItem] = {}
         self.observers: Dict[int, ObserverItem] = {}
         self.model: GraphModel = GraphModel.blank()
@@ -389,6 +391,7 @@ class CanvasWidget(QGraphicsView):
             return
         scene.clear()
         self.nodes.clear()
+        self.edges.clear()
         self.meta_nodes.clear()
         self.observers.clear()
         if self._hud_item is not None:
@@ -402,13 +405,17 @@ class CanvasWidget(QGraphicsView):
             self.nodes[node_id] = item
 
         for idx, edge in enumerate(model.edges):
-            src = self.nodes.get(edge.get("from"))
-            dst = self.nodes.get(edge.get("to"))
+            src_id = edge.get("from")
+            dst_id = edge.get("to")
+            src = self.nodes.get(src_id)
+            dst = self.nodes.get(dst_id)
             if src and dst:
                 if src is dst:
-                    scene.addItem(SelfEdgeItem(src, self, idx))
+                    item = SelfEdgeItem(src, self, idx)
                 else:
-                    scene.addItem(EdgeItem(src, dst, self, idx, "edge"))
+                    item = EdgeItem(src, dst, self, idx, "edge")
+                scene.addItem(item)
+                self.edges[(src_id, dst_id)] = item
 
         for meta_id, data in model.meta_nodes.items():
             x, y = data.get("x", 0.0), data.get("y", 0.0)
@@ -425,6 +432,99 @@ class CanvasWidget(QGraphicsView):
             scene.addItem(item)
             item.update_lines()
         self.observers[idx] = item
+
+    def apply_diff(self, snapshot: ViewSnapshot) -> None:
+        """Apply incremental updates from ``snapshot`` to the scene.
+
+        Nodes and edges referenced in the snapshot are refreshed in-place using
+        cached ``NodeItem`` and ``EdgeItem`` instances. Items are created or
+        removed if the underlying :class:`GraphModel` now contains or lacks the
+        corresponding entries.
+        """
+
+        scene = self.scene()
+        if scene is None:
+            return
+
+        for view in snapshot.changed_nodes:
+            node_id = view.id
+            data = self.model.nodes.get(node_id)
+            item = self.nodes.get(node_id)
+            if data is None:
+                if item is not None:
+                    for edge in list(item.edges):
+                        if isinstance(edge, SelfEdgeItem):
+                            key = (node_id, node_id)
+                            self.edges.pop(key, None)
+                        else:
+                            key = (edge.source.node_id, edge.target.node_id)
+                            self.edges.pop(key, None)
+                            edge.source.edges.remove(edge)
+                            if edge.target is not edge.source:
+                                edge.target.edges.remove(edge)
+                        scene.removeItem(edge)
+                    scene.removeItem(item)
+                    self.nodes.pop(node_id, None)
+                    self.update_meta_lines_for_node(node_id)
+                    self.update_observer_lines_for_node(node_id)
+                continue
+
+            x, y = data.get("x", 0.0), data.get("y", 0.0)
+            if item is None:
+                new_item = NodeItem(node_id, x, y, self)
+                scene.addItem(new_item)
+                self.nodes[node_id] = new_item
+                item = new_item
+            else:
+                item.setPos(QPointF(x, y))
+            self.update_meta_lines_for_node(node_id)
+            self.update_observer_lines_for_node(node_id)
+
+        for view in snapshot.changed_edges:
+            key = (view.src, view.dst)
+            data = next(
+                (
+                    e
+                    for e in self.model.edges
+                    if e.get("from") == view.src and e.get("to") == view.dst
+                ),
+                None,
+            )
+            item = self.edges.get(key)
+            if data is None:
+                if item is not None:
+                    if isinstance(item, SelfEdgeItem):
+                        node = item.node
+                        node.edges.remove(item)
+                    else:
+                        item.source.edges.remove(item)
+                        item.target.edges.remove(item)
+                    scene.removeItem(item)
+                    self.edges.pop(key, None)
+                continue
+
+            src = self.nodes.get(view.src)
+            dst = self.nodes.get(view.dst)
+            if src is None or dst is None:
+                continue
+            idx = next(
+                (
+                    i
+                    for i, e in enumerate(self.model.edges)
+                    if e.get("from") == view.src and e.get("to") == view.dst
+                ),
+                -1,
+            )
+            if item is None:
+                if src is dst:
+                    new_edge = SelfEdgeItem(src, self, idx)
+                else:
+                    new_edge = EdgeItem(src, dst, self, idx, "edge")
+                scene.addItem(new_edge)
+                self.edges[key] = new_edge
+            else:
+                item.index = idx
+                item.update_position()
 
     def update_hud(self, tick: int, depth: int, window: int) -> None:
         """Update the on-canvas HUD text."""
