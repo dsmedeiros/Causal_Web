@@ -1,7 +1,13 @@
+cupy
 matplotlib
 networkx
 numpy
 pandas
 pydantic
+psycopg2
+pyqtgraph
+PySide6
 pytest
 pyyaml
+ray
+zstandard
