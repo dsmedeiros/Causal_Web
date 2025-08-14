@@ -434,6 +434,17 @@ class CanvasWidget(QGraphicsView):
                 f"arrival-depth {tick} | depth {depth} | depth limit {window}"
             )
 
+    def highlight_closed_windows(self, events: list) -> None:
+        """Temporarily highlight nodes referenced by closed window events."""
+        for ev in events:
+            node_id = str(getattr(ev, "window_idx", ""))
+            item = self.nodes.get(node_id)
+            if item is None:
+                continue
+            original = item.brush()
+            item.setBrush(QBrush(Qt.red))
+            QTimer.singleShot(500, lambda it=item, br=original: it.setBrush(br))
+
     # ---- interaction -------------------------------------------------
     def wheelEvent(self, event: QWheelEvent) -> None:
         factor = 1.15 if event.angleDelta().y() > 0 else 1 / 1.15

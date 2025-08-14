@@ -62,6 +62,8 @@ class EngineAdapter:
         self._neigh_sums_cache: np.ndarray | None = None
         self._delay_changed: Set[int] = set()
         self._lock = threading.RLock()
+        self._last_snapshot_time = time.time()
+        self._last_frame = 0
 
     # ------------------------------------------------------------------
     def _splitmix64(self, x: int) -> int:
@@ -1142,7 +1144,21 @@ class EngineAdapter:
                 lccm = data["lccm"]
                 max_depth = max(max_depth, lccm.depth)
                 max_window = max(max_window, lccm.window_idx)
-            return ViewSnapshot(frame=max_depth, counters={"window": max_window})
+            now = time.time()
+            elapsed = now - self._last_snapshot_time
+            events_per_sec = 0.0
+            if elapsed > 0:
+                events_per_sec = (self._frame - self._last_frame) / elapsed
+            self._last_snapshot_time = now
+            self._last_frame = self._frame
+            counters = {
+                "window": max_window,
+                "events_per_sec": events_per_sec,
+                "gates_fired": getattr(self._epairs, "gates_fired", 0),
+                "active_bridges": len(getattr(self._epairs, "active_bridges", [])),
+                "residual": getattr(self._epairs, "residual", 0.0),
+            }
+            return ViewSnapshot(frame=max_depth, counters=counters)
 
     def current_depth(self) -> int:
         """Return the current depth of the simulation."""

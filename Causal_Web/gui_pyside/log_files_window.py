@@ -24,7 +24,7 @@ LOG_TIPS: dict[str, str] = {
     "bridge_dynamics_log.json": "State changes for each bridge.",
     "bridge_reformation_log.json": "Bridges reforming after rupture.",
     "bridge_rupture_log.json": "Details of bridge failures.",
-    "bridge_state.json": "Snapshot of all bridge states per tick.",
+    "bridge_state.json": "Snapshot of all bridge states per frame.",
     "cluster_log.json": "Hierarchical clustering results.",
     "coherence_log.json": "Node coherence values.",
     "coherence_velocity_log.json": "Change in coherence between frames.",
@@ -79,7 +79,7 @@ class LogFilesWindow(QMainWindow):
         layout.addLayout(btn_layout)
 
         interval_row = QHBoxLayout()
-        interval_label = QLabel("Log Interval")
+        interval_label = QLabel("Log Interval (frames)")
         self.interval_spin = QSpinBox()
         self.interval_spin.setMinimum(1)
         self.interval_spin.setMaximum(1000)
@@ -110,7 +110,8 @@ class LogFilesWindow(QMainWindow):
             checks.addWidget(header)
             for name in names:
                 desc = LOG_TIPS.get(f"{name}.json", "")
-                cb = TooltipCheckBox(name, desc)
+                display_name = name.replace("tick", "frame")
+                cb = TooltipCheckBox(display_name, desc)
                 category = "event" if title == "Events" else title.lower()
                 checked = Config.log_files.get(category, {}).get(name, True)
                 cb.setChecked(checked)
