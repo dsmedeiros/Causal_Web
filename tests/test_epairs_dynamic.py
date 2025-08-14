@@ -17,6 +17,8 @@ def _make_manager():
         lambda_decay=0.5,
         sigma_reinforce=0.2,
         sigma_min=0.1,
+        sample_seed_rate=1.0,
+        sample_bridge_rate=1.0,
     )
 
 
@@ -209,6 +211,8 @@ def test_seed_logging(monkeypatch):
         lambda_decay=0.5,
         sigma_reinforce=0.2,
         sigma_min=0.1,
+        sample_seed_rate=1.0,
+        sample_bridge_rate=1.0,
     )
 
     # expiry drop
@@ -324,6 +328,8 @@ def test_seed_list_capped(monkeypatch, caplog):
         sigma_reinforce=0.2,
         sigma_min=0.1,
         max_seeds_per_site=2,
+        sample_seed_rate=1.0,
+        sample_bridge_rate=1.0,
     )
     edges = {"dst": [5], "d_eff": [1]}
     with caplog.at_level(logging.WARNING):
