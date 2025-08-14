@@ -263,7 +263,10 @@ existing ingestion remains compatible.
 
 The adapter exposes methods like `build_graph`, `step`, `pause` and
 `snapshot_for_ui` (returning a `ViewSnapshot` dataclass) to remain drop-in
-compatible.  Internally a depth-based
+compatible. Snapshots include the identifiers of nodes and edges touched since
+the previous call along with any closed window events, allowing the GUI to
+incrementally update its model. Energy conservation residuals are also tracked
+per window and surfaced via the snapshot counters. Internally a depth-based
 scheduler orders packets by their arrival depth and advances vertex windows
 using the Local Causal Consistency Model (LCCM).  The LCCM computes a window
 size ``W(v)`` from the vertex's incident degree (fan-in plus fan-out) and local
