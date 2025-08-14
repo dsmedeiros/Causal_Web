@@ -10,7 +10,7 @@ to remove outdated hooks from the legacy engine.
 from __future__ import annotations
 
 from typing import Any, Dict, Iterable, List, Optional, Set
-from collections import deque, defaultdict
+from collections import deque, defaultdict, OrderedDict
 import threading
 import time
 import random
@@ -62,6 +62,8 @@ class EngineAdapter:
         self._packet_buf: Dict[str, Any] = {}
         self._edge_buf: Dict[str, Any] = {}
         self._payload_buf: Dict[str, Any] = {}
+        self._psi_arr_pool: OrderedDict[int, np.ndarray] = OrderedDict()
+        self._p_arr_pool: OrderedDict[int, np.ndarray] = OrderedDict()
         self._neigh_sums_cache: np.ndarray | None = None
         self._delay_changed: Set[int] = set()
         self._lock = threading.RLock()
@@ -73,6 +75,25 @@ class EngineAdapter:
         self._energy_totals: Dict[int, float] = {}
         self._residuals: Dict[int, float] = {}
         self._residual: float = 0.0
+
+    # ------------------------------------------------------------------
+    def _get_pool_arr(
+        self,
+        pool: OrderedDict[int, np.ndarray],
+        length: int,
+        rows: int,
+        dtype: np.dtype,
+    ) -> np.ndarray:
+        """Return a reusable array from ``pool`` with at least ``rows`` rows."""
+
+        arr = pool.get(length)
+        if arr is None or arr.shape[0] < rows:
+            new_rows = max(rows, arr.shape[0] * 2 if arr is not None else rows)
+            arr = np.empty((new_rows, length), dtype=dtype)
+            pool[length] = arr
+            while len(pool) > 4:
+                pool.popitem(last=False)
+        return arr
 
     # ------------------------------------------------------------------
     def _splitmix64(self, x: int) -> int:
@@ -473,15 +494,24 @@ class EngineAdapter:
 
             U_arr = np.asarray(U_list, dtype=np.complex64)
             phase_arr = np.asarray(phase_list, dtype=np.complex64)
-            psi_arr = np.asarray(psi_list, dtype=np.complex64)
+            alpha_arr = np.asarray(alpha_list, dtype=np.float32)
+            psi_len = len(psi_list[0]) if psi_list else 0
+            psi_buf = self._get_pool_arr(
+                self._psi_arr_pool, psi_len, pkt_count, np.complex64
+            )
+            for i, psi_vec in enumerate(psi_list):
+                psi_buf[i] = psi_vec
             mu_arr, kappa_arr, psi_rot_arr = phase_stats_batch(
-                U_arr, phase_arr, psi_arr
+                U_arr, phase_arr, psi_buf[:pkt_count]
             )
             mu_list = mu_arr.tolist()
             kappa_list = kappa_arr.tolist()
 
-            p_arr = np.asarray(p_list, dtype=np.float32)
-            theta_vals = np.sum(np.abs(p_arr), axis=1)
+            p_len = len(p_list[0]) if p_list else 0
+            p_buf = self._get_pool_arr(self._p_arr_pool, p_len, pkt_count, np.float32)
+            for i, p_vec in enumerate(p_list):
+                p_buf[i] = p_vec
+            theta_vals = np.sum(np.abs(p_buf[:pkt_count]), axis=1)
             theta_int_arr = np.minimum(1.0, theta_vals)
             theta_mean = float(np.mean(theta_vals)) if len(theta_vals) else 0.0
             theta_mean = min(1.0, theta_mean)
@@ -503,13 +533,13 @@ class EngineAdapter:
                     vertex["psi_acc"],
                     vertex["p_v"],
                     vertex["bit_deque"],
-                    psi_list,
-                    p_list,
+                    psi_buf[:pkt_count],
+                    p_buf[:pkt_count],
                     bit_list,
                     depth_list,
-                    alpha_list,
-                    phase_list,
-                    U_list,
+                    alpha_arr,
+                    phase_arr,
+                    U_arr,
                     max_deque=self._cfg.max_deque,
                     update_p=lccm.layer == "Θ",
                 )
