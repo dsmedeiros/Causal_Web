@@ -17,7 +17,7 @@ def test_step_returns_telemetry_frame():
     adapter = EngineAdapter()
     adapter.build_graph(graph)
     adapter._scheduler.push(0, 0, 0, Packet(0, 0))
-    frame = adapter.step(max_events=1)
+    frame = adapter.step(max_events=1, collect_packets=True)
 
     assert isinstance(frame, TelemetryFrame)
     assert frame.events == 1

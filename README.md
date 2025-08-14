@@ -79,6 +79,8 @@ via a Monte-Carlo path sampler over the graph's causal structure.
   from the public API.
 - `EngineAdapter` now exposes a `get_engine()` factory; the module no longer
   instantiates a global engine at import time.
+- `EngineAdapter.step` accepts a `collect_packets` flag to capture processed packets
+  for debugging; collection is disabled by default to reduce memory overhead.
 
 ## Table of Contents
 - [Quick Start](#quick-start)
