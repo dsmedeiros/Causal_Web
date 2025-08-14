@@ -43,6 +43,8 @@ via a Monte-Carlo path sampler over the graph's causal structure.
   and lightweight real-time plots using ``pyqtgraph``.
 - Canvas performance improved with minimal viewport updates, item caching and
   label level-of-detail. HUD wording clarified and telemetry buffers capped.
+- Fixed a startup crash in read-only mode where a stale HUD item was
+  re-added after clearing the scene.
 - Visible "Tick" terminology has been replaced with "Frame" throughout the
   interface and tooltips.
 - Added local Forman curvature diagnostics with per-region statistics and

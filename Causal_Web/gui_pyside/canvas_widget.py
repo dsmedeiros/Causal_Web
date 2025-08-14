@@ -392,11 +392,16 @@ class CanvasWidget(QGraphicsView):
         if not self.editable:
             scene = self.scene()
             if scene is not None:
-                self._hud_item = QGraphicsSimpleTextItem("")
-                self._hud_item.setBrush(QBrush(Qt.white))
-                self._hud_item.setZValue(2)
-                self._hud_item.setPos(5, 5)
+                self._hud_item = self._create_hud_item()
                 scene.addItem(self._hud_item)
+
+    def _create_hud_item(self) -> QGraphicsSimpleTextItem:
+        """Return a configured HUD text item for read-only mode."""
+        item = QGraphicsSimpleTextItem("")
+        item.setBrush(QBrush(Qt.white))
+        item.setZValue(2)
+        item.setPos(5, 5)
+        return item
 
     def load_model(self, model: GraphModel) -> None:
         """Populate the scene from ``model``."""
@@ -411,8 +416,8 @@ class CanvasWidget(QGraphicsView):
         self.meta_nodes.clear()
         self.observers.clear()
         if self._hud_item is not None:
+            self._hud_item = self._create_hud_item()
             scene.addItem(self._hud_item)
-            self._hud_item.setPos(5, 5)
 
         for node_id, data in model.nodes.items():
             x, y = data.get("x", 0.0), data.get("y", 0.0)
@@ -447,7 +452,7 @@ class CanvasWidget(QGraphicsView):
             item = ObserverItem(idx, x, y, targets, self)
             scene.addItem(item)
             item.update_lines()
-        self.observers[idx] = item
+            self.observers[idx] = item
 
         self._update_label_visibility()
 
