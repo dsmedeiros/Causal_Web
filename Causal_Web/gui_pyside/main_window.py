@@ -349,7 +349,11 @@ class MainWindow(QMainWindow):
         self._refresh_timer.start()
 
     def _handle_engine_update(self) -> None:
-        """Update the UI when the worker emits a new snapshot."""
+        """Update the UI when the worker emits a new snapshot.
+
+        The simulation canvas reuses the live engine graph while running to
+        avoid rebuilding a :class:`GraphModel` on every frame.
+        """
         snap = self._engine_worker.latest_snapshot()
         if snap is None:
             return
@@ -368,10 +372,11 @@ class MainWindow(QMainWindow):
         self._update_telemetry(snap)
         if snap.closed_windows and hasattr(self.sim_canvas, "highlight_closed_windows"):
             self.sim_canvas.highlight_closed_windows(snap.closed_windows)
-        model_dict = (
-            tick_engine.graph.to_dict() if Config.is_running else get_graph().to_dict()
-        )
-        self.sim_canvas.model = GraphModel.from_dict(model_dict)
+        if Config.is_running:
+            if self.sim_canvas.model is not tick_engine.graph:
+                self.sim_canvas.model = tick_engine.graph
+        else:
+            self.sim_canvas.model = GraphModel.from_dict(get_graph().to_dict())
         self.sim_canvas.apply_diff(snap)
 
     def _refresh_sim_canvas(self) -> None:
