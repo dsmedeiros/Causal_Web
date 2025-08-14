@@ -118,8 +118,13 @@ def _gate2_delay(
     return slope, float(tau)
 
 
-def _gate3_hysteresis() -> tuple[int, int, int]:
+def _gate3_hysteresis(cfg: Dict[str, float] | None = None) -> tuple[int, int, int]:
     """Return hysteresis transition depths for the LCCM model.
+
+    Parameters
+    ----------
+    cfg:
+        Optional configuration overriding ``W0``, ``C_min`` and ``T_hold``.
 
     Fan-in is swept upward until the layer transitions from ``Q`` to ``Θ``.
     Afterwards the system is held with ``EQ`` above ``C_min`` and zero additional
@@ -128,18 +133,19 @@ def _gate3_hysteresis() -> tuple[int, int, int]:
     (``q_to_theta_at - theta_to_q_at``) are returned.
     """
 
+    cfg = cfg or {}
     lccm = LCCM(
-        W0=2,
+        W0=int(cfg.get("W0", 2)),
         zeta1=0.0,
         zeta2=0.0,
         rho0=1.0,
         a=1.0,
         b=0.5,
-        C_min=1.0,
+        C_min=float(cfg.get("C_min", 1.0)),
         f_min=1.0,
         conf_min=0.0,
         H_max=1.0,
-        T_hold=2,
+        T_hold=int(cfg.get("T_hold", 2)),
         T_class=1,
     )
 
@@ -169,22 +175,29 @@ def _gate3_hysteresis() -> tuple[int, int, int]:
     return q_to_theta_at, theta_to_q_at, width
 
 
-def _gate4_metrics() -> Dict[str, float]:
+def _gate4_metrics(cfg: Dict[str, float] | None = None) -> Dict[str, float]:
     """Return basic ε-pair locality statistics.
+
+    Parameters
+    ----------
+    cfg:
+        Optional configuration overriding ``delta_ttl`` and bridge parameters
+        ``sigma0``, ``lambda_decay``, ``sigma_reinforce`` and ``sigma_min``.
 
     A small network is initialised and two seeds emitted so that a single
     bridge forms.  The bridge is then decayed while tracking its ``sigma``
     lifetime.  TTL compliance is verified during emission.
     """
 
+    cfg = cfg or {}
     mgr = EPairs(
-        delta_ttl=1,
+        delta_ttl=int(cfg.get("delta_ttl", 1)),
         ancestry_prefix_L=4,
         theta_max=0.1,
-        sigma0=1.0,
-        lambda_decay=0.5,
-        sigma_reinforce=0.2,
-        sigma_min=0.1,
+        sigma0=float(cfg.get("sigma0", 1.0)),
+        lambda_decay=float(cfg.get("lambda_decay", 0.5)),
+        sigma_reinforce=float(cfg.get("sigma_reinforce", 0.2)),
+        sigma_min=float(cfg.get("sigma_min", 0.1)),
     )
     edges = {"dst": [3], "d_eff": [1]}
     depth_emit = 0
@@ -339,7 +352,8 @@ def run_gates(config: Dict[str, float], which: List[int]) -> Dict[str, float]:
     ----------
     config:
         Engine configuration passed to the gate harness. ``config['bell']`` may
-        contain Bell experiment parameters used by Gate 6.
+        contain Bell experiment parameters used by Gate 6. ``config['gate3']``
+        and ``config['gate4']`` optionally override parameters for those gates.
     which:
         List of gate identifiers to execute. Supports gate IDs 1–6.
 
@@ -382,12 +396,14 @@ def run_gates(config: Dict[str, float], which: List[int]) -> Dict[str, float]:
         metrics["G2_delay_slope"] = slope
         metrics["G2_relax_tau"] = tau
     if 3 in which:
-        q2t, t2q, width = _gate3_hysteresis()
+        gate3_cfg = config.get("gate3", {}) if isinstance(config, dict) else {}
+        q2t, t2q, width = _gate3_hysteresis(gate3_cfg)
         metrics["G3_q_to_theta_at"] = float(q2t)
         metrics["G3_theta_to_q_at"] = float(t2q)
         metrics["G3_hysteresis_width"] = float(width)
     if 4 in which:
-        gate4 = _gate4_metrics()
+        gate4_cfg = config.get("gate4", {}) if isinstance(config, dict) else {}
+        gate4 = _gate4_metrics(gate4_cfg)
         metrics.update(gate4)
 
     energy1 = _energy_total()

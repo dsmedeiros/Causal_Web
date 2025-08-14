@@ -461,6 +461,35 @@ class EPairs:
             elif target < bridge.d_bridge:
                 bridge.d_bridge -= 1
 
+    def adjust_d_bridge(self, site: int) -> None:
+        """Nudge bridge delays incident on ``site`` toward local medians.
+
+        Parameters
+        ----------
+        site:
+            Vertex identifier whose incident edge delays were updated.
+        """
+
+        for partner in self.partners(site):
+            key = self._bridge_key(site, partner)
+            bridge = self.bridges.get(key)
+            if bridge is None:
+                continue
+            if self._incident_delay_cb is not None:
+                delays_site = list(self._incident_delay_cb(site))
+                delays_partner = list(self._incident_delay_cb(partner))
+            else:
+                delays_site = self._incident_delays.get(site, [])
+                delays_partner = self._incident_delays.get(partner, [])
+            delays = delays_site + delays_partner
+            if not delays:
+                continue
+            target = max(1, int(np.median(delays)))
+            if target > bridge.d_bridge:
+                bridge.d_bridge += 1
+            elif target < bridge.d_bridge:
+                bridge.d_bridge -= 1
+
     def decay_all(self) -> None:
         """Decay all bridges, removing those below :attr:`sigma_min`."""
 
