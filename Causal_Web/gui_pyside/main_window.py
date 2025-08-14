@@ -371,7 +371,8 @@ class MainWindow(QMainWindow):
         model_dict = (
             tick_engine.graph.to_dict() if Config.is_running else get_graph().to_dict()
         )
-        self.sim_canvas.load_model(GraphModel.from_dict(model_dict))
+        self.sim_canvas.model = GraphModel.from_dict(model_dict)
+        self.sim_canvas.apply_diff(snap)
 
     def _refresh_sim_canvas(self) -> None:
         """Reload the canvas from the appropriate graph when idle."""
@@ -382,6 +383,7 @@ class MainWindow(QMainWindow):
             return
         model_dict = tick_engine.graph.to_dict() if running else get_graph().to_dict()
         self.tick_label.setText(str(tick))
+        model = GraphModel.from_dict(model_dict)
         if Config.engine_mode == EngineMode.V2:
             snap = tick_engine.snapshot_for_ui()
             if hasattr(self, "depth_label"):
@@ -398,7 +400,10 @@ class MainWindow(QMainWindow):
                 self.sim_canvas, "highlight_closed_windows"
             ):
                 self.sim_canvas.highlight_closed_windows(snap.closed_windows)
-        self.sim_canvas.load_model(GraphModel.from_dict(model_dict))
+            self.sim_canvas.model = model
+            self.sim_canvas.apply_diff(snap)
+        else:
+            self.sim_canvas.load_model(model)
         if not running:
             self.start_button.setEnabled(get_active_file() is not None)
             self.pause_button.setEnabled(False)
