@@ -68,6 +68,7 @@ class EngineAdapter:
         self._changed_edges: Set[tuple[str, str]] = set()
         self._closed_windows: list[WindowEvent] = []
         self._energy_totals: Dict[int, float] = {}
+        self._residuals: Dict[int, float] = {}
         self._residual: float = 0.0
 
     # ------------------------------------------------------------------
@@ -1134,10 +1135,18 @@ class EngineAdapter:
                     metadata={"window_idx": lccm.window_idx},
                 )
                 E_total = EQ + E_theta + E_C + E_rho
-                prev = self._energy_totals.get(vid)
-                if prev is not None:
-                    self._residual = abs(E_total - prev)
+                prev = self._energy_totals.get(vid, 0.0)
+                leak_coeff = self._cfg.rho_delay.get("alpha_leak", 0.0)
+                leak = leak_coeff * prev
+                resid = E_total - prev - leak
+                alpha_res = self._cfg.windowing.get("alpha_residual", 0.1)
+                prev_res = self._residuals.get(vid, 0.0)
+                self._residuals[vid] = (1 - alpha_res) * prev_res + alpha_res * abs(
+                    resid
+                )
                 self._energy_totals[vid] = E_total
+                if self._residuals:
+                    self._residual = float(np.mean(list(self._residuals.values())))
                 self._closed_windows.append(
                     WindowEvent(v_id=str(vid), window_idx=lccm.window_idx)
                 )
@@ -1154,7 +1163,11 @@ class EngineAdapter:
         return frame
 
     def snapshot_for_ui(self) -> ViewSnapshot:
-        """Return a :class:`ViewSnapshot` capturing recent changes for the GUI."""
+        """Return a :class:`ViewSnapshot` capturing recent changes for the GUI.
+
+        The returned counters include an EWMA of the energy conservation
+        residual over recent window closures.
+        """
 
         with self._lock:
             max_depth = 0
