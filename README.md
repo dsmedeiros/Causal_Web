@@ -18,11 +18,12 @@ Engine v2 stores graph data in a struct-of-arrays format using `float32` and
 accumulation. A bucketed scheduler keyed by integer depth reduces heap
 operations to amortised *O*(1) and delivery logs may be sampled via
 `Config.log_delivery_sample_rate` to reduce I/O overhead. Per-edge
-ρ/delay updates can also be throttled by setting `Config.logging.sample_rho_rate`
-(0.0–1.0) which records only a fraction of per-hop `edge_delivery`
-events; a value of `0.0` disables per-edge logs while still emitting a
-per-window summary of edge activity. Seed and bridge events can be sampled in the same way using
-`Config.logging.sample_seed_rate` and `Config.logging.sample_bridge_rate`.
+ρ/delay updates are sampled via `Config.logging.sample_rho_rate`
+(defaults to 0.01) which records only a fraction of per-hop `edge_delivery`
+events and is further capped at roughly one log per 100 edges processed.
+Seed and bridge events are sampled the same way using
+`Config.logging.sample_seed_rate` and `Config.logging.sample_bridge_rate`
+(both default to 0.01).
 
 To cap memory growth for long coherent lines, the engine detects tensor clusters
 and represents them as Matrix Product States. Local edge unitaries contract with

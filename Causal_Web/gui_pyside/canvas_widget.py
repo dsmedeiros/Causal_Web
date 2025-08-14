@@ -371,6 +371,9 @@ class CanvasWidget(QGraphicsView):
         super().__init__(parent)
         self.setViewportUpdateMode(QGraphicsView.MinimalViewportUpdate)
         self.setOptimizationFlag(QGraphicsView.DontSavePainterState, True)
+        viewport = self.viewport()
+        viewport.setAttribute(Qt.WA_OpaquePaintEvent, True)
+        viewport.setAttribute(Qt.WA_NoSystemBackground, True)
         self.editable = editable
         self.setScene(QGraphicsScene(self))
         self.setRenderHint(QPainter.Antialiasing)
@@ -644,7 +647,7 @@ class CanvasWidget(QGraphicsView):
 
     def _update_label_visibility(self) -> None:
         scale = self.transform().m11()
-        visible = scale >= 0.5
+        visible = scale >= 0.75
         for node in self.nodes.values():
             node.label.setVisible(visible)
 

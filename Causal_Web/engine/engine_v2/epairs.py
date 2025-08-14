@@ -107,8 +107,8 @@ class EPairs:
         sigma_min: float,
         seed: int | None = None,
         max_seeds_per_site: int = 64,
-        sample_seed_rate: float = 1.0,
-        sample_bridge_rate: float = 1.0,
+        sample_seed_rate: float = 0.01,
+        sample_bridge_rate: float = 0.01,
     ) -> None:
         """Initialize the manager.
 

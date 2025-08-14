@@ -38,6 +38,9 @@ from .bell import BellHelpers, Ancestry
 from ...config import Config, RunConfig
 
 
+EDGE_LOG_BUDGET = 100
+
+
 class EngineAdapter:
     """Bridge between the legacy orchestrator calls and engine v2."""
 
@@ -64,8 +67,8 @@ class EngineAdapter:
         self._lock = threading.RLock()
         self._last_snapshot_time = time.time()
         self._last_frame = 0
-        self._changed_nodes: Set[str] = set()
-        self._changed_edges: Set[tuple[str, str]] = set()
+        self._changed_nodes: Set[int] = set()
+        self._changed_edges: Set[tuple[int, int]] = set()
         self._closed_windows: list[WindowEvent] = []
         self._energy_totals: Dict[int, float] = {}
         self._residuals: Dict[int, float] = {}
@@ -189,8 +192,8 @@ class EngineAdapter:
         eps_seed = eps_cfg.pop("seed", self._cfg.run_seed)
         self._epairs = EPairs(
             seed=eps_seed,
-            sample_seed_rate=self._cfg.logging.get("sample_seed_rate", 1.0),
-            sample_bridge_rate=self._cfg.logging.get("sample_bridge_rate", 1.0),
+            sample_seed_rate=self._cfg.logging.get("sample_seed_rate", 0.01),
+            sample_bridge_rate=self._cfg.logging.get("sample_bridge_rate", 0.01),
             **eps_cfg,
         )
         bell_seed = self._cfg.bell.get("seed", self._cfg.run_seed)
@@ -383,7 +386,7 @@ class EngineAdapter:
             vertex = self._vertices.get(dst)
             if vertex is None:
                 continue
-            self._changed_nodes.add(str(dst))
+            self._changed_nodes.add(dst)
             lccm = vertex["lccm"]
             lccm.advance_depth(depth_arr)
             prev_layer = lccm.layer
@@ -890,9 +893,7 @@ class EngineAdapter:
                                 int(d_eff),
                             )
 
-            log_rho_edges = self._rng.random() < self._cfg.logging.get(
-                "sample_rho_rate", 0.0
-            )
+            rate = self._cfg.logging.get("sample_rho_rate", 0.01)
             for edge_idx in self._edges_by_src.get(dst, []):
                 rho_before = float(edges["rho"][edge_idx])
                 if edge_idx in injected:
@@ -924,9 +925,13 @@ class EngineAdapter:
                     payload=payload_buf.copy(),
                 )
                 edge_logs += 1
-                self._changed_nodes.add(str(int(edges["dst"][edge_idx])))
-                self._changed_edges.add((str(dst), str(int(edges["dst"][edge_idx]))))
-                if log_rho_edges:
+                self._changed_nodes.add(int(edges["dst"][edge_idx]))
+                self._changed_edges.add((dst, int(edges["dst"][edge_idx])))
+                if (
+                    edge_logs % EDGE_LOG_BUDGET == 0
+                    and rate > 0.0
+                    and self._rng.random() < rate
+                ):
                     log_record(
                         category="event",
                         label="edge_delivery",
@@ -957,10 +962,14 @@ class EngineAdapter:
                 payload_buf["ancestry"] = packet_data.get("ancestry")
                 payload_buf["m"] = packet_data.get("m")
                 edge_logs += 1
-                self._changed_nodes.update({str(dst), str(other)})
-                self._changed_edges.add((str(dst), str(other)))
-                rate = self._cfg.logging.get("sample_rho_rate", 0.0)
-                if rate > 0.0 and self._rng.random() < rate:
+                self._changed_nodes.update({dst, other})
+                self._changed_edges.add((dst, other))
+                rate = self._cfg.logging.get("sample_rho_rate", 0.01)
+                if (
+                    edge_logs % EDGE_LOG_BUDGET == 0
+                    and rate > 0.0
+                    and self._rng.random() < rate
+                ):
                     log_record(
                         category="event",
                         label="edge_delivery",
@@ -1163,7 +1172,7 @@ class EngineAdapter:
                 self._closed_windows.append(
                     WindowEvent(v_id=str(vid), window_idx=lccm.window_idx)
                 )
-                self._changed_nodes.add(str(vid))
+                self._changed_nodes.add(vid)
                 if self._cfg.epsilon_pairs.get("decay_on_window_close", True):
                     # Decay bridges when vertices advance a window.
                     self._epairs.decay_all()
@@ -1203,8 +1212,8 @@ class EngineAdapter:
                 "active_bridges": len(getattr(self._epairs, "active_bridges", [])),
                 "residual": self._residual,
             }
-            nodes = [NodeView(id=n) for n in self._changed_nodes]
-            edges = [EdgeView(src=s, dst=d) for s, d in self._changed_edges]
+            nodes = [NodeView(id=str(n)) for n in self._changed_nodes]
+            edges = [EdgeView(src=str(s), dst=str(d)) for s, d in self._changed_edges]
             closed = list(self._closed_windows)
             self._changed_nodes.clear()
             self._changed_edges.clear()
