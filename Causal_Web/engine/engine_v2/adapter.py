@@ -18,6 +18,8 @@ import math
 
 import numpy as np
 
+from Causal_Web.view import ViewSnapshot
+
 from ..logging.logger import log_record, flush_metrics
 from .lccm import LCCM, WindowParams, WindowState, on_window_close
 from .scheduler import DepthScheduler
@@ -1130,8 +1132,8 @@ class EngineAdapter:
 
         return frame
 
-    def snapshot_for_ui(self) -> dict:
-        """Return a minimal snapshot for the GUI."""
+    def snapshot_for_ui(self) -> ViewSnapshot:
+        """Return a minimal :class:`ViewSnapshot` for the GUI."""
 
         with self._lock:
             max_depth = 0
@@ -1140,7 +1142,7 @@ class EngineAdapter:
                 lccm = data["lccm"]
                 max_depth = max(max_depth, lccm.depth)
                 max_window = max(max_window, lccm.window_idx)
-            return {"depth": max_depth, "window": max_window}
+            return ViewSnapshot(frame=max_depth, counters={"window": max_window})
 
     def current_depth(self) -> int:
         """Return the current depth of the simulation."""
