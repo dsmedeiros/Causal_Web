@@ -325,14 +325,15 @@ class MainWindow(QMainWindow):
             if Config.engine_mode == EngineMode.V2:
                 snap = tick_engine.snapshot_for_ui()
                 if hasattr(self, "depth_label"):
-                    self.depth_label.setText(str(snap.get("depth", 0)))
+                    self.depth_label.setText(str(snap.frame))
+                window = snap.counters.get("window", 0)
                 if hasattr(self, "window_label"):
-                    self.window_label.setText(str(snap.get("window", 0)))
+                    self.window_label.setText(str(window))
                 if hasattr(self.sim_canvas, "update_hud"):
                     self.sim_canvas.update_hud(
                         tick,
-                        snap.get("depth", 0),
-                        snap.get("window", 0),
+                        snap.frame,
+                        window,
                     )
         self.sim_canvas.load_model(GraphModel.from_dict(model_dict))
         if not running:

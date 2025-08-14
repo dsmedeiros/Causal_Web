@@ -258,7 +258,8 @@ edge and vertex telemetry fields are appended without renaming existing keys so
 existing ingestion remains compatible.
 
 The adapter exposes methods like `build_graph`, `step`, `pause` and
-`snapshot_for_ui` to remain drop-in compatible.  Internally a depth-based
+`snapshot_for_ui` (returning a `ViewSnapshot` dataclass) to remain drop-in
+compatible.  Internally a depth-based
 scheduler orders packets by their arrival depth and advances vertex windows
 using the Local Causal Consistency Model (LCCM).  The LCCM computes a window
 size ``W(v)`` from the vertex's incident degree (fan-in plus fan-out) and local
