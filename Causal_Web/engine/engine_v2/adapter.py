@@ -894,62 +894,79 @@ class EngineAdapter:
                             )
 
             rate = self._cfg.logging.get("sample_rho_rate", 0.01)
-            for edge_idx in self._edges_by_src.get(dst, []):
-                rho_before = float(edges["rho"][edge_idx])
-                if edge_idx in injected:
-                    rho_after, d_eff = injected[edge_idx][1], injected[edge_idx][2]
+            edge_ids_all = self._edges_by_src.get(dst)
+            if edge_ids_all is not None and len(edge_ids_all) > 0:
+                edge_arr = np.asarray(edge_ids_all, dtype=np.int32)
+                dst_arr = edges["dst"][edge_arr].astype(int)
+                rho_before_arr = edges["rho"][edge_arr].astype(float)
+                if "d_eff" in edges:
+                    d_eff_arr = edges["d_eff"][edge_arr].astype(int)
                 else:
-                    rho_after = rho_before
-                    if "d_eff" in edges:
-                        d_eff = int(edges["d_eff"][edge_idx])
-                    else:
-                        d_eff = int(
+                    d0_arr = edges["d0"][edge_arr]
+                    d_eff_arr = np.empty_like(edge_arr, dtype=int)
+                    for i, (rb, d0_val) in enumerate(zip(rho_before_arr, d0_arr)):
+                        d_eff_arr[i] = int(
                             effective_delay(
-                                rho_before,
-                                d0=float(edges["d0"][edge_idx]),
-                                gamma=gamma,
-                                rho0=rho0,
+                                rb, d0=float(d0_val), gamma=gamma, rho0=rho0
                             )
                         )
-                depth_next = depth_arr + d_eff
-                payload_buf["psi"] = self._arrays.vertices["psi"][dst]
-                payload_buf["p"] = self._arrays.vertices["p"][dst]
-                payload_buf["bit"] = int(self._arrays.vertices["bit"][dst])
-                payload_buf["lambda_u"] = packet_data.get("lambda_u")
-                payload_buf["zeta"] = packet_data.get("zeta")
-                payload_buf["ancestry"] = packet_data.get("ancestry")
-                payload_buf["m"] = packet_data.get("m")
-                new_pkt = Packet(
-                    src=dst,
-                    dst=int(edges["dst"][edge_idx]),
-                    payload=payload_buf.copy(),
-                )
-                edge_logs += 1
-                self._changed_nodes.add(int(edges["dst"][edge_idx]))
-                self._changed_edges.add((dst, int(edges["dst"][edge_idx])))
-                if (
-                    edge_logs % EDGE_LOG_BUDGET == 0
-                    and rate > 0.0
-                    and self._rng.random() < rate
-                ):
-                    log_record(
-                        category="event",
-                        label="edge_delivery",
-                        frame=self._frame,
-                        tick=self._frame,
-                        value={
-                            "rho_before": rho_before,
-                            "rho_after": rho_after,
-                            "d_eff": d_eff,
-                            "leak_contrib": None,
-                            "is_bridge": False,
-                            "sigma": float(edges["sigma"][edge_idx]),
-                        },
-                    )
-                self._scheduler.push(
-                    depth_next, int(edges["dst"][edge_idx]), edge_idx, new_pkt
-                )
-                self._epairs.reinforce(dst, int(edges["dst"][edge_idx]))
+                rho_after_arr = rho_before_arr.copy()
+                for i, eid in enumerate(edge_arr):
+                    if int(eid) in injected:
+                        rho_after_arr[i] = injected[int(eid)][1]
+                        d_eff_arr[i] = injected[int(eid)][2]
+                depth_next_arr = depth_arr + d_eff_arr
+
+                payload_template = {
+                    "psi": self._arrays.vertices["psi"][dst],
+                    "p": self._arrays.vertices["p"][dst],
+                    "bit": int(self._arrays.vertices["bit"][dst]),
+                    "lambda_u": packet_data.get("lambda_u"),
+                    "zeta": packet_data.get("zeta"),
+                    "ancestry": packet_data.get("ancestry"),
+                    "m": packet_data.get("m"),
+                }
+
+                sched_push = self._scheduler.push
+                reinforce = self._epairs.reinforce
+                rng_rand = self._rng.random
+                sigma_arr = edges["sigma"]
+
+                for i in range(len(edge_arr)):
+                    eid = int(edge_arr[i])
+                    dst_id = int(dst_arr[i])
+                    rho_before = float(rho_before_arr[i])
+                    rho_after = float(rho_after_arr[i])
+                    d_eff = int(d_eff_arr[i])
+                    depth_next = int(depth_next_arr[i])
+
+                    payload = payload_template.copy()
+                    new_pkt = Packet(src=dst, dst=dst_id, payload=payload)
+
+                    edge_logs += 1
+                    self._changed_nodes.add(dst_id)
+                    self._changed_edges.add((dst, dst_id))
+                    if (
+                        edge_logs % EDGE_LOG_BUDGET == 0
+                        and rate > 0.0
+                        and rng_rand() < rate
+                    ):
+                        log_record(
+                            category="event",
+                            label="edge_delivery",
+                            frame=self._frame,
+                            tick=self._frame,
+                            value={
+                                "rho_before": rho_before,
+                                "rho_after": rho_after,
+                                "d_eff": d_eff,
+                                "leak_contrib": None,
+                                "is_bridge": False,
+                                "sigma": float(sigma_arr[eid]),
+                            },
+                        )
+                    sched_push(depth_next, dst_id, eid, new_pkt)
+                    reinforce(dst, dst_id)
 
             for other in self._epairs.partners(dst):
                 bridge = self._epairs.bridges[self._epairs._bridge_key(dst, other)]
