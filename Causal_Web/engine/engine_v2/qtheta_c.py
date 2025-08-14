@@ -227,13 +227,21 @@ def deliver_packets_batch(
     if depth_arr is not None:
         depth_v = max(depth_v, int(np.max(depth_arr)))
 
-    psi = np.asarray(list(psi), dtype=np.complex64)
-    p = np.asarray(list(p), dtype=np.float32)
-    bits = np.asarray(list(bits), dtype=np.int8)
+    psi = np.asarray(
+        list(psi) if not isinstance(psi, np.ndarray) else psi, dtype=np.complex64
+    )
+    p = np.asarray(list(p) if not isinstance(p, np.ndarray) else p, dtype=np.float32)
+    bits = np.asarray(
+        list(bits) if not isinstance(bits, np.ndarray) else bits, dtype=np.int8
+    )
 
-    U = np.asarray(list(U), dtype=np.complex64)
-    alpha = np.asarray(list(alpha), dtype=np.float32)
-    phase = np.asarray(list(phase), dtype=np.complex64)[:, None]
+    U = np.asarray(list(U) if not isinstance(U, np.ndarray) else U, dtype=np.complex64)
+    alpha = np.asarray(
+        list(alpha) if not isinstance(alpha, np.ndarray) else alpha, dtype=np.float32
+    )
+    phase = np.asarray(
+        list(phase) if not isinstance(phase, np.ndarray) else phase, dtype=np.complex64
+    )[:, None]
 
     out = np.einsum("nij,nj->ni", U, psi)
     psi_rot = phase * out
