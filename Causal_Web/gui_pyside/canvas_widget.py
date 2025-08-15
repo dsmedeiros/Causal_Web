@@ -375,7 +375,7 @@ class CanvasWidget(QGraphicsView):
         self.setOptimizationFlag(QGraphicsView.DontSavePainterState, True)
         viewport = self.viewport()
         viewport.setAttribute(Qt.WA_OpaquePaintEvent, True)
-        viewport.setAttribute(Qt.WA_NoSystemBackground, True)
+        self.setBackgroundBrush(QBrush(Qt.black))
         self.editable = editable
         self.setScene(QGraphicsScene(self))
         self.setRenderHint(QPainter.Antialiasing)
