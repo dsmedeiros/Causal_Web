@@ -39,6 +39,8 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 
 ### Recent Changes
 
+- Closing the GUI no longer hangs; the engine worker thread now shuts down
+  cleanly.
 - GUI now includes a status bar with frame metrics, an engine profile panel
   and lightweight real-time plots using ``pyqtgraph``.
 - Canvas performance improved with minimal viewport updates, item caching and
