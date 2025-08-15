@@ -39,6 +39,7 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 
 ### Recent Changes
 
+- Fixed runaway zoom in the frames graph that occurred on startup.
 - Closing the GUI no longer hangs; the engine worker thread now shuts down
   cleanly.
 - GUI now includes a status bar with frame metrics, an engine profile panel
