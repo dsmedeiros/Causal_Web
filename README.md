@@ -37,8 +37,9 @@ twin-paradox demonstration showcasing this time dilation. Run
 `python -m Causal_Web.analysis.lensing` to approximate lensing wedge amplitudes
 via a Monte-Carlo path sampler over the graph's causal structure.
 
-### Recent Changes
-
+- Engine can now publish a MessagePack-encoded WebSocket stream. Clients pull
+  `SnapshotDelta` updates on demand after a `DeltaReady` notification and also
+  receive `ExperimentStatus` messages and an EWMA of conservation residuals.
 - Fixed runaway zoom in the frames graph that occurred on startup.
 - Closing the GUI no longer hangs; the engine worker thread now shuts down
   cleanly.

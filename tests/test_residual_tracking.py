@@ -31,3 +31,4 @@ def test_residual_updates_on_window_close():
     adapter.run_until_next_window_or(None)
     snap = adapter.snapshot_for_ui()
     assert snap.counters["residual"] > 0.0
+    assert snap.invariants["inv_conservation_residual"] == snap.counters["residual"]
