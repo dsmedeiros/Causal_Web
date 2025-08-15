@@ -75,6 +75,7 @@ class EngineAdapter:
         self._energy_totals: Dict[int, float] = {}
         self._residuals: Dict[int, float] = {}
         self._residual: float = 0.0
+        self._experiment_status: Dict[str, Any] | None = None
 
     # ------------------------------------------------------------------
     def _get_pool_arr(
@@ -1271,6 +1272,7 @@ class EngineAdapter:
                 changed_edges=edges,
                 closed_windows=closed,
                 counters=counters,
+                invariants={"inv_conservation_residual": self._residual},
             )
 
     def current_depth(self) -> int:
@@ -1285,6 +1287,29 @@ class EngineAdapter:
         """Return the number of steps executed so far."""
 
         return self._frame
+
+    # ------------------------------------------------------------------
+    def set_experiment_status(self, status: Dict[str, Any]) -> None:
+        """Record the most recent experiment status.
+
+        Parameters
+        ----------
+        status:
+            Mapping containing ``id``, ``state``, ``progress`` and
+            ``best_metrics`` fields.
+        """
+
+        with self._lock:
+            self._experiment_status = status
+
+    # ------------------------------------------------------------------
+    def experiment_status(self) -> Dict[str, Any] | None:
+        """Return and clear the latest experiment status if available."""
+
+        with self._lock:
+            status = self._experiment_status
+            self._experiment_status = None
+        return status
 
 
 # Lazily constructed engine instance; GUI code may read this handle but
