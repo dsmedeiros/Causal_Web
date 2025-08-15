@@ -156,8 +156,9 @@ class MainWindow(QMainWindow):
     # ---- UI setup ----
 
     def closeEvent(self, event: QCloseEvent) -> None:  # type: ignore[override]
-        """Stop the engine worker before closing."""
+        """Stop the engine worker and thread before closing."""
         self._engine_worker.stop()
+        self._engine_thread.quit()
         self._engine_thread.wait()
         super().closeEvent(event)
 
