@@ -5,7 +5,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PySide6.QtWidgets import QApplication
 
-from Causal_Web.gui_pyside.canvas_widget import CanvasWidget
+from Causal_Web.gui_legacy.canvas_widget import CanvasWidget
 from Causal_Web.graph.model import GraphModel
 
 
@@ -21,5 +21,5 @@ def test_load_model_recreates_hud_item():
     # Remove gui modules to avoid side effects on other tests
     import sys
 
-    for name in [m for m in list(sys.modules) if m.startswith("Causal_Web.gui_pyside")]:
+    for name in [m for m in list(sys.modules) if m.startswith("Causal_Web.gui_legacy")]:
         del sys.modules[name]

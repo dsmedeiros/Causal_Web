@@ -26,4 +26,4 @@ def test_cli_headless_uses_v2_simulation_loop(monkeypatch, tmp_path):
     service.run()
 
     assert called.get("loop")
-    assert "Causal_Web.gui_pyside.engine_worker" not in sys.modules
+    assert "Causal_Web.gui_legacy.engine_worker" not in sys.modules

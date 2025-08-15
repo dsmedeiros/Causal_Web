@@ -1,6 +1,6 @@
 # Causal Web
 
-Causal Web is a simulation engine and GUI for experimenting with causal graphs. Nodes emit frames that propagate through edges with delay and attenuation while observers infer hidden state from the resulting activity. Delays now retain sub-frame precision and are quantised only when scheduled, enabling finer-grained simulations. The project is written in Python and uses [PySide6](https://doc.qt.io/qtforpython/) for the graphical interface.
+Causal Web is a simulation engine and GUI for experimenting with causal graphs. Nodes emit frames that propagate through edges with delay and attenuation while observers infer hidden state from the resulting activity. Delays now retain sub-frame precision and are quantised only when scheduled, enabling finer-grained simulations. The project is written in Python and uses [PySide6](https://doc.qt.io/qtforpython/) for the graphical interface. The PySide6 interface is now maintained under `gui_legacy` and will be removed in a future release.
 
 Frames carry both phase and amplitude. Their influence on interference and coherence is weighted by amplitude and each frame records the local `generation_tick` at which it was emitted.
 
@@ -101,13 +101,13 @@ via a Monte-Carlo path sampler over the graph's causal structure.
    ```bash
    pip install -r requirements.txt
    ```
-2. Run the GUI:
+2. Run the legacy GUI (deprecated):
    ```bash
-   python -m Causal_Web.main
+   cw run --gui=legacy
    ```
    Or run headless:
    ```bash
-   python -m Causal_Web.main --no-gui
+   cw run --gui=legacy --no-gui
    ```
 3. Optional flags:
    - `--config <path>` to use a custom configuration file.

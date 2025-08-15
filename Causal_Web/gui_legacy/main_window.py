@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QWidget,
     QVBoxLayout,
+    QMessageBox,
 )
 import pyqtgraph as pg
 
@@ -38,10 +39,10 @@ from .canvas_widget import CanvasWidget
 from .engine_profile_panel import EngineProfileDock
 from .toolbar_builder import build_toolbar
 from ..gui.command_stack import AddNodeCommand, AddObserverCommand
-from ..engine.engine_v2.adapter import EngineAdapter
+from cw.ui.facade import EngineClient
 from .engine_worker import EngineWorker
 
-tick_engine = EngineAdapter()
+tick_engine = EngineClient()
 
 
 class GraphDockWidget(QDockWidget):
@@ -447,7 +448,7 @@ class MainWindow(QMainWindow):
             self.start_button.setEnabled(False)
             self.pause_button.setEnabled(True)
             self.stop_button.setEnabled(True)
-            tick_engine._update_simulation_state(False, False, tick, None)
+            tick_engine.update_state(False, False, tick, None)
 
     def pause_or_resume(self) -> None:
         """Toggle between pausing and resuming the simulation."""
@@ -648,4 +649,9 @@ def launch() -> None:
     app = QApplication.instance() or QApplication([])
     window = MainWindow()
     window.show()
+    QMessageBox.warning(
+        window,
+        "Deprecated",
+        "The legacy GUI is deprecated and will be removed in a future release.",
+    )
     app.exec()
