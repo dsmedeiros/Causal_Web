@@ -1,22 +1,38 @@
+# .github/workflows/version.yml
 name: Semantic Version
-
 on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   release:
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref_name }}
+      cancel-in-progress: false
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
         with:
-          python-version: '3.x'
-      - name: Install semantic-release
-        run: pip install python-semantic-release
-      - name: Bump version
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: semantic-release version --no-build --version-source=setup.cfg
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0  # IMPORTANT for tags/history
+      - name: Force branch to workflow SHA (avoids race conditions)
+        run: git reset --hard ${{ github.sha }}
+      - name: Semantic Version Release
+        id: release
+        uses: python-semantic-release/python-semantic-release@v10.3.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          git_committer_name: github-actions[bot]
+          git_committer_email: 41898282+github-actions[bot]@users.noreply.github.com
+      # Optional: upload built dists to the Release, if you build in PSR
+      - name: Publish artifacts to GitHub Release
+        if: steps.release.outputs.released == 'true'
+        uses: python-semantic-release/publish-action@v10.3.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ steps.release.outputs.tag }}
