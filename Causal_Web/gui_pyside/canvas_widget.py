@@ -369,11 +369,13 @@ class CanvasWidget(QGraphicsView):
     ) -> None:
         """Initialize the canvas widget."""
         super().__init__(parent)
-        self.setViewportUpdateMode(QGraphicsView.MinimalViewportUpdate)
+        # Full viewport updates prevent the previous view from lingering when
+        # the scene is panned or zoomed.
+        self.setViewportUpdateMode(QGraphicsView.FullViewportUpdate)
         self.setOptimizationFlag(QGraphicsView.DontSavePainterState, True)
         viewport = self.viewport()
         viewport.setAttribute(Qt.WA_OpaquePaintEvent, True)
-        viewport.setAttribute(Qt.WA_NoSystemBackground, True)
+        self.setBackgroundBrush(QBrush(Qt.black))
         self.editable = editable
         self.setScene(QGraphicsScene(self))
         self.setRenderHint(QPainter.Antialiasing)
