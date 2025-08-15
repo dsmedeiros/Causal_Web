@@ -255,7 +255,7 @@ class ConnectionPanelSetupService:
 
 @dataclass
 class MetaNodePanelSetupService:
-    """Build widgets for :class:`~Causal_Web.gui_pyside.toolbar_builder.MetaNodePanel`."""
+    """Build widgets for :class:`~Causal_Web.gui_legacy.toolbar_builder.MetaNodePanel`."""
 
     panel: QDockWidget
     main_window: Any

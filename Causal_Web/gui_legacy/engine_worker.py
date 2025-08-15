@@ -7,7 +7,7 @@ from typing import Optional
 from PySide6.QtCore import QObject, Signal
 
 from ..config import Config, EngineMode
-from ..engine.engine_v2.adapter import EngineAdapter
+from cw.ui.facade import EngineClient
 from ..view import ViewSnapshot
 
 
@@ -16,10 +16,10 @@ class EngineWorker(QObject):
 
     snapshot_ready = Signal()
 
-    def __init__(self, adapter: EngineAdapter) -> None:
-        """Initialise the worker with the engine ``adapter``."""
+    def __init__(self, engine: EngineClient) -> None:
+        """Initialise the worker with the engine client."""
         super().__init__()
-        self._adapter = adapter
+        self._engine = engine
         self._lock = threading.Lock()
         self._latest: Optional[ViewSnapshot] = None
         self._active = True
@@ -30,8 +30,8 @@ class EngineWorker(QObject):
             with Config.state_lock:
                 running = Config.is_running and Config.engine_mode == EngineMode.V2
             if running:
-                self._adapter.step()
-                snap = self._adapter.snapshot_for_ui()
+                self._engine.step()
+                snap = self._engine.snapshot_for_ui()
                 with self._lock:
                     self._latest = snap
                 self.snapshot_ready.emit()

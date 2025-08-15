@@ -249,7 +249,7 @@ class MainService:
     # ------------------------------------------------------------------
     @staticmethod
     def _launch_gui() -> None:
-        from .gui_pyside import launch
+        from .gui_legacy import launch
 
         launch()
 
