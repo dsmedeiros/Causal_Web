@@ -571,8 +571,18 @@ class CanvasWidget(QGraphicsView):
 
     # ---- interaction -------------------------------------------------
     def wheelEvent(self, event: QWheelEvent) -> None:
-        """Zoom the view and disable antialiasing when zoomed far out."""
-        factor = 1.15 if event.angleDelta().y() > 0 else 1 / 1.15
+        """Zoom the view and disable antialiasing when zoomed far out.
+
+        Some platforms emit wheel events with no ``angleDelta`` or ``pixelDelta``
+        values when the application starts, which previously triggered rapid
+        zooming. These zero-delta events are now ignored to prevent unwanted
+        zoom behaviour on launch.
+        """
+        delta = event.angleDelta().y() or event.pixelDelta().y()
+        if delta == 0:
+            event.ignore()
+            return
+        factor = 1.15 if delta > 0 else 1 / 1.15
         self.scale(factor, factor)
         self._update_label_visibility()
         scale_level = self.transform().m11()
