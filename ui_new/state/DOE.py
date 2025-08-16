@@ -56,7 +56,7 @@ class DOEModel(QObject):
             async def _run() -> None:
                 await self._mgr.run_all_ipc()
 
-            asyncio.create_task(_run())
+            self._ipc_task = asyncio.create_task(_run())
 
     def handle_status(self, msg: Dict) -> None:
         """Process an ``ExperimentStatus`` message from the engine."""
