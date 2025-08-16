@@ -92,7 +92,7 @@ class GAModel(QObject):
         self._loop = loop
         # Use public setter to maintain encapsulation (requires GeneticAlgorithm.set_client)
         self._ga.set_client(client)
-        self._ga._loop = loop
+        self._ga.set_event_loop(loop)
 
     def handle_status(self, msg: Dict) -> None:
         """Forward ``ExperimentStatus`` messages to the GA."""
