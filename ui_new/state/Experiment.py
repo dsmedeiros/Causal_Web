@@ -15,12 +15,14 @@ class ExperimentModel(QObject):
 
     statusChanged = Signal(str)
     residualChanged = Signal(float)
+    rateChanged = Signal(float)
 
     def __init__(self) -> None:
         super().__init__()
         self._status = ""
         self._residual = 0.0
         self._client: Optional[Client] = None
+        self._rate = 1.0
 
     # ------------------------------------------------------------------
     def _get_status(self) -> str:
@@ -73,17 +75,36 @@ class ExperimentModel(QObject):
             )
 
     @Slot()
-    def resume(self) -> None:
-        """Request the backend to resume the experiment."""
-        if self._client:
-            asyncio.create_task(
-                self._client.send({"ExperimentControl": {"action": "resume"}})
-            )
-
-    @Slot()
     def reset(self) -> None:
         """Request the backend to reset the experiment state."""
         if self._client:
             asyncio.create_task(
                 self._client.send({"ExperimentControl": {"action": "reset"}})
             )
+
+    @Slot()
+    def step(self) -> None:
+        """Request a single-step advancement of the experiment."""
+        if self._client:
+            asyncio.create_task(
+                self._client.send({"ExperimentControl": {"action": "step"}})
+            )
+
+    @Slot(float)
+    def setRate(self, value: float) -> None:
+        """Set the desired simulation ``value`` speed multiplier."""
+        if self._rate != value:
+            self._rate = value
+            self.rateChanged.emit(value)
+        if self._client:
+            asyncio.create_task(
+                self._client.send(
+                    {"ExperimentControl": {"action": "set_rate", "rate": value}}
+                )
+            )
+
+    # ------------------------------------------------------------------
+    def _get_rate(self) -> float:
+        return self._rate
+
+    rate = Property(float, _get_rate, notify=rateChanged)

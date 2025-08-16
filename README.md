@@ -55,6 +55,13 @@ via a Monte-Carlo path sampler over the graph's causal structure.
   and lightweight real-time plots using ``pyqtgraph``.
 - Canvas performance improved with minimal viewport updates, item caching and
   label level-of-detail. HUD wording clarified and telemetry buffers capped.
+- Telemetry panel now exposes rolling counter and invariant histories for live plots.
+- HUD overlay reports frame, depth, active windows, active bridges, FPS,
+  events per second and residual metrics.
+- Experiment panel adds single-step controls, a rate slider and label/edge
+  visibility toggles.
+- Canvas renders the latest snapshot diffs at up to 60 FPS via a pull-based loop.
+- Window closures trigger brief red pulses on affected nodes for visual feedback.
 - Fixed a startup crash in read-only mode where a stale HUD item was
   re-added after clearing the scene.
 - Visible "Tick" terminology has been replaced with "Frame" throughout the
