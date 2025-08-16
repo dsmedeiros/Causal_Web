@@ -58,7 +58,12 @@ Item {
             TextField {
                 id: obsFreq
                 text: obs && obs.frequency !== undefined ? obs.frequency : ""
-                onEditingFinished: store.set_observer_frequency(store.selectedObserver, parseFloat(text))
+                onEditingFinished: {
+                    var freq = parseFloat(text);
+                    if (!isNaN(freq)) {
+                        store.set_observer_frequency(store.selectedObserver, freq);
+                    }
+                }
             }
         }
         // Bridge inspector
