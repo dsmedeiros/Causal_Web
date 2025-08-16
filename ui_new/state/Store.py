@@ -417,7 +417,7 @@ class Store(QObject):
         """Return validation warnings for duplicates, self-loops or missing props."""
 
         warnings: List[str] = []
-        ids: set[int] = set()
+        ids: Set[int] = set()
         for node in self.graph_static.get("nodes", []):
             nid = node.get("id")
             if nid in ids:
