@@ -76,6 +76,13 @@ class EngineAdapter:
         self._residuals: Dict[int, float] = {}
         self._residual: float = 0.0
         self._experiment_status: Dict[str, Any] | None = None
+        self._replay_progress: float | None = None
+        self._replay_playing: bool = False
+        self._thread: threading.Thread | None = None
+        self._current_delta: Dict[str, Any] | None = None
+        self._graph_static: Dict[str, Any] | None = None
+        self._replay_frames: List[Dict[str, Any]] = []
+        self._replay_index = 0
 
     # ------------------------------------------------------------------
     def _get_pool_arr(
@@ -309,22 +316,62 @@ class EngineAdapter:
             }
             self._vertices[vid] = vertex_state
 
+        v_arr = self._arrays.vertices
+        e_arr = self._arrays.edges
+        positions = [
+            (float(v_arr["x"][i]), float(v_arr["y"][i])) for i in range(n_vert)
+        ]
+        edge_list = [
+            (int(e_arr["src"][i]), int(e_arr["dst"][i]))
+            for i in range(len(e_arr["src"]))
+        ]
+        labels = [str(i) for i in range(n_vert)]
+        colors = ["#ffffff" for _ in range(n_vert)]
+        flags = [True for _ in range(n_vert)]
+        self._graph_static = {
+            "node_positions": positions,
+            "edges": edge_list,
+            "node_labels": labels,
+            "node_colors": colors,
+            "node_flags": flags,
+        }
+
+    def graph_static(self) -> Dict[str, Any]:
+        """Return a static description of the loaded graph for the UI."""
+
+        return self._graph_static or {
+            "node_positions": [],
+            "edges": [],
+            "node_labels": [],
+            "node_colors": [],
+            "node_flags": [],
+        }
+
     def start(self) -> None:
         """Mark the engine as running."""
 
+        if self._running:
+            return
         self._running = True
+        if self._thread is None or not self._thread.is_alive():
+            self._thread = threading.Thread(target=self._run_loop, daemon=True)
+            self._thread.start()
 
     def pause(self) -> None:
         """Pause execution."""
-
         self._running = False
 
     def stop(self) -> None:
         """Stop execution and reset all state."""
-
         self._running = False
+        if self._thread is not None:
+            self._thread.join(timeout=0.1)
+            self._thread = None
         self._vertices.clear()
         self._scheduler.clear()
+        self._replay_frames.clear()
+        self._replay_index = 0
+        self._current_delta = None
 
     def step(
         self, max_events: int | None = None, *, collect_packets: bool = False
@@ -1287,6 +1334,114 @@ class EngineAdapter:
         """Return the number of steps executed so far."""
 
         return self._frame
+
+    # ------------------------------------------------------------------
+    def _build_delta(self) -> Dict[str, Any] | None:
+        """Coalesce changes into a snapshot delta for the UI."""
+
+        if self._arrays is None:
+            return None
+        v_arr = self._arrays.vertices
+        delta: Dict[str, Any] = {"frame": self._frame}
+        positions: Dict[int, tuple[float, float]] = {}
+        for vid in self._changed_nodes:
+            positions[int(vid)] = (
+                float(v_arr["x"][vid]),
+                float(v_arr["y"][vid]),
+            )
+        if positions:
+            delta["node_positions"] = positions
+        if self._changed_edges:
+            delta["edges"] = [(int(a), int(b)) for a, b in self._changed_edges]
+        self._changed_nodes.clear()
+        self._changed_edges.clear()
+        return delta if len(delta) > 1 else None
+
+    # ------------------------------------------------------------------
+    def _run_loop(self) -> None:
+        """Background thread advancing the experiment and recording deltas."""
+
+        while self._running:
+            self.step()
+            delta = self._build_delta()
+            if delta:
+                with self._lock:
+                    self._current_delta = delta
+                    self._replay_frames.append(dict(delta))
+            self.set_experiment_status(
+                {"status": "running", "residual": self._residual}
+            )
+            time.sleep(0)
+
+    # ------------------------------------------------------------------
+    def snapshot_delta(self) -> Dict[str, Any] | None:
+        """Return the next snapshot delta for live or replay playback."""
+
+        with self._lock:
+            if self._running:
+                delta = self._current_delta
+                self._current_delta = None
+                return delta
+            if self._replay_playing and self._replay_frames:
+                if self._replay_index >= len(self._replay_frames):
+                    self._replay_playing = False
+                    self._replay_progress = 1.0
+                    return None
+                delta = self._replay_frames[self._replay_index]
+                self._replay_index += 1
+                self._replay_progress = self._replay_index / len(self._replay_frames)
+                return delta
+        return None
+
+    # ------------------------------------------------------------------
+    def handle_control(self, msg: Dict[str, Any]) -> None:
+        """Handle experiment and replay control messages from the UI."""
+
+        exp = msg.get("ExperimentControl")
+        if exp:
+            action = exp.get("action")
+            if action == "start":
+                self.start()
+                self.set_experiment_status(
+                    {"status": "running", "residual": self._residual}
+                )
+            elif action == "pause":
+                self.pause()
+                self.set_experiment_status(
+                    {"status": "paused", "residual": self._residual}
+                )
+            elif action == "resume":
+                self.start()
+                self.set_experiment_status(
+                    {"status": "running", "residual": self._residual}
+                )
+            elif action == "reset":
+                self.stop()
+                self.set_experiment_status({"status": "idle", "residual": 0.0})
+            return
+
+        replay = msg.get("ReplayControl")
+        if replay:
+            action = replay.get("action")
+            if action == "play":
+                self._replay_playing = True
+                self._replay_progress = self._replay_progress or 0.0
+            elif action == "pause":
+                self._replay_playing = False
+                self._replay_progress = self._replay_progress or 0.0
+            elif action == "seek":
+                prog = float(replay.get("progress", 0.0))
+                self._replay_index = int(prog * len(self._replay_frames))
+                self._replay_progress = prog
+
+    # ------------------------------------------------------------------
+    def replay_progress(self) -> float | None:
+        """Return and clear the latest replay progress if available."""
+
+        with self._lock:
+            progress = self._replay_progress
+            self._replay_progress = None
+        return progress
 
     # ------------------------------------------------------------------
     def set_experiment_status(self, status: Dict[str, Any]) -> None:

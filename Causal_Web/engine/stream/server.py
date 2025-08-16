@@ -93,4 +93,15 @@ async def serve(
                     await asyncio.gather(
                         *[ws.send(msgpack.packb(payload)) for ws in list(clients)]
                     )
+            if hasattr(adapter, "replay_progress"):
+                progress = adapter.replay_progress()
+                if progress is not None and clients:
+                    payload = {
+                        "type": "ReplayProgress",
+                        "v": 1,
+                        "progress": float(progress),
+                    }
+                    await asyncio.gather(
+                        *[ws.send(msgpack.packb(payload)) for ws in list(clients)]
+                    )
             await asyncio.sleep(0)

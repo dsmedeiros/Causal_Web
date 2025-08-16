@@ -118,7 +118,7 @@ class MainService:
         if args.no_gui:
             self._run_headless()
         else:
-            self._launch_gui()
+            self._launch_gui(args.new_ui)
 
     # ------------------------------------------------------------------
     @staticmethod
@@ -211,6 +211,11 @@ class MainService:
             default="",
             help="Comma-separated event types to disable",
         )
+        parser.add_argument(
+            "--new-ui",
+            action="store_true",
+            help="Launch experimental Qt Quick interface",
+        )
         args = parser.parse_args(self.argv)
         Config.graph_file = args.graph
         return args, defaults
@@ -248,10 +253,71 @@ class MainService:
 
     # ------------------------------------------------------------------
     @staticmethod
-    def _launch_gui() -> None:
-        from .gui_legacy import launch
+    def _launch_gui(new_ui: bool) -> None:
+        """Launch the legacy GUI or the new Qt Quick interface."""
 
-        launch()
+        if new_ui:
+            import asyncio
+            import os
+            import threading
+            from PySide6.QtGui import QGuiApplication
+            from PySide6.QtQml import QQmlApplicationEngine
+            from PySide6.QtQuick import QQuickItem
+            from ui_new import core
+            from ui_new.state import (
+                TelemetryModel,
+                MetersModel,
+                ExperimentModel,
+                ReplayModel,
+                LogsModel,
+            )
+
+            app = QGuiApplication([])
+            engine = QQmlApplicationEngine()
+            qml_path = os.path.join(
+                os.path.dirname(__file__), "..", "ui_new", "main.qml"
+            )
+            engine.load(qml_path)
+            if not engine.rootObjects():
+                return
+            root = engine.rootObjects()[0]
+            view = root.findChild(QQuickItem, "graphView")
+            telemetry = TelemetryModel()
+            meters = MetersModel()
+            experiment = ExperimentModel()
+            replay = ReplayModel()
+            logs = LogsModel()
+            engine.rootContext().setContextProperty("telemetryModel", telemetry)
+            engine.rootContext().setContextProperty("metersModel", meters)
+            engine.rootContext().setContextProperty("experimentModel", experiment)
+            engine.rootContext().setContextProperty("replayModel", replay)
+            engine.rootContext().setContextProperty("logsModel", logs)
+            view.frameRendered.connect(meters.frame_drawn)
+
+            loop = asyncio.new_event_loop()
+
+            def _run_loop() -> None:
+                asyncio.set_event_loop(loop)
+                loop.run_forever()
+
+            threading.Thread(target=_run_loop, daemon=True).start()
+            asyncio.run_coroutine_threadsafe(
+                core.run(
+                    "ws://localhost:8765",
+                    view,
+                    telemetry,
+                    experiment,
+                    replay,
+                    logs,
+                ),
+                loop,
+            )
+            app.exec()
+            loop.call_soon_threadsafe(loop.stop)
+        else:
+            from .gui_legacy import launch
+
+            launch()
 
 
 def main() -> None:

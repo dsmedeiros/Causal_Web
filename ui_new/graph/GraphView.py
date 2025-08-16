@@ -1,0 +1,488 @@
+from __future__ import annotations
+
+from typing import Dict, Iterable, List, Tuple, Set
+
+from PySide6.QtGui import QColor, QVector2D, QVector4D, QWheelEvent
+from PySide6.QtQml import QmlElement
+from PySide6.QtQuick import (
+    QQuickItem,
+    QSGGeometry,
+    QSGGeometryNode,
+    QSGMaterial,
+    QSGMaterialShader,
+    QSGNode,
+    QSGTextNode,
+)
+from PySide6.QtCore import QByteArray, Property, QRectF, QPointF, Signal
+
+QML_IMPORT_NAME = "CausalGraph"
+QML_IMPORT_MAJOR_VERSION = 1
+
+
+class _InstancedMaterial(QSGMaterial):
+    """Flat material with per-instance offsets, colors and flags."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.color = QColor("white")
+        self.offsets: List[QVector2D] = []
+        self.colors: List[QVector4D] = []
+        self.flags: List[float] = []
+
+    def type(self) -> int:  # pragma: no cover - Qt binding detail
+        return QSGMaterial.UserType + 1
+
+    def createShader(self) -> QSGMaterialShader:  # pragma: no cover - Qt binding detail
+        return _InstancedShader()
+
+
+class _InstancedShader(QSGMaterialShader):
+    """Vertex and fragment shaders applying per-instance offsets."""
+
+    VERTEX = QByteArray(
+        b"""
+        attribute highp vec4 aVertex;
+        uniform highp vec2 uOffsets[256];
+        uniform lowp vec4 uColors[256];
+        uniform float uFlags[256];
+        varying lowp vec4 vColor;
+        varying float vFlag;
+        void main(){
+            vec2 off = uOffsets[gl_InstanceID];
+            vColor = uColors[gl_InstanceID];
+            vFlag = uFlags[gl_InstanceID];
+            gl_Position = aVertex + vec4(off, 0.0, 0.0);
+        }
+        """
+    )
+
+    FRAG = QByteArray(
+        b"""
+        varying lowp vec4 vColor;
+        varying float vFlag;
+        void main(){
+            if (vFlag < 0.5) discard;
+            gl_FragColor = vColor;
+        }
+        """
+    )
+
+    def __init__(self) -> None:  # pragma: no cover - Qt binding detail
+        super().__init__()
+        self.setShaderSourceCode(QSGMaterialShader.VertexStage, self.VERTEX)
+        self.setShaderSourceCode(QSGMaterialShader.FragmentStage, self.FRAG)
+        self.setAttributeNames([b"aVertex"])
+
+    def updateState(
+        self, state, new_material, old_material
+    ):  # pragma: no cover - Qt binding detail
+        program = self.program()
+        program.setUniformValue("uColor", new_material.color)
+        if new_material.offsets:
+            program.setUniformValueArray(
+                "uOffsets", new_material.offsets, len(new_material.offsets)
+            )
+        if new_material.colors:
+            program.setUniformValueArray(
+                "uColors", new_material.colors, len(new_material.colors)
+            )
+        if new_material.flags:
+            program.setUniformValueArray(
+                "uFlags", new_material.flags, len(new_material.flags)
+            )
+
+
+class _EdgeMaterial(QSGMaterial):
+    """Material supplying per-edge endpoints."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.color = QColor("gray")
+        self.starts: List[QVector2D] = []
+        self.ends: List[QVector2D] = []
+
+    def type(self) -> int:  # pragma: no cover - Qt binding detail
+        return QSGMaterial.UserType + 2
+
+    def createShader(self) -> QSGMaterialShader:  # pragma: no cover - Qt binding detail
+        return _EdgeShader()
+
+
+class _EdgeShader(QSGMaterialShader):
+    """Render edges by interpolating start and end points."""
+
+    VERTEX = QByteArray(
+        b"""
+        attribute highp vec4 aVertex;
+        uniform highp vec2 uStart[256];
+        uniform highp vec2 uEnd[256];
+        void main(){
+            vec2 p = mix(uStart[gl_InstanceID], uEnd[gl_InstanceID], aVertex.x);
+            gl_Position = vec4(p, 0.0, 1.0);
+        }
+        """
+    )
+
+    FRAG = QByteArray(
+        b"""
+        uniform lowp vec4 uColor;
+        void main(){
+            gl_FragColor = uColor;
+        }
+        """
+    )
+
+    def __init__(self) -> None:  # pragma: no cover - Qt binding detail
+        super().__init__()
+        self.setShaderSourceCode(QSGMaterialShader.VertexStage, self.VERTEX)
+        self.setShaderSourceCode(QSGMaterialShader.FragmentStage, self.FRAG)
+        self.setAttributeNames([b"aVertex"])
+
+    def updateState(
+        self, state, new_material, old_material
+    ):  # pragma: no cover - Qt binding detail
+        program = self.program()
+        program.setUniformValue("uColor", new_material.color)
+        if new_material.starts:
+            program.setUniformValueArray(
+                "uStart", new_material.starts, len(new_material.starts)
+            )
+        if new_material.ends:
+            program.setUniformValueArray(
+                "uEnd", new_material.ends, len(new_material.ends)
+            )
+
+
+@QmlElement
+class GraphView(QQuickItem):
+    """QQuickItem rendering nodes and edges via instanced geometry.
+
+    Level-of-detail behaviour such as antialiasing, label visibility and edge
+    culling is governed by configurable zoom thresholds exposed as properties.
+    """
+
+    def __init__(self, parent: QQuickItem | None = None) -> None:
+        super().__init__(parent)
+        self.setFlag(QQuickItem.ItemHasContents, True)
+        self._nodes: List[Tuple[float, float]] = []
+        self._edges: List[Tuple[int, int]] = []
+        self._node_offsets: List[QVector2D] = []
+        self._node_material = _InstancedMaterial()
+        self._node_geom: QSGGeometryNode | None = None
+        self._edge_material = _EdgeMaterial()
+        self._edge_geom: QSGGeometryNode | None = None
+        self._node_colors: List[QColor] = []
+        self._node_flags: List[float] = []
+        self._node_labels: List[str] = []
+        self._label_container: QSGNode | None = None
+        self._label_nodes: List[QSGTextNode] = []
+        self._edges_dirty = True
+        self._zoom = 1.0
+        self._labels_visible = True
+        self._edges_visible = True
+        self._antialias_threshold = 0.5
+        self._label_threshold = 0.3
+        self._edge_threshold = 0.2
+        self._update_lod()
+
+    zoomChanged = Signal(float)
+    labelsVisibleChanged = Signal(bool)
+    edgesVisibleChanged = Signal(bool)
+
+    def set_graph(
+        self,
+        nodes: Iterable[Tuple[float, float]],
+        edges: Iterable[Tuple[int, int]],
+        labels: Iterable[str] | None = None,
+        colors: Iterable[str] | None = None,
+        flags: Iterable[bool] | None = None,
+    ) -> None:
+        """Update geometry, instance attributes and schedule a redraw.
+
+        Parameters
+        ----------
+        nodes:
+            Iterable of ``(x, y)`` positions for each node.
+        edges:
+            Iterable of ``(a, b)`` node index pairs describing edges.
+        labels:
+            Optional iterable of text labels per node.
+        colors:
+            Optional iterable of colors recognised by :class:`QColor`.
+        flags:
+            Optional iterable of booleans marking node visibility.
+        """
+
+        self._nodes = list(nodes)
+        self._edges = self._collapse_edges(edges)
+        self._node_offsets = [QVector2D(x, y) for x, y in self._nodes]
+        if colors is not None:
+            self._node_colors = [QColor(c) for c in colors]
+        else:
+            self._node_colors = [QColor("white") for _ in self._nodes]
+        if flags is not None:
+            self._node_flags = [1.0 if f else 0.0 for f in flags]
+        else:
+            self._node_flags = [1.0 for _ in self._nodes]
+        self._node_labels = list(labels) if labels else ["" for _ in self._nodes]
+        self._edges_dirty = True
+        rect = self._bounding_rect()
+        self.update(rect)
+
+    def apply_delta(self, delta: Dict[str, Dict[int, Tuple[float, float]]]) -> None:
+        """Apply ``delta`` updates to buffers and schedule minimal repaint.
+
+        Keys may include ``node_positions``, ``node_colors``, ``node_flags``,
+        ``node_labels`` and ``edges``. Instance attribute buffers are updated
+        in-place so only the latest values touch the GPU.
+        """
+
+        affected: Set[int] = set()
+
+        positions = delta.get("node_positions", {})
+        if positions:
+            for idx, (x, y) in positions.items():
+                i = int(idx)
+                self._nodes[i] = (x, y)
+                if i < len(self._node_offsets):
+                    self._node_offsets[i].setX(x)
+                    self._node_offsets[i].setY(y)
+                affected.add(i)
+            self._edges_dirty = True
+
+        colors = delta.get("node_colors", {})
+        for idx, color in colors.items():
+            i = int(idx)
+            self._node_colors[i] = QColor(color)
+            affected.add(i)
+
+        flags = delta.get("node_flags", {})
+        for idx, flag in flags.items():
+            i = int(idx)
+            self._node_flags[i] = 1.0 if flag else 0.0
+            affected.add(i)
+
+        labels = delta.get("node_labels", {})
+        for idx, text in labels.items():
+            i = int(idx)
+            self._node_labels[i] = str(text)
+            affected.add(i)
+
+        edges = delta.get("edges")
+        if edges is not None:
+            self._edges = self._collapse_edges(edges)
+            self._edges_dirty = True
+            for a, b in edges:
+                affected.add(int(a))
+                affected.add(int(b))
+
+        rect = self._bounding_rect(affected)
+        self.update(rect)
+
+    # --- level of detail -----------------------------------------------------
+    def _update_lod(self) -> None:
+        """Adjust antialiasing, label and edge visibility based on zoom."""
+
+        self.setAntialiasing(self._zoom > self._antialias_threshold)
+        old = self._labels_visible
+        self._labels_visible = self._zoom > self._label_threshold
+        if old != self._labels_visible:
+            self.labelsVisibleChanged.emit(self._labels_visible)
+        edge_old = self._edges_visible
+        self._edges_visible = self._zoom > self._edge_threshold
+        if edge_old != self._edges_visible:
+            self.edgesVisibleChanged.emit(self._edges_visible)
+            self.update()
+
+    def _get_zoom(self) -> float:
+        return self._zoom
+
+    def _set_zoom(self, value: float) -> None:
+        """Update zoom level, scale view and emit change signals."""
+        self._zoom = value
+        self.setScale(self._zoom)
+        self._update_lod()
+        self.update()
+        self.zoomChanged.emit(self._zoom)
+
+    zoom = Property(float, _get_zoom, _set_zoom, notify=zoomChanged)
+
+    def _get_labels_visible(self) -> bool:
+        return self._labels_visible
+
+    labelsVisible = Property(bool, _get_labels_visible, notify=labelsVisibleChanged)
+
+    def _get_edges_visible(self) -> bool:
+        return self._edges_visible
+
+    edgesVisible = Property(bool, _get_edges_visible, notify=edgesVisibleChanged)
+
+    def _get_antialias_threshold(self) -> float:
+        return self._antialias_threshold
+
+    def _set_antialias_threshold(self, value: float) -> None:
+        self._antialias_threshold = value
+        self._update_lod()
+
+    antialiasThreshold = Property(
+        float, _get_antialias_threshold, _set_antialias_threshold
+    )
+
+    def _get_label_threshold(self) -> float:
+        return self._label_threshold
+
+    def _set_label_threshold(self, value: float) -> None:
+        self._label_threshold = value
+        self._update_lod()
+
+    labelThreshold = Property(float, _get_label_threshold, _set_label_threshold)
+
+    def _get_edge_threshold(self) -> float:
+        return self._edge_threshold
+
+    def _set_edge_threshold(self, value: float) -> None:
+        self._edge_threshold = value
+        self._update_lod()
+
+    edgeThreshold = Property(float, _get_edge_threshold, _set_edge_threshold)
+
+    # --- QQuickItem overrides -------------------------------------------------
+    frameRendered = Signal()
+
+    def wheelEvent(
+        self, event: QWheelEvent
+    ) -> None:  # pragma: no cover - Qt binding detail
+        """Zoom the view in response to mouse wheel events."""
+        factor = 1.0 + event.angleDelta().y() / 1200.0
+        self.zoom = max(0.1, min(10.0, self._zoom * factor))
+        event.accept()
+
+    def updatePaintNode(
+        self, old_node: QSGNode | None, data
+    ) -> QSGNode:  # pragma: no cover - Qt binding detail
+        root = old_node or QSGNode()
+        self._update_edges(root)
+        self._update_nodes(root)
+        self._update_labels(root)
+        self.frameRendered.emit()
+        return root
+
+    # --- helpers --------------------------------------------------------------
+    def _update_nodes(self, parent: QSGNode) -> None:
+        if self._node_geom is None:
+            self._node_geom = QSGGeometryNode()
+            geometry = QSGGeometry(QSGGeometry.defaultAttributes_Point2D(), 4)
+            geometry.setDrawingMode(QSGGeometry.DrawTriangleStrip)
+            verts = geometry.vertexDataAsPoint2D()
+            verts[0].set(-0.5, -0.5)
+            verts[1].set(0.5, -0.5)
+            verts[2].set(-0.5, 0.5)
+            verts[3].set(0.5, 0.5)
+            self._node_geom.setGeometry(geometry)
+            self._node_geom.setFlag(QSGNode.OwnsGeometry, True)
+            self._node_geom.setMaterial(self._node_material)
+            self._node_geom.setFlag(QSGNode.OwnsMaterial, True)
+            parent.appendChildNode(self._node_geom)
+
+        self._node_material.offsets = self._node_offsets[:256]
+        self._node_material.colors = [
+            QVector4D(c.redF(), c.greenF(), c.blueF(), c.alphaF())
+            for c in self._node_colors[:256]
+        ]
+        self._node_material.flags = self._node_flags[:256]
+        self._node_geom.setInstanceCount(len(self._node_material.offsets))
+
+    def _update_edges(self, parent: QSGNode) -> None:
+        if not self._edges_visible or not self._edges:
+            if self._edge_geom is not None:
+                self._edge_geom.setInstanceCount(0)
+            return
+
+        if self._edge_geom is None:
+            self._edge_geom = QSGGeometryNode()
+            geometry = QSGGeometry(QSGGeometry.defaultAttributes_Point2D(), 2)
+            geometry.setDrawingMode(QSGGeometry.DrawLines)
+            verts = geometry.vertexDataAsPoint2D()
+            verts[0].set(0.0, 0.0)
+            verts[1].set(1.0, 0.0)
+            self._edge_geom.setGeometry(geometry)
+            self._edge_geom.setFlag(QSGNode.OwnsGeometry, True)
+            self._edge_geom.setMaterial(self._edge_material)
+            self._edge_geom.setFlag(QSGNode.OwnsMaterial, True)
+            parent.appendChildNode(self._edge_geom)
+
+        if not self._edges_dirty:
+            return
+
+        self._edge_material.starts = [
+            QVector2D(*self._nodes[a]) for a, _ in self._edges[:256]
+        ]
+        self._edge_material.ends = [
+            QVector2D(*self._nodes[b]) for _, b in self._edges[:256]
+        ]
+        self._edge_geom.setInstanceCount(len(self._edge_material.starts))
+        self._edges_dirty = False
+
+    def _update_labels(self, parent: QSGNode) -> None:
+        """Render node labels when visible with cached text nodes."""
+
+        if not self._labels_visible:
+            if self._label_container is not None:
+                parent.removeChildNode(self._label_container)
+                self._label_container = None
+                self._label_nodes = []
+            return
+
+        if self._label_container is None:
+            self._label_container = QSGNode()
+            parent.appendChildNode(self._label_container)
+
+        count = min(len(self._nodes), len(self._node_labels), 256)
+
+        while len(self._label_nodes) < count:
+            node = QSGTextNode()
+            node.setColor(QColor("white"))
+            self._label_container.appendChildNode(node)
+            self._label_nodes.append(node)
+
+        for i in range(count):
+            node = self._label_nodes[i]
+            node.setText(self._node_labels[i])
+            x, y = self._nodes[i]
+            node.setPosition(QPointF(x, y))
+
+        for node in self._label_nodes[count:]:
+            self._label_container.removeChildNode(node)
+
+        self._label_nodes = self._label_nodes[:count]
+
+    def _collapse_edges(
+        self, edges: Iterable[Tuple[int, int]]
+    ) -> List[Tuple[int, int]]:
+        """Collapse parallel edges so only one instance per pair is kept."""
+
+        seen: Set[Tuple[int, int]] = set()
+        result: List[Tuple[int, int]] = []
+        for a, b in edges:
+            key = tuple(sorted((int(a), int(b))))
+            if key in seen:
+                continue
+            seen.add(key)
+            result.append((int(a), int(b)))
+        return result
+
+    def _bounding_rect(self, indices: Iterable[int] | None = None) -> QRectF:
+        """Return bounding rectangle for ``indices`` or all nodes."""
+
+        if not self._nodes:
+            return QRectF()
+        if indices:
+            pts = [self._nodes[i] for i in indices if 0 <= i < len(self._nodes)]
+            if not pts:
+                return QRectF()
+            xs, ys = zip(*pts)
+        else:
+            xs, ys = zip(*self._nodes)
+        xmin, xmax = min(xs), max(xs)
+        ymin, ymax = min(ys), max(ys)
+        return QRectF(xmin, ymin, xmax - xmin, ymax - ymin)
