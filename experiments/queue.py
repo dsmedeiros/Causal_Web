@@ -188,7 +188,7 @@ class DOEQueueManager:
                 break
             results.append(res)
             while res.state == "running":
-                await asyncio.sleep(0)
+                await asyncio.sleep(0.05)
         return results
 
     @property
