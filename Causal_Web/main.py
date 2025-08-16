@@ -265,6 +265,7 @@ class MainService:
             from PySide6.QtQuick import QQuickItem
             from ui_new import core
             from ui_new.state import (
+                Store,
                 TelemetryModel,
                 MetersModel,
                 ExperimentModel,
@@ -287,11 +288,13 @@ class MainService:
             experiment = ExperimentModel()
             replay = ReplayModel()
             logs = LogsModel()
+            store = Store()
             engine.rootContext().setContextProperty("telemetryModel", telemetry)
             engine.rootContext().setContextProperty("metersModel", meters)
             engine.rootContext().setContextProperty("experimentModel", experiment)
             engine.rootContext().setContextProperty("replayModel", replay)
             engine.rootContext().setContextProperty("logsModel", logs)
+            engine.rootContext().setContextProperty("store", store)
             view.frameRendered.connect(meters.frame_drawn)
 
             loop = asyncio.new_event_loop()
@@ -309,6 +312,7 @@ class MainService:
                     experiment,
                     replay,
                     logs,
+                    store,
                 ),
                 loop,
             )

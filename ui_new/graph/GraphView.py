@@ -181,6 +181,7 @@ class GraphView(QQuickItem):
         self._label_container: QSGNode | None = None
         self._label_nodes: List[QSGTextNode] = []
         self._edges_dirty = True
+        self._editable = True
         self._zoom = 1.0
         self._labels_visible = True
         self._edges_visible = True
@@ -326,6 +327,15 @@ class GraphView(QQuickItem):
         return self._edges_visible
 
     edgesVisible = Property(bool, _get_edges_visible, notify=edgesVisibleChanged)
+
+    def _get_editable(self) -> bool:
+        return self._editable
+
+    def _set_editable(self, value: bool) -> None:
+        """Enable or disable user interaction with the canvas."""
+        self._editable = value
+
+    editable = Property(bool, _get_editable, _set_editable)
 
     def _get_antialias_threshold(self) -> float:
         return self._antialias_threshold

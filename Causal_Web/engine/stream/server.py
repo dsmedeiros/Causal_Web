@@ -72,7 +72,9 @@ async def serve(
                         payload = {"type": "SnapshotDelta", "v": 1, **latest}
                         await ws.send(msgpack.packb(payload))
                 else:
-                    adapter.handle_control(msg)
+                    result = adapter.handle_control(msg)
+                    if result:
+                        await ws.send(msgpack.packb(result))
         finally:
             clients.remove(ws)
 
