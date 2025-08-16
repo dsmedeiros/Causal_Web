@@ -78,6 +78,7 @@ class EngineAdapter:
         self._experiment_status: Dict[str, Any] | None = None
         self._replay_progress: float | None = None
         self._replay_playing: bool = False
+        self._target_rate: float = 1.0
         self._thread: threading.Thread | None = None
         self._current_delta: Dict[str, Any] | None = None
         self._graph_static: Dict[str, Any] | None = None
@@ -1337,12 +1338,22 @@ class EngineAdapter:
 
     # ------------------------------------------------------------------
     def _build_delta(self) -> Dict[str, Any] | None:
-        """Coalesce changes into a snapshot delta for the UI."""
+        """Coalesce geometry changes, metrics and window events into a delta."""
 
         if self._arrays is None:
             return None
         v_arr = self._arrays.vertices
-        delta: Dict[str, Any] = {"frame": self._frame}
+
+        # Depth and window counters
+        max_depth = 0
+        max_window = 0
+        for data in self._vertices.values():
+            lccm = data["lccm"]
+            max_depth = max(max_depth, lccm.depth)
+            max_window = max(max_window, lccm.window_idx)
+
+        delta: Dict[str, Any] = {"frame": max_depth}
+
         positions: Dict[int, tuple[float, float]] = {}
         for vid in self._changed_nodes:
             positions[int(vid)] = (
@@ -1353,8 +1364,31 @@ class EngineAdapter:
             delta["node_positions"] = positions
         if self._changed_edges:
             delta["edges"] = [(int(a), int(b)) for a, b in self._changed_edges]
+        if self._closed_windows:
+            delta["closed_windows"] = [
+                (ev.v_id, ev.window_idx) for ev in self._closed_windows
+            ]
+
+        now = time.time()
+        elapsed = now - self._last_snapshot_time
+        events_per_sec = 0.0
+        if elapsed > 0:
+            events_per_sec = (self._frame - self._last_frame) / elapsed
+        self._last_snapshot_time = now
+        self._last_frame = self._frame
+        counters = {
+            "window": max_window,
+            "events_per_sec": events_per_sec,
+            "gates_fired": getattr(self._epairs, "gates_fired", 0),
+            "active_bridges": len(getattr(self._epairs, "active_bridges", [])),
+            "residual": self._residual,
+        }
+        delta["counters"] = counters
+        delta["invariants"] = {"inv_conservation_residual": self._residual}
+
         self._changed_nodes.clear()
         self._changed_edges.clear()
+        self._closed_windows.clear()
         return delta if len(delta) > 1 else None
 
     # ------------------------------------------------------------------
@@ -1418,6 +1452,13 @@ class EngineAdapter:
             elif action == "reset":
                 self.stop()
                 self.set_experiment_status({"status": "idle", "residual": 0.0})
+            elif action == "step":
+                self.step()
+                self.set_experiment_status(
+                    {"status": "paused", "residual": self._residual}
+                )
+            elif action == "set_rate":
+                self._target_rate = float(exp.get("rate", 1.0))
             return
 
         replay = msg.get("ReplayControl")

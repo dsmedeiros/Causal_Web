@@ -48,16 +48,25 @@ async def run(
         flags = static.get("node_flags")
         view.set_graph(nodes, edges, labels, colors, flags)
         telemetry.update_counts(len(nodes), len(edges))
+    await client.send({"cmd": "pull"})
 
     while True:
         msg = await client.receive()
 
         mtype = msg.get("type")
+        if mtype == "DeltaReady":
+            await asyncio.sleep(1 / 60)
+            await client.send({"cmd": "pull"})
+            continue
         if mtype == "SnapshotDelta":
             delta = {k: v for k, v in msg.items() if k not in {"type", "v"}}
             store.apply_delta(delta)
             view.apply_delta(delta)
             telemetry.update_counts(len(view._nodes), len(view._edges))
+            counters = delta.get("counters")
+            invariants = delta.get("invariants")
+            if counters or invariants or "frame" in delta:
+                telemetry.record(counters, invariants, depth=delta.get("frame"))
             continue
 
         if mtype == "ExperimentStatus":

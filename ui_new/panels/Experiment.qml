@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 
 Rectangle {
+    property var graphView
     color: "#202020"
     anchors.fill: parent
 
@@ -20,21 +21,33 @@ Rectangle {
         }
         Row {
             spacing: 4
-            Button {
-                text: "Start"
-                onClicked: experimentModel.start()
+            Button { text: "Start"; onClicked: experimentModel.start() }
+            Button { text: "Pause"; onClicked: experimentModel.pause() }
+            Button { text: "Step"; onClicked: experimentModel.step() }
+            Button { text: "Reset"; onClicked: experimentModel.reset() }
+        }
+        Row {
+            spacing: 4
+            Text { text: "Rate"; color: "white" }
+            Slider {
+                width: 120
+                from: 0.1
+                to: 2.0
+                value: experimentModel.rate
+                onValueChanged: experimentModel.setRate(value)
             }
-            Button {
-                text: "Pause"
-                onClicked: experimentModel.pause()
+        }
+        Row {
+            spacing: 4
+            CheckBox {
+                text: "Labels"
+                checked: graphView ? graphView.labelsVisible : true
+                onToggled: if (graphView) graphView.labelsVisible = checked
             }
-            Button {
-                text: "Resume"
-                onClicked: experimentModel.resume()
-            }
-            Button {
-                text: "Reset"
-                onClicked: experimentModel.reset()
+            CheckBox {
+                text: "Edges"
+                checked: graphView ? graphView.edgesVisible : true
+                onToggled: if (graphView) graphView.edgesVisible = checked
             }
         }
     }

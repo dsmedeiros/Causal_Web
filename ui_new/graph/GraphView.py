@@ -171,6 +171,10 @@ class GraphView(QQuickItem):
         self._node_geom: QSGGeometryNode | None = None
         self._edge_material = _EdgeMaterial()
         self._edge_geom: QSGGeometryNode | None = None
+        self._pulse_material = _InstancedMaterial()
+        self._pulse_geom: QSGGeometryNode | None = None
+        self._pulses: Dict[int, int] = {}
+        self._pulse_duration = 30
         self._node_colors: List[QColor] = []
         self._node_flags: List[float] = []
         self._node_labels: List[str] = []
@@ -276,6 +280,12 @@ class GraphView(QQuickItem):
                 affected.add(int(a))
                 affected.add(int(b))
 
+        closed = delta.get("closed_windows", [])
+        for vid, _ in closed:
+            i = int(vid)
+            self._pulses[i] = self._pulse_duration
+            affected.add(i)
+
         rect = self._bounding_rect(affected)
         self.update(rect)
 
@@ -363,6 +373,7 @@ class GraphView(QQuickItem):
         root = old_node or QSGNode()
         self._update_edges(root)
         self._update_nodes(root)
+        self._update_pulses(root)
         self._update_labels(root)
         self.frameRendered.emit()
         return root
@@ -391,6 +402,45 @@ class GraphView(QQuickItem):
         ]
         self._node_material.flags = self._node_flags[:256]
         self._node_geom.setInstanceCount(len(self._node_material.offsets))
+
+    def _update_pulses(self, parent: QSGNode) -> None:
+        """Render and decay transient window-closure pulses."""
+        if self._pulse_geom is None:
+            self._pulse_geom = QSGGeometryNode()
+            geometry = QSGGeometry(QSGGeometry.defaultAttributes_Point2D(), 4)
+            geometry.setDrawingMode(QSGGeometry.DrawTriangleStrip)
+            verts = geometry.vertexDataAsPoint2D()
+            verts[0].set(-0.6, -0.6)
+            verts[1].set(0.6, -0.6)
+            verts[2].set(-0.6, 0.6)
+            verts[3].set(0.6, 0.6)
+            self._pulse_geom.setGeometry(geometry)
+            self._pulse_geom.setFlag(QSGNode.OwnsGeometry, True)
+            self._pulse_geom.setMaterial(self._pulse_material)
+            self._pulse_geom.setFlag(QSGNode.OwnsMaterial, True)
+            parent.appendChildNode(self._pulse_geom)
+
+        offsets: List[QVector2D] = []
+        colors: List[QVector4D] = []
+        remove: List[int] = []
+        for vid, ttl in self._pulses.items():
+            if ttl <= 0:
+                remove.append(vid)
+                continue
+            x, y = self._nodes[vid]
+            offsets.append(QVector2D(x, y))
+            alpha = ttl / float(self._pulse_duration)
+            colors.append(QVector4D(1.0, 0.0, 0.0, alpha))
+            self._pulses[vid] = ttl - 1
+        for vid in remove:
+            del self._pulses[vid]
+
+        self._pulse_material.offsets = offsets[:256]
+        self._pulse_material.colors = colors[:256]
+        self._pulse_material.flags = [1.0] * len(self._pulse_material.offsets)
+        count = len(self._pulse_material.offsets)
+        if self._pulse_geom is not None:
+            self._pulse_geom.setInstanceCount(count)
 
     def _update_edges(self, parent: QSGNode) -> None:
         if not self._edges_visible or not self._edges:
