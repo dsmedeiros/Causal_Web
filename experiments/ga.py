@@ -175,7 +175,12 @@ class GeneticAlgorithm:
             ),
             self._loop,
         )
-        genome.fitness = fut.result()
+        try:
+            genome.fitness = fut.result(timeout=30)
+        except TimeoutError:
+            genome.fitness = None
+            # Optionally, log or handle the timeout here
+            raise RuntimeError("Fitness evaluation timed out for genome.")
         return genome.fitness
 
     # ------------------------------------------------------------------
