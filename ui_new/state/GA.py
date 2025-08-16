@@ -90,7 +90,8 @@ class GAModel(QObject):
 
         self._client = client
         self._loop = loop
-        self._ga._client = client
+        # Use public setter to maintain encapsulation (requires GeneticAlgorithm.set_client)
+        self._ga.set_client(client)
         self._ga._loop = loop
 
     def handle_status(self, msg: Dict) -> None:
