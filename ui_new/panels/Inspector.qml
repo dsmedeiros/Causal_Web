@@ -35,7 +35,12 @@ Item {
             TextField {
                 id: edgeDelay
                 text: edge && edge.delay !== undefined ? edge.delay : ""
-                onEditingFinished: store.set_edge_delay(store.selectedEdge, parseInt(text))
+                onEditingFinished: {
+                    var val = parseInt(text);
+                    if (!isNaN(val)) {
+                        store.set_edge_delay(store.selectedEdge, val);
+                    }
+                }
             }
         }
         // Observer inspector
