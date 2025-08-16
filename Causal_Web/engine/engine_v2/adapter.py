@@ -1428,8 +1428,15 @@ class EngineAdapter:
         return None
 
     # ------------------------------------------------------------------
-    def handle_control(self, msg: Dict[str, Any]) -> None:
-        """Handle experiment and replay control messages from the UI."""
+    def handle_control(self, msg: Dict[str, Any]) -> Dict[str, Any] | None:
+        """Handle experiment, replay and graph control messages from the UI."""
+
+        if msg.get("cmd") == "load_graph":
+            graph = msg.get("graph")
+            if graph is not None:
+                self.build_graph(graph)
+                return {"type": "GraphStatic", "v": 1, **self.graph_static()}
+            return None
 
         exp = msg.get("ExperimentControl")
         if exp:
@@ -1459,7 +1466,7 @@ class EngineAdapter:
                 )
             elif action == "set_rate":
                 self._target_rate = float(exp.get("rate", 1.0))
-            return
+            return None
 
         replay = msg.get("ReplayControl")
         if replay:
@@ -1474,6 +1481,9 @@ class EngineAdapter:
                 prog = float(replay.get("progress", 0.0))
                 self._replay_index = int(prog * len(self._replay_frames))
                 self._replay_progress = prog
+            return None
+
+        return None
 
     # ------------------------------------------------------------------
     def replay_progress(self) -> float | None:

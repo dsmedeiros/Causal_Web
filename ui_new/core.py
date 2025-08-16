@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Any
 
 from .ipc import Client
 from .state import (
@@ -22,6 +21,7 @@ async def run(
     experiment: ExperimentModel,
     replay: ReplayModel,
     logs: LogsModel,
+    store: Store,
 ) -> None:
     """Connect to ``url`` and forward graph updates to the view and models.
 
@@ -31,11 +31,11 @@ async def run(
     """
 
     client = Client(url)
-    store = Store()
     await client.connect()
 
     experiment.set_client(client)
     replay.set_client(client)
+    store.set_client(client)
 
     msg = await client.receive()
     if msg.get("type") == "GraphStatic":
@@ -54,6 +54,19 @@ async def run(
         msg = await client.receive()
 
         mtype = msg.get("type")
+        if mtype == "GraphStatic":
+            static = {k: v for k, v in msg.items() if k not in {"type", "v"}}
+            store.set_static(static)
+            nodes = static.get("node_positions", [])
+            edges = static.get("edges", [])
+            labels = static.get("node_labels")
+            colors = static.get("node_colors")
+            flags = static.get("node_flags")
+            view.set_graph(nodes, edges, labels, colors, flags)
+            telemetry.update_counts(len(nodes), len(edges))
+            await client.send({"cmd": "pull"})
+            continue
+
         if mtype == "DeltaReady":
             await asyncio.sleep(1 / 60)
             await client.send({"cmd": "pull"})
