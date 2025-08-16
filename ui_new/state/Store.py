@@ -427,7 +427,7 @@ class Store(QObject):
             if any(k not in node for k in ("id", "x", "y")):
                 warnings.append(f"node {nid} missing properties")
 
-        edge_pairs: set[tuple[int, int]] = set()
+        edge_pairs: Set[Tuple[int, int]] = set()
         for edge in self.graph_static.get("edges", []):
             a = edge.get("from")
             b = edge.get("to")
