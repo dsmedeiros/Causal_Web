@@ -6,6 +6,8 @@ from .Meters import MetersModel
 from .Experiment import ExperimentModel
 from .Replay import ReplayModel
 from .Logs import LogsModel
+from .DOE import DOEModel
+from .GA import GAModel
 
 __all__ = [
     "Store",
@@ -14,4 +16,6 @@ __all__ = [
     "ExperimentModel",
     "ReplayModel",
     "LogsModel",
+    "DOEModel",
+    "GAModel",
 ]

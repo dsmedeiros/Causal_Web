@@ -136,5 +136,7 @@ Window {
         Tab { title: "Logs"; LogExplorer { anchors.fill: parent } }
         Tab { title: "Inspector"; Inspector { anchors.fill: parent } }
         Tab { title: "Validation"; Validation { anchors.fill: parent } }
+        Tab { title: "DOE"; DOE { anchors.fill: parent } }
+        Tab { title: "GA"; GA { anchors.fill: parent } }
     }
 }

@@ -36,6 +36,8 @@ from .qtheta_c import (
 from .epairs import EPairs
 from .bell import BellHelpers, Ancestry
 from ...config import Config, RunConfig
+from experiments.gates import run_gates
+from invariants import checks
 
 
 EDGE_LOG_BUDGET = 100
@@ -1466,6 +1468,25 @@ class EngineAdapter:
                 )
             elif action == "set_rate":
                 self._target_rate = float(exp.get("rate", 1.0))
+            elif action == "run":
+                cfg = exp.get("config") or {}
+                rid = exp.get("id", 0)
+                gates = exp.get("gates", [1, 2, 3, 4, 5, 6])
+                try:
+                    metrics = run_gates(cfg, gates)
+                    inv = checks.from_metrics(metrics)
+                    self.set_experiment_status(
+                        {
+                            "id": rid,
+                            "state": "finished",
+                            "metrics": metrics,
+                            "invariants": inv,
+                        }
+                    )
+                except Exception as exc:
+                    self.set_experiment_status(
+                        {"id": rid, "state": "failed", "error": str(exc)}
+                    )
             return None
 
         replay = msg.get("ReplayControl")
