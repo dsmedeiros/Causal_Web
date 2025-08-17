@@ -65,16 +65,6 @@
     <Compile Include="graph\__init__.py" />
     <Compile Include="gui\state.py" />
     <Compile Include="gui\__init__.py" />
-    <Compile Include="gui_legacy\bell_window.py" />
-    <Compile Include="gui_legacy\canvas_widget.py" />
-    <Compile Include="gui_legacy\log_files_window.py" />
-    <Compile Include="gui_legacy\main_window.py" />
-    <Compile Include="gui_legacy\panel_mixins.py" />
-    <Compile Include="gui_legacy\panel_services.py" />
-    <Compile Include="gui_legacy\shared.py" />
-    <Compile Include="gui_legacy\toolbar_builder.py" />
-    <Compile Include="gui_legacy\toolbar_services.py" />
-    <Compile Include="gui_legacy\__init__.py" />
     <Compile Include="ingest\service.py" />
     <Compile Include="ingest\__init__.py" />
     <Compile Include="main.py" />
@@ -99,7 +89,6 @@
     <Folder Include="graph\" />
     <Folder Include="gui\" />
     <Folder Include="assets\" />
-    <Folder Include="gui_legacy\" />
     <Folder Include="ingest\" />
     <Folder Include="input\" />
     <Folder Include="output\" />
