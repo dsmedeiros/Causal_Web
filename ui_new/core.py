@@ -11,6 +11,8 @@ from .state import (
     ExperimentModel,
     ReplayModel,
     LogsModel,
+    DOEModel,
+    GAModel,
 )
 
 
@@ -22,6 +24,8 @@ async def run(
     replay: ReplayModel,
     logs: LogsModel,
     store: Store,
+    doe: DOEModel,
+    ga: GAModel,
 ) -> None:
     """Connect to ``url`` and forward graph updates to the view and models.
 
@@ -33,9 +37,12 @@ async def run(
     client = Client(url)
     await client.connect()
 
+    loop = asyncio.get_running_loop()
     experiment.set_client(client)
     replay.set_client(client)
     store.set_client(client)
+    doe.set_client(client)
+    ga.set_client(client, loop)
 
     msg = await client.receive()
     if msg.get("type") == "GraphStatic":
@@ -84,6 +91,8 @@ async def run(
 
         if mtype == "ExperimentStatus":
             experiment.update(msg.get("status", ""), msg.get("residual", 0.0))
+            doe.handle_status(msg)
+            ga.handle_status(msg)
             continue
 
         if mtype == "ReplayProgress":

@@ -271,6 +271,8 @@ class MainService:
                 ExperimentModel,
                 ReplayModel,
                 LogsModel,
+                DOEModel,
+                GAModel,
             )
 
             app = QGuiApplication([])
@@ -289,12 +291,16 @@ class MainService:
             replay = ReplayModel()
             logs = LogsModel()
             store = Store()
+            doe = DOEModel()
+            ga_model = GAModel()
             engine.rootContext().setContextProperty("telemetryModel", telemetry)
             engine.rootContext().setContextProperty("metersModel", meters)
             engine.rootContext().setContextProperty("experimentModel", experiment)
             engine.rootContext().setContextProperty("replayModel", replay)
             engine.rootContext().setContextProperty("logsModel", logs)
             engine.rootContext().setContextProperty("store", store)
+            engine.rootContext().setContextProperty("doeModel", doe)
+            engine.rootContext().setContextProperty("gaModel", ga_model)
             view.frameRendered.connect(meters.frame_drawn)
 
             loop = asyncio.new_event_loop()
@@ -313,6 +319,8 @@ class MainService:
                     replay,
                     logs,
                     store,
+                    doe,
+                    ga_model,
                 ),
                 loop,
             )

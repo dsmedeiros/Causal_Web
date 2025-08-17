@@ -86,6 +86,11 @@ via a Monte-Carlo path sampler over the graph's causal structure.
   parallel execution via `--parallel` (use `--processes` for a process pool).
 - DOE summaries now record selected gates and aggregate gate metrics
   (mean and standard deviation).
+- DOE queue manager can generate Latin Hypercube or grid sweeps, tracks live per-run invariant and fitness status, and dispatches runs to the engine via IPC.
+- New DOE panel integrates the queue manager into the Qt Quick UI with a Top-K table, scatter plot, parallel-coordinate view, fitness heatmap and live status updates for sampled configurations.
+- Added a lightweight Genetic Algorithm framework with tournament selection, uniform crossover, Gaussian mutation and elitism along with a GA panel showing population fitness, a Pareto-front view and a "Promote to baseline config" action.
+- GA evaluation can dispatch genomes to the engine via IPC, with engine-side handling of ``ExperimentControl`` messages for ``run`` requests.
+- GA panel evaluations now use the shared IPC loop so genomes are executed on the engine during interactive runs.
 - Gate harness now executes Gates 1–6 via engine primitives rather than
   returning proxy metrics.
 - Gate metrics now capture interference visibility, delay slopes and
