@@ -162,7 +162,7 @@ class GeneticAlgorithm:
         self._pending[rid] = (genome, fut)
         raw = self._normalizer.to_raw(self.base, genome.groups)
         raw.update(genome.toggles)
-        asyncio.run_coroutine_threadsafe(
+        send_future = asyncio.run_coroutine_threadsafe(
             self._client.send(
                 {
                     "ExperimentControl": {
