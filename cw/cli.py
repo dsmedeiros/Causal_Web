@@ -7,20 +7,18 @@ from typing import List, Optional
 
 
 def main(argv: Optional[List[str]] = None) -> None:
+    """Parse ``cw`` CLI arguments and dispatch to the runner."""
+
     parser = argparse.ArgumentParser(prog="cw")
     sub = parser.add_subparsers(dest="command", required=True)
 
-    run_parser = sub.add_parser("run", help="Run simulation")
-    run_parser.add_argument("--gui", choices=["legacy", "new"], default="legacy")
+    sub.add_parser("run", help="Run simulation")
 
     args, rest = parser.parse_known_args(argv)
     if args.command == "run":
-        if args.gui == "legacy":
-            from Causal_Web.main import MainService
+        from Causal_Web.main import MainService
 
-            MainService(argv=rest).run()
-        else:
-            raise RuntimeError("New GUI is not yet available")
+        MainService(argv=rest).run()
 
 
 if __name__ == "__main__":
