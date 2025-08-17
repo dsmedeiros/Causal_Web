@@ -35,7 +35,7 @@ class ReplayModel(QObject):
 
     progress = Property(float, _get_progress, _set_progress, notify=progressChanged)
 
-    def _get_bookmarks(self) -> list[dict[str, float]]:
+    def _get_bookmarks(self) -> List[Dict[str, float]]:
         """Expose bookmarks as a list of mappings for QML."""
         return [{"name": n, "progress": p} for n, p in self._bookmarks]
 
