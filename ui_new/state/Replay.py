@@ -41,7 +41,7 @@ class ReplayModel(QObject):
 
     bookmarks = Property("QVariant", _get_bookmarks, notify=bookmarksChanged)
 
-    def _get_annotations(self) -> list[dict[str, float]]:
+    def _get_annotations(self) -> List[Dict[str, Union[float, str]]]:
         """Expose frame annotations for QML."""
         return [{"progress": p, "text": t} for p, t in self._annotations]
 
