@@ -21,6 +21,11 @@ Rectangle {
                 onClicked: replayModel.pause()
             }
         }
+        Row {
+            spacing: 4
+            TextField { id: logPath; placeholderText: "delta log" }
+            Button { text: "Load"; onClicked: replayModel.load(logPath.text) }
+        }
         Slider {
             from: 0
             to: 1
@@ -30,6 +35,32 @@ Rectangle {
         Text {
             text: Math.round(replayModel.progress * 100) + "%"
             color: "white"
+        }
+        Row {
+            spacing: 4
+            TextField { id: bookmarkName; placeholderText: "Bookmark" }
+            Button { text: "Add"; onClicked: replayModel.addBookmark(bookmarkName.text) }
+        }
+        Row {
+            spacing: 4
+            TextField { id: annotationText; placeholderText: "Annotation" }
+            Button { text: "Add"; onClicked: replayModel.addAnnotation(annotationText.text) }
+        }
+        ListView {
+            height: 60
+            model: replayModel.bookmarks
+            delegate: Text {
+                color: "white"
+                text: model.name + " @ " + Math.round(model.progress * 100) + "%"
+            }
+        }
+        ListView {
+            height: 60
+            model: replayModel.annotations
+            delegate: Text {
+                color: "white"
+                text: Math.round(model.progress * 100) + "% - " + model.text
+            }
         }
     }
 }

@@ -10,6 +10,7 @@ to remove outdated hooks from the legacy engine.
 from __future__ import annotations
 
 from typing import Any, Dict, Iterable, List, Optional, Set
+import json
 from collections import deque, defaultdict, OrderedDict
 import threading
 import time
@@ -86,6 +87,25 @@ class EngineAdapter:
         self._graph_static: Dict[str, Any] | None = None
         self._replay_frames: List[Dict[str, Any]] = []
         self._replay_index = 0
+
+    # ------------------------------------------------------------------
+    def load_replay(self, path: str) -> None:
+        """Load snapshot deltas from ``path`` for deterministic replay."""
+
+        with self._lock:
+            self._replay_frames.clear()
+            self._replay_index = 0
+            try:
+                with open(path) as fh:
+                    for line in fh:
+                        try:
+                            self._replay_frames.append(json.loads(line))
+                        except json.JSONDecodeError:
+                            continue
+            except FileNotFoundError:
+                return
+            self._replay_playing = False
+            self._replay_progress = 0.0
 
     # ------------------------------------------------------------------
     def _get_pool_arr(
@@ -1404,6 +1424,7 @@ class EngineAdapter:
                 with self._lock:
                     self._current_delta = delta
                     self._replay_frames.append(dict(delta))
+                log_record("delta", "snapshot", frame=self._frame, value=delta)
             self.set_experiment_status(
                 {"status": "running", "residual": self._residual}
             )
@@ -1492,6 +1513,11 @@ class EngineAdapter:
         replay = msg.get("ReplayControl")
         if replay:
             action = replay.get("action")
+            if action == "load":
+                path = replay.get("path")
+                if isinstance(path, str):
+                    self.load_replay(path)
+                return None
             if action == "play":
                 self._replay_playing = True
                 self._replay_progress = self._replay_progress or 0.0
