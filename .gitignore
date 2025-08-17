@@ -400,3 +400,4 @@ FodyWeavers.xsd
 /Causal_Web/output/tick_seed_log.json
 /pkgs
 /.venv
+/cwt-env
