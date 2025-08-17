@@ -80,7 +80,7 @@ class CompareModel(QObject):
                 for row in reader:
                     try:
                         totals[row["category"]] += float(row["count"])
-                    except Exception:
+                    except (KeyError, ValueError):
                         continue
             return totals
 
