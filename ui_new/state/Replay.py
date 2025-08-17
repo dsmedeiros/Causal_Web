@@ -3,7 +3,7 @@ from __future__ import annotations
 """Replay model exposed to QML panels."""
 
 import asyncio
-from typing import Optional
+from typing import List, Optional, Tuple
 
 from PySide6.QtCore import QObject, Property, Signal, Slot
 
@@ -14,11 +14,15 @@ class ReplayModel(QObject):
     """Track replay progress as a fraction [0, 1]."""
 
     progressChanged = Signal(float)
+    bookmarksChanged = Signal()
+    annotationsChanged = Signal()
 
     def __init__(self) -> None:
         super().__init__()
         self._progress = 0.0
         self._client: Optional[Client] = None
+        self._bookmarks: List[Tuple[str, float]] = []
+        self._annotations: List[Tuple[float, str]] = []
 
     # ------------------------------------------------------------------
     def _get_progress(self) -> float:
@@ -30,6 +34,18 @@ class ReplayModel(QObject):
             self.progressChanged.emit(value)
 
     progress = Property(float, _get_progress, _set_progress, notify=progressChanged)
+
+    def _get_bookmarks(self) -> List[Dict[str, float]]:
+        """Expose bookmarks as a list of mappings for QML."""
+        return [{"name": n, "progress": p} for n, p in self._bookmarks]
+
+    bookmarks = Property("QVariant", _get_bookmarks, notify=bookmarksChanged)
+
+    def _get_annotations(self) -> List[Dict[str, Union[float, str]]]:
+        """Expose frame annotations for QML."""
+        return [{"progress": p, "text": t} for p, t in self._annotations]
+
+    annotations = Property("QVariant", _get_annotations, notify=annotationsChanged)
 
     # ------------------------------------------------------------------
     def update_progress(self, value: float) -> None:
@@ -67,4 +83,25 @@ class ReplayModel(QObject):
                 self._client.send(
                     {"ReplayControl": {"action": "seek", "progress": float(value)}}
                 )
+            )
+
+    # ------------------------------------------------------------------
+    @Slot(str)
+    def addBookmark(self, name: str) -> None:
+        """Record a bookmark at the current progress."""
+        self._bookmarks.append((name, self._progress))
+        self.bookmarksChanged.emit()
+
+    @Slot(str)
+    def addAnnotation(self, text: str) -> None:
+        """Annotate the current frame with ``text``."""
+        self._annotations.append((self._progress, text))
+        self.annotationsChanged.emit()
+
+    @Slot(str)
+    def load(self, path: str) -> None:
+        """Load a delta log for deterministic replay."""
+        if self._client:
+            asyncio.create_task(
+                self._client.send({"ReplayControl": {"action": "load", "path": path}})
             )

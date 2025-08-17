@@ -273,6 +273,7 @@ class MainService:
                 LogsModel,
                 DOEModel,
                 GAModel,
+                CompareModel,
             )
 
             app = QGuiApplication([])
@@ -293,6 +294,7 @@ class MainService:
             store = Store()
             doe = DOEModel()
             ga_model = GAModel()
+            compare = CompareModel()
             engine.rootContext().setContextProperty("telemetryModel", telemetry)
             engine.rootContext().setContextProperty("metersModel", meters)
             engine.rootContext().setContextProperty("experimentModel", experiment)
@@ -301,6 +303,7 @@ class MainService:
             engine.rootContext().setContextProperty("store", store)
             engine.rootContext().setContextProperty("doeModel", doe)
             engine.rootContext().setContextProperty("gaModel", ga_model)
+            engine.rootContext().setContextProperty("compareModel", compare)
             view.frameRendered.connect(meters.frame_drawn)
 
             loop = asyncio.new_event_loop()
