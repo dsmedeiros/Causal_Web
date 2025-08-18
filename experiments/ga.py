@@ -134,14 +134,14 @@ class GeneticAlgorithm:
         if state == "failed":
             err = RuntimeError(msg.get("error", "run failed"))
             if not fut.done():
-                fut.set_exception(err)
+                self._loop.call_soon_threadsafe(fut.set_exception, err)
             self._pending.pop(rid, None)
             return
         metrics = msg.get("metrics", {})
         inv = msg.get("invariants", {})
         genome.fitness = self.fitness_fn(metrics, inv, genome.groups, genome.toggles)
         if not fut.done():
-            fut.set_result(genome.fitness)
+            self._loop.call_soon_threadsafe(fut.set_result, genome.fitness)
         self._pending.pop(rid, None)
 
     def _evaluate(self, genome: Genome) -> Union[float, Sequence[float]]:
@@ -175,8 +175,9 @@ class GeneticAlgorithm:
             ),
             self._loop,
         )
+        waiter = asyncio.run_coroutine_threadsafe(asyncio.wait_for(fut, 30), self._loop)
         try:
-            genome.fitness = fut.result(timeout=30)
+            genome.fitness = waiter.result()
         except TimeoutError:
             genome.fitness = None
             # Optionally, log or handle the timeout here
