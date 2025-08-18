@@ -8,6 +8,7 @@ Window {
     id: root
     property bool editMode: true
     property string tool: "select"
+    property bool controlsEnabled: true
     width: 800
     height: 600
     visible: true
@@ -21,13 +22,14 @@ Window {
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: panels.left
+        enabled: root.controlsEnabled
     }
 
     // editing overlay
     MouseArea {
         id: editor
         anchors.fill: graphView
-        enabled: root.editMode
+        enabled: root.editMode && root.controlsEnabled
         onPressed: function(mouse) {
             var pos = Qt.point(mouse.x, mouse.y)
             if (root.tool === "add") {
@@ -84,6 +86,7 @@ Window {
         anchors.top: parent.top
         anchors.left: parent.left
         visible: root.editMode
+        enabled: root.controlsEnabled
         Button { text: "Select"; onClicked: root.tool = "select" }
         Button { text: "Add"; onClicked: root.tool = "add" }
         Button { text: "Connect"; onClicked: root.tool = "connect" }
@@ -95,6 +98,7 @@ Window {
         text: root.editMode ? "Run" : "Edit"
         anchors.top: parent.top
         anchors.right: panels.left
+        enabled: root.controlsEnabled
         onClicked: {
             root.editMode = !root.editMode
             graphView.editable = root.editMode
@@ -109,9 +113,9 @@ Window {
         anchors.left: parent.left
         anchors.top: parent.top
         color: "white"
-        text: "frame: " + metersModel.frame +
-              " depth: " + telemetryModel.depth +
-              " windows: " +
+          text: "frame: " + metersModel.frame +
+                " " + telemetryModel.depthLabel + ": " + telemetryModel.depth +
+                " windows: " +
               (telemetryModel.counters["window"] ? telemetryModel.counters["window"][telemetryModel.counters["window"].length - 1] : 0) +
               " bridges: " +
               (telemetryModel.counters["active_bridges"] ? telemetryModel.counters["active_bridges"][telemetryModel.counters["active_bridges"].length - 1] : 0) +
@@ -128,6 +132,7 @@ Window {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.right: parent.right
+        enabled: root.controlsEnabled
 
         Tab { title: "Telemetry"; Telemetry { anchors.fill: parent; graphView: graphView } }
         Tab { title: "Meters"; Meters { anchors.fill: parent } }

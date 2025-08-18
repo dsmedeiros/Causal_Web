@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from typing import Any
 
 from .ipc import Client
 from .state import (
@@ -26,15 +27,19 @@ async def run(
     store: Store,
     doe: DOEModel,
     ga: GAModel,
+    window: Any,
+    token: str | None = None,
 ) -> None:
     """Connect to ``url`` and forward graph updates to the view and models.
 
     ``view`` must expose :meth:`set_graph` and :meth:`apply_delta` methods.
     Other models receive telemetry, experiment status, replay progress and log
-    entries for display in QML panels.
+    entries for display in QML panels. ``token`` is forwarded to the server for
+    simple session authentication. ``window`` controls overall UI enabling and
+    is disabled on disconnect.
     """
 
-    client = Client(url)
+    client = Client(url, token)
     await client.connect()
 
     loop = asyncio.get_running_loop()
@@ -44,64 +49,65 @@ async def run(
     doe.set_client(client)
     ga.set_client(client, loop)
 
-    msg = await client.receive()
-    if msg.get("type") == "GraphStatic":
-        static = {k: v for k, v in msg.items() if k not in {"type", "v"}}
-        store.set_static(static)
-        nodes = static.get("node_positions", [])
-        edges = static.get("edges", [])
-        labels = static.get("node_labels")
-        colors = static.get("node_colors")
-        flags = static.get("node_flags")
-        view.set_graph(nodes, edges, labels, colors, flags)
-        telemetry.update_counts(len(nodes), len(edges))
-    await client.send({"cmd": "pull"})
+    try:
+        while True:
+            msg = await client.receive()
 
-    while True:
-        msg = await client.receive()
+            mtype = msg.get("type")
+            if mtype == "GraphStatic":
+                static = {k: v for k, v in msg.items() if k not in {"type", "v"}}
+                store.set_static(static)
+                nodes = static.get("node_positions", [])
+                edges = static.get("edges", [])
+                labels = static.get("node_labels")
+                colors = static.get("node_colors")
+                flags = static.get("node_flags")
+                view.set_graph(nodes, edges, labels, colors, flags)
+                telemetry.update_counts(len(nodes), len(edges))
+                await client.send({"cmd": "pull"})
+                continue
 
-        mtype = msg.get("type")
-        if mtype == "GraphStatic":
-            static = {k: v for k, v in msg.items() if k not in {"type", "v"}}
-            store.set_static(static)
-            nodes = static.get("node_positions", [])
-            edges = static.get("edges", [])
-            labels = static.get("node_labels")
-            colors = static.get("node_colors")
-            flags = static.get("node_flags")
-            view.set_graph(nodes, edges, labels, colors, flags)
-            telemetry.update_counts(len(nodes), len(edges))
-            await client.send({"cmd": "pull"})
-            continue
+            if mtype == "DeltaReady":
+                await asyncio.sleep(1 / 60)
+                await client.send({"cmd": "pull"})
+                continue
+            if mtype == "SnapshotDelta":
+                delta = {k: v for k, v in msg.items() if k not in {"type", "v"}}
+                store.apply_delta(delta)
+                view.apply_delta(delta)
+                telemetry.update_counts(len(view._nodes), len(view._edges))
+                counters = delta.get("counters")
+                invariants = delta.get("invariants")
+                depth = delta.get("depth")
+                label = "depth"
+                if depth is None:
+                    depth = delta.get("frame")
+                    label = "frame"
+                if counters or invariants or depth is not None:
+                    telemetry.record(counters, invariants, depth=depth, label=label)
+                continue
 
-        if mtype == "DeltaReady":
-            await asyncio.sleep(1 / 60)
-            await client.send({"cmd": "pull"})
-            continue
-        if mtype == "SnapshotDelta":
-            delta = {k: v for k, v in msg.items() if k not in {"type", "v"}}
-            store.apply_delta(delta)
-            view.apply_delta(delta)
-            telemetry.update_counts(len(view._nodes), len(view._edges))
-            counters = delta.get("counters")
-            invariants = delta.get("invariants")
-            if counters or invariants or "frame" in delta:
-                telemetry.record(counters, invariants, depth=delta.get("frame"))
-            continue
+            if mtype == "ExperimentStatus":
+                experiment.update(msg.get("status", ""), msg.get("residual", 0.0))
+                doe.handle_status(msg)
+                ga.handle_status(msg)
+                continue
 
-        if mtype == "ExperimentStatus":
-            experiment.update(msg.get("status", ""), msg.get("residual", 0.0))
-            doe.handle_status(msg)
-            ga.handle_status(msg)
-            continue
+            if mtype == "ReplayProgress":
+                progress = msg.get("progress")
+                if progress is not None:
+                    replay.update_progress(float(progress))
+                continue
 
-        if mtype == "ReplayProgress":
-            progress = msg.get("progress")
-            if progress is not None:
-                replay.update_progress(float(progress))
-            continue
-
-        if mtype == "LogEntry":
-            entry = msg.get("entry")
-            if entry is not None:
-                logs.add_entry(str(entry))
+            if mtype == "LogEntry":
+                entry = msg.get("entry")
+                if entry is not None:
+                    logs.add_entry(str(entry))
+    finally:
+        view.editable = False
+        window.controlsEnabled = False
+        experiment.set_client(None)
+        replay.set_client(None)
+        store.set_client(None)
+        doe.set_client(None)
+        ga.set_client(None)

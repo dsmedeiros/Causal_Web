@@ -15,6 +15,7 @@ class TelemetryModel(QObject):
     countersChanged = Signal(dict)
     invariantsChanged = Signal(dict)
     depthChanged = Signal(int)
+    depthLabelChanged = Signal(str)
 
     def __init__(self, max_points: int = 100) -> None:
         super().__init__()
@@ -22,6 +23,7 @@ class TelemetryModel(QObject):
         self._edge_count = 0
         self._telemetry = RollingTelemetry(max_points=max_points)
         self._depth = 0
+        self._depth_label = "depth"
 
     # ------------------------------------------------------------------
     def _get_node_count(self) -> int:
@@ -63,11 +65,15 @@ class TelemetryModel(QObject):
         counters: dict[str, float] | None = None,
         invariants: dict[str, bool] | None = None,
         depth: int | None = None,
+        label: str = "depth",
     ) -> None:
         """Record a telemetry sample and emit change signals."""
         if depth is not None and depth != self._depth:
             self._depth = depth
             self.depthChanged.emit(depth)
+        if label != self._depth_label:
+            self._depth_label = label
+            self.depthLabelChanged.emit(label)
         self._telemetry.record(counters, invariants)
         self.countersChanged.emit(self._telemetry.get_counters())
         self.invariantsChanged.emit(self._telemetry.get_invariants())
@@ -83,3 +89,9 @@ class TelemetryModel(QObject):
         return self._depth
 
     depth = Property(int, _get_depth, notify=depthChanged)
+
+    # ------------------------------------------------------------------
+    def _get_depth_label(self) -> str:
+        return self._depth_label
+
+    depthLabel = Property(str, _get_depth_label, notify=depthLabelChanged)

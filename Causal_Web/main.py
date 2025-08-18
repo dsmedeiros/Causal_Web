@@ -305,6 +305,7 @@ class MainService:
             loop.run_forever()
 
         threading.Thread(target=_run_loop, daemon=True).start()
+        token = os.getenv("CW_SESSION_TOKEN", "secret")
         asyncio.run_coroutine_threadsafe(
             core.run(
                 "ws://localhost:8765",
@@ -316,6 +317,8 @@ class MainService:
                 store,
                 doe,
                 ga_model,
+                root,
+                token=token,
             ),
             loop,
         )
