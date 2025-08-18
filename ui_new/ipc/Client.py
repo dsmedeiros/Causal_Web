@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
+from typing import Any, Deque, Dict, Optional
 
 import asyncio
+from collections import deque
 
 import msgpack
 import websockets
@@ -22,6 +23,7 @@ class Client:
         self.ping_interval = ping_interval
         self.connection: Optional[websockets.WebSocketClientProtocol] = None
         self._ping_task: Optional[asyncio.Task] = None
+        self._backlog: Deque[Dict[str, Any]] = deque()
 
     async def connect(self) -> None:
         """Open the WebSocket connection and send the session token."""
@@ -50,10 +52,27 @@ class Client:
 
     async def receive(self) -> Dict[str, Any]:
         """Receive and deserialize a message from the server."""
+        if self._backlog:
+            return self._backlog.popleft()
         if not self.connection:
             raise RuntimeError("Client not connected")
         data = await self.connection.recv()
         return msgpack.unpackb(data, raw=False)
+
+    async def drop_pending(self, mtype: str) -> None:
+        """Discard queued messages of ``mtype`` leaving others untouched."""
+
+        if not self.connection:
+            return
+        while True:
+            try:
+                data = await asyncio.wait_for(self.connection.recv(), timeout=0)
+            except asyncio.TimeoutError:
+                break
+            msg = msgpack.unpackb(data, raw=False)
+            if msg.get("type") == mtype:
+                continue
+            self._backlog.append(msg)
 
     async def close(self) -> None:
         """Close the WebSocket connection."""
