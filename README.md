@@ -68,6 +68,9 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 - Experiment panel adds single-step controls, a rate slider and label/edge
   visibility toggles.
 - Canvas renders the latest snapshot diffs at up to 60 FPS via a pull-based loop.
+- Client coalesces snapshot notifications and reuses scratch buffers (including
+  pooled unitary, phase and alpha scaling arrays) while edge and event logging respect budgets
+  unless diagnostics are enabled.
 - Window closures trigger brief red pulses on affected nodes for visual feedback.
 - Fixed a startup crash in read-only mode where a stale HUD item was
   re-added after clearing the scene.

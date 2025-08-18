@@ -65,8 +65,21 @@ class EngineAdapter:
         self._packet_buf: Dict[str, Any] = {}
         self._edge_buf: Dict[str, Any] = {}
         self._payload_buf: Dict[str, Any] = {}
-        self._psi_arr_pool: OrderedDict[int, np.ndarray] = OrderedDict()
-        self._p_arr_pool: OrderedDict[int, np.ndarray] = OrderedDict()
+        self._psi_arr_pool: OrderedDict[tuple[int, ...], deque[np.ndarray]] = (
+            OrderedDict()
+        )
+        self._p_arr_pool: OrderedDict[tuple[int, ...], deque[np.ndarray]] = (
+            OrderedDict()
+        )
+        self._phase_arr_pool: OrderedDict[tuple[int, ...], deque[np.ndarray]] = (
+            OrderedDict()
+        )
+        self._U_arr_pool: OrderedDict[tuple[int, ...], deque[np.ndarray]] = (
+            OrderedDict()
+        )
+        self._alpha_arr_pool: OrderedDict[tuple[int, ...], deque[np.ndarray]] = (
+            OrderedDict()
+        )
         self._neigh_sums_cache: np.ndarray | None = None
         self._delay_changed: Set[int] = set()
         self._lock = threading.RLock()
@@ -110,21 +123,51 @@ class EngineAdapter:
     # ------------------------------------------------------------------
     def _get_pool_arr(
         self,
-        pool: OrderedDict[int, np.ndarray],
-        length: int,
+        pool: OrderedDict[tuple[int, ...], deque[np.ndarray]],
+        base_shape: tuple[int, ...],
         rows: int,
         dtype: np.dtype,
     ) -> np.ndarray:
-        """Return a reusable array from ``pool`` with at least ``rows`` rows."""
+        """Return a reusable array from ``pool`` with at least ``rows`` rows.
 
-        arr = pool.get(length)
+        Parameters
+        ----------
+        pool:
+            Mapping keyed by per-item shape excluding the row dimension.
+        base_shape:
+            Shape of a single item (excluding ``rows``).
+        rows:
+            Minimum number of rows required.
+        dtype:
+            Desired array dtype.
+        """
+
+        dq = pool.setdefault(base_shape, deque())
+        arr = dq.pop() if dq else None
         if arr is None or arr.shape[0] < rows:
             new_rows = max(rows, arr.shape[0] * 2 if arr is not None else rows)
-            arr = np.empty((new_rows, length), dtype=dtype)
-            pool[length] = arr
-            while len(pool) > 4:
-                pool.popitem(last=False)
+            arr = np.empty((new_rows, *base_shape), dtype=dtype)
+        pool[base_shape] = dq
+        pool.move_to_end(base_shape)
+        while len(pool) > 4:
+            pool.popitem(last=False)
         return arr
+
+    def _recycle_pool_arr(
+        self,
+        pool: OrderedDict[tuple[int, ...], deque[np.ndarray]],
+        base_shape: tuple[int, ...],
+        arr: np.ndarray,
+    ) -> None:
+        """Return ``arr`` to ``pool`` under ``base_shape`` with LRU culling."""
+
+        dq = pool.setdefault(base_shape, deque())
+        dq.append(arr)
+        pool.move_to_end(base_shape)
+        while len(dq) > 8:
+            dq.popleft()
+        while len(pool) > 4:
+            pool.popitem(last=False)
 
     # ------------------------------------------------------------------
     def _splitmix64(self, x: int) -> int:
@@ -464,6 +507,8 @@ class EngineAdapter:
         events = 0
         packets: list[Packet] | None = [] if collect_packets else None
         edge_logs = 0
+        diagnostic_mode = "diagnostic" in getattr(self._cfg, "logging_mode", [])
+        event_logs = 0
         decay_counter = 0
         decay_interval = self._cfg.epsilon_pairs.get("decay_interval", 32)
         packet_struct = self._packet_buf
@@ -563,23 +608,36 @@ class EngineAdapter:
             for item in requeue:
                 self._scheduler.push(*item)
 
-            U_arr = np.asarray(U_list, dtype=np.complex64)
-            phase_arr = np.asarray(phase_list, dtype=np.complex64)
-            alpha_arr = np.asarray(alpha_list, dtype=np.float32)
+            dim = U_list[0].shape[0] if U_list else 0
+            U_buf = self._get_pool_arr(
+                self._U_arr_pool, (dim, dim), pkt_count, np.complex64
+            )
+            for i, U_mat in enumerate(U_list):
+                U_buf[i] = U_mat
+            phase_buf = self._get_pool_arr(
+                self._phase_arr_pool, (), pkt_count, np.complex64
+            )
+            phase_buf[:pkt_count] = phase_list
+            alpha_buf = self._get_pool_arr(
+                self._alpha_arr_pool, (), pkt_count, np.float32
+            )
+            alpha_buf[:pkt_count] = alpha_list
             psi_len = len(psi_list[0]) if psi_list else 0
             psi_buf = self._get_pool_arr(
-                self._psi_arr_pool, psi_len, pkt_count, np.complex64
+                self._psi_arr_pool, (psi_len,), pkt_count, np.complex64
             )
             for i, psi_vec in enumerate(psi_list):
                 psi_buf[i] = psi_vec
             mu_arr, kappa_arr, psi_rot_arr = phase_stats_batch(
-                U_arr, phase_arr, psi_buf[:pkt_count]
+                U_buf[:pkt_count], phase_buf[:pkt_count], psi_buf[:pkt_count]
             )
             mu_list = mu_arr.tolist()
             kappa_list = kappa_arr.tolist()
 
             p_len = len(p_list[0]) if p_list else 0
-            p_buf = self._get_pool_arr(self._p_arr_pool, p_len, pkt_count, np.float32)
+            p_buf = self._get_pool_arr(
+                self._p_arr_pool, (p_len,), pkt_count, np.float32
+            )
             for i, p_vec in enumerate(p_list):
                 p_buf[i] = p_vec
             theta_vals = np.sum(np.abs(p_buf[:pkt_count]), axis=1)
@@ -608,9 +666,9 @@ class EngineAdapter:
                     p_buf[:pkt_count],
                     bit_list,
                     depth_list,
-                    alpha_arr,
-                    phase_arr,
-                    U_arr,
+                    alpha_buf[:pkt_count],
+                    phase_buf[:pkt_count],
+                    U_buf[:pkt_count],
                     max_deque=self._cfg.max_deque,
                     update_p=lccm.layer == "Θ",
                 )
@@ -641,6 +699,12 @@ class EngineAdapter:
                     update_p=lccm.layer == "Θ",
                 )
 
+            self._recycle_pool_arr(self._U_arr_pool, (dim, dim), U_buf)
+            self._recycle_pool_arr(self._phase_arr_pool, (), phase_buf)
+            self._recycle_pool_arr(self._alpha_arr_pool, (), alpha_buf)
+            self._recycle_pool_arr(self._psi_arr_pool, (psi_len,), psi_buf)
+            self._recycle_pool_arr(self._p_arr_pool, (p_len,), p_buf)
+
             vertex["psi_acc"][:] = psi_acc
             vertex["p_v"][:] = p_v
             if self._arrays is not None:
@@ -655,7 +719,7 @@ class EngineAdapter:
                 if vertex["bit_deque"]
                 else 0.0
             )
-            p_v = np.where(np.isfinite(p_v), p_v, np.zeros_like(p_v))
+            np.where(np.isfinite(p_v), p_v, 0.0, out=p_v)
             entropy = float(-(p_v * np.log2(p_v + 1e-12)).sum()) if len(p_v) else 0.0
             lccm.update_classical_metrics(bit_fraction, entropy, conf)
             is_q = lccm.layer == "Q"
@@ -814,22 +878,24 @@ class EngineAdapter:
                 else:
                     H_pv = 0.0
                     EQ = lccm._eq
-                    log_record(
-                        category="event",
-                        label="layer_transition",
-                        frame=self._frame,
-                        tick=self._frame,
-                        value={
-                            "v_id": dst,
-                            "from_layer": prev_layer,
-                            "to_layer": lccm.layer,
-                            "reason": reason,
-                            "window_idx": lccm.window_idx,
-                            "Lambda_v": lccm._lambda,
-                            "EQ": EQ,
-                            "H_p": H_pv,
-                        },
-                    )
+                    event_logs += 1
+                    if diagnostic_mode or event_logs % EDGE_LOG_BUDGET == 0:
+                        log_record(
+                            category="event",
+                            label="layer_transition",
+                            frame=self._frame,
+                            tick=self._frame,
+                            value={
+                                "v_id": dst,
+                                "from_layer": prev_layer,
+                                "to_layer": lccm.layer,
+                                "reason": reason,
+                                "window_idx": lccm.window_idx,
+                                "Lambda_v": lccm._lambda,
+                                "EQ": EQ,
+                                "H_p": H_pv,
+                            },
+                        )
                 if prev_layer == "C" and lccm.layer != "C":
                     if self._arrays is not None:
                         self._arrays.vertices["bit"][dst] = 0
@@ -1048,7 +1114,7 @@ class EngineAdapter:
                     self._changed_nodes.add(dst_id)
                     self._changed_edges.add((dst, dst_id))
                     if (
-                        edge_logs % EDGE_LOG_BUDGET == 0
+                        (diagnostic_mode or edge_logs % EDGE_LOG_BUDGET == 0)
                         and rate > 0.0
                         and rng_rand() < rate
                     ):
@@ -1084,7 +1150,7 @@ class EngineAdapter:
                 self._changed_edges.add((dst, other))
                 rate = self._cfg.logging.get("sample_rho_rate", 0.01)
                 if (
-                    edge_logs % EDGE_LOG_BUDGET == 0
+                    (diagnostic_mode or edge_logs % EDGE_LOG_BUDGET == 0)
                     and rate > 0.0
                     and self._rng.random() < rate
                 ):
@@ -1198,7 +1264,7 @@ class EngineAdapter:
                             pass
                         case _:
                             p_v.fill(1.0 / len(p_v))
-                    p_v = np.where(np.isfinite(p_v), p_v, np.zeros_like(p_v))
+                    np.where(np.isfinite(p_v), p_v, 0.0, out=p_v)
                     self._arrays.vertices["p"][vid] = p_v
                     if lccm.layer != "C":
                         self._arrays.vertices["bit"][vid] = 0
@@ -1257,23 +1323,25 @@ class EngineAdapter:
                     E_theta = 0.0
                     E_C = 0.0
                     E_rho = 0.0
-                log_record(
-                    category="event",
-                    label="vertex_window_close",
-                    frame=self._frame,
-                    tick=self._frame,
-                    value={
-                        "layer": lccm.layer,
-                        "Lambda_v": lccm._lambda,
-                        "EQ": EQ,
-                        "H_p": H_pv,
-                        "E_theta": E_theta,
-                        "E_C": E_C,
-                        "E_rho": E_rho,
-                        "v_id": vid,
-                    },
-                    metadata={"window_idx": lccm.window_idx},
-                )
+                event_logs += 1
+                if diagnostic_mode or event_logs % EDGE_LOG_BUDGET == 0:
+                    log_record(
+                        category="event",
+                        label="vertex_window_close",
+                        frame=self._frame,
+                        tick=self._frame,
+                        value={
+                            "layer": lccm.layer,
+                            "Lambda_v": lccm._lambda,
+                            "EQ": EQ,
+                            "H_p": H_pv,
+                            "E_theta": E_theta,
+                            "E_C": E_C,
+                            "E_rho": E_rho,
+                            "v_id": vid,
+                        },
+                        metadata={"window_idx": lccm.window_idx},
+                    )
                 E_total = EQ + E_theta + E_C + E_rho
                 prev = self._energy_totals.get(vid, 0.0)
                 leak_coeff = self._cfg.rho_delay.get("alpha_leak", 0.0)
