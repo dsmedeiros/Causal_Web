@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
+import asyncio
+
 import msgpack
 import websockets
 
@@ -11,14 +13,33 @@ import websockets
 class Client:
     """Simple WebSocket client using msgpack for message encoding."""
 
-    def __init__(self, url: str) -> None:
-        """Initialize the client with the server ``url``."""
+    def __init__(
+        self, url: str, token: str | None = None, ping_interval: float = 30.0
+    ) -> None:
+        """Initialize the client with the server ``url`` and optional ``token``."""
         self.url = url
+        self.token = token or ""
+        self.ping_interval = ping_interval
         self.connection: Optional[websockets.WebSocketClientProtocol] = None
+        self._ping_task: Optional[asyncio.Task] = None
 
     async def connect(self) -> None:
-        """Open the WebSocket connection."""
+        """Open the WebSocket connection and send the session token."""
         self.connection = await websockets.connect(self.url)
+        if self.token:
+            await self.send({"token": self.token})
+        self._ping_task = asyncio.create_task(self._heartbeat())
+
+    async def _heartbeat(self) -> None:
+        """Periodically ping the server to keep the connection alive."""
+        try:
+            while self.connection:
+                await asyncio.sleep(self.ping_interval)
+                if self.connection:
+                    pong = await self.connection.ping()
+                    await pong
+        except websockets.ConnectionClosed:
+            pass
 
     async def send(self, message: Dict[str, Any]) -> None:
         """Serialize and send ``message``."""
@@ -36,6 +57,8 @@ class Client:
 
     async def close(self) -> None:
         """Close the WebSocket connection."""
+        if self._ping_task is not None:
+            self._ping_task.cancel()
         if self.connection is not None:
             await self.connection.close()
             self.connection = None

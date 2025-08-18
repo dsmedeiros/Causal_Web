@@ -8,6 +8,7 @@ are encoded with `msgpack` and versioned via a ``type`` and ``v`` field.
 from __future__ import annotations
 
 import asyncio
+import os
 from typing import Any, Dict, Set
 
 import msgpack
@@ -40,6 +41,8 @@ async def serve(
     adapter: Any,
     host: str = "127.0.0.1",
     port: int = 8765,
+    allow_multi: bool | None = None,
+    session_token: str | None = None,
 ) -> None:
     """Start a WebSocket server publishing engine deltas.
 
@@ -52,19 +55,43 @@ async def serve(
         ``handle_control`` and ``experiment_status`` callables.
     host, port:
         Network location on which to serve the WebSocket.
+    allow_multi:
+        Whether to permit multiple simultaneous clients. If ``None`` the value
+        is read from the ``CW_ALLOW_MULTI`` environment variable and defaults to
+        ``False``.
+    session_token:
+        Optional token expected from clients on connect.
     """
+
+    if allow_multi is None:
+        allow_multi = os.getenv("CW_ALLOW_MULTI", "false").lower() in {
+            "1",
+            "true",
+            "yes",
+        }
 
     clients: Set[websockets.WebSocketServerProtocol] = set()
 
     async def handler(ws: websockets.WebSocketServerProtocol) -> None:
         """Handle a single client connection."""
 
+        if not allow_multi and clients:
+            await ws.close(reason="single client only")
+            return
+
+        raw = await ws.recv()
+        msg = msgpack.unpackb(raw, raw=False)
+        token = msg.get("token", "")
+        if session_token and token != session_token:
+            await ws.close(reason="unauthorized")
+            return
+
         clients.add(ws)
         try:
             graph_static = {"type": "GraphStatic", "v": 1, **adapter.graph_static()}
             await ws.send(msgpack.packb(graph_static))
             async for raw in ws:
-                msg = msgpack.unpackb(raw)
+                msg = msgpack.unpackb(raw, raw=False)
                 cmd = msg.get("cmd")
                 if cmd == "pull":
                     latest = bus.latest()
