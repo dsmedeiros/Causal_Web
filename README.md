@@ -97,6 +97,7 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 - Added a lightweight Genetic Algorithm framework with tournament selection, uniform crossover, Gaussian mutation and elitism along with a GA panel showing population fitness, a Pareto-front view and a "Promote to baseline config" action.
 - GA evaluation can dispatch genomes to the engine via IPC, with engine-side handling of ``ExperimentControl`` messages for ``run`` requests.
 - GA panel evaluations now use the shared IPC loop so genomes are executed on the engine during interactive runs.
+- GA runs can be checkpointed and later resumed from disk—including any in-flight evaluations—to support reproducible interrupted searches.
 - Gate harness now executes Gates 1–6 via engine primitives rather than
   returning proxy metrics.
 - Gate metrics now capture interference visibility, delay slopes and

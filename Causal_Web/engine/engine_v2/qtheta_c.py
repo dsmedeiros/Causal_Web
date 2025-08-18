@@ -140,7 +140,7 @@ def deliver_packet(
     phase = np.complex64(edge.get("phase", 1.0 + 0.0j))
     mu, kappa, psi_rot = phase_stats(U, phase, psi)
     psi_acc = psi_acc + alpha * psi_rot
-    np.where(np.isfinite(psi_acc), psi_acc, 0.0, out=psi_acc)
+    psi_acc[:] = np.where(np.isfinite(psi_acc), psi_acc, 0.0)
 
     if update_p:
         p_v = p_v + alpha * np.asarray(packet.get("p"), dtype=np.float32)
@@ -148,7 +148,7 @@ def deliver_packet(
         total = float(np.sum(p_v))
         if total > 0:
             p_v = p_v / total
-        np.where(np.isfinite(p_v), p_v, 0.0, out=p_v)
+        p_v[:] = np.where(np.isfinite(p_v), p_v, 0.0)
 
     bit_deque.append(int(packet.get("bit", 0)))
     while len(bit_deque) > max_deque:
@@ -175,7 +175,7 @@ def close_window(psi_acc: np.ndarray) -> Tuple[np.ndarray, float]:
         psi = psi_acc / np.sqrt(EQ)
     else:
         psi = psi_acc.copy()
-    np.where(np.isfinite(psi), psi, 0.0, out=psi)
+    psi[:] = np.where(np.isfinite(psi), psi, 0.0)
     return psi, EQ
 
 
@@ -246,14 +246,14 @@ def deliver_packets_batch(
     out = np.einsum("nij,nj->ni", U, psi)
     psi_rot = phase * out
     psi_acc = psi_acc + (alpha[:, None] * psi_rot).sum(axis=0)
-    np.where(np.isfinite(psi_acc), psi_acc, 0.0, out=psi_acc)
+    psi_acc[:] = np.where(np.isfinite(psi_acc), psi_acc, 0.0)
     if update_p:
         p_v = p_v + (alpha[:, None] * p).sum(axis=0)
         p_v = np.clip(p_v, 0.0, 1.0)
         total = float(np.sum(p_v))
         if total > 0:
             p_v = p_v / total
-        np.where(np.isfinite(p_v), p_v, 0.0, out=p_v)
+        p_v[:] = np.where(np.isfinite(p_v), p_v, 0.0)
 
     bit_deque.extend(bits.tolist())
     while len(bit_deque) > max_deque:
