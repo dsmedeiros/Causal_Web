@@ -384,9 +384,12 @@ class EngineAdapter:
 
         v_arr = self._arrays.vertices
         e_arr = self._arrays.edges
-        positions = [
-            (float(v_arr["x"][i]), float(v_arr["y"][i])) for i in range(n_vert)
-        ]
+        x_vals = v_arr.get("x")
+        y_vals = v_arr.get("y")
+        if x_vals is not None and y_vals is not None:
+            positions = [(float(x_vals[i]), float(y_vals[i])) for i in range(n_vert)]
+        else:
+            positions = [(0.0, 0.0) for _ in range(n_vert)]
         edge_list = [
             (int(e_arr["src"][i]), int(e_arr["dst"][i]))
             for i in range(len(e_arr["src"]))
@@ -719,7 +722,7 @@ class EngineAdapter:
                 if vertex["bit_deque"]
                 else 0.0
             )
-            np.where(np.isfinite(p_v), p_v, 0.0, out=p_v)
+            p_v[:] = np.where(np.isfinite(p_v), p_v, 0.0)
             entropy = float(-(p_v * np.log2(p_v + 1e-12)).sum()) if len(p_v) else 0.0
             lccm.update_classical_metrics(bit_fraction, entropy, conf)
             is_q = lccm.layer == "Q"
@@ -1264,7 +1267,7 @@ class EngineAdapter:
                             pass
                         case _:
                             p_v.fill(1.0 / len(p_v))
-                    np.where(np.isfinite(p_v), p_v, 0.0, out=p_v)
+                    p_v[:] = np.where(np.isfinite(p_v), p_v, 0.0)
                     self._arrays.vertices["p"][vid] = p_v
                     if lccm.layer != "C":
                         self._arrays.vertices["bit"][vid] = 0
@@ -1445,11 +1448,16 @@ class EngineAdapter:
         delta: Dict[str, Any] = {"frame": max_depth}
 
         positions: Dict[int, tuple[float, float]] = {}
+        x_vals = v_arr.get("x")
+        y_vals = v_arr.get("y")
         for vid in self._changed_nodes:
-            positions[int(vid)] = (
-                float(v_arr["x"][vid]),
-                float(v_arr["y"][vid]),
-            )
+            if x_vals is not None and y_vals is not None:
+                positions[int(vid)] = (
+                    float(x_vals[vid]),
+                    float(y_vals[vid]),
+                )
+            else:
+                positions[int(vid)] = (0.0, 0.0)
         if positions:
             delta["node_positions"] = positions
         if self._changed_edges:

@@ -9,9 +9,24 @@ manager.
 """
 
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+)
 import asyncio
 import random
+import json
+import hashlib
+import pickle
+import time
+from concurrent.futures import TimeoutError
 import numpy as np
 
 from config.normalizer import Normalizer
@@ -98,9 +113,64 @@ class GeneticAlgorithm:
         self.history: List[float] = []
         self._client = client
         self._loop = loop
-        self._pending: Dict[int, Tuple[Genome, asyncio.Future]] = {}
+        self._pending: Dict[int, Tuple[Genome, asyncio.Future, int]] = {}
         self._next_id = 0
         self._init_population()
+
+    # ------------------------------------------------------------------
+    def _seed_for_genome(self, genome: Genome) -> int:
+        """Return a deterministic seed for ``genome`` based on its genes."""
+
+        payload = json.dumps(
+            [sorted(genome.groups.items()), sorted(genome.toggles.items())],
+            sort_keys=True,
+        )
+        digest = hashlib.sha256(payload.encode("utf8")).hexdigest()
+        return int(digest, 16) & 0xFFFFFFFF
+
+    # ------------------------------------------------------------------
+    async def _async_eval_genome(self, genome: Genome, seed: int) -> Dict[str, Any]:
+        """Schedule ``genome`` evaluation on the engine loop."""
+
+        rid = self._next_id
+        self._next_id += 1
+        fut: asyncio.Future = self._loop.create_future()
+        self._pending[rid] = (genome, fut, seed)
+        raw = self._normalizer.to_raw(self.base, genome.groups)
+        raw.update(genome.toggles)
+        raw.setdefault("seed", seed)
+        await self._client.send(
+            {
+                "ExperimentControl": {
+                    "action": "run",
+                    "id": rid,
+                    "config": raw,
+                    "gates": self.gates,
+                }
+            }
+        )
+        return await fut
+
+    # ------------------------------------------------------------------
+    def evaluate_blocking(
+        self, genome: Genome, timeout_s: float = 60.0
+    ) -> Dict[str, Any]:
+        """Evaluate ``genome`` synchronously with retry and timeout handling."""
+
+        seed = self._seed_for_genome(genome)
+        for attempt in range(2):
+            fut = asyncio.run_coroutine_threadsafe(
+                self._async_eval_genome(genome, seed), self._loop
+            )
+            try:
+                res: Dict[str, Any] = fut.result(timeout=timeout_s * (2**attempt))
+            except TimeoutError:
+                res = {"status": "timeout", "message": "evaluation timed out"}
+            if res.get("status") == "ok":
+                return res
+            if attempt == 0:
+                time.sleep(2**attempt)
+        return res
 
     # ------------------------------------------------------------------
     def _init_population(self) -> None:
@@ -129,19 +199,42 @@ class GeneticAlgorithm:
         pending = self._pending.get(rid)
         if pending is None:
             return
-        genome, fut = pending
+        genome, fut, _ = pending
         state = msg.get("state")
         if state == "failed":
-            err = RuntimeError(msg.get("error", "run failed"))
+            res = {
+                "status": "engine_error",
+                "message": msg.get("error", "run failed"),
+            }
             if not fut.done():
-                self._loop.call_soon_threadsafe(fut.set_exception, err)
+                self._loop.call_soon_threadsafe(fut.set_result, res)
             self._pending.pop(rid, None)
             return
         metrics = msg.get("metrics", {})
         inv = msg.get("invariants", {})
-        genome.fitness = self.fitness_fn(metrics, inv, genome.groups, genome.toggles)
+        inv_ok = (
+            inv.get("inv_causality_ok", True)
+            and inv.get("inv_ancestry_ok", True)
+            and abs(inv.get("inv_conservation_residual", 0.0)) <= 1e-9
+            and abs(inv.get("inv_no_signaling_delta", 0.0)) <= 1e-9
+        )
+        if inv_ok:
+            fit = self.fitness_fn(metrics, inv, genome.groups, genome.toggles)
+            res = {
+                "status": "ok",
+                "fitness": fit,
+                "metrics": metrics,
+                "invariants": inv,
+            }
+        else:
+            res = {
+                "status": "invalid",
+                "message": "invariant failure",
+                "metrics": metrics,
+                "invariants": inv,
+            }
         if not fut.done():
-            self._loop.call_soon_threadsafe(fut.set_result, genome.fitness)
+            self._loop.call_soon_threadsafe(fut.set_result, res)
         self._pending.pop(rid, None)
 
     def _evaluate(self, genome: Genome) -> Union[float, Sequence[float]]:
@@ -152,36 +245,21 @@ class GeneticAlgorithm:
             raw.update(genome.toggles)
             metrics = run_gates(raw, self.gates)
             inv = checks.from_metrics(metrics)
-            genome.fitness = self.fitness_fn(
-                metrics, inv, genome.groups, genome.toggles
+            inv_ok = (
+                inv.get("inv_causality_ok", True)
+                and inv.get("inv_ancestry_ok", True)
+                and abs(inv.get("inv_conservation_residual", 0.0)) <= 1e-9
+                and abs(inv.get("inv_no_signaling_delta", 0.0)) <= 1e-9
             )
+            if inv_ok:
+                genome.fitness = self.fitness_fn(
+                    metrics, inv, genome.groups, genome.toggles
+                )
+            else:
+                genome.fitness = None
             return genome.fitness
-        rid = self._next_id
-        self._next_id += 1
-        fut: asyncio.Future = self._loop.create_future()
-        self._pending[rid] = (genome, fut)
-        raw = self._normalizer.to_raw(self.base, genome.groups)
-        raw.update(genome.toggles)
-        send_future = asyncio.run_coroutine_threadsafe(
-            self._client.send(
-                {
-                    "ExperimentControl": {
-                        "action": "run",
-                        "id": rid,
-                        "config": raw,
-                        "gates": self.gates,
-                    }
-                }
-            ),
-            self._loop,
-        )
-        waiter = asyncio.run_coroutine_threadsafe(asyncio.wait_for(fut, 30), self._loop)
-        try:
-            genome.fitness = waiter.result()
-        except TimeoutError:
-            genome.fitness = None
-            # Optionally, log or handle the timeout here
-            raise RuntimeError("Fitness evaluation timed out for genome.")
+        res = self.evaluate_blocking(genome)
+        genome.fitness = res.get("fitness") if res.get("status") == "ok" else None
         return genome.fitness
 
     # ------------------------------------------------------------------
@@ -297,3 +375,90 @@ class GeneticAlgorithm:
                 },
                 fh,
             )
+
+    # ------------------------------------------------------------------
+    def save_checkpoint(self, path: str) -> None:
+        """Persist the GA state to ``path`` for later restoration.
+
+        Pending evaluations are recorded with their deterministic seeds so they
+        can be resubmitted when the checkpoint is loaded.
+        """
+
+        data = {
+            "base": self.base,
+            "group_ranges": self.group_ranges,
+            "toggle_choices": self.toggle_choices,
+            "gates": self.gates,
+            "population": [
+                {
+                    "groups": g.groups,
+                    "toggles": g.toggles,
+                    "fitness": g.fitness,
+                }
+                for g in self.population
+            ],
+            "history": self.history,
+            "rng_state": self.rng.getstate(),
+            "np_rng_state": self._np_rng.bit_generator.state,
+            "next_id": self._next_id,
+            "pending": [
+                {
+                    "groups": g.groups,
+                    "toggles": g.toggles,
+                    "seed": seed,
+                }
+                for _, (g, _, seed) in self._pending.items()
+            ],
+        }
+        with open(path, "wb") as fh:
+            pickle.dump(data, fh)
+
+    # ------------------------------------------------------------------
+    @classmethod
+    def load_checkpoint(
+        cls,
+        path: str,
+        fitness_fn: Callable[
+            [Dict[str, float], Dict[str, float], Dict[str, float], Dict[str, int]],
+            Union[float, Sequence[float]],
+        ],
+        client: Any | None = None,
+        loop: asyncio.AbstractEventLoop | None = None,
+    ) -> "GeneticAlgorithm":
+        """Return a :class:`GeneticAlgorithm` restored from ``path``.
+
+        Any in-flight evaluations captured in the checkpoint are automatically
+        rescheduled if both ``client`` and ``loop`` are provided.
+        """
+
+        with open(path, "rb") as fh:
+            data = pickle.load(fh)
+        ga = cls(
+            data["base"],
+            data["group_ranges"],
+            data["toggle_choices"],
+            data["gates"],
+            fitness_fn,
+            population_size=len(data["population"]),
+            seed=0,
+            client=client,
+            loop=loop,
+        )
+        ga.population = [
+            Genome(d["groups"], d["toggles"], d.get("fitness"))
+            for d in data["population"]
+        ]
+        ga.history = list(data["history"])
+        ga.rng.setstate(data["rng_state"])
+        ga._np_rng = np.random.default_rng()
+        ga._np_rng.bit_generator.state = data["np_rng_state"]
+        ga._next_id = data["next_id"]
+
+        for item in data.get("pending", []):
+            genome = Genome(item["groups"], item["toggles"])
+            if client is not None and loop is not None:
+                asyncio.run_coroutine_threadsafe(
+                    ga._async_eval_genome(genome, item["seed"]), loop
+                )
+
+        return ga
