@@ -183,7 +183,6 @@ def test_checkpoint_persists_pending(tmp_path: pathlib.Path) -> None:
     asyncio.run_coroutine_threadsafe(
         ga._async_eval_genome(genome, ga._seed_for_genome(genome)), loop
     )
-    import time
 
     time.sleep(0.01)
     ckpt = tmp_path / "ga.pkl"
