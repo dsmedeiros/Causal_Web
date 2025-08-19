@@ -95,6 +95,11 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 - DOE queue manager can generate Latin Hypercube or grid sweeps, tracks live per-run invariant and fitness status, and dispatches runs to the engine via IPC.
 - New DOE panel integrates the queue manager into the Qt Quick UI with a Top-K table, scatter plot, parallel-coordinate view, fitness heatmap and live status updates for sampled configurations.
 - Added a lightweight Genetic Algorithm framework with tournament selection, uniform crossover, Gaussian mutation and elitism along with a GA panel showing population fitness, a Pareto-front view and a "Promote to baseline config" action.
+- DOE and GA batches now persist summaries under ``experiments/``:
+  - ``top_k.json`` records the best runs and is consumed by the Top-K UI table.
+  - ``hall_of_fame.json`` archives per-generation GA champions.
+  - ``best_config.yaml`` captures the promoted configuration for quick reuse.
+  - run directories under ``experiments/runs/<date>/<id>/`` hold per-run ``config.json``, ``result.json`` and ``delta_log.jsonl`` for replay.
 - GA evaluation can dispatch genomes to the engine via IPC, with engine-side handling of ``ExperimentControl`` messages for ``run`` requests.
 - GA panel evaluations now use the shared IPC loop so genomes are executed on the engine during interactive runs.
 - GA runs can be checkpointed and later resumed from disk—including any in-flight evaluations—to support reproducible interrupted searches.

@@ -1,4 +1,7 @@
 import pathlib
+import time
+import json
+import yaml
 
 from experiments.ga import GeneticAlgorithm
 
@@ -25,6 +28,65 @@ def test_ga_converges(tmp_path: pathlib.Path) -> None:
     out = tmp_path / "best.yaml"
     ga.promote_best(out)
     assert out.exists()
+
+
+def test_ga_artifacts_link_runs(tmp_path: pathlib.Path, monkeypatch) -> None:
+    base = {"W0": 1.0}
+    group_ranges = {"x": (0.0, 1.0)}
+    toggles: dict[str, list[int]] = {}
+
+    def fitness(metrics, invariants, groups, toggles):
+        return -abs(groups["x"] - 0.3)
+
+    from Causal_Web.config import Config
+
+    monkeypatch.chdir(tmp_path)
+    Config.output_dir = str(tmp_path)
+    (tmp_path / "delta_log.jsonl").write_text("{}\n")
+    ga = GeneticAlgorithm(
+        base, group_ranges, toggles, [], fitness, population_size=2, seed=0
+    )
+    ga.run(1)
+    ga.save_artifacts("experiments/top_k.json", "experiments/hall_of_fame.json")
+    data = json.loads((tmp_path / "experiments/top_k.json").read_text())
+    row = data["rows"][0]
+    run_dir = tmp_path / "experiments" / row["path"]
+    assert (run_dir / "config.json").exists()
+    result = json.loads((run_dir / "result.json").read_text())
+    assert "fitness" in result
+    assert (run_dir / "delta_log.jsonl").exists()
+    # hall-of-fame paths point to the same run directories
+    hof = json.loads((tmp_path / "experiments/hall_of_fame.json").read_text())
+    hof_dir = tmp_path / "experiments" / hof["archive"][0]["path"]
+    assert (hof_dir / "config.json").exists()
+    assert (hof_dir / "result.json").exists()
+    assert (hof_dir / "delta_log.jsonl").exists()
+
+
+def test_ga_promote_uses_run_config(tmp_path: pathlib.Path, monkeypatch) -> None:
+    base = {"W0": 1.0}
+    group_ranges = {"x": (0.0, 1.0)}
+    toggles: dict[str, list[int]] = {}
+
+    def fitness(metrics, invariants, groups, toggles):
+        return -abs(groups["x"] - 0.2)
+
+    from Causal_Web.config import Config
+
+    monkeypatch.chdir(tmp_path)
+    Config.output_dir = str(tmp_path)
+    (tmp_path / "delta_log.jsonl").write_text("{}\n")
+    ga = GeneticAlgorithm(
+        base, group_ranges, toggles, [], fitness, population_size=2, seed=0
+    )
+    ga.run(1)
+    best = max(ga.population, key=ga._score)
+    run_dir = pathlib.Path("experiments") / (best.run_path or "")
+    (run_dir / "config.json").write_text(json.dumps({"y": 5}))
+    out = tmp_path / "best.yaml"
+    ga.promote_best(out)
+    data = yaml.safe_load(out.read_text())
+    assert data == {"y": 5}
 
 
 def test_pareto_front() -> None:

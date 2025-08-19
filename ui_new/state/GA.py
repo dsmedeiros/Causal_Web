@@ -3,11 +3,13 @@ from __future__ import annotations
 """Expose a simple Genetic Algorithm to QML panels."""
 
 from typing import Dict, List, Optional
+from pathlib import Path
 import asyncio
 
 from PySide6.QtCore import QObject, Property, Signal, Slot
 
 from experiments import GeneticAlgorithm
+from experiments.artifacts import load_hall_of_fame
 from ..ipc import Client
 
 
@@ -17,6 +19,7 @@ class GAModel(QObject):
     populationChanged = Signal()
     historyChanged = Signal()
     paretoChanged = Signal()
+    hallOfFameChanged = Signal()
 
     def __init__(self) -> None:
         super().__init__()
@@ -48,6 +51,8 @@ class GAModel(QObject):
         self._population: List[dict] = []
         self._history: List[float] = []
         self._pareto: List[List[float]] = []
+        data = load_hall_of_fame(Path("experiments/hall_of_fame.json"))
+        self._hof: List[dict] = list(data.get("archive", []))
 
     # ------------------------------------------------------------------
     @Slot()
@@ -74,16 +79,22 @@ class GAModel(QObject):
             if isinstance(g.fitness, (list, tuple)) and len(g.fitness) >= 2
         ]
         self._pareto = pf
+        self._ga.save_artifacts(
+            "experiments/top_k.json", "experiments/hall_of_fame.json"
+        )
+        data = load_hall_of_fame(Path("experiments/hall_of_fame.json"))
+        self._hof = list(data.get("archive", []))
         self.populationChanged.emit()
         self.historyChanged.emit()
         self.paretoChanged.emit()
+        self.hallOfFameChanged.emit()
 
     # ------------------------------------------------------------------
     @Slot()
     def promote(self) -> None:
         """Write the best genome to ``best_config.yaml``."""
 
-        self._ga.promote_best("best_config.yaml")
+        self._ga.promote_best("experiments/best_config.yaml")
 
     def set_client(self, client: Client, loop: asyncio.AbstractEventLoop) -> None:
         """Attach a WebSocket ``client`` and event ``loop`` for engine integration."""
@@ -114,3 +125,8 @@ class GAModel(QObject):
         return self._pareto
 
     pareto = Property("QVariant", _get_pareto, notify=paretoChanged)
+
+    def _get_hof(self) -> List[dict]:
+        return self._hof
+
+    hallOfFame = Property("QVariant", _get_hof, notify=hallOfFameChanged)

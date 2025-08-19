@@ -9,6 +9,7 @@ manager.
 """
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import (
     Any,
     Callable,
@@ -32,15 +33,28 @@ import numpy as np
 from config.normalizer import Normalizer
 from invariants import checks
 from .gates import run_gates
+from .artifacts import (
+    TopKEntry,
+    update_top_k,
+    save_hall_of_fame,
+    persist_run,
+    allocate_run_dir,
+)
 
 
 @dataclass
 class Genome:
-    """Container describing a single genome in the population."""
+    """Container describing a single genome in the population.
+
+    ``run_id`` and ``run_path`` are populated when the genome has been
+    evaluated and its configuration/result persisted to disk.
+    """
 
     groups: Dict[str, float]
     toggles: Dict[str, int]
     fitness: Optional[Union[float, Sequence[float]]] = None
+    run_id: Optional[str] = None
+    run_path: Optional[str] = None
 
 
 class GeneticAlgorithm:
@@ -111,11 +125,25 @@ class GeneticAlgorithm:
         self._normalizer = Normalizer()
         self.population: List[Genome] = []
         self.history: List[float] = []
+        self._hall_of_fame: List[Tuple[int, Genome]] = []
+        self._generation = 0
         self._client = client
         self._loop = loop
         self._pending: Dict[int, Tuple[Genome, asyncio.Future, int]] = {}
         self._next_id = 0
         self._init_population()
+
+    # ------------------------------------------------------------------
+    def set_client(self, client: Any | None) -> None:
+        """Assign an IPC ``client`` for engine communication."""
+
+        self._client = client
+
+    # ------------------------------------------------------------------
+    def set_event_loop(self, loop: asyncio.AbstractEventLoop | None) -> None:
+        """Assign the AsyncIO ``loop`` used for IPC callbacks."""
+
+        self._loop = loop
 
     # ------------------------------------------------------------------
     def _seed_for_genome(self, genome: Genome) -> int:
@@ -169,7 +197,7 @@ class GeneticAlgorithm:
             if res.get("status") == "ok":
                 return res
             if attempt == 0:
-                await asyncio.sleep(2**attempt)
+                self._loop.run_until_complete(asyncio.sleep(2**attempt))
         return res
 
     # ------------------------------------------------------------------
@@ -238,11 +266,11 @@ class GeneticAlgorithm:
         self._pending.pop(rid, None)
 
     def _evaluate(self, genome: Genome) -> Union[float, Sequence[float]]:
-        """Evaluate ``genome`` and cache its fitness."""
+        """Evaluate ``genome`` and persist its config/result on success."""
 
+        raw = self._normalizer.to_raw(self.base, genome.groups)
+        raw.update(genome.toggles)
         if self._client is None or self._loop is None:
-            raw = self._normalizer.to_raw(self.base, genome.groups)
-            raw.update(genome.toggles)
             metrics = run_gates(raw, self.gates)
             inv = checks.from_metrics(metrics)
             inv_ok = (
@@ -252,14 +280,27 @@ class GeneticAlgorithm:
                 and abs(inv.get("inv_no_signaling_delta", 0.0)) <= 1e-9
             )
             if inv_ok:
-                genome.fitness = self.fitness_fn(
-                    metrics, inv, genome.groups, genome.toggles
-                )
+                fit = self.fitness_fn(metrics, inv, genome.groups, genome.toggles)
+                res = {
+                    "status": "ok",
+                    "fitness": fit,
+                    "metrics": metrics,
+                    "invariants": inv,
+                }
             else:
-                genome.fitness = None
-            return genome.fitness
-        res = self.evaluate_blocking(genome)
+                res = {
+                    "status": "invalid",
+                    "metrics": metrics,
+                    "invariants": inv,
+                }
+        else:
+            res = self.evaluate_blocking(genome)
         genome.fitness = res.get("fitness") if res.get("status") == "ok" else None
+        if res.get("status") == "ok":
+            rid, abs_path, rel_path = allocate_run_dir()
+            persist_run(raw, res, abs_path)
+            genome.run_id = rid
+            genome.run_path = rel_path
         return genome.fitness
 
     # ------------------------------------------------------------------
@@ -305,6 +346,7 @@ class GeneticAlgorithm:
         self.population.sort(key=lambda g: self._score(g), reverse=True)
         best = self.population[0]
         self.history.append(self._score(best))
+        self._hall_of_fame.append((self._generation, best))
 
         next_pop: List[Genome] = self.population[: self.elite]
         while len(next_pop) < self.population_size:
@@ -316,6 +358,7 @@ class GeneticAlgorithm:
         self.population = next_pop
         for g in self.population[self.elite :]:
             g.fitness = None
+        self._generation += 1
         return best
 
     # ------------------------------------------------------------------
@@ -359,22 +402,75 @@ class GeneticAlgorithm:
         return best if best is not None else self.population[0]
 
     # ------------------------------------------------------------------
+    def save_artifacts(
+        self,
+        top_k_path: str,
+        hall_of_fame_path: str,
+        k: int = 50,
+    ) -> None:
+        """Persist top-K and hall-of-fame summaries to disk."""
+
+        top_entries: List[TopKEntry] = []
+        hof_entries: List[Dict[str, Any]] = []
+        for gen, g in self._hall_of_fame:
+            if g.run_id is None or g.run_path is None:
+                continue
+            obj = (
+                {f"f{i}": float(v) for i, v in enumerate(g.fitness)}
+                if isinstance(g.fitness, Sequence)
+                else {}
+            )
+            top_entries.append(
+                TopKEntry(
+                    run_id=g.run_id,
+                    fitness=self._score(g),
+                    objectives=obj,
+                    groups=g.groups,
+                    toggles=g.toggles,
+                    seed=self._seed_for_genome(g),
+                    path=g.run_path,
+                )
+            )
+            hof_entries.append(
+                {
+                    "gen": gen,
+                    "run_id": g.run_id,
+                    "fitness": self._score(g),
+                    "objectives": obj,
+                    "path": g.run_path,
+                }
+            )
+        update_top_k(top_entries, Path(top_k_path), k)
+        save_hall_of_fame(hof_entries, Path(hall_of_fame_path))
+
+    # ------------------------------------------------------------------
     def promote_best(self, path: str) -> None:
-        """Write the best genome's raw configuration to ``path`` as YAML."""
+        """Write the best genome's configuration to ``path`` as YAML.
+
+        If the genome has a persisted run directory, the configuration is
+        loaded from the saved ``config.json``.  Otherwise it is materialised
+        from the genome's groups and toggles.
+        """
 
         best = max(self.population, key=self._score)
-        raw = self._normalizer.to_raw(self.base, best.groups)
-        raw.update(best.toggles)
+        cfg: Dict[str, Any] | None = None
+        if best.run_path:
+            try:
+                cfg = json.loads(
+                    (Path("experiments") / best.run_path / "config.json").read_text()
+                )
+            except Exception:  # pragma: no cover - fall back to materialised config
+                cfg = None
+        if cfg is None:
+            raw = self._normalizer.to_raw(self.base, best.groups)
+            raw.update(best.toggles)
+            cfg = {
+                k: float(v) if isinstance(v, np.floating) else v for k, v in raw.items()
+            }
         import yaml
 
         with open(path, "w", encoding="utf8") as fh:
-            yaml.safe_dump(
-                {
-                    k: float(v) if isinstance(v, np.floating) else v
-                    for k, v in raw.items()
-                },
-                fh,
-            )
+            yaml.safe_dump(cfg, fh)
 
     # ------------------------------------------------------------------
     def save_checkpoint(self, path: str) -> None:
