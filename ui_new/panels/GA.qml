@@ -78,6 +78,17 @@ Rectangle {
             }
             Connections { target: gaModel; function onParetoChanged() { pareto.requestPaint() } }
         }
+        ListView {
+            width: parent.width
+            height: 80
+            model: gaModel.pareto
+            delegate: Row {
+                spacing: 4
+                Text { text: Number(modelData[0]).toFixed(3); color: "white" }
+                Text { text: Number(modelData[1]).toFixed(3); color: "white" }
+                Button { text: "Promote"; onClicked: gaModel.promoteIndex(index) }
+            }
+        }
         Text { text: "Hall of Fame"; color: "white" }
         ListView {
             width: parent.width

@@ -107,6 +107,43 @@ def test_pareto_front() -> None:
     assert len(front) >= 2
 
 
+def test_pareto_archive_shrinks() -> None:
+    base = {"W0": 1.0}
+    group_ranges = {"x": (0.0, 1.0)}
+    toggles: dict[str, list[int]] = {}
+
+    def fitness(metrics, invariants, groups, toggles):
+        x = groups["x"]
+        return (x, 1 - x)
+
+    ga = GeneticAlgorithm(
+        base, group_ranges, toggles, [], fitness, population_size=6, seed=1
+    )
+    ga.step()
+    size1 = len(ga.pareto_front())
+    ga.step()
+    size2 = len(ga.pareto_front())
+    assert size2 <= size1
+
+
+def test_promote_pareto(tmp_path: pathlib.Path) -> None:
+    base = {"W0": 1.0}
+    group_ranges = {"x": (0.0, 1.0)}
+    toggles: dict[str, list[int]] = {}
+
+    def fitness(metrics, invariants, groups, toggles):
+        x = groups["x"]
+        return (x, 1 - x)
+
+    ga = GeneticAlgorithm(
+        base, group_ranges, toggles, [], fitness, population_size=4, seed=0
+    )
+    ga.step()
+    out = tmp_path / "pareto.yaml"
+    ga.promote_pareto(0, out)
+    assert out.exists()
+
+
 def test_checkpoint_resume(tmp_path: pathlib.Path) -> None:
     base = {"W0": 1.0}
     group_ranges = {"x": (0.0, 1.0)}
