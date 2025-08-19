@@ -137,12 +137,12 @@ Window {
         Tab { title: "Telemetry"; Telemetry { anchors.fill: parent; graphView: graphView } }
         Tab { title: "Meters"; Meters { anchors.fill: parent } }
         Tab { title: "Experiment"; Experiment { anchors.fill: parent; graphView: graphView } }
-        Tab { title: "Replay"; Replay { anchors.fill: parent } }
+        Tab { id: replayTab; title: "Replay"; Replay { anchors.fill: parent } }
         Tab { title: "Logs"; LogExplorer { anchors.fill: parent } }
         Tab { title: "Inspector"; Inspector { anchors.fill: parent } }
         Tab { title: "Validation"; Validation { anchors.fill: parent } }
-        Tab { title: "DOE"; DOE { anchors.fill: parent } }
-        Tab { title: "GA"; GA { anchors.fill: parent } }
+        Tab { title: "DOE"; DOE { anchors.fill: parent; panels: panels; replayTab: replayTab } }
+        Tab { title: "GA"; GA { anchors.fill: parent; panels: panels; replayTab: replayTab } }
         Tab { title: "Compare"; Compare { anchors.fill: parent } }
     }
 }

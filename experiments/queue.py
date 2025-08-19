@@ -23,12 +23,19 @@ from .runner import _latin_hypercube
 
 @dataclass
 class RunStatus:
-    """Track the state of a single experiment run."""
+    """Track the state of a single experiment run.
+
+    ``run_id`` and ``path`` are populated once a run has been persisted to
+    disk.  ``path`` is stored relative to the ``experiments`` directory so it
+    can be embedded directly into Top-K artifacts.
+    """
 
     state: str = "queued"
     invariants: Optional[Dict[str, float]] = None
     fitness: Optional[float] = None
     error: Optional[str] = None
+    run_id: Optional[str] = None
+    path: Optional[str] = None
 
 
 class DOEQueueManager:
@@ -41,8 +48,8 @@ class DOEQueueManager:
     gates:
         Sequence of gate identifiers executed for each sample.
     fitness_fn:
-        Optional callback returning a scalar fitness value given gate metrics
-        and invariants.
+        Optional callback returning a scalar fitness value given gate metrics,
+        invariants and the groups and toggles used for the run.
     seed:
         Seed for deterministic sampling.
     """
@@ -51,7 +58,13 @@ class DOEQueueManager:
         self,
         base: Dict[str, float],
         gates: Iterable[int],
-        fitness_fn: Callable[[Dict[str, float], Dict[str, float]], float] | None = None,
+        fitness_fn: (
+            Callable[
+                [Dict[str, float], Dict[str, float], Dict[str, float], Dict[str, int]],
+                float,
+            ]
+            | None
+        ) = None,
         seed: int = 0,
         client: Any | None = None,
     ) -> None:
@@ -132,7 +145,7 @@ class DOEQueueManager:
                     inv = checks.from_metrics(metrics)
                     status.invariants = inv
                     if self.fitness_fn is not None:
-                        status.fitness = self.fitness_fn(metrics, inv)
+                        status.fitness = self.fitness_fn(metrics, inv, groups, {})
                     status.state = "finished"
                 except Exception as exc:  # pragma: no cover - pass through
                     status.state = "failed"

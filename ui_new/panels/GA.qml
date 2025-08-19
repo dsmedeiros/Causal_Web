@@ -2,6 +2,8 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 
 Rectangle {
+    property var panels
+    property var replayTab
     color: "#202020"
     anchors.fill: parent
 
@@ -75,6 +77,25 @@ Rectangle {
                 }
             }
             Connections { target: gaModel; function onParetoChanged() { pareto.requestPaint() } }
+        }
+        Text { text: "Hall of Fame"; color: "white" }
+        ListView {
+            width: parent.width
+            height: 80
+            model: gaModel.hallOfFame
+            delegate: Row {
+                spacing: 4
+                Text { text: gen + ":"; color: "white" }
+                Text { text: fitness.toFixed(3); color: "white" }
+                Button {
+                    text: "Replay"
+                    onClicked: {
+                        replayModel.load("experiments/" + path + "/delta_log.jsonl")
+                        if (panels && replayTab)
+                            panels.currentIndex = panels.indexOf(replayTab)
+                    }
+                }
+            }
         }
     }
 }

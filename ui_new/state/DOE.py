@@ -3,11 +3,19 @@ from __future__ import annotations
 """Expose DOE queue results to QML panels."""
 
 from typing import Dict, List, Optional
+from pathlib import Path
 
 from PySide6.QtCore import QObject, Property, Signal, Slot
 
 from experiments import DOEQueueManager
 from ..ipc import Client
+from experiments.artifacts import (
+    TopKEntry,
+    update_top_k,
+    load_top_k,
+    persist_run,
+    allocate_run_dir,
+)
 
 
 class DOEModel(QObject):
@@ -37,6 +45,8 @@ class DOEModel(QObject):
         }
         self._groups = {"Delta_over_W0": (0.0, 1.0), "alpha_d_over_leak": (0.0, 1.0)}
         self._gates: List[int] = []
+        data = load_top_k(Path("experiments/top_k.json"))
+        self._topk = data.get("rows", [])
 
     # ------------------------------------------------------------------
     @Slot(int)
@@ -91,15 +101,40 @@ class DOEModel(QObject):
             return
         mgr = self._mgr
         self._runs = [{"config": cfg, "status": status} for cfg, status in mgr.runs]
-        self._topk = sorted(
-            (
-                {"fitness": status.fitness or 0.0, **cfg}
-                for cfg, status in mgr.runs
-                if status.fitness is not None
-            ),
-            key=lambda r: r["fitness"],
-            reverse=True,
-        )[:5]
+        rows: List[dict] = []
+        entries: List[TopKEntry] = []
+        for i, (cfg, status) in enumerate(mgr.runs):
+            if status.fitness is None:
+                continue
+            if status.path is None:
+                rid, abs_path, rel_path = allocate_run_dir()
+                persist_run(
+                    cfg,
+                    {"fitness": status.fitness, "invariants": status.invariants or {}},
+                    abs_path,
+                )
+                status.run_id = rid
+                status.path = rel_path
+            row = {"fitness": status.fitness or 0.0, **cfg, "path": status.path}
+            rows.append(row)
+            entries.append(
+                TopKEntry(
+                    run_id=status.run_id or "",
+                    fitness=status.fitness or 0.0,
+                    objectives={
+                        k: float(v)
+                        for k, v in (status.invariants or {}).items()
+                        if isinstance(v, (int, float))
+                    },
+                    groups=cfg,
+                    toggles={},
+                    seed=0,
+                    path=status.path or "",
+                )
+            )
+        rows.sort(key=lambda r: r["fitness"], reverse=True)
+        self._topk = rows[:5]
+        update_top_k(entries, Path("experiments/top_k.json"))
         names = list(self._groups.keys())
         if len(names) >= 2:
             self._scatter = [
@@ -162,6 +197,26 @@ class DOEModel(QObject):
         toggles: Dict[str, int],
     ) -> float:
         return groups.get("Delta_over_W0", 0.0)
+
+    # ------------------------------------------------------------------
+    @Slot()
+    def promote(self) -> None:
+        """Write the best run's config to ``best_config.yaml``."""
+
+        if not self._topk:
+            return
+        import json
+        import yaml
+
+        best = self._topk[0]
+        run_path = Path("experiments") / best.get("path", "")
+        try:
+            cfg = json.loads((run_path / "config.json").read_text())
+        except Exception:
+            cfg = {k: v for k, v in best.items() if k not in {"fitness", "path"}}
+        Path("experiments").mkdir(exist_ok=True)
+        with open("experiments/best_config.yaml", "w", encoding="utf8") as fh:
+            yaml.safe_dump(cfg, fh)
 
     # ------------------------------------------------------------------
     def _get_topk(self) -> List[dict]:
