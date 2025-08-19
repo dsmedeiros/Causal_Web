@@ -100,18 +100,23 @@ def persist_run(
     result: Dict[str, Any],
     path: Path,
     *,
+    manifest: Dict[str, Any] | None = None,
     delta_log: Path | None = None,
 ) -> None:
     """Write ``config`` and ``result`` details to ``path``.
 
     A small directory is created containing ``config.json`` and ``result.json``
-    files.  When available a ``delta_log.jsonl`` capturing snapshot deltas is
-    also copied so runs can be deterministically replayed.
+    files.  When ``manifest`` metadata is provided it is written to
+    ``manifest.json`` to aid run indexing.  When available a ``delta_log.jsonl``
+    capturing snapshot deltas is also copied so runs can be deterministically
+    replayed.
     """
 
     path.mkdir(parents=True, exist_ok=True)
     (path / "config.json").write_text(json.dumps(config, indent=2))
     (path / "result.json").write_text(json.dumps(result, indent=2))
+    if manifest is not None:
+        (path / "manifest.json").write_text(json.dumps(manifest, indent=2))
 
     if delta_log is None:
         try:  # pragma: no cover - optional dependency

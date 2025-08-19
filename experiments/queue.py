@@ -11,6 +11,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 import asyncio
 import itertools
+import json
+from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
 
 import numpy as np
@@ -19,6 +21,8 @@ from config.normalizer import Normalizer
 from invariants import checks
 from .gates import run_gates
 from .runner import _latin_hypercube
+from .index import RunIndex, run_key
+from .artifacts import persist_run, allocate_run_dir
 
 
 @dataclass
@@ -52,6 +56,9 @@ class DOEQueueManager:
         invariants and the groups and toggles used for the run.
     seed:
         Seed for deterministic sampling.
+    run_index:
+        Optional :class:`RunIndex` used to track completed runs and avoid
+        duplicate evaluations.
     """
 
     def __init__(
@@ -67,6 +74,7 @@ class DOEQueueManager:
         ) = None,
         seed: int = 0,
         client: Any | None = None,
+        run_index: RunIndex | None = None,
     ) -> None:
         self.base = dict(base)
         self.gates = list(gates)
@@ -76,6 +84,7 @@ class DOEQueueManager:
         self._runs: List[Tuple[Dict[str, float], RunStatus]] = []
         self._normalizer = Normalizer()
         self._client = client
+        self._index = run_index or RunIndex()
 
     # ------------------------------------------------------------------
     # queue construction
@@ -138,15 +147,55 @@ class DOEQueueManager:
 
         for i, (groups, status) in enumerate(self._runs):
             if status.state == "queued":
+                raw = self._normalizer.to_raw(self.base, groups)
+                seed = int(raw.get("seed", self.seed))
+                cfg = {
+                    "groups": groups,
+                    "toggles": {},
+                    "seed": seed,
+                    "gates": self.gates,
+                }
+                key = run_key(cfg)
+                info = self._index.get(key)
+                if info is not None:
+                    status.state = "finished"
+                    run_dir = Path("experiments") / info["path"]
+                    try:
+                        res = json.loads((run_dir / "result.json").read_text())
+                    except Exception:
+                        res = {}
+                    status.invariants = res.get("invariants")
+                    status.fitness = res.get("fitness")
+                    status.run_id = info["run_id"]
+                    status.path = info["path"]
+                    return status
                 status.state = "running"
                 try:
-                    raw = self._normalizer.to_raw(self.base, groups)
                     metrics = run_gates(raw, self.gates)
                     inv = checks.from_metrics(metrics)
                     status.invariants = inv
                     if self.fitness_fn is not None:
                         status.fitness = self.fitness_fn(metrics, inv, groups, {})
                     status.state = "finished"
+                    rid, abs_path, rel_path = allocate_run_dir()
+                    manifest = {
+                        "run_id": rid,
+                        "run_key": key,
+                        "groups": groups,
+                        "toggles": {},
+                        "seed": seed,
+                        "gates": self.gates,
+                    }
+                    res = {
+                        "status": "ok",
+                        "metrics": metrics,
+                        "invariants": inv,
+                        "fitness": status.fitness,
+                    }
+                    persist_run(raw, res, abs_path, manifest=manifest)
+                    self._index.mark(key, rid, rel_path)
+                    status.run_id = rid
+                    status.path = rel_path
                 except Exception as exc:  # pragma: no cover - pass through
                     status.state = "failed"
                     status.error = str(exc)
@@ -167,8 +216,29 @@ class DOEQueueManager:
 
         for i, (groups, status) in enumerate(self._runs):
             if status.state == "queued":
-                status.state = "running"
                 raw = self._normalizer.to_raw(self.base, groups)
+                seed = int(raw.get("seed", self.seed))
+                cfg = {
+                    "groups": groups,
+                    "toggles": {},
+                    "seed": seed,
+                    "gates": self.gates,
+                }
+                key = run_key(cfg)
+                info = self._index.get(key)
+                if info is not None:
+                    status.state = "finished"
+                    run_dir = Path("experiments") / info["path"]
+                    try:
+                        res = json.loads((run_dir / "result.json").read_text())
+                    except Exception:
+                        res = {}
+                    status.invariants = res.get("invariants")
+                    status.fitness = res.get("fitness")
+                    status.run_id = info["run_id"]
+                    status.path = info["path"]
+                    return status
+                status.state = "running"
                 await self._client.send(
                     {"ExperimentControl": {"action": "run", "id": i, "config": raw}}
                 )

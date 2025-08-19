@@ -33,6 +33,7 @@ import numpy as np
 from config.normalizer import Normalizer
 from invariants import checks
 from .gates import run_gates
+from .index import RunIndex, run_key
 from .artifacts import (
     TopKEntry,
     update_top_k,
@@ -91,6 +92,9 @@ class GeneticAlgorithm:
         AsyncIO event loop associated with ``client``.  Required when
         ``client`` is provided so evaluation requests can be scheduled and
         results returned via ``ExperimentStatus`` messages.
+    run_index:
+        Optional :class:`RunIndex` used to track completed runs and avoid
+        duplicate evaluations.
     """
 
     def __init__(
@@ -110,6 +114,7 @@ class GeneticAlgorithm:
         seed: int = 0,
         client: Any | None = None,
         loop: asyncio.AbstractEventLoop | None = None,
+        run_index: RunIndex | None = None,
     ) -> None:
         self.base = dict(base)
         self.group_ranges = dict(group_ranges)
@@ -131,6 +136,7 @@ class GeneticAlgorithm:
         self._loop = loop
         self._pending: Dict[int, Tuple[Genome, asyncio.Future, int]] = {}
         self._next_id = 0
+        self._index = run_index or RunIndex()
         self._init_population()
 
     # ------------------------------------------------------------------
@@ -268,8 +274,29 @@ class GeneticAlgorithm:
     def _evaluate(self, genome: Genome) -> Union[float, Sequence[float]]:
         """Evaluate ``genome`` and persist its config/result on success."""
 
+        seed = self._seed_for_genome(genome)
+        cfg = {
+            "groups": genome.groups,
+            "toggles": genome.toggles,
+            "seed": seed,
+            "gates": self.gates,
+        }
+        key = run_key(cfg)
+        info = self._index.get(key)
+        if info is not None:
+            run_dir = Path("experiments") / info["path"]
+            try:
+                res = json.loads((run_dir / "result.json").read_text())
+            except Exception:
+                res = {}
+            genome.fitness = res.get("fitness")
+            genome.run_id = info.get("run_id")
+            genome.run_path = info.get("path")
+            return genome.fitness
+
         raw = self._normalizer.to_raw(self.base, genome.groups)
         raw.update(genome.toggles)
+        raw.setdefault("seed", seed)
         if self._client is None or self._loop is None:
             metrics = run_gates(raw, self.gates)
             inv = checks.from_metrics(metrics)
@@ -298,7 +325,16 @@ class GeneticAlgorithm:
         genome.fitness = res.get("fitness") if res.get("status") == "ok" else None
         if res.get("status") == "ok":
             rid, abs_path, rel_path = allocate_run_dir()
-            persist_run(raw, res, abs_path)
+            manifest = {
+                "run_id": rid,
+                "run_key": key,
+                "groups": genome.groups,
+                "toggles": genome.toggles,
+                "seed": seed,
+                "gates": self.gates,
+            }
+            persist_run(raw, res, abs_path, manifest=manifest)
+            self._index.mark(key, rid, rel_path)
             genome.run_id = rid
             genome.run_path = rel_path
         return genome.fitness

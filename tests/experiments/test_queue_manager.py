@@ -1,3 +1,5 @@
+import pathlib
+
 from experiments import DOEQueueManager
 
 
@@ -29,3 +31,17 @@ def test_grid_enqueue():
     mgr = DOEQueueManager(_base_config(), [1])
     mgr.enqueue_grid({"Delta_over_W0": (0.0, 1.0)}, {"Delta_over_W0": 3})
     assert len(mgr.runs) == 3
+
+
+def test_queue_manager_duplicate_skip(tmp_path: pathlib.Path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    mgr = DOEQueueManager(_base_config(), [1])
+    mgr.enqueue_lhs({"Delta_over_W0": (0.5, 1.0)}, samples=1)
+    mgr.run_all()
+
+    mgr2 = DOEQueueManager(_base_config(), [1])
+    mgr2.enqueue_lhs({"Delta_over_W0": (0.5, 1.0)}, samples=1)
+    mgr2.run_all()
+
+    manifests = list((tmp_path / "experiments" / "runs").rglob("manifest.json"))
+    assert len(manifests) == 1

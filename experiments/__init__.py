@@ -10,6 +10,7 @@ from .artifacts import (
     load_hall_of_fame,
     persist_run,
 )
+from .index import RunIndex, run_key
 
 __all__ = [
     "DOEQueueManager",
@@ -20,4 +21,6 @@ __all__ = [
     "save_hall_of_fame",
     "load_hall_of_fame",
     "persist_run",
+    "RunIndex",
+    "run_key",
 ]
