@@ -201,6 +201,36 @@ def test_threadsafe_eval_deterministic() -> None:
     thread.join()
 
 
+def test_run_index_resume_skips_duplicates(tmp_path: pathlib.Path, monkeypatch) -> None:
+    base = {"W0": 1.0}
+    group_ranges = {"x": (0.0, 1.0)}
+    toggles: dict[str, list[int]] = {}
+
+    def fitness(metrics, invariants, groups, toggles):
+        return -abs(groups["x"] - 0.3)
+
+    monkeypatch.chdir(tmp_path)
+    ga = GeneticAlgorithm(
+        base, group_ranges, toggles, [], fitness, population_size=1, seed=0
+    )
+    genome = ga.population[0]
+    ga._evaluate(genome)
+
+    manifests = list((tmp_path / "experiments" / "runs").rglob("manifest.json"))
+    assert len(manifests) == 1
+
+    # Simulate crash by removing index and creating a new GA
+    (tmp_path / "experiments" / "run_index.json").unlink()
+    ga2 = GeneticAlgorithm(
+        base, group_ranges, toggles, [], fitness, population_size=1, seed=0
+    )
+    genome2 = ga2.population[0]
+    ga2._evaluate(genome2)
+
+    manifests2 = list((tmp_path / "experiments" / "runs").rglob("manifest.json"))
+    assert len(manifests2) == 1
+
+
 def test_checkpoint_persists_pending(tmp_path: pathlib.Path) -> None:
     """Pending evaluations are saved and resubmitted on load."""
 
@@ -279,3 +309,32 @@ def test_checkpoint_persists_pending(tmp_path: pathlib.Path) -> None:
 
     loop.call_soon_threadsafe(loop.stop)
     thread.join()
+
+
+def test_run_index_resume_skips_duplicates(tmp_path: pathlib.Path, monkeypatch) -> None:
+    base = {"W0": 1.0}
+    group_ranges = {"x": (0.0, 1.0)}
+    toggles: dict[str, list[int]] = {}
+
+    def fitness(metrics, invariants, groups, toggles):
+        return -abs(groups["x"] - 0.3)
+
+    monkeypatch.chdir(tmp_path)
+    ga = GeneticAlgorithm(
+        base, group_ranges, toggles, [], fitness, population_size=1, seed=0
+    )
+    genome = ga.population[0]
+    ga._evaluate(genome)
+
+    manifests = list((tmp_path / "experiments" / "runs").rglob("manifest.json"))
+    assert len(manifests) == 1
+
+    (tmp_path / "experiments" / "run_index.json").unlink()
+    ga2 = GeneticAlgorithm(
+        base, group_ranges, toggles, [], fitness, population_size=1, seed=0
+    )
+    genome2 = ga2.population[0]
+    ga2._evaluate(genome2)
+
+    manifests2 = list((tmp_path / "experiments" / "runs").rglob("manifest.json"))
+    assert len(manifests2) == 1
