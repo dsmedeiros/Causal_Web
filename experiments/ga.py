@@ -197,7 +197,7 @@ class GeneticAlgorithm:
             if res.get("status") == "ok":
                 return res
             if attempt == 0:
-                time.sleep(2**attempt)
+                self._loop.run_until_complete(asyncio.sleep(2**attempt))
         return res
 
     # ------------------------------------------------------------------
