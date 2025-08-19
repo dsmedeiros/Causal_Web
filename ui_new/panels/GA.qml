@@ -85,7 +85,7 @@ Rectangle {
             model: gaModel.hallOfFame
             delegate: Row {
                 spacing: 4
-                Text { text: gen + ":"; color: "white" }
+                Text { text: (typeof gen !== "undefined" ? gen : "?") + ":"; color: "white" }
                 Text { text: fitness.toFixed(3); color: "white" }
                 Button {
                     text: "Replay"
