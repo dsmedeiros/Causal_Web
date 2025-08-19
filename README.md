@@ -95,6 +95,8 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 - DOE queue manager can generate Latin Hypercube or grid sweeps, tracks live per-run invariant and fitness status, and dispatches runs to the engine via IPC.
 - New DOE panel integrates the queue manager into the Qt Quick UI with a Top-K table, scatter plot, parallel-coordinate view, fitness heatmap and live status updates for sampled configurations.
 - Added a lightweight Genetic Algorithm framework with tournament selection, uniform crossover, Gaussian mutation and elitism along with a GA panel showing population fitness, a Pareto-front view and a "Promote to baseline config" action.
+- Introduced scalar fitness helpers with hard invariant guardrails and normalised terms, providing a clear objective for optimisation and a path toward multi-objective Pareto support.
+- Added NSGA-II-lite multi-objective capabilities with non-dominated sorting, crowding-distance selection, a persistent Pareto archive and UI promotion of chosen trade-offs.
 - DOE and GA batches now persist summaries under ``experiments/``:
   - ``top_k.json`` records the best runs and is consumed by the Top-K UI table.
   - ``hall_of_fame.json`` archives per-generation GA champions.

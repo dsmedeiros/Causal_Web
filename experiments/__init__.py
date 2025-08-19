@@ -11,6 +11,7 @@ from .artifacts import (
     persist_run,
 )
 from .index import RunIndex, run_key
+from .fitness import scalar_fitness, vector_fitness
 
 __all__ = [
     "DOEQueueManager",
@@ -23,4 +24,6 @@ __all__ = [
     "persist_run",
     "RunIndex",
     "run_key",
+    "scalar_fitness",
+    "vector_fitness",
 ]

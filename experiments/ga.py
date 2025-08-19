@@ -137,6 +137,7 @@ class GeneticAlgorithm:
         self._pending: Dict[int, Tuple[Genome, asyncio.Future, int]] = {}
         self._next_id = 0
         self._index = run_index or RunIndex()
+        self._archive: List[Genome] = []
         self._init_population()
 
     # ------------------------------------------------------------------
@@ -344,6 +345,14 @@ class GeneticAlgorithm:
         """Return the best genome among ``tournament_k`` random samples."""
 
         samples = self.rng.sample(self.population, self.tournament_k)
+        if any(hasattr(g, "_rank") for g in samples):
+            return min(
+                samples,
+                key=lambda g: (
+                    getattr(g, "_rank", float("inf")),
+                    -getattr(g, "_crowding", 0.0),
+                ),
+            )
         return max(samples, key=lambda g: self._score(g))
 
     # ------------------------------------------------------------------
@@ -373,13 +382,107 @@ class GeneticAlgorithm:
                 genome.toggles[k] = self.rng.choice(choices)
 
     # ------------------------------------------------------------------
+    def _dominates(self, a: Genome, b: Genome) -> bool:
+        """Return ``True`` if genome ``a`` Pareto-dominates ``b``."""
+
+        fa = a.fitness if isinstance(a.fitness, Sequence) else []
+        fb = b.fitness if isinstance(b.fitness, Sequence) else []
+        if not fa or not fb:
+            return False
+        return all(x <= y for x, y in zip(fa, fb)) and any(
+            x < y for x, y in zip(fa, fb)
+        )
+
+    # ------------------------------------------------------------------
+    def _non_dominated_sort(self, pop: Sequence[Genome]) -> List[List[Genome]]:
+        """Split ``pop`` into Pareto fronts using non-dominated sorting."""
+
+        remaining = list(pop)
+        fronts: List[List[Genome]] = []
+        rank = 0
+        while remaining:
+            front: List[Genome] = []
+            for g in remaining:
+                dominated = False
+                for h in remaining:
+                    if g is h:
+                        continue
+                    if self._dominates(h, g):
+                        dominated = True
+                        break
+                if not dominated:
+                    g._rank = rank
+                    front.append(g)
+            fronts.append(front)
+            remaining = [g for g in remaining if g not in front]
+            rank += 1
+        return fronts
+
+    # ------------------------------------------------------------------
+    def _crowding_distance(self, front: Sequence[Genome]) -> None:
+        """Compute crowding distance for genomes in ``front`` in-place."""
+
+        if not front:
+            return
+        n_obj = len(front[0].fitness) if isinstance(front[0].fitness, Sequence) else 0
+        for g in front:
+            g._crowding = 0.0
+        if len(front) <= 2:
+            for g in front:
+                g._crowding = float("inf")
+            return
+        for m in range(n_obj):
+            front.sort(key=lambda g: g.fitness[m])
+            front[0]._crowding = front[-1]._crowding = float("inf")
+            min_f = front[0].fitness[m]
+            max_f = front[-1].fitness[m]
+            span = max_f - min_f or 1.0
+            for i in range(1, len(front) - 1):
+                prev_f = front[i - 1].fitness[m]
+                next_f = front[i + 1].fitness[m]
+                front[i]._crowding += (next_f - prev_f) / span
+
+    # ------------------------------------------------------------------
+    def _update_archive(self, front: Sequence[Genome]) -> None:
+        """Update the persistent Pareto archive with ``front``."""
+
+        combined_map: Dict[
+            Tuple[Tuple[Tuple[str, float], ...], Tuple[Tuple[str, int], ...]], Genome
+        ] = {}
+        for g in list(self._archive) + list(front):
+            key = (
+                tuple(sorted(g.groups.items())),
+                tuple(sorted(g.toggles.items())),
+            )
+            if key not in combined_map:
+                combined_map[key] = Genome(
+                    dict(g.groups), dict(g.toggles), g.fitness, g.run_id, g.run_path
+                )
+        combined = list(combined_map.values())
+        fronts = self._non_dominated_sort(combined)
+        archive = fronts[0] if fronts else []
+        if len(archive) > self.population_size:
+            self._crowding_distance(archive)
+            archive.sort(key=lambda g: -g._crowding)
+            archive = archive[: self.population_size]
+        self._archive = archive
+
+    # ------------------------------------------------------------------
     def step(self) -> Genome:
         """Advance the population by one generation."""
 
         for g in self.population:
             if g.fitness is None:
                 self._evaluate(g)
-        self.population.sort(key=lambda g: self._score(g), reverse=True)
+        multi = any(isinstance(g.fitness, Sequence) for g in self.population)
+        if multi:
+            fronts = self._non_dominated_sort(self.population)
+            for front in fronts:
+                self._crowding_distance(front)
+            self._update_archive(fronts[0])
+            self.population.sort(key=lambda g: (g._rank, -g._crowding))
+        else:
+            self.population.sort(key=lambda g: self._score(g), reverse=True)
         best = self.population[0]
         self.history.append(self._score(best))
         self._hall_of_fame.append((self._generation, best))
@@ -410,23 +513,14 @@ class GeneticAlgorithm:
 
     # ------------------------------------------------------------------
     def pareto_front(self) -> List[Genome]:
-        """Return non-dominated genomes for multi-objective fitness."""
+        """Return genomes in the persistent Pareto archive."""
 
-        seq = [g for g in self.population if isinstance(g.fitness, Sequence)]
-        front: List[Genome] = []
-        for g in seq:
-            dominated = False
-            for h in seq:
-                if g is h:
-                    continue
-                if all(hf >= gf for hf, gf in zip(h.fitness, g.fitness)) and any(
-                    hf > gf for hf, gf in zip(h.fitness, g.fitness)
-                ):
-                    dominated = True
-                    break
-            if not dominated:
-                front.append(g)
-        return front
+        if self._archive:
+            return list(self._archive)
+        fronts = self._non_dominated_sort(
+            [g for g in self.population if isinstance(g.fitness, Sequence)]
+        )
+        return fronts[0] if fronts else []
 
     # ------------------------------------------------------------------
     def run(self, generations: int) -> Genome:
@@ -480,26 +574,20 @@ class GeneticAlgorithm:
         save_hall_of_fame(hof_entries, Path(hall_of_fame_path))
 
     # ------------------------------------------------------------------
-    def promote_best(self, path: str) -> None:
-        """Write the best genome's configuration to ``path`` as YAML.
+    def _write_config(self, genome: Genome, path: str) -> None:
+        """Persist ``genome`` configuration to ``path`` as YAML."""
 
-        If the genome has a persisted run directory, the configuration is
-        loaded from the saved ``config.json``.  Otherwise it is materialised
-        from the genome's groups and toggles.
-        """
-
-        best = max(self.population, key=self._score)
         cfg: Dict[str, Any] | None = None
-        if best.run_path:
+        if genome.run_path:
             try:
                 cfg = json.loads(
-                    (Path("experiments") / best.run_path / "config.json").read_text()
+                    (Path("experiments") / genome.run_path / "config.json").read_text()
                 )
             except Exception:  # pragma: no cover - fall back to materialised config
                 cfg = None
         if cfg is None:
-            raw = self._normalizer.to_raw(self.base, best.groups)
-            raw.update(best.toggles)
+            raw = self._normalizer.to_raw(self.base, genome.groups)
+            raw.update(genome.toggles)
             cfg = {
                 k: float(v) if isinstance(v, np.floating) else v for k, v in raw.items()
             }
@@ -507,6 +595,22 @@ class GeneticAlgorithm:
 
         with open(path, "w", encoding="utf8") as fh:
             yaml.safe_dump(cfg, fh)
+
+    # ------------------------------------------------------------------
+    def promote_best(self, path: str) -> None:
+        """Write the best genome's configuration to ``path`` as YAML."""
+
+        best = max(self.population, key=self._score)
+        self._write_config(best, path)
+
+    # ------------------------------------------------------------------
+    def promote_pareto(self, index: int, path: str) -> None:
+        """Persist the ``index``-th Pareto genome to ``path``."""
+
+        front = self.pareto_front()
+        if not 0 <= index < len(front):
+            raise IndexError("pareto index out of range")
+        self._write_config(front[index], path)
 
     # ------------------------------------------------------------------
     def save_checkpoint(self, path: str) -> None:

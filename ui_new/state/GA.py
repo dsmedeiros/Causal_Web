@@ -96,6 +96,12 @@ class GAModel(QObject):
 
         self._ga.promote_best("experiments/best_config.yaml")
 
+    @Slot(int)
+    def promoteIndex(self, idx: int) -> None:  # noqa: N802 (Qt slot naming)
+        """Promote the ``idx``-th Pareto genome."""
+
+        self._ga.promote_pareto(idx, "experiments/best_config.yaml")
+
     def set_client(self, client: Client, loop: asyncio.AbstractEventLoop) -> None:
         """Attach a WebSocket ``client`` and event ``loop`` for engine integration."""
 
