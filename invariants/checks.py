@@ -26,7 +26,7 @@ def no_signaling(prob: float, epsilon: float) -> bool:
 def ancestry_determinism(seq: Sequence[Tuple[str, str, str]]) -> bool:
     """Identical local Q sequences imply identical (h, m)."""
 
-    seen: dict[Tuple[str, ...], Tuple[str, str]] = {}
+    seen: dict[str, Tuple[str, str]] = {}
     for q, h, m in seq:
         if q in seen and seen[q] != (h, m):
             return False
