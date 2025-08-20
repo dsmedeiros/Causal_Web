@@ -58,10 +58,11 @@ via a Monte-Carlo path sampler over the graph's causal structure.
   `SnapshotDelta` updates on demand after a `DeltaReady` notification and also
   receive `ExperimentStatus` messages and an EWMA of conservation residuals.
 - WebSocket connections require a random session token printed by the engine on
-  startup. Clients must begin with a ``Hello`` message that includes this token
-  and the server replies to explicit ``Ping`` heartbeats with ``Pong``. The
-  client drops the link after consecutive missed pongs. A single client is
-  accepted by default; set environment variable ``CW_ALLOW_MULTI=true`` to
+  startup. Clients must begin with a ``Hello`` message that includes this token.
+  Connections are kept alive using standard WebSocket ping/pong frames; the
+  client waits for pong replies without consuming the message stream, and the
+  link is dropped if a ping isn't answered within the interval. A single client
+  is accepted by default; set environment variable ``CW_ALLOW_MULTI=true`` to
   permit multiple clients.
 - The UI disables its controls within a few seconds if the engine connection is
   lost.

@@ -6,6 +6,7 @@ from typing import Any, Deque, Dict, Optional
 
 import asyncio
 from collections import deque
+import contextlib
 
 import msgpack
 import websockets
@@ -42,36 +43,23 @@ class Client:
         self._ping_task = asyncio.create_task(self._heartbeat())
 
     async def _heartbeat(self) -> None:
-        """Send periodic ``Ping`` messages and close after missed pongs."""
-        misses = 0
+        """Issue periodic ping frames and close when unanswered."""
         try:
-            while self.connection:
+            while self.connection is not None:
                 await asyncio.sleep(self.ping_interval)
-                if not self.connection:
-                    break
-                await self.send({"type": "Ping"})
                 try:
-                    while True:
-                        data = await asyncio.wait_for(
-                            self.connection.recv(), timeout=self.ping_interval
-                        )
-                        msg = msgpack.unpackb(data, raw=False)
-                        if msg.get("type") == "Pong":
-                            misses = 0
-                            break
-                        self._backlog.append(msg)
+                    waiter = self.connection.ping()
+                    await asyncio.wait_for(waiter, timeout=self.ping_interval)
                 except (asyncio.TimeoutError, websockets.ConnectionClosed):
-                    misses += 1
-                    if misses >= 2 and self.connection:
+                    if self.connection is not None:
                         await self.connection.close()
-                        self.connection = None
-                    continue
-        except websockets.ConnectionClosed:
+                    self.connection = None
+        except (asyncio.CancelledError, websockets.ConnectionClosed):
             pass
 
     async def send(self, message: Dict[str, Any]) -> None:
         """Serialize and send ``message``."""
-        if not self.connection:
+        if self.connection is None:
             raise RuntimeError("Client not connected")
         packed = msgpack.packb(message, use_bin_type=True)
         await self.connection.send(packed)
@@ -80,7 +68,7 @@ class Client:
         """Receive and deserialize a message from the server."""
         if self._backlog:
             return self._backlog.popleft()
-        if not self.connection:
+        if self.connection is None:
             raise RuntimeError("Client not connected")
         data = await self.connection.recv()
         return msgpack.unpackb(data, raw=False)
@@ -88,7 +76,7 @@ class Client:
     async def drop_pending(self, mtype: str) -> None:
         """Discard queued messages of ``mtype`` leaving others untouched."""
 
-        if not self.connection:
+        if self.connection is None:
             return
         while True:
             try:
@@ -104,6 +92,9 @@ class Client:
         """Close the WebSocket connection."""
         if self._ping_task is not None:
             self._ping_task.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await self._ping_task
+            self._ping_task = None
         if self.connection is not None:
             await self.connection.close()
             self.connection = None
