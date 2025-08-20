@@ -104,24 +104,44 @@ async def serve(
 
         clients.add(ws)
         try:
-            await ws.send(msgpack.packb({"type": "Hello", "v": 1}))
+            await ws.send(
+                msgpack.packb(
+                    {"type": "Hello", "v": 1}, use_bin_type=True, use_single_float=True
+                )
+            )
             graph_static = {"type": "GraphStatic", "v": 1, **adapter.graph_static()}
-            await ws.send(msgpack.packb(graph_static))
+            await ws.send(
+                msgpack.packb(graph_static, use_bin_type=True, use_single_float=True)
+            )
             async for raw in ws:
                 msg = msgpack.unpackb(raw, raw=False)
                 if msg.get("type") == "Ping":
-                    await ws.send(msgpack.packb({"type": "Pong", "v": 1}))
+                    await ws.send(
+                        msgpack.packb(
+                            {"type": "Pong", "v": 1},
+                            use_bin_type=True,
+                            use_single_float=True,
+                        )
+                    )
                     continue
                 cmd = msg.get("cmd")
                 if cmd == "pull":
                     latest = bus.latest()
                     if latest is not None:
                         payload = {"type": "SnapshotDelta", "v": 1, **latest}
-                        await ws.send(msgpack.packb(payload))
+                        await ws.send(
+                            msgpack.packb(
+                                payload, use_bin_type=True, use_single_float=True
+                            )
+                        )
                 else:
                     result = adapter.handle_control(msg)
                     if result:
-                        await ws.send(msgpack.packb(result))
+                        await ws.send(
+                            msgpack.packb(
+                                result, use_bin_type=True, use_single_float=True
+                            )
+                        )
         finally:
             clients.remove(ws)
 
@@ -133,14 +153,28 @@ async def serve(
                 if clients:
                     notify = {"type": "DeltaReady", "v": 1, "frame": delta.get("frame")}
                     await asyncio.gather(
-                        *[ws.send(msgpack.packb(notify)) for ws in list(clients)]
+                        *[
+                            ws.send(
+                                msgpack.packb(
+                                    notify, use_bin_type=True, use_single_float=True
+                                )
+                            )
+                            for ws in list(clients)
+                        ]
                     )
             if hasattr(adapter, "experiment_status"):
                 status = adapter.experiment_status()
                 if status and clients:
                     payload = {"type": "ExperimentStatus", "v": 1, **status}
                     await asyncio.gather(
-                        *[ws.send(msgpack.packb(payload)) for ws in list(clients)]
+                        *[
+                            ws.send(
+                                msgpack.packb(
+                                    payload, use_bin_type=True, use_single_float=True
+                                )
+                            )
+                            for ws in list(clients)
+                        ]
                     )
             if hasattr(adapter, "replay_progress"):
                 progress = adapter.replay_progress()
@@ -151,6 +185,13 @@ async def serve(
                         "progress": float(progress),
                     }
                     await asyncio.gather(
-                        *[ws.send(msgpack.packb(payload)) for ws in list(clients)]
+                        *[
+                            ws.send(
+                                msgpack.packb(
+                                    payload, use_bin_type=True, use_single_float=True
+                                )
+                            )
+                            for ws in list(clients)
+                        ]
                     )
             await asyncio.sleep(0)
