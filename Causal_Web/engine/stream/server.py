@@ -8,6 +8,7 @@ are encoded with `msgpack` and versioned via a ``type`` and ``v`` field.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import os
 import secrets
 import tempfile
@@ -36,6 +37,54 @@ class DeltaBus:
     def latest(self) -> Dict[str, Any] | None:
         """Return the newest snapshot delta if available."""
         return self._slots[self._idx]
+
+
+async def _broadcast(
+    payload: bytes, clients: Set[websockets.WebSocketServerProtocol]
+) -> None:
+    """Send ``payload`` to all ``clients`` removing stale sockets."""
+
+    stale: list[websockets.WebSocketServerProtocol] = []
+    for ws in list(clients):
+        try:
+            await ws.send(payload)
+        except Exception:
+            stale.append(ws)
+    for ws in stale:
+        clients.discard(ws)
+
+
+async def publisher(
+    bus: DeltaBus, clients: Set[websockets.WebSocketServerProtocol], poll_hz: int = 120
+) -> None:
+    """Publish snapshot deltas from ``bus`` to connected ``clients``.
+
+    Parameters
+    ----------
+    bus:
+        :class:`DeltaBus` providing the latest snapshot delta.
+    clients:
+        Set of websocket connections to broadcast deltas to.
+    poll_hz:
+        Frequency in Hertz at which to poll the bus when idle.
+    """
+
+    last_frame: Any = None
+    idle_sleep = 1.0 / poll_hz
+    while True:
+        delta = bus.latest()
+        frame = delta.get("frame") if delta else None
+        if delta is not None and frame != last_frame:
+            payload = msgpack.packb(
+                {"type": "SnapshotDelta", "v": 1, **delta},
+                use_bin_type=True,
+                use_single_float=True,
+            )
+            await _broadcast(payload, clients)
+            last_frame = frame
+            await asyncio.sleep(0)
+        else:
+            await asyncio.sleep(idle_sleep)
 
 
 async def serve(
@@ -84,6 +133,8 @@ async def serve(
         print(f"CW session token: {session_token} (file: {tmp.name})")
 
     clients: Set[websockets.WebSocketServerProtocol] = set()
+
+    publisher_task = asyncio.create_task(publisher(bus, clients))
 
     async def handler(ws: websockets.WebSocketServerProtocol) -> None:
         """Handle a single client connection."""
@@ -143,55 +194,45 @@ async def serve(
                             )
                         )
         finally:
-            clients.remove(ws)
+            clients.discard(ws)
 
-    async with websockets.serve(handler, host, port):
-        while True:
-            delta = adapter.snapshot_delta()
-            if delta is not None:
-                bus.put(delta)
-                if clients:
-                    notify = {"type": "DeltaReady", "v": 1, "frame": delta.get("frame")}
-                    await asyncio.gather(
-                        *[
-                            ws.send(
-                                msgpack.packb(
-                                    notify, use_bin_type=True, use_single_float=True
-                                )
-                            )
-                            for ws in list(clients)
-                        ]
-                    )
-            if hasattr(adapter, "experiment_status"):
-                status = adapter.experiment_status()
-                if status and clients:
-                    payload = {"type": "ExperimentStatus", "v": 1, **status}
-                    await asyncio.gather(
-                        *[
-                            ws.send(
-                                msgpack.packb(
-                                    payload, use_bin_type=True, use_single_float=True
-                                )
-                            )
-                            for ws in list(clients)
-                        ]
-                    )
-            if hasattr(adapter, "replay_progress"):
-                progress = adapter.replay_progress()
-                if progress is not None and clients:
-                    payload = {
-                        "type": "ReplayProgress",
-                        "v": 1,
-                        "progress": float(progress),
-                    }
-                    await asyncio.gather(
-                        *[
-                            ws.send(
-                                msgpack.packb(
-                                    payload, use_bin_type=True, use_single_float=True
-                                )
-                            )
-                            for ws in list(clients)
-                        ]
-                    )
-            await asyncio.sleep(0)
+    try:
+        async with websockets.serve(handler, host, port):
+            idle_sleep = 1.0 / 120
+            while True:
+                delta = adapter.snapshot_delta()
+                if delta is not None:
+                    bus.put(delta)
+
+                if hasattr(adapter, "experiment_status"):
+                    status = adapter.experiment_status()
+                    if status and clients:
+                        payload = msgpack.packb(
+                            {"type": "ExperimentStatus", "v": 1, **status},
+                            use_bin_type=True,
+                            use_single_float=True,
+                        )
+                        await _broadcast(payload, clients)
+
+                if hasattr(adapter, "replay_progress"):
+                    progress = adapter.replay_progress()
+                    if progress is not None and clients:
+                        payload = msgpack.packb(
+                            {
+                                "type": "ReplayProgress",
+                                "v": 1,
+                                "progress": float(progress),
+                            },
+                            use_bin_type=True,
+                            use_single_float=True,
+                        )
+                        await _broadcast(payload, clients)
+
+                if delta is None:
+                    await asyncio.sleep(idle_sleep)
+                else:
+                    await asyncio.sleep(0)
+    finally:
+        publisher_task.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await publisher_task
