@@ -48,12 +48,14 @@ class Genome:
     """Container describing a single genome in the population.
 
     ``run_id`` and ``run_path`` are populated when the genome has been
-    evaluated and its configuration/result persisted to disk.
+    evaluated and its configuration/result persisted to disk. ``invariants``
+    captures any constraint metrics returned during the last evaluation.
     """
 
     groups: Dict[str, float]
     toggles: Dict[str, int]
     fitness: Optional[Union[float, Sequence[float]]] = None
+    invariants: Optional[Dict[str, float | bool]] = None
     run_id: Optional[str] = None
     run_path: Optional[str] = None
 
@@ -291,6 +293,7 @@ class GeneticAlgorithm:
             except Exception:
                 res = {}
             genome.fitness = res.get("fitness")
+            genome.invariants = res.get("invariants")
             genome.run_id = info.get("run_id")
             genome.run_path = info.get("path")
             return genome.fitness
@@ -324,6 +327,7 @@ class GeneticAlgorithm:
         else:
             res = self.evaluate_blocking(genome)
         genome.fitness = res.get("fitness") if res.get("status") == "ok" else None
+        genome.invariants = res.get("invariants")
         if res.get("status") == "ok":
             rid, abs_path, rel_path = allocate_run_dir()
             manifest = {

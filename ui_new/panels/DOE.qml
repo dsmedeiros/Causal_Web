@@ -12,22 +12,68 @@ Rectangle {
         anchors.fill: parent
         spacing: 4
 
+        Repeater {
+            model: doeModel.groups
+            delegate: Row {
+                spacing: 4
+                Text { text: modelData.name; color: "white" }
+                TextField {
+                    id: lowField
+                    width: 40
+                    text: modelData.low
+                    onEditingFinished: doeModel.setGroupRange(modelData.name, parseFloat(text), parseFloat(highField.text))
+                }
+                TextField {
+                    id: highField
+                    width: 40
+                    text: modelData.high
+                    onEditingFinished: doeModel.setGroupRange(modelData.name, parseFloat(lowField.text), parseFloat(text))
+                }
+                TextField {
+                    id: stepField
+                    width: 30
+                    text: modelData.steps
+                    onEditingFinished: doeModel.setGroupSteps(modelData.name, parseInt(text))
+                }
+            }
+        }
+
         Row {
             spacing: 4
-            Button { text: "Run LHS"; onClicked: doeModel.runLhs(20) }
+            ComboBox { id: modeBox; model: ["LHS", "Grid"] }
+            TextField { id: sampleField; width: 40; text: "20" }
+            Button {
+                text: "Start"
+                onClicked: {
+                    if (modeBox.currentText === "LHS")
+                        doeModel.runLhs(parseInt(sampleField.text))
+                    else
+                        doeModel.runGrid()
+                }
+            }
+            Button { text: "Stop"; onClicked: doeModel.stop() }
+            Button { text: "Resume"; onClicked: doeModel.resume() }
             Button { text: "Promote"; onClicked: doeModel.promote() }
         }
+
+        ProgressBar { width: parent.width; value: doeModel.progress }
+        Text { text: "ETA: " + doeModel.eta.toFixed(1) + "s"; color: "white" }
+
         Text { text: "Top-K"; color: "white" }
         ListView {
             width: parent.width
             height: 100
             model: doeModel.topK
-            delegate: Row {
-                spacing: 4
-                Text { text: (index + 1) + ":"; color: "white" }
-                Text { text: fitness.toFixed(3); color: "white" }
-                Button {
-                    text: "Open Replay"
+            delegate: Item {
+                width: parent.width
+                height: 24
+                Row {
+                    spacing: 4
+                    Text { text: (index + 1) + ":"; color: "white" }
+                    Text { text: fitness.toFixed(3); color: "white" }
+                }
+                MouseArea {
+                    anchors.fill: parent
                     onClicked: {
                         replayModel.load("experiments/" + path)
                         if (panels && replayTab)
@@ -69,9 +115,16 @@ Rectangle {
                 var data = doeModel.parallel
                 var names = doeModel.groupNames
                 if (!data || data.length === 0) return
+                var brushes = doeModel.brushes
                 for (var i=0;i<data.length;i++) {
                     var run = data[i]
-                    ctx.strokeStyle = 'rgba(0,255,255,0.3)'
+                    var match = true
+                    for (var ax in brushes) {
+                        var r = brushes[ax]
+                        var val = run[ax]
+                        if (val < r[0] || val > r[1]) { match = false; break }
+                    }
+                    ctx.strokeStyle = match ? 'rgba(0,255,255,0.7)' : 'rgba(0,255,255,0.1)'
                     ctx.beginPath()
                     for (var j=0;j<names.length;j++) {
                         var x = j/(names.length-1) * width
@@ -80,8 +133,36 @@ Rectangle {
                     }
                     ctx.stroke()
                 }
+                for (var ax in brushes) {
+                    var r = brushes[ax]
+                    var x = ax/(names.length-1) * width - 5
+                    var y1 = height - r[1]*height
+                    var y2 = height - r[0]*height
+                    ctx.fillStyle = 'rgba(255,255,0,0.2)'
+                    ctx.fillRect(x, y1, 10, y2 - y1)
+                }
             }
             Connections { target: doeModel; function onParallelChanged() { parallel.requestPaint() } }
+            Connections { target: doeModel; function onBrushesChanged() { parallel.requestPaint() } }
+            Connections { target: doeModel; function onGroupNamesChanged() { parallel.requestPaint() } }
+            MouseArea {
+                anchors.fill: parent
+                property real startY: 0
+                property int axis: 0
+                onPressed: {
+                    axis = Math.round(mouse.x / width * (doeModel.groupNames.length - 1))
+                    startY = mouse.y
+                }
+                onReleased: {
+                    var dy = Math.abs(mouse.y - startY)
+                    var norm1 = 1 - Math.max(mouse.y, startY) / height
+                    var norm2 = 1 - Math.min(mouse.y, startY) / height
+                    if (dy < 5)
+                        doeModel.setBrush(axis, 0, 0)
+                    else
+                        doeModel.setBrush(axis, norm1, norm2)
+                }
+            }
         }
         Text { text: "Heatmap"; color: "white" }
         Canvas {
