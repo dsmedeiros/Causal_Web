@@ -16,6 +16,7 @@ class CompareModel(QObject):
     metricDeltaChanged = Signal()
     frameChanged = Signal()
     frameCountChanged = Signal()
+    frameIndexChanged = Signal()
 
     def __init__(self) -> None:
         super().__init__()
@@ -39,6 +40,12 @@ class CompareModel(QObject):
         return min(len(self._frames_a), len(self._frames_b))
 
     frameCount = Property(int, _get_frame_count, notify=frameCountChanged)
+
+    def _get_frame_index(self) -> int:
+        """Current frame index."""
+        return self._index
+
+    frameIndex = Property(int, _get_frame_index, notify=frameIndexChanged)
 
     def _get_frame_a(self) -> str:
         """Path to the current frame from run A."""
@@ -64,6 +71,17 @@ class CompareModel(QObject):
         if new_index != self._index:
             self._index = new_index
             self.frameChanged.emit()
+            self.frameIndexChanged.emit()
+
+    @Slot()
+    def nextFrame(self) -> None:
+        """Advance to the next frame if available."""
+        self.setFrame(self._index + 1)
+
+    @Slot()
+    def prevFrame(self) -> None:
+        """Move to the previous frame if available."""
+        self.setFrame(self._index - 1)
 
     # ------------------------------------------------------------------
     @Slot(str, str)
@@ -105,3 +123,4 @@ class CompareModel(QObject):
         self.metricDeltaChanged.emit()
         self.frameChanged.emit()
         self.frameCountChanged.emit()
+        self.frameIndexChanged.emit()

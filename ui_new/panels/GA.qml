@@ -99,9 +99,9 @@ Rectangle {
                 Text { text: (typeof gen !== "undefined" ? gen : "?") + ":"; color: "white" }
                 Text { text: fitness.toFixed(3); color: "white" }
                 Button {
-                    text: "Replay"
+                    text: "Open Replay"
                     onClicked: {
-                        replayModel.load("experiments/" + path + "/delta_log.jsonl")
+                        replayModel.load("experiments/" + path)
                         if (panels && replayTab)
                             panels.currentIndex = panels.indexOf(replayTab)
                     }
