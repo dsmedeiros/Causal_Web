@@ -36,11 +36,14 @@ async def run(
     Other models receive telemetry, experiment status, replay progress and log
     entries for display in QML panels. ``token`` is forwarded to the server for
     simple session authentication. ``window`` controls overall UI enabling and
-    is disabled on disconnect.
+    is disabled on disconnect. A 2-second heartbeat detects dead engines and
+    drops the connection after missed pongs.
     """
 
-    client = Client(url, token)
+    window.controlsEnabled = False
+    client = Client(url, token, ping_interval=2.0)
     await client.connect()
+    window.controlsEnabled = True
 
     loop = asyncio.get_running_loop()
     experiment.set_client(client)

@@ -57,9 +57,14 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 - Engine can now publish a MessagePack-encoded WebSocket stream. Clients pull
   `SnapshotDelta` updates on demand after a `DeltaReady` notification and also
   receive `ExperimentStatus` messages and an EWMA of conservation residuals.
-- WebSocket connections now expect a session token, send ping/pong keepalives
-  and accept only a single client by default. Set environment variable
-  `CW_ALLOW_MULTI=true` to permit multiple clients.
+- WebSocket connections require a random session token printed by the engine on
+  startup. Clients must begin with a ``Hello`` message that includes this token
+  and the server replies to explicit ``Ping`` heartbeats with ``Pong``. The
+  client drops the link after consecutive missed pongs. A single client is
+  accepted by default; set environment variable ``CW_ALLOW_MULTI=true`` to
+  permit multiple clients.
+- The UI disables its controls within a few seconds if the engine connection is
+  lost.
 - Fixed runaway zoom in the frames graph that occurred on startup.
 - Closing the GUI no longer hangs; the engine worker thread now shuts down
   cleanly.

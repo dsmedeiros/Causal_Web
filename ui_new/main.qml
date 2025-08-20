@@ -8,7 +8,7 @@ Window {
     id: root
     property bool editMode: true
     property string tool: "select"
-    property bool controlsEnabled: true
+    property bool controlsEnabled: false
     width: 800
     height: 600
     visible: true

@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import asyncio
 import os
+import secrets
+import tempfile
 from typing import Any, Dict, Set
 
 import msgpack
@@ -60,7 +62,9 @@ async def serve(
         is read from the ``CW_ALLOW_MULTI`` environment variable and defaults to
         ``False``.
     session_token:
-        Optional token expected from clients on connect.
+        Optional token expected from clients on connect. If ``None`` a random
+        token is generated, printed to ``stdout`` and written to a temporary
+        file prefixed with ``cw_token_``.
     """
 
     if allow_multi is None:
@@ -69,6 +73,15 @@ async def serve(
             "true",
             "yes",
         }
+
+    if session_token is None:
+        session_token = secrets.token_urlsafe(16)
+        tmp = tempfile.NamedTemporaryFile(
+            "w", delete=False, prefix="cw_token_", suffix=".txt"
+        )
+        tmp.write(session_token)
+        tmp.close()
+        print(f"CW session token: {session_token} (file: {tmp.name})")
 
     clients: Set[websockets.WebSocketServerProtocol] = set()
 
@@ -81,6 +94,9 @@ async def serve(
 
         raw = await ws.recv()
         msg = msgpack.unpackb(raw, raw=False)
+        if msg.get("type") != "Hello":
+            await ws.close(reason="handshake required")
+            return
         token = msg.get("token", "")
         if session_token and token != session_token:
             await ws.close(reason="unauthorized")
@@ -88,10 +104,14 @@ async def serve(
 
         clients.add(ws)
         try:
+            await ws.send(msgpack.packb({"type": "Hello", "v": 1}))
             graph_static = {"type": "GraphStatic", "v": 1, **adapter.graph_static()}
             await ws.send(msgpack.packb(graph_static))
             async for raw in ws:
                 msg = msgpack.unpackb(raw, raw=False)
+                if msg.get("type") == "Ping":
+                    await ws.send(msgpack.packb({"type": "Pong", "v": 1}))
+                    continue
                 cmd = msg.get("cmd")
                 if cmd == "pull":
                     latest = bus.latest()
