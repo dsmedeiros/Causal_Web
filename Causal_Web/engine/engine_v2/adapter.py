@@ -23,7 +23,7 @@ import numpy as np
 
 from Causal_Web.view import EdgeView, NodeView, ViewSnapshot, WindowEvent
 
-from ..logging.logger import log_record, flush_metrics
+from ..logging.logger import log_record, flush_metrics, _get_aggregator
 from .lccm import LCCM, WindowParams, WindowState, on_window_close
 from .scheduler import DepthScheduler
 from .state import Packet, TelemetryFrame
@@ -69,21 +69,21 @@ class EngineAdapter:
         self._packet_buf: Dict[str, Any] = {}
         self._edge_buf: Dict[str, Any] = {}
         self._payload_buf: Dict[str, Any] = {}
-        self._psi_arr_pool: OrderedDict[
-            tuple[int, ...], deque[np.ndarray]
-        ] = OrderedDict()
-        self._p_arr_pool: OrderedDict[
-            tuple[int, ...], deque[np.ndarray]
-        ] = OrderedDict()
-        self._phase_arr_pool: OrderedDict[
-            tuple[int, ...], deque[np.ndarray]
-        ] = OrderedDict()
-        self._U_arr_pool: OrderedDict[
-            tuple[int, ...], deque[np.ndarray]
-        ] = OrderedDict()
-        self._alpha_arr_pool: OrderedDict[
-            tuple[int, ...], deque[np.ndarray]
-        ] = OrderedDict()
+        self._psi_arr_pool: OrderedDict[tuple[int, ...], deque[np.ndarray]] = (
+            OrderedDict()
+        )
+        self._p_arr_pool: OrderedDict[tuple[int, ...], deque[np.ndarray]] = (
+            OrderedDict()
+        )
+        self._phase_arr_pool: OrderedDict[tuple[int, ...], deque[np.ndarray]] = (
+            OrderedDict()
+        )
+        self._U_arr_pool: OrderedDict[tuple[int, ...], deque[np.ndarray]] = (
+            OrderedDict()
+        )
+        self._alpha_arr_pool: OrderedDict[tuple[int, ...], deque[np.ndarray]] = (
+            OrderedDict()
+        )
         self._neigh_sums_cache: np.ndarray | None = None
         self._delay_changed: Set[int] = set()
         self._lock = threading.RLock()
@@ -95,6 +95,13 @@ class EngineAdapter:
         self._energy_totals: Dict[int, float] = {}
         self._residuals: Dict[int, float] = {}
         self._residual: float = 0.0
+        self._residual_ewma: float = 0.0
+        self._residual_max: float = 0.0
+        self._ns_plus: int = 0
+        self._ns_total: int = 0
+        self._ns_delta: float = 0.0
+        self._edges_traversed: int = 0
+        self._windows_closed_total: int = 0
         self._experiment_status: Dict[str, Any] | None = None
         self._replay_progress: float | None = None
         self._replay_playing: bool = False
@@ -835,6 +842,10 @@ class EngineAdapter:
                         kappa_a,
                         batch=self._frame,
                     )
+                    self._ns_total += 1
+                    if outcome == 1:
+                        self._ns_plus += 1
+                    self._ns_delta = abs(self._ns_plus / self._ns_total - 0.5)
                     log_record(
                         category="entangled",
                         label="measurement",
@@ -1211,6 +1222,14 @@ class EngineAdapter:
             packets=packets if collect_packets else None,
             window=max_window,
         )
+        self._edges_traversed += edge_logs
+        self._windows_closed_total += len(self._closed_windows)
+        bridges_active = len(self._epairs.bridges) if self._epairs is not None else 0
+        agg = _get_aggregator()
+        agg.counts["events_processed"] += events
+        agg.counts["edges_traversed"] += edge_logs
+        agg.counts["windows_closed"] += len(self._closed_windows)
+        agg.counts["bridges_active"] += bridges_active
 
         depth_bucket = max_depth // 10
         flush_metrics(self._frame)
@@ -1237,6 +1256,7 @@ class EngineAdapter:
             metadata={"window_idx": max_window},
         )
 
+        residual_max_local = 0.0
         for vid, data in self._vertices.items():
             lccm = data["lccm"]
             if lccm.window_idx != start_windows.get(vid, lccm.window_idx):
@@ -1363,12 +1383,17 @@ class EngineAdapter:
                 resid = E_total - prev - leak
                 alpha_res = self._cfg.windowing.get("alpha_residual", 0.1)
                 prev_res = self._residuals.get(vid, 0.0)
-                self._residuals[vid] = (1 - alpha_res) * prev_res + alpha_res * abs(
-                    resid
-                )
+                abs_resid = abs(resid)
+                self._residuals[vid] = (
+                    1 - alpha_res
+                ) * prev_res + alpha_res * abs_resid
+                residual_max_local = max(residual_max_local, abs_resid)
                 self._energy_totals[vid] = E_total
                 if self._residuals:
                     self._residual = float(np.mean(list(self._residuals.values())))
+                    self._residual_ewma = (
+                        1 - alpha_res
+                    ) * self._residual_ewma + alpha_res * self._residual
                 self._closed_windows.append(
                     WindowEvent(v_id=str(vid), window_idx=lccm.window_idx)
                 )
@@ -1376,6 +1401,8 @@ class EngineAdapter:
                 if self._cfg.epsilon_pairs.get("decay_on_window_close", True):
                     # Decay bridges when vertices advance a window.
                     self._epairs.decay_all()
+
+        self._residual_max = residual_max_local
 
         if self._delay_changed and self._epairs is not None:
             for vid in self._delay_changed:
@@ -1424,7 +1451,10 @@ class EngineAdapter:
                 changed_edges=edges,
                 closed_windows=closed,
                 counters=counters,
-                invariants={"inv_conservation_residual": self._residual},
+                invariants={
+                    "inv_conservation_residual": self._residual,
+                    "inv_no_signaling_delta": self._ns_delta,
+                },
             )
 
     def current_depth(self) -> int:
@@ -1487,14 +1517,20 @@ class EngineAdapter:
         self._last_frame = self._frame
         counters = {
             "window": max_window,
+            "windows_closed": self._windows_closed_total,
+            "bridges_active": len(getattr(self._epairs, "bridges", {})),
+            "events_processed": self._frame,
+            "edges_traversed": self._edges_traversed,
             "events_per_sec": float(np.float32(events_per_sec)),
             "gates_fired": getattr(self._epairs, "gates_fired", 0),
-            "active_bridges": len(getattr(self._epairs, "active_bridges", [])),
             "residual": float(np.float32(self._residual)),
+            "residual_ewma": float(np.float32(self._residual_ewma)),
+            "residual_max": float(np.float32(self._residual_max)),
         }
         delta["counters"] = counters
         delta["invariants"] = {
-            "inv_conservation_residual": float(np.float32(self._residual))
+            "inv_conservation_residual": float(np.float32(self._residual)),
+            "inv_no_signaling_delta": float(np.float32(self._ns_delta)),
         }
 
         self._changed_nodes.clear()

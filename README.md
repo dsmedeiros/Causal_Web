@@ -335,7 +335,11 @@ The adapter exposes methods like `build_graph`, `step`, `pause` and
 compatible. Snapshots include the identifiers of nodes and edges touched since
 the previous call along with any closed window events, allowing the GUI to
 incrementally update its model. An EWMA of the energy conservation residual
-is tracked per window and surfaced via the snapshot counters. Internally a depth-based
+is tracked per window and surfaced via the snapshot counters. Additional
+micro-counters such as ``windows_closed``, ``bridges_active``,
+``events_processed`` and ``edges_traversed`` are exposed alongside global
+``residual_ewma`` and per-window ``residual_max`` to aid diagnostics. For Bell experiments the
+adapter also tracks a no-signaling delta under ``inv_no_signaling_delta``. Internally a depth-based
 scheduler orders packets by their arrival depth and advances vertex windows
 using the Local Causal Consistency Model (LCCM).  The LCCM computes a window
 size ``W(v)`` from the vertex's incident degree (fan-in plus fan-out) and local
