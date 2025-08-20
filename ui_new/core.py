@@ -73,6 +73,7 @@ async def run(
             if mtype == "DeltaReady":
                 await asyncio.sleep(1 / 60)
                 await client.drop_pending("DeltaReady")
+                await client.drop_pending("SnapshotDelta")
                 await client.send({"cmd": "pull"})
                 continue
             if mtype == "SnapshotDelta":

@@ -8,7 +8,11 @@ from telemetry import RollingTelemetry
 
 
 class TelemetryModel(QObject):
-    """Report node/edge counts and rolling telemetry histories."""
+    """Report node/edge counts and rolling telemetry histories.
+
+    ``max_points`` caps the length of stored series to keep memory usage flat
+    during long runs. It defaults to ``3000`` samples per series.
+    """
 
     nodeCountChanged = Signal(int)
     edgeCountChanged = Signal(int)
@@ -17,7 +21,7 @@ class TelemetryModel(QObject):
     depthChanged = Signal(int)
     depthLabelChanged = Signal(str)
 
-    def __init__(self, max_points: int = 100) -> None:
+    def __init__(self, max_points: int = 3000) -> None:
         super().__init__()
         self._node_count = 0
         self._edge_count = 0

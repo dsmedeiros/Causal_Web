@@ -142,28 +142,22 @@ class EngineAdapter:
         rows: int,
         dtype: np.dtype,
     ) -> np.ndarray:
-        """Return a reusable array from ``pool`` with at least ``rows`` rows.
+        """Return an array from ``pool`` sized for ``rows`` in bucketed groups.
 
-        Parameters
-        ----------
-        pool:
-            Mapping keyed by per-item shape excluding the row dimension.
-        base_shape:
-            Shape of a single item (excluding ``rows``).
-        rows:
-            Minimum number of rows required.
-        dtype:
-            Desired array dtype.
+        Arrays are grouped by ``rows`` rounded up to the next power-of-two so
+        transient batch sizes reuse a small set of allocations. ``pool`` is keyed
+        by ``(bucket, *base_shape)`` where ``bucket`` is this rounded row count.
         """
 
-        dq = pool.setdefault(base_shape, deque())
+        bucket = 1 << (rows - 1).bit_length()
+        key = (bucket, *base_shape)
+        dq = pool.setdefault(key, deque())
         arr = dq.pop() if dq else None
-        if arr is None or arr.shape[0] < rows:
-            new_rows = max(rows, arr.shape[0] * 2 if arr is not None else rows)
-            arr = np.empty((new_rows, *base_shape), dtype=dtype)
-        pool[base_shape] = dq
-        pool.move_to_end(base_shape)
-        while len(pool) > 4:
+        if arr is None:
+            arr = np.empty((bucket, *base_shape), dtype=dtype)
+        pool[key] = dq
+        pool.move_to_end(key)
+        while len(pool) > 8:
             pool.popitem(last=False)
         return arr
 
@@ -173,14 +167,15 @@ class EngineAdapter:
         base_shape: tuple[int, ...],
         arr: np.ndarray,
     ) -> None:
-        """Return ``arr`` to ``pool`` under ``base_shape`` with LRU culling."""
+        """Return ``arr`` to ``pool`` grouped by its bucketed row count."""
 
-        dq = pool.setdefault(base_shape, deque())
+        key = (arr.shape[0], *base_shape)
+        dq = pool.setdefault(key, deque())
         dq.append(arr)
-        pool.move_to_end(base_shape)
+        pool.move_to_end(key)
         while len(dq) > 8:
             dq.popleft()
-        while len(pool) > 4:
+        while len(pool) > 8:
             pool.popitem(last=False)
 
     # ------------------------------------------------------------------
@@ -1467,8 +1462,8 @@ class EngineAdapter:
         for vid in self._changed_nodes:
             if x_vals is not None and y_vals is not None:
                 positions[int(vid)] = (
-                    float(x_vals[vid]),
-                    float(y_vals[vid]),
+                    float(np.float32(x_vals[vid])),
+                    float(np.float32(y_vals[vid])),
                 )
             else:
                 positions[int(vid)] = (0.0, 0.0)
@@ -1490,13 +1485,15 @@ class EngineAdapter:
         self._last_frame = self._frame
         counters = {
             "window": max_window,
-            "events_per_sec": events_per_sec,
+            "events_per_sec": float(np.float32(events_per_sec)),
             "gates_fired": getattr(self._epairs, "gates_fired", 0),
             "active_bridges": len(getattr(self._epairs, "active_bridges", [])),
-            "residual": self._residual,
+            "residual": float(np.float32(self._residual)),
         }
         delta["counters"] = counters
-        delta["invariants"] = {"inv_conservation_residual": self._residual}
+        delta["invariants"] = {
+            "inv_conservation_residual": float(np.float32(self._residual))
+        }
 
         self._changed_nodes.clear()
         self._changed_edges.clear()

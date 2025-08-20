@@ -81,7 +81,13 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 - Client coalesces snapshot notifications and reuses scratch buffers (including
   pooled unitary, phase and alpha scaling arrays) while edge and event logging respect budgets
   unless diagnostics are enabled.
+- Scratch buffers for ψ and p are bucketed by group size to curb allocations and
+  snapshot deltas now encode float32 metrics and positions for leaner payloads.
+- Telemetry histories cap at roughly 3k samples per series and DeltaReady
+  messages drop older snapshots so only the newest frame renders between paints.
 - Window closures trigger brief red pulses on affected nodes for visual feedback.
+- GraphView exposes `save_snapshot(path, duration=0.0, fps=30)` to capture the current canvas as a PNG image or MP4 clip. For
+  MP4 exports both `duration` and `fps` must be positive.
 - Fixed a startup crash in read-only mode where a stale HUD item was
   re-added after clearing the scene.
 - Visible "Tick" terminology has been replaced with "Frame" throughout the

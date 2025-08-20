@@ -13,7 +13,7 @@ from PySide6.QtQuick import (
     QSGNode,
     QSGTextNode,
 )
-from PySide6.QtCore import QByteArray, Property, QRectF, QPointF, Signal
+from PySide6.QtCore import QByteArray, Property, QRectF, QPointF, Signal, Slot
 
 QML_IMPORT_NAME = "CausalGraph"
 QML_IMPORT_MAJOR_VERSION = 1
@@ -293,8 +293,9 @@ class GraphView(QQuickItem):
     # --- level of detail -----------------------------------------------------
     def _update_lod(self) -> None:
         """Adjust antialiasing, label and edge visibility based on zoom."""
-
-        self.setAntialiasing(self._zoom > self._antialias_threshold)
+        aa = self._zoom > self._antialias_threshold
+        if self.antialiasing() != aa:
+            self.setAntialiasing(aa)
         old = self._labels_visible
         self._labels_visible = self._zoom > self._label_threshold
         if old != self._labels_visible:
@@ -515,6 +516,51 @@ class GraphView(QQuickItem):
             self._label_container.removeChildNode(node)
 
         self._label_nodes = self._label_nodes[:count]
+
+    @Slot(str)
+    @Slot(str, float, int)
+    def save_snapshot(self, path: str, duration: float = 0.0, fps: int = 30) -> None:
+        """Export the current view as an image or short video.
+
+        Parameters
+        ----------
+        path:
+            Destination file. The extension determines the format:
+            ``.png`` for a static image or ``.mp4`` for a short clip.
+        duration:
+            Length of the MP4 clip in seconds. Must be positive for MP4 exports
+            and is ignored for PNG exports.
+        fps:
+            Frame rate of the MP4 clip. Must be positive for MP4 exports and is
+            ignored for PNG exports.
+        """
+
+        ext = path.lower().split(".")[-1]
+        if ext not in {"png", "mp4"}:
+            raise ValueError("Unsupported snapshot format; use .png or .mp4")
+        if ext == "mp4":
+            if duration <= 0:
+                raise ValueError("MP4 snapshots require a positive duration")
+            if fps <= 0:
+                raise ValueError("MP4 snapshots require a positive fps")
+
+        def _write(result) -> None:
+            if ext == "png":
+                result.saveToFile(path)
+                return
+            from PySide6.QtGui import QImage  # Local import to avoid GUI deps
+            import numpy as np
+            import imageio
+
+            img = result.image().convertToFormat(QImage.Format_RGBA8888)
+            width, height = img.width(), img.height()
+            ptr = img.constBits()
+            ptr.setsize(img.byteCount())
+            arr = np.frombuffer(ptr, np.uint8).reshape(height, width, 4)
+            frames = [arr] * max(1, int(duration * fps))
+            imageio.mimsave(path, frames, fps=fps)
+
+        self.grabToImage(_write)
 
     def _collapse_edges(
         self, edges: Iterable[Tuple[int, int]]
