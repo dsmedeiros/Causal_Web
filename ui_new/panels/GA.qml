@@ -12,18 +12,58 @@ Rectangle {
         anchors.fill: parent
         spacing: 4
 
+        Grid {
+            columns: 2
+            rowSpacing: 4
+            columnSpacing: 4
+            Text { text: "Pop"; color: "white" }
+            TextField { text: gaModel.populationSize; width: 40; onEditingFinished: gaModel.populationSize = parseInt(text) }
+            Text { text: "Mut"; color: "white" }
+            TextField { text: gaModel.mutationRate; width: 40; onEditingFinished: gaModel.mutationRate = parseFloat(text) }
+            Text { text: "Cross"; color: "white" }
+            TextField { text: gaModel.crossoverRate; width: 40; onEditingFinished: gaModel.crossoverRate = parseFloat(text) }
+            Text { text: "Elite"; color: "white" }
+            TextField { text: gaModel.elitism; width: 40; onEditingFinished: gaModel.elitism = parseInt(text) }
+            Text { text: "Gen"; color: "white" }
+            TextField { text: gaModel.maxGenerations; width: 40; onEditingFinished: gaModel.maxGenerations = parseInt(text) }
+        }
         Row {
             spacing: 4
-            Button { text: "Step"; onClicked: gaModel.step() }
-            Button { text: "Promote"; onClicked: gaModel.promote() }
+            Button {
+                text: gaModel.running ? "Pause" : "Start"
+                onClicked: gaModel.running ? gaModel.pause() : gaModel.start()
+            }
+            Button { text: "Resume"; onClicked: gaModel.resume() }
+            Button { text: "Promote Baseline"; onClicked: gaModel.promoteBaseline() }
+            Button { text: "Export Best"; onClicked: gaModel.exportBest() }
         }
         ListView {
             width: parent.width
             height: 100
             model: gaModel.population
-            delegate: Row {
-                spacing: 4
-                Text { text: fitness.toFixed(3); color: "white" }
+            delegate: Item {
+                width: parent.width
+                height: 24
+                Row {
+                    spacing: 4
+                    Text { text: fitness.toFixed(3); color: "white" }
+                    Text { text: obj0.toFixed(2); color: "white" }
+                    Text { text: obj1.toFixed(2); color: "white" }
+                    Text { text: invCausality ? "C✓" : "C✗"; color: invCausality ? "lime" : "red" }
+                    Text { text: invAncestry ? "A✓" : "A✗"; color: invAncestry ? "lime" : "red" }
+                    Text { text: invResidual ? "R✓" : "R✗"; color: invResidual ? "lime" : "red" }
+                    Text { text: invNoSignal ? "N✓" : "N✗"; color: invNoSignal ? "lime" : "red" }
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        if (path) {
+                            replayModel.load("experiments/" + path)
+                            if (panels && replayTab)
+                                panels.currentIndex = panels.indexOf(replayTab)
+                        }
+                    }
+                }
             }
         }
         Canvas {
@@ -94,12 +134,16 @@ Rectangle {
             width: parent.width
             height: 80
             model: gaModel.hallOfFame
-            delegate: Row {
-                spacing: 4
-                Text { text: (typeof gen !== "undefined" ? gen : "?") + ":"; color: "white" }
-                Text { text: fitness.toFixed(3); color: "white" }
-                Button {
-                    text: "Open Replay"
+            delegate: Item {
+                width: parent.width
+                height: 24
+                Row {
+                    spacing: 4
+                    Text { text: (typeof gen !== "undefined" ? gen : "?") + ":"; color: "white" }
+                    Text { text: fitness.toFixed(3); color: "white" }
+                }
+                MouseArea {
+                    anchors.fill: parent
                     onClicked: {
                         replayModel.load("experiments/" + path)
                         if (panels && replayTab)

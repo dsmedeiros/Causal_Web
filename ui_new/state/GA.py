@@ -20,32 +20,41 @@ class GAModel(QObject):
     historyChanged = Signal()
     paretoChanged = Signal()
     hallOfFameChanged = Signal()
+    runningChanged = Signal()
 
     def __init__(self) -> None:
         super().__init__()
-        base = {
+        self._base = {
             "W0": 1.0,
             "alpha_leak": 1.0,
             "lambda_decay": 1.0,
             "b": 1.0,
             "prob": 0.5,
         }
-        group_ranges = {"Delta_over_W0": (0.0, 1.0)}
-        toggles: Dict[str, List[int]] = {}
+        self._group_ranges = {"Delta_over_W0": (0.0, 1.0)}
+        self._toggles: Dict[str, List[int]] = {}
 
         def fitness(metrics, invariants, groups, toggles):
             g = groups["Delta_over_W0"]
             return (-abs(g - 0.5), -abs(g - 0.8))
 
+        self._fitness = fitness
         self._client: Optional[Client] = None
         self._loop: Optional[asyncio.AbstractEventLoop] = None
+        self._population_size = 8
+        self._mutation_rate = 0.1
+        self._crossover_rate = 0.5
+        self._elitism = 1
+        self._max_generations = 10
         self._ga = GeneticAlgorithm(
-            base,
-            group_ranges,
-            toggles,
+            self._base,
+            self._group_ranges,
+            self._toggles,
             [],
-            fitness,
-            population_size=8,
+            self._fitness,
+            population_size=self._population_size,
+            elite=self._elitism,
+            mutation_sigma=self._mutation_rate,
             seed=42,
         )
         self._population: List[dict] = []
@@ -53,6 +62,9 @@ class GAModel(QObject):
         self._pareto: List[List[float]] = []
         data = load_hall_of_fame(Path("experiments/hall_of_fame.json"))
         self._hof: List[dict] = list(data.get("archive", []))
+        self._running = False
+        self._task: Optional[asyncio.Task] = None
+        self._generation = 0
 
     # ------------------------------------------------------------------
     @Slot()
@@ -60,18 +72,33 @@ class GAModel(QObject):
         """Advance the GA by one generation."""
 
         self._ga.step()
-        self._population = [
-            {
-                "fitness": (
-                    g.fitness[0]
-                    if isinstance(g.fitness, (list, tuple))
-                    else g.fitness or 0.0
-                ),
-                **g.groups,
-                **g.toggles,
-            }
-            for g in self._ga.population
-        ]
+        self._population = []
+        for g in self._ga.population:
+            if isinstance(g.fitness, (list, tuple)):
+                f0 = g.fitness[0]
+                f1 = g.fitness[1] if len(g.fitness) > 1 else 0.0
+            else:
+                f0 = g.fitness or 0.0
+                f1 = 0.0
+            inv = getattr(g, "invariants", {}) or {}
+            caus = bool(inv.get("inv_causality_ok", True))
+            ances = bool(inv.get("inv_ancestry_ok", True))
+            resid = abs(float(inv.get("inv_conservation_residual", 0.0))) <= 1e-9
+            ns = abs(float(inv.get("inv_no_signaling_delta", 0.0))) <= 1e-9
+            self._population.append(
+                {
+                    "fitness": f0,
+                    "obj0": f0,
+                    "obj1": f1,
+                    "invCausality": caus,
+                    "invAncestry": ances,
+                    "invResidual": resid,
+                    "invNoSignal": ns,
+                    "path": g.run_path,
+                    **g.groups,
+                    **g.toggles,
+                }
+            )
         self._history = list(self._ga.history)
         pf = [
             list(g.fitness[:2])
@@ -84,6 +111,7 @@ class GAModel(QObject):
         )
         data = load_hall_of_fame(Path("experiments/hall_of_fame.json"))
         self._hof = list(data.get("archive", []))
+        self._generation += 1
         self.populationChanged.emit()
         self.historyChanged.emit()
         self.paretoChanged.emit()
@@ -91,9 +119,23 @@ class GAModel(QObject):
 
     # ------------------------------------------------------------------
     @Slot()
-    def promote(self) -> None:
+    def exportBest(self) -> None:
         """Write the best genome to ``best_config.yaml``."""
 
+        self._ga.promote_best("experiments/best_config.yaml")
+
+    @Slot()
+    def promoteBaseline(self) -> None:
+        """Promote the best genome to the GA baseline."""
+
+        best = max(
+            self._ga.population,
+            key=lambda g: (
+                g.fitness if isinstance(g.fitness, (int, float)) else g.fitness[0]
+            ),
+        )
+        raw = self._ga._normalizer.to_raw(self._ga.base, best.groups)
+        self._ga.base.update(raw)
         self._ga.promote_best("experiments/best_config.yaml")
 
     @Slot(int)
@@ -107,7 +149,6 @@ class GAModel(QObject):
 
         self._client = client
         self._loop = loop
-        # Use public setter to maintain encapsulation (requires GeneticAlgorithm.set_client)
         self._ga.set_client(client)
         self._ga.set_event_loop(loop)
 
@@ -115,6 +156,57 @@ class GAModel(QObject):
         """Forward ``ExperimentStatus`` messages to the GA."""
 
         self._ga.handle_status(msg)
+
+    # ------------------------------------------------------------------
+    @Slot()
+    def start(self) -> None:
+        """Start evolving genomes until ``maxGenerations`` or paused."""
+
+        if self._running:
+            return
+        self._ga = GeneticAlgorithm(
+            self._base,
+            self._group_ranges,
+            self._toggles,
+            [],
+            self._fitness,
+            population_size=self._population_size,
+            elite=self._elitism,
+            mutation_sigma=self._mutation_rate,
+            seed=42,
+        )
+        self._population = []
+        self._history = []
+        self._pareto = []
+        self._generation = 0
+        self._running = True
+        self.runningChanged.emit()
+
+        async def _run() -> None:
+            while self._running and self._generation < self._max_generations:
+                self.step()
+                await asyncio.sleep(0)
+            self._running = False
+            self.runningChanged.emit()
+
+        self._task = asyncio.create_task(_run())
+
+    # ------------------------------------------------------------------
+    @Slot()
+    def pause(self) -> None:
+        """Pause the running GA."""
+
+        self._running = False
+        self.runningChanged.emit()
+
+    # ------------------------------------------------------------------
+    @Slot()
+    def resume(self) -> None:
+        """Resume evolution if previously paused."""
+
+        if self._running or self._generation >= self._max_generations:
+            return
+        self.start()
 
     # ------------------------------------------------------------------
     def _get_population(self) -> List[dict]:
@@ -136,3 +228,48 @@ class GAModel(QObject):
         return self._hof
 
     hallOfFame = Property("QVariant", _get_hof, notify=hallOfFameChanged)
+
+    def _get_population_size(self) -> int:
+        return self._population_size
+
+    def _set_population_size(self, val: int) -> None:
+        self._population_size = int(val)
+
+    populationSize = Property(int, _get_population_size, _set_population_size)
+
+    def _get_mutation_rate(self) -> float:
+        return self._mutation_rate
+
+    def _set_mutation_rate(self, val: float) -> None:
+        self._mutation_rate = float(val)
+
+    mutationRate = Property(float, _get_mutation_rate, _set_mutation_rate)
+
+    def _get_crossover_rate(self) -> float:
+        return self._crossover_rate
+
+    def _set_crossover_rate(self, val: float) -> None:
+        self._crossover_rate = float(val)
+
+    crossoverRate = Property(float, _get_crossover_rate, _set_crossover_rate)
+
+    def _get_elitism(self) -> int:
+        return self._elitism
+
+    def _set_elitism(self, val: int) -> None:
+        self._elitism = int(val)
+
+    elitism = Property(int, _get_elitism, _set_elitism)
+
+    def _get_max_generations(self) -> int:
+        return self._max_generations
+
+    def _set_max_generations(self, val: int) -> None:
+        self._max_generations = int(val)
+
+    maxGenerations = Property(int, _get_max_generations, _set_max_generations)
+
+    def _get_running(self) -> bool:
+        return self._running
+
+    running = Property(bool, _get_running, notify=runningChanged)
