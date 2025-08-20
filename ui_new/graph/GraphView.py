@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Scene-graph renderer for causal graphs using Qt Quick instancing."""
+
 from typing import Dict, Iterable, List, Tuple, Set
 
 from PySide6.QtGui import QColor, QVector2D, QVector4D, QWheelEvent
@@ -20,11 +22,11 @@ QML_IMPORT_MAJOR_VERSION = 1
 
 
 class _InstancedMaterial(QSGMaterial):
-    """Flat material with per-instance offsets, colors and flags."""
+    """Flat material feeding per-instance attributes to the shader."""
 
     def __init__(self) -> None:
         super().__init__()
-        self.color = QColor("white")
+        # Attribute buffers mirroring geometry instance data
         self.offsets: List[QVector2D] = []
         self.colors: List[QVector4D] = []
         self.flags: List[float] = []
@@ -37,21 +39,20 @@ class _InstancedMaterial(QSGMaterial):
 
 
 class _InstancedShader(QSGMaterialShader):
-    """Vertex and fragment shaders applying per-instance offsets."""
+    """Shader consuming per-instance attributes for quads."""
 
     VERTEX = QByteArray(
         b"""
         attribute highp vec4 aVertex;
-        uniform highp vec2 uOffsets[256];
-        uniform lowp vec4 uColors[256];
-        uniform float uFlags[256];
+        attribute highp vec2 aOffset;
+        attribute lowp vec4 aColor;
+        attribute float aFlag;
         varying lowp vec4 vColor;
         varying float vFlag;
         void main(){
-            vec2 off = uOffsets[gl_InstanceID];
-            vColor = uColors[gl_InstanceID];
-            vFlag = uFlags[gl_InstanceID];
-            gl_Position = aVertex + vec4(off, 0.0, 0.0);
+            vColor = aColor;
+            vFlag = aFlag;
+            gl_Position = aVertex + vec4(aOffset, 0.0, 0.0);
         }
         """
     )
@@ -71,29 +72,25 @@ class _InstancedShader(QSGMaterialShader):
         super().__init__()
         self.setShaderSourceCode(QSGMaterialShader.VertexStage, self.VERTEX)
         self.setShaderSourceCode(QSGMaterialShader.FragmentStage, self.FRAG)
-        self.setAttributeNames([b"aVertex"])
+        self.setAttributeNames([b"aVertex", b"aOffset", b"aColor", b"aFlag"])
 
     def updateState(
         self, state, new_material, old_material
     ):  # pragma: no cover - Qt binding detail
         program = self.program()
-        program.setUniformValue("uColor", new_material.color)
         if new_material.offsets:
-            program.setUniformValueArray(
-                "uOffsets", new_material.offsets, len(new_material.offsets)
-            )
+            program.enableAttributeArray(b"aOffset")
+            program.setAttributeArray(b"aOffset", new_material.offsets)
         if new_material.colors:
-            program.setUniformValueArray(
-                "uColors", new_material.colors, len(new_material.colors)
-            )
+            program.enableAttributeArray(b"aColor")
+            program.setAttributeArray(b"aColor", new_material.colors)
         if new_material.flags:
-            program.setUniformValueArray(
-                "uFlags", new_material.flags, len(new_material.flags)
-            )
+            program.enableAttributeArray(b"aFlag")
+            program.setAttributeArray(b"aFlag", new_material.flags)
 
 
 class _EdgeMaterial(QSGMaterial):
-    """Material supplying per-edge endpoints."""
+    """Material supplying per-edge endpoints via instanced attributes."""
 
     def __init__(self) -> None:
         super().__init__()
@@ -109,15 +106,19 @@ class _EdgeMaterial(QSGMaterial):
 
 
 class _EdgeShader(QSGMaterialShader):
-    """Render edges by interpolating start and end points."""
+    """Render edges by interpolating per-instance start and end points."""
 
     VERTEX = QByteArray(
         b"""
         attribute highp vec4 aVertex;
-        uniform highp vec2 uStart[256];
-        uniform highp vec2 uEnd[256];
+        attribute highp vec2 aStart;
+        attribute highp vec2 aEnd;
+        varying highp vec2 vStart;
+        varying highp vec2 vEnd;
         void main(){
-            vec2 p = mix(uStart[gl_InstanceID], uEnd[gl_InstanceID], aVertex.x);
+            vStart = aStart;
+            vEnd = aEnd;
+            vec2 p = mix(aStart, aEnd, aVertex.x);
             gl_Position = vec4(p, 0.0, 1.0);
         }
         """
@@ -136,7 +137,7 @@ class _EdgeShader(QSGMaterialShader):
         super().__init__()
         self.setShaderSourceCode(QSGMaterialShader.VertexStage, self.VERTEX)
         self.setShaderSourceCode(QSGMaterialShader.FragmentStage, self.FRAG)
-        self.setAttributeNames([b"aVertex"])
+        self.setAttributeNames([b"aVertex", b"aStart", b"aEnd"])
 
     def updateState(
         self, state, new_material, old_material
@@ -144,21 +145,22 @@ class _EdgeShader(QSGMaterialShader):
         program = self.program()
         program.setUniformValue("uColor", new_material.color)
         if new_material.starts:
-            program.setUniformValueArray(
-                "uStart", new_material.starts, len(new_material.starts)
-            )
+            program.enableAttributeArray(b"aStart")
+            program.setAttributeArray(b"aStart", new_material.starts)
         if new_material.ends:
-            program.setUniformValueArray(
-                "uEnd", new_material.ends, len(new_material.ends)
-            )
+            program.enableAttributeArray(b"aEnd")
+            program.setAttributeArray(b"aEnd", new_material.ends)
 
 
 @QmlElement
 class GraphView(QQuickItem):
-    """QQuickItem rendering nodes and edges via instanced geometry.
+    """QQuickItem rendering nodes, edges and pulses via instanced attributes.
 
-    Level-of-detail behaviour such as antialiasing, label visibility and edge
-    culling is governed by configurable zoom thresholds exposed as properties.
+    Per-instance offset, color and flag data is supplied as geometry attributes
+    so the scene no longer carries the 256-uniform limit. Large graphs render in
+    a single draw call per primitive while level-of-detail behaviour such as
+    antialiasing, label visibility and edge culling is governed by configurable
+    zoom thresholds exposed as properties.
     """
 
     def __init__(self, parent: QQuickItem | None = None) -> None:
@@ -167,12 +169,12 @@ class GraphView(QQuickItem):
         self._nodes: List[Tuple[float, float]] = []
         self._edges: List[Tuple[int, int]] = []
         self._node_offsets: List[QVector2D] = []
-        self._node_material = _InstancedMaterial()
         self._node_geom: QSGGeometryNode | None = None
-        self._edge_material = _EdgeMaterial()
+        self._node_material = _InstancedMaterial()
         self._edge_geom: QSGGeometryNode | None = None
-        self._pulse_material = _InstancedMaterial()
+        self._edge_material = _EdgeMaterial()
         self._pulse_geom: QSGGeometryNode | None = None
+        self._pulse_material = _InstancedMaterial()
         self._pulses: Dict[int, int] = {}
         self._pulse_duration = 30
         self._node_colors: List[QColor] = []
@@ -232,7 +234,10 @@ class GraphView(QQuickItem):
         self._node_labels = list(labels) if labels else ["" for _ in self._nodes]
         self._edges_dirty = True
         rect = self._bounding_rect()
-        self.update(rect)
+        try:
+            self.update(rect)
+        except TypeError:  # PySide binding without QRectF overload
+            self.update()
 
     def apply_delta(self, delta: Dict[str, Dict[int, Tuple[float, float]]]) -> None:
         """Apply ``delta`` updates to buffers and schedule minimal repaint.
@@ -288,7 +293,10 @@ class GraphView(QQuickItem):
             affected.add(i)
 
         rect = self._bounding_rect(affected)
-        self.update(rect)
+        try:
+            self.update(rect)
+        except TypeError:  # PySide binding without QRectF overload
+            self.update()
 
     # --- level of detail -----------------------------------------------------
     def _update_lod(self) -> None:
@@ -304,6 +312,7 @@ class GraphView(QQuickItem):
         self._edges_visible = self._zoom > self._edge_threshold
         if edge_old != self._edges_visible:
             self.edgesVisibleChanged.emit(self._edges_visible)
+            self._edges_dirty = True
             self.update()
 
     def _get_zoom(self) -> float:
@@ -391,8 +400,10 @@ class GraphView(QQuickItem):
 
     # --- helpers --------------------------------------------------------------
     def _update_nodes(self, parent: QSGNode) -> None:
+        """Render all nodes with a single instanced geometry node."""
+
         if self._node_geom is None:
-            self._node_geom = QSGGeometryNode()
+            geom = QSGGeometryNode()
             geometry = QSGGeometry(QSGGeometry.defaultAttributes_Point2D(), 4)
             geometry.setDrawingMode(QSGGeometry.DrawTriangleStrip)
             verts = geometry.vertexDataAsPoint2D()
@@ -400,36 +411,24 @@ class GraphView(QQuickItem):
             verts[1].set(0.5, -0.5)
             verts[2].set(-0.5, 0.5)
             verts[3].set(0.5, 0.5)
-            self._node_geom.setGeometry(geometry)
-            self._node_geom.setFlag(QSGNode.OwnsGeometry, True)
-            self._node_geom.setMaterial(self._node_material)
-            self._node_geom.setFlag(QSGNode.OwnsMaterial, True)
-            parent.appendChildNode(self._node_geom)
+            geom.setGeometry(geometry)
+            geom.setFlag(QSGNode.OwnsGeometry, True)
+            geom.setMaterial(self._node_material)
+            geom.setFlag(QSGNode.OwnsMaterial, True)
+            parent.appendChildNode(geom)
+            self._node_geom = geom
 
-        self._node_material.offsets = self._node_offsets[:256]
+        self._node_material.offsets = self._node_offsets
         self._node_material.colors = [
             QVector4D(c.redF(), c.greenF(), c.blueF(), c.alphaF())
-            for c in self._node_colors[:256]
+            for c in self._node_colors
         ]
-        self._node_material.flags = self._node_flags[:256]
-        self._node_geom.setInstanceCount(len(self._node_material.offsets))
+        self._node_material.flags = self._node_flags
+        if self._node_geom is not None:
+            self._node_geom.setInstanceCount(len(self._node_offsets))
 
     def _update_pulses(self, parent: QSGNode) -> None:
         """Render and decay transient window-closure pulses."""
-        if self._pulse_geom is None:
-            self._pulse_geom = QSGGeometryNode()
-            geometry = QSGGeometry(QSGGeometry.defaultAttributes_Point2D(), 4)
-            geometry.setDrawingMode(QSGGeometry.DrawTriangleStrip)
-            verts = geometry.vertexDataAsPoint2D()
-            verts[0].set(-0.6, -0.6)
-            verts[1].set(0.6, -0.6)
-            verts[2].set(-0.6, 0.6)
-            verts[3].set(0.6, 0.6)
-            self._pulse_geom.setGeometry(geometry)
-            self._pulse_geom.setFlag(QSGNode.OwnsGeometry, True)
-            self._pulse_geom.setMaterial(self._pulse_material)
-            self._pulse_geom.setFlag(QSGNode.OwnsMaterial, True)
-            parent.appendChildNode(self._pulse_geom)
 
         offsets: List[QVector2D] = []
         colors: List[QVector4D] = []
@@ -446,42 +445,60 @@ class GraphView(QQuickItem):
         for vid in remove:
             del self._pulses[vid]
 
-        self._pulse_material.offsets = offsets[:256]
-        self._pulse_material.colors = colors[:256]
-        self._pulse_material.flags = [1.0] * len(self._pulse_material.offsets)
-        count = len(self._pulse_material.offsets)
+        if self._pulse_geom is None:
+            geom = QSGGeometryNode()
+            geometry = QSGGeometry(QSGGeometry.defaultAttributes_Point2D(), 4)
+            geometry.setDrawingMode(QSGGeometry.DrawTriangleStrip)
+            verts = geometry.vertexDataAsPoint2D()
+            verts[0].set(-0.6, -0.6)
+            verts[1].set(0.6, -0.6)
+            verts[2].set(-0.6, 0.6)
+            verts[3].set(0.6, 0.6)
+            geom.setGeometry(geometry)
+            geom.setFlag(QSGNode.OwnsGeometry, True)
+            geom.setMaterial(self._pulse_material)
+            geom.setFlag(QSGNode.OwnsMaterial, True)
+            parent.appendChildNode(geom)
+            self._pulse_geom = geom
+
+        self._pulse_material.offsets = offsets
+        self._pulse_material.colors = colors
+        self._pulse_material.flags = [1.0] * len(offsets)
         if self._pulse_geom is not None:
-            self._pulse_geom.setInstanceCount(count)
+            self._pulse_geom.setInstanceCount(len(offsets))
 
     def _update_edges(self, parent: QSGNode) -> None:
+        """Render edges using per-instance start and end points when visible."""
+
         if not self._edges_visible or not self._edges:
             if self._edge_geom is not None:
                 self._edge_geom.setInstanceCount(0)
             return
 
         if self._edge_geom is None:
-            self._edge_geom = QSGGeometryNode()
+            geom = QSGGeometryNode()
             geometry = QSGGeometry(QSGGeometry.defaultAttributes_Point2D(), 2)
             geometry.setDrawingMode(QSGGeometry.DrawLines)
             verts = geometry.vertexDataAsPoint2D()
             verts[0].set(0.0, 0.0)
             verts[1].set(1.0, 0.0)
-            self._edge_geom.setGeometry(geometry)
-            self._edge_geom.setFlag(QSGNode.OwnsGeometry, True)
-            self._edge_geom.setMaterial(self._edge_material)
-            self._edge_geom.setFlag(QSGNode.OwnsMaterial, True)
-            parent.appendChildNode(self._edge_geom)
+            geom.setGeometry(geometry)
+            geom.setFlag(QSGNode.OwnsGeometry, True)
+            geom.setMaterial(self._edge_material)
+            geom.setFlag(QSGNode.OwnsMaterial, True)
+            parent.appendChildNode(geom)
+            self._edge_geom = geom
 
         if not self._edges_dirty:
             return
 
         self._edge_material.starts = [
-            QVector2D(*self._nodes[a]) for a, _ in self._edges[:256]
+            QVector2D(*self._nodes[a]) for a, _ in self._edges
         ]
-        self._edge_material.ends = [
-            QVector2D(*self._nodes[b]) for _, b in self._edges[:256]
-        ]
-        self._edge_geom.setInstanceCount(len(self._edge_material.starts))
+        self._edge_material.ends = [QVector2D(*self._nodes[b]) for _, b in self._edges]
+        if self._edge_geom is not None:
+            self._edge_geom.setInstanceCount(len(self._edges))
+
         self._edges_dirty = False
 
     def _update_labels(self, parent: QSGNode) -> None:
@@ -498,7 +515,7 @@ class GraphView(QQuickItem):
             self._label_container = QSGNode()
             parent.appendChildNode(self._label_container)
 
-        count = min(len(self._nodes), len(self._node_labels), 256)
+        count = min(len(self._nodes), len(self._node_labels))
 
         while len(self._label_nodes) < count:
             node = QSGTextNode()
