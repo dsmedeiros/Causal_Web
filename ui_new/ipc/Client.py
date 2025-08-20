@@ -17,7 +17,17 @@ class Client:
     def __init__(
         self, url: str, token: str | None = None, ping_interval: float = 30.0
     ) -> None:
-        """Initialize the client with the server ``url`` and optional ``token``."""
+        """Initialize the client.
+
+        Parameters
+        ----------
+        url:
+            WebSocket server URL.
+        token:
+            Optional session token required by the server.
+        ping_interval:
+            Seconds between heartbeat pings.
+        """
         self.url = url
         self.token = token or ""
         self.ping_interval = ping_interval
@@ -26,20 +36,36 @@ class Client:
         self._backlog: Deque[Dict[str, Any]] = deque()
 
     async def connect(self) -> None:
-        """Open the WebSocket connection and send the session token."""
+        """Open the WebSocket connection and perform the hello handshake."""
         self.connection = await websockets.connect(self.url)
-        if self.token:
-            await self.send({"token": self.token})
+        await self.send({"type": "Hello", "token": self.token})
         self._ping_task = asyncio.create_task(self._heartbeat())
 
     async def _heartbeat(self) -> None:
-        """Periodically ping the server to keep the connection alive."""
+        """Send periodic ``Ping`` messages and close after missed pongs."""
+        misses = 0
         try:
             while self.connection:
                 await asyncio.sleep(self.ping_interval)
-                if self.connection:
-                    pong = await self.connection.ping()
-                    await pong
+                if not self.connection:
+                    break
+                await self.send({"type": "Ping"})
+                try:
+                    while True:
+                        data = await asyncio.wait_for(
+                            self.connection.recv(), timeout=self.ping_interval
+                        )
+                        msg = msgpack.unpackb(data, raw=False)
+                        if msg.get("type") == "Pong":
+                            misses = 0
+                            break
+                        self._backlog.append(msg)
+                except (asyncio.TimeoutError, websockets.ConnectionClosed):
+                    misses += 1
+                    if misses >= 2 and self.connection:
+                        await self.connection.close()
+                        self.connection = None
+                    continue
         except websockets.ConnectionClosed:
             pass
 
