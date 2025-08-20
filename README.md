@@ -461,4 +461,11 @@ generators, so parallel sweeps should run in separate processes to avoid
 contention.
 
 ## Contributing
+
+Run style checks with `pre-commit`:
+
+```bash
+pre-commit run --files <path>
+```
+
 Unit tests live under `tests/` and can be run with `pytest`. Coding guidelines and packaging instructions are documented in [AGENTS.md](AGENTS.md) and [docs/developer_guide.md](docs/developer_guide.md).

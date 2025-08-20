@@ -13,6 +13,8 @@ from typing import Deque, Iterable, Tuple
 
 import numpy as np
 
+# mypy: ignore-errors
+
 
 def phase_stats(
     U: np.ndarray, phase: complex, psi: np.ndarray

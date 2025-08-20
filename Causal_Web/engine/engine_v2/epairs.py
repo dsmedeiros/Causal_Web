@@ -153,7 +153,7 @@ class EPairs:
         self._bridge_logs = 0
 
     # Internal helpers -------------------------------------------------
-    def _log_seed(self, label: str, value: Dict[str, int | float]) -> None:
+    def _log_seed(self, label: str, value: Dict[str, int | float | str]) -> None:
         self._seed_logs += 1
         if (
             "diagnostic" in getattr(Config, "logging_mode", [])
@@ -161,7 +161,7 @@ class EPairs:
         ):
             log_record(category="event", label=label, value=value)
 
-    def _log_bridge(self, label: str, value: Dict[str, int | float]) -> None:
+    def _log_bridge(self, label: str, value: Dict[str, int | float | str]) -> None:
         self._bridge_logs += 1
         if (
             "diagnostic" in getattr(Config, "logging_mode", [])
@@ -508,8 +508,8 @@ class EPairs:
     def decay_all(self) -> None:
         """Decay all bridges, removing those below :attr:`sigma_min`."""
 
-        factor = 1.0 - self.lambda_decay
-        if factor >= 1.0:
+        factor = 1 - self.lambda_decay
+        if factor >= 1:
             return
         for (a, b), bridge in list(self.bridges.items()):
             bridge.sigma *= factor

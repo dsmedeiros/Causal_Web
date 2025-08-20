@@ -9,7 +9,7 @@ to remove outdated hooks from the legacy engine.
 
 from __future__ import annotations
 
-from typing import Any, Dict, Iterable, List, Optional, Set
+from typing import Any, Dict, Iterable, List, Set, Tuple
 import json
 import os
 from pathlib import Path
@@ -44,6 +44,8 @@ from invariants import checks
 
 
 EDGE_LOG_BUDGET = 100
+POOL_MAX_ENTRIES = 8
+EPSILON = 0.0
 
 
 class EngineAdapter:
@@ -67,21 +69,21 @@ class EngineAdapter:
         self._packet_buf: Dict[str, Any] = {}
         self._edge_buf: Dict[str, Any] = {}
         self._payload_buf: Dict[str, Any] = {}
-        self._psi_arr_pool: OrderedDict[tuple[int, ...], deque[np.ndarray]] = (
-            OrderedDict()
-        )
-        self._p_arr_pool: OrderedDict[tuple[int, ...], deque[np.ndarray]] = (
-            OrderedDict()
-        )
-        self._phase_arr_pool: OrderedDict[tuple[int, ...], deque[np.ndarray]] = (
-            OrderedDict()
-        )
-        self._U_arr_pool: OrderedDict[tuple[int, ...], deque[np.ndarray]] = (
-            OrderedDict()
-        )
-        self._alpha_arr_pool: OrderedDict[tuple[int, ...], deque[np.ndarray]] = (
-            OrderedDict()
-        )
+        self._psi_arr_pool: OrderedDict[
+            tuple[int, ...], deque[np.ndarray]
+        ] = OrderedDict()
+        self._p_arr_pool: OrderedDict[
+            tuple[int, ...], deque[np.ndarray]
+        ] = OrderedDict()
+        self._phase_arr_pool: OrderedDict[
+            tuple[int, ...], deque[np.ndarray]
+        ] = OrderedDict()
+        self._U_arr_pool: OrderedDict[
+            tuple[int, ...], deque[np.ndarray]
+        ] = OrderedDict()
+        self._alpha_arr_pool: OrderedDict[
+            tuple[int, ...], deque[np.ndarray]
+        ] = OrderedDict()
         self._neigh_sums_cache: np.ndarray | None = None
         self._delay_changed: Set[int] = set()
         self._lock = threading.RLock()
@@ -157,7 +159,7 @@ class EngineAdapter:
             arr = np.empty((bucket, *base_shape), dtype=dtype)
         pool[key] = dq
         pool.move_to_end(key)
-        while len(pool) > 8:
+        while len(pool) > POOL_MAX_ENTRIES:
             pool.popitem(last=False)
         return arr
 
@@ -173,9 +175,9 @@ class EngineAdapter:
         dq = pool.setdefault(key, deque())
         dq.append(arr)
         pool.move_to_end(key)
-        while len(dq) > 8:
+        while len(dq) > POOL_MAX_ENTRIES:
             dq.popleft()
-        while len(pool) > 8:
+        while len(pool) > POOL_MAX_ENTRIES:
             pool.popitem(last=False)
 
     # ------------------------------------------------------------------
@@ -385,7 +387,7 @@ class EngineAdapter:
                 "lccm": lccm,
                 "psi_acc": self._arrays.vertices["psi_acc"][vid],
                 "p_v": self._arrays.vertices["p"][vid],
-                "bit_deque": deque(maxlen=8),
+                "bit_deque": deque(maxlen=POOL_MAX_ENTRIES),
                 "base_deg": deg,
                 "win_state": WindowState(M_v=rho_mean, W_v=w_init),
             }
@@ -1127,7 +1129,7 @@ class EngineAdapter:
                     self._changed_edges.add((dst, dst_id))
                     if (
                         (diagnostic_mode or edge_logs % EDGE_LOG_BUDGET == 0)
-                        and rate > 0.0
+                        and rate > EPSILON
                         and rng_rand() < rate
                     ):
                         log_record(
@@ -1163,7 +1165,7 @@ class EngineAdapter:
                 rate = self._cfg.logging.get("sample_rho_rate", 0.01)
                 if (
                     (diagnostic_mode or edge_logs % EDGE_LOG_BUDGET == 0)
-                    and rate > 0.0
+                    and rate > EPSILON
                     and self._rng.random() < rate
                 ):
                     log_record(
@@ -1270,13 +1272,13 @@ class EngineAdapter:
                             p_v.fill(1.0 / len(p_v))
                         case "renorm":
                             total = float(p_v.sum())
-                            if total > 0.0:
+                            if total > EPSILON:
                                 p_v /= total
                         case "hold":
                             pass
                         case _:
                             p_v.fill(1.0 / len(p_v))
-                    p_v[:] = np.where(np.isfinite(p_v), p_v, 0.0)
+                    p_v[:] = np.where(np.isfinite(p_v), p_v, EPSILON)
                     self._arrays.vertices["p"][vid] = p_v
                     if lccm.layer != "C":
                         self._arrays.vertices["bit"][vid] = 0
