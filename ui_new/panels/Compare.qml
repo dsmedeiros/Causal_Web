@@ -21,9 +21,27 @@ Rectangle {
             }
         }
         Slider {
+            id: frameSlider
             from: 0
             to: compareModel.frameCount > 0 ? compareModel.frameCount - 1 : 0
+            value: compareModel.frameIndex
             onMoved: compareModel.setFrame(Math.round(value))
+            Connections { target: compareModel; function onFrameCountChanged(){ frameSlider.to = compareModel.frameCount > 0 ? compareModel.frameCount - 1 : 0 } }
+        }
+        Row {
+            spacing: 4
+            Button { text: "Prev"; onClicked: compareModel.prevFrame() }
+            Button { text: timer.running ? "Pause" : "Play"; onClicked: timer.running ? timer.stop() : timer.start() }
+            Button { text: "Next"; onClicked: compareModel.nextFrame() }
+        }
+        Timer {
+            id: timer
+            interval: 500
+            repeat: true
+            onTriggered: {
+                compareModel.nextFrame()
+                if (compareModel.frameIndex >= compareModel.frameCount - 1) timer.stop()
+            }
         }
         Row {
             spacing: 4

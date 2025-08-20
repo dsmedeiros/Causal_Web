@@ -99,9 +99,11 @@ class ReplayModel(QObject):
         self.annotationsChanged.emit()
 
     @Slot(str)
-    def load(self, path: str) -> None:
-        """Load a delta log for deterministic replay."""
+    def load(self, dir_path: str) -> None:
+        """Load replay data from ``dir_path`` directory."""
         if self._client:
             asyncio.create_task(
-                self._client.send({"ReplayControl": {"action": "load", "path": path}})
+                self._client.send(
+                    {"ReplayControl": {"action": "load", "path": dir_path}}
+                )
             )

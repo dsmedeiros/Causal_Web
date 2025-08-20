@@ -11,6 +11,8 @@ from __future__ import annotations
 
 from typing import Any, Dict, Iterable, List, Optional, Set
 import json
+import os
+from pathlib import Path
 from collections import deque, defaultdict, OrderedDict
 import threading
 import time
@@ -102,23 +104,35 @@ class EngineAdapter:
         self._replay_index = 0
 
     # ------------------------------------------------------------------
-    def load_replay(self, path: str) -> None:
-        """Load snapshot deltas from ``path`` for deterministic replay."""
+    def load_replay(self, path: str | os.PathLike[str]) -> dict[str, Any] | None:
+        """Load replay data from ``path`` directory and return ``GraphStatic``.
 
+        The directory may contain ``graph_static.json`` describing the graph and
+        a ``delta_log.jsonl`` file with one JSON snapshot delta per line. Missing
+        files are ignored.
+        """
+
+        p = Path(path)
         with self._lock:
             self._replay_frames.clear()
             self._replay_index = 0
-            try:
-                with open(path) as fh:
-                    for line in fh:
-                        try:
-                            self._replay_frames.append(json.loads(line))
-                        except json.JSONDecodeError:
-                            continue
-            except FileNotFoundError:
-                return
+            self._graph_static = None
+            graph_file = p / "graph_static.json"
+            if graph_file.exists():
+                try:
+                    self._graph_static = json.loads(graph_file.read_text())
+                except json.JSONDecodeError:
+                    self._graph_static = None
+            delta_file = p / "delta_log.jsonl"
+            if delta_file.exists():
+                for line in delta_file.read_text().splitlines():
+                    try:
+                        self._replay_frames.append(json.loads(line))
+                    except json.JSONDecodeError:
+                        continue
             self._replay_playing = False
             self._replay_progress = 0.0
+            return self._graph_static
 
     # ------------------------------------------------------------------
     def _get_pool_arr(
@@ -1592,7 +1606,9 @@ class EngineAdapter:
             if action == "load":
                 path = replay.get("path")
                 if isinstance(path, str):
-                    self.load_replay(path)
+                    gs = self.load_replay(path)
+                    if gs is not None:
+                        return {"type": "GraphStatic", "v": 1, **gs}
                 return None
             if action == "play":
                 self._replay_playing = True
