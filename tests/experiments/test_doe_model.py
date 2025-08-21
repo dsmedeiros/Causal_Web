@@ -1,8 +1,10 @@
 import json
 from pathlib import Path
 
+import pytest
 import yaml
 
+pytest.importorskip("PySide6")
 from ui_new.state.DOE import DOEModel
 
 

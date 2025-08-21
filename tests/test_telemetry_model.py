@@ -1,3 +1,6 @@
+import pytest
+
+pytest.importorskip("PySide6")
 from ui_new.state.Telemetry import TelemetryModel
 
 

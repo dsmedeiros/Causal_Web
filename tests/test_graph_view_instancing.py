@@ -1,6 +1,8 @@
 import os
 import pytest
 
+pytest.importorskip("PySide6.QtGui")
+pytest.importorskip("PySide6.QtQuick")
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PySide6.QtGui import QGuiApplication
