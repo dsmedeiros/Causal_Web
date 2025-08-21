@@ -4,6 +4,8 @@ import QtQuick.Controls 2.15
 Rectangle {
     property var panels
     property int replayIndex: -1
+    property int xObj: 0
+    property int yObj: 1
     color: "#202020"
     anchors.fill: parent
 
@@ -33,6 +35,11 @@ Rectangle {
             TextField { text: gaModel.elitism; width: 40; onEditingFinished: gaModel.elitism = parseInt(text) }
             Text { text: "Gen"; color: "white" }
             TextField { text: gaModel.maxGenerations; width: 40; onEditingFinished: gaModel.maxGenerations = parseInt(text) }
+        }
+        CheckBox {
+            text: "Multi-objective"
+            checked: gaModel.multiObjective
+            onToggled: gaModel.multiObjective = checked
         }
         Row {
             spacing: 4
@@ -97,6 +104,23 @@ Rectangle {
             Connections { target: gaModel; function onHistoryChanged() { fitnessPlot.requestPaint() } }
         }
         Text { text: "Pareto Front"; color: "white" }
+        Row {
+            spacing: 4
+            Text { text: "X"; color: "white" }
+            ComboBox {
+                model: gaModel.objectiveNames
+                currentIndex: xObj
+                onCurrentIndexChanged: xObj = currentIndex
+                width: 120
+            }
+            Text { text: "Y"; color: "white" }
+            ComboBox {
+                model: gaModel.objectiveNames
+                currentIndex: yObj
+                onCurrentIndexChanged: yObj = currentIndex
+                width: 120
+            }
+        }
         Canvas {
             id: pareto
             width: parent.width
@@ -109,31 +133,73 @@ Rectangle {
                 if (!pts || pts.length === 0) return
                 var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
                 for (var i=0;i<pts.length;i++){
-                    var p = pts[i]
-                    if (p[0]<minX) minX=p[0]
-                    if (p[0]>maxX) maxX=p[0]
-                    if (p[1]<minY) minY=p[1]
-                    if (p[1]>maxY) maxY=p[1]
+                    var p = pts[i].objs
+                    if (p[xObj]<minX) minX=p[xObj]
+                    if (p[xObj]>maxX) maxX=p[xObj]
+                    if (p[yObj]<minY) minY=p[yObj]
+                    if (p[yObj]>maxY) maxY=p[yObj]
                 }
                 ctx.fillStyle = 'cyan'
                 for (var i=0;i<pts.length;i++){
-                    var p = pts[i]
-                    var x = (p[0]-minX)/((maxX-minX)||1) * width
-                    var y = height - (p[1]-minY)/((maxY-minY)||1) * height
+                    var p = pts[i].objs
+                    var x = (p[xObj]-minX)/((maxX-minX)||1) * width
+                    var y = height - (p[yObj]-minY)/((maxY-minY)||1) * height
                     ctx.fillRect(x-2,y-2,4,4)
                 }
+                ctx.fillStyle = 'white'
+                var xLabel = gaModel.objectiveNames[xObj] || ''
+                var yLabel = gaModel.objectiveNames[yObj] || ''
+                ctx.fillText(xLabel, 4, 12)
+                ctx.save()
+                ctx.translate(0, height)
+                ctx.rotate(-Math.PI/2)
+                ctx.fillText(yLabel, 4, 12)
+                ctx.restore()
             }
             Connections { target: gaModel; function onParetoChanged() { pareto.requestPaint() } }
+        }
+        Row {
+            spacing: 4
+            Text { text: "Rank"; color: "white" }
+            Text { text: "Crowd"; color: "white" }
+            Repeater {
+                model: gaModel.objectiveNames
+                delegate: Text { text: modelData; color: "white" }
+            }
         }
         ListView {
             width: parent.width
             height: 80
             model: gaModel.pareto
             delegate: Row {
+                id: rowItem
+                property var rowData: modelData
                 spacing: 4
-                Text { text: Number(modelData[0]).toFixed(3); color: "white" }
-                Text { text: Number(modelData[1]).toFixed(3); color: "white" }
-                Button { text: "Promote"; onClicked: gaModel.promoteIndex(index) }
+                Text { text: rowData.rank; color: "white" }
+                Text { text: rowData.crowding.toFixed(3); color: "white" }
+                Repeater {
+                    model: rowItem.rowData.objs.length
+                    delegate: Text { text: Number(rowItem.rowData.objs[index]).toFixed(3); color: "white" }
+                }
+            }
+        }
+        Button { text: "Promote"; onClicked: paretoDialog.open(); enabled: gaModel.pareto.length > 0 }
+        Dialog {
+            id: paretoDialog
+            modal: true
+            standardButtons: Dialog.Close
+            contentItem: ListView {
+                width: 200
+                height: 200
+                model: gaModel.pareto
+                delegate: Row {
+                    id: dlgRow
+                    property var rowData: modelData
+                    spacing: 4
+                    Text { text: index; color: "white" }
+                    Repeater { model: dlgRow.rowData.objs.length; delegate: Text { text: Number(dlgRow.rowData.objs[index]).toFixed(2); color: "white" } }
+                    Button { text: "Select"; onClicked: { gaModel.promoteIndex(index); paretoDialog.close() } }
+                }
             }
         }
         Text { text: "Hall of Fame"; color: "white" }
