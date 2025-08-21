@@ -1,5 +1,7 @@
 import asyncio
+import pytest
 
+pytest.importorskip("PySide6")
 from ui_new.state.Experiment import ExperimentModel
 
 
