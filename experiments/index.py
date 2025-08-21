@@ -32,16 +32,16 @@ def run_key(cfg_dict: Dict[str, Any]) -> str:
 
 
 class RunIndex:
-    """Persisted mapping of ``run_key`` to run metadata.
+    """Persisted mapping of ``run_key`` to run directories.
 
     Parameters
     ----------
     path:
         JSON file used to store the index.  Defaults to
-        ``experiments/run_index.json``.
+        ``experiments/runs/index.json``.
     runs_root:
         Root directory containing run folders.  All ``manifest.json`` files
-        under ``runs_root / runs`` are scanned when rebuilding the index.
+        under ``runs_root`` are scanned when rebuilding the index.
     """
 
     def __init__(
@@ -49,9 +49,9 @@ class RunIndex:
         path: pathlib.Path | None = None,
         runs_root: pathlib.Path | None = None,
     ) -> None:
-        self.path = path or pathlib.Path("experiments/run_index.json")
+        self.path = path or pathlib.Path("experiments/runs/index.json")
         self.runs_root = runs_root or self.path.parent
-        self.seen: Dict[str, Dict[str, str]] = {}
+        self.seen: Dict[str, str] = {}
         if self.path.exists():
             try:
                 self.seen = json.loads(self.path.read_text())
@@ -64,15 +64,14 @@ class RunIndex:
         """Rebuild the index by scanning run manifests."""
 
         self.seen = {}
-        pattern = self.runs_root.glob("runs/*/*/manifest.json")
+        pattern = self.runs_root.glob("*/*/manifest.json")
         for manifest in pattern:
             try:
                 data = json.loads(manifest.read_text())
                 key = data.get("run_key")
-                rid = data.get("run_id")
-                if key and rid:
+                if key:
                     rel = str(manifest.parent.relative_to(self.runs_root))
-                    self.seen[key] = {"run_id": rid, "path": rel}
+                    self.seen[key] = rel
             except Exception:  # pragma: no cover - skip unreadable manifests
                 continue
         self.save()
@@ -85,15 +84,20 @@ class RunIndex:
         self.path.write_text(json.dumps(self.seen, indent=2))
 
     # ------------------------------------------------------------------
-    def mark(self, key: str, run_id: str, rel_path: str) -> None:
-        """Record ``key`` with associated ``run_id`` and ``rel_path``."""
+    def mark(self, key: str, rel_path: str) -> None:
+        """Record ``key`` with associated ``rel_path``."""
 
-        self.seen[key] = {"run_id": run_id, "path": rel_path}
+        rel = pathlib.Path(rel_path)
+        try:
+            rel = rel.relative_to(self.runs_root.name)
+        except Exception:
+            pass
+        self.seen[key] = str(rel)
         self.save()
 
     # ------------------------------------------------------------------
-    def get(self, key: str) -> Optional[Dict[str, str]]:
-        """Return run metadata for ``key`` or ``None`` if unknown."""
+    def get(self, key: str) -> Optional[str]:
+        """Return run directory for ``key`` or ``None`` if unknown."""
 
         return self.seen.get(key)
 

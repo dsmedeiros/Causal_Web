@@ -67,14 +67,23 @@ class DOEModel(QObject):
         self._topk = data.get("rows", [])
 
     # ------------------------------------------------------------------
-    @Slot(int)
-    def runLhs(self, samples: int = 10) -> None:
-        """Generate ``samples`` Latin Hypercube points and evaluate them."""
+    @Slot(int, bool)
+    def runLhs(self, samples: int = 10, force: bool = False) -> None:
+        """Generate ``samples`` LHS points and evaluate them.
+
+        Parameters
+        ----------
+        samples:
+            Number of Latin Hypercube samples to generate.
+        force:
+            When ``True`` re-evaluate configurations even if present in the
+            run index.
+        """
 
         self._mgr = DOEQueueManager(
             self._base, self._gates, self._fitness, client=self._client
         )
-        self._mgr.enqueue_lhs(self._groups, samples)
+        self._mgr.enqueue_lhs(self._groups, samples, force=force)
         self._start_time = time.time()
         self._update_progress()
         if self._client is None:
@@ -89,14 +98,21 @@ class DOEModel(QObject):
             self._ipc_task = asyncio.create_task(_run())
 
     # ------------------------------------------------------------------
-    @Slot()
-    def runGrid(self) -> None:
-        """Execute a grid sweep using the configured ``steps`` per group."""
+    @Slot(bool)
+    def runGrid(self, force: bool = False) -> None:
+        """Execute a grid sweep using the configured ``steps`` per group.
+
+        Parameters
+        ----------
+        force:
+            When ``True`` re-evaluate configurations even if present in the
+            run index.
+        """
 
         self._mgr = DOEQueueManager(
             self._base, self._gates, self._fitness, client=self._client
         )
-        self._mgr.enqueue_grid(self._groups, self._steps)
+        self._mgr.enqueue_grid(self._groups, self._steps, force=force)
         self._start_time = time.time()
         self._update_progress()
         if self._client is None:

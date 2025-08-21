@@ -105,8 +105,10 @@ via a Monte-Carlo path sampler over the graph's causal structure.
   saturation with high fan-in.
 - Added DOE runner with invariant checks and metrics logging.
 - Runner CLI now accepts separate experiment (`--exp`) and base (`--base`)
-  configs, persists per-sample seeds and gate metrics, and supports
-  parallel execution via `--parallel` (use `--processes` for a process pool).
+  configs, persists per-sample seeds and gate metrics, supports
+  parallel execution via `--parallel` (use `--processes` for a process pool),
+  and can re-evaluate cached configurations with `--force`. The genetic
+  algorithm runner exposes the same `--force` option to rerun cached genomes.
 - DOE summaries now record selected gates and aggregate gate metrics
   (mean and standard deviation).
 - DOE queue manager can generate Latin Hypercube or grid sweeps, tracks live per-run invariant and fitness status, and dispatches runs to the engine via IPC.
@@ -123,8 +125,10 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 - GA panel evaluations now use the shared IPC loop so genomes are executed on the engine during interactive runs.
 - GA runs can be checkpointed and later resumed from disk—including any in-flight evaluations—to support reproducible interrupted searches.
 - Sweeps and GA populations reuse existing results via a persistent run index
-  keyed by a deterministic run hash, allowing duplicate submissions to be
-  skipped and interrupted batches to resume safely.
+  at ``experiments/runs/index.json`` keyed by a deterministic run hash,
+  skipping duplicate configurations and allowing interrupted batches to
+  resume safely. Command-line sweeps accept ``--force`` to re-evaluate
+  configurations even when present in the index.
 - Gate harness now executes Gates 1–6 via engine primitives rather than
   returning proxy metrics.
 - Gate metrics now capture interference visibility, delay slopes and
