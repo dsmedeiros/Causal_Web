@@ -576,7 +576,11 @@ class GeneticAlgorithm:
                 )
             )
         hof_entries: List[Dict[str, Any]] = []
-        for g in self._archive:
+        # Persist Pareto archive for multi-objective runs; fall back to the
+        # hall-of-fame in single-objective scenarios so callers always receive a
+        # populated archive.
+        source = self._archive or [g for _, g in self._hall_of_fame]
+        for g in source:
             if g.run_id is None or g.run_path is None:
                 continue
             obj = (

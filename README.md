@@ -32,8 +32,8 @@ SnapshotDelta = {
 On startup the engine prints a random session token. Clients begin with a
 `Hello` message carrying this token and the server closes connections that omit
 or mismatch it. A single client is accepted by default; set
-`CW_ALLOW_MULTI=true` to allow multiple clients. Float32 fields keep payloads
-lean.
+`CW_ALLOW_MULTI=1` to allow additional read-only spectator clients. Only the
+first connection retains control. Float32 fields keep payloads lean.
 
 ## Compare panel
 
@@ -110,6 +110,8 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 - Window closures trigger brief red pulses on affected nodes for visual feedback.
 - GraphView exposes `save_snapshot(path, duration=0.0, fps=30)` to capture the current canvas as a PNG image or MP4 clip. For
   MP4 exports both `duration` and `fps` must be positive.
+- A headless `video_export` utility under `tools/` composites logged snapshots
+  into an MP4 without launching the GUI.
 - Fixed a startup crash in read-only mode where a stale HUD item was
   re-added after clearing the scene.
 - Visible "Tick" terminology has been replaced with "Frame" throughout the
@@ -418,7 +420,7 @@ These settings drive the helper modules in ``experiments.dispersion`` and
 ``experiments.lightcone``.
 
 ## GPU and Distributed Acceleration
-The engine optionally accelerates per-edge calculations on the GPU when [Cupy](https://cupy.dev) is installed and can shard classical zones across a [Ray](https://www.ray.io) cluster. Classical nodes are partitioned into coherent zones and dispatched in parallel to Ray workers; if Ray is unavailable an info-level message is logged and processing continues locally. Select the backend with `Config.backend` or `--backend` (`cpu` by default, `cupy` for CUDA).
+The engine optionally accelerates per-edge calculations on the GPU when [Cupy](https://cupy.dev) is installed and can shard classical zones across a [Ray](https://www.ray.io) cluster. Classical nodes are partitioned into coherent zones and dispatched in parallel to Ray workers; if Ray is unavailable an info-level message is logged and processing continues locally. Select the backend with `Config.backend` or `--backend` (`cpu` by default, `cupy` for CUDA). Set `CW_USE_CUPY=1` to enable optional vectorised kernels for heavy sweeps when using the `cupy` backend.
 
 Density accumulation and matrix-product-state propagation also leverage CuPy
 when the backend is set to `cupy`, keeping computation on the GPU.

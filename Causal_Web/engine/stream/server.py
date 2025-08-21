@@ -133,13 +133,25 @@ async def serve(
         print(f"CW session token: {session_token} (file: {tmp.name})")
 
     clients: Set[websockets.WebSocketServerProtocol] = set()
+    primary: websockets.WebSocketServerProtocol | None = None
 
     publisher_task = asyncio.create_task(publisher(bus, clients))
 
     async def handler(ws: websockets.WebSocketServerProtocol) -> None:
-        """Handle a single client connection."""
+        """Handle a single client connection.
 
-        if not allow_multi and clients:
+        The first connected client retains control privileges. Subsequent
+        clients are treated as read-only spectators unless ``allow_multi`` is
+        ``False`` in which case they are rejected.
+        """
+
+        nonlocal primary
+
+        is_primary = False
+        if primary is None:
+            primary = ws
+            is_primary = True
+        elif not allow_multi:
             await ws.close(reason="single client only")
             return
 
@@ -157,7 +169,9 @@ async def serve(
         try:
             await ws.send(
                 msgpack.packb(
-                    {"type": "Hello", "v": 1}, use_bin_type=True, use_single_float=True
+                    {"type": "Hello", "v": 1, "read_only": not is_primary},
+                    use_bin_type=True,
+                    use_single_float=True,
                 )
             )
             graph_static = {"type": "GraphStatic", "v": 1, **adapter.graph_static()}
@@ -185,6 +199,14 @@ async def serve(
                                 payload, use_bin_type=True, use_single_float=True
                             )
                         )
+                elif not is_primary:
+                    await ws.send(
+                        msgpack.packb(
+                            {"type": "Error", "v": 1, "reason": "read-only"},
+                            use_bin_type=True,
+                            use_single_float=True,
+                        )
+                    )
                 else:
                     result = adapter.handle_control(msg)
                     if result:
@@ -195,6 +217,8 @@ async def serve(
                         )
         finally:
             clients.discard(ws)
+            if ws is primary:
+                primary = next(iter(clients), None)
 
     try:
         async with websockets.serve(handler, host, port):
