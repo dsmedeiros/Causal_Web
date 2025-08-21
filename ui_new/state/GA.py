@@ -10,6 +10,7 @@ from PySide6.QtCore import QObject, Property, Signal, Slot
 
 from experiments import GeneticAlgorithm
 from experiments.artifacts import load_hall_of_fame, write_best_config
+from experiments.fitness import VECTOR_FITNESS_LABELS
 from ..ipc import Client
 
 
@@ -22,6 +23,8 @@ class GAModel(QObject):
     hallOfFameChanged = Signal()
     runningChanged = Signal()
     baselinePromoted = Signal(str)
+    objectiveCountChanged = Signal()
+    objectiveNamesChanged = Signal()
 
     def __init__(self) -> None:
         super().__init__()
@@ -35,11 +38,16 @@ class GAModel(QObject):
         self._group_ranges = {"Delta_over_W0": (0.0, 1.0)}
         self._toggles: Dict[str, List[int]] = {}
 
-        def fitness(metrics, invariants, groups, toggles):
+        def _fitness_multi(metrics, invariants, groups, toggles):
             g = groups["Delta_over_W0"]
             return (-abs(g - 0.5), -abs(g - 0.8))
 
-        self._fitness = fitness
+        def _fitness_single(metrics, invariants, groups, toggles):
+            return _fitness_multi(metrics, invariants, groups, toggles)[0]
+
+        self._fitness_multi = _fitness_multi
+        self._fitness_single = _fitness_single
+        self._fitness = _fitness_single
         self._client: Optional[Client] = None
         self._loop: Optional[asyncio.AbstractEventLoop] = None
         self._population_size = 8
@@ -47,6 +55,7 @@ class GAModel(QObject):
         self._crossover_rate = 0.5
         self._elitism = 1
         self._max_generations = 10
+        self._multi_objective = False
         self._ga = GeneticAlgorithm(
             self._base,
             self._group_ranges,
@@ -60,7 +69,9 @@ class GAModel(QObject):
         )
         self._population: List[dict] = []
         self._history: List[float] = []
-        self._pareto: List[List[float]] = []
+        self._pareto: List[dict] = []
+        self._obj_count = 0
+        self._obj_names: List[str] = []
         data = load_hall_of_fame(Path("experiments/hall_of_fame.json"))
         self._hof: List[dict] = list(data.get("archive", []))
         self._running = False
@@ -101,11 +112,28 @@ class GAModel(QObject):
                 }
             )
         self._history = list(self._ga.history)
-        pf = [
-            list(g.fitness[:2])
-            for g in self._ga.pareto_front()
-            if isinstance(g.fitness, (list, tuple)) and len(g.fitness) >= 2
-        ]
+        pf: List[dict] = []
+        front = self._ga.pareto_front()
+        if front:
+            self._obj_count = (
+                len(front[0].fitness)
+                if isinstance(front[0].fitness, (list, tuple))
+                else 0
+            )
+            self._obj_names = VECTOR_FITNESS_LABELS[: self._obj_count]
+        else:
+            self._obj_count = 0
+            self._obj_names = []
+        for g in front:
+            if isinstance(g.fitness, (list, tuple)):
+                pf.append(
+                    {
+                        "rank": getattr(g, "rank", 0),
+                        "crowding": getattr(g, "cd", 0.0),
+                        "objs": list(g.fitness),
+                        "path": g.run_path,
+                    }
+                )
         self._pareto = pf
         self._ga.save_artifacts(
             "experiments/top_k.json", "experiments/hall_of_fame.json"
@@ -117,6 +145,8 @@ class GAModel(QObject):
         self.historyChanged.emit()
         self.paretoChanged.emit()
         self.hallOfFameChanged.emit()
+        self.objectiveCountChanged.emit()
+        self.objectiveNamesChanged.emit()
 
     # ------------------------------------------------------------------
     @Slot()
@@ -176,12 +206,15 @@ class GAModel(QObject):
 
         if self._running:
             return
+        fitness_fn = (
+            self._fitness_multi if self._multi_objective else self._fitness_single
+        )
         self._ga = GeneticAlgorithm(
             self._base,
             self._group_ranges,
             self._toggles,
             [],
-            self._fitness,
+            fitness_fn,
             population_size=self._population_size,
             elite=self._elitism,
             mutation_sigma=self._mutation_rate,
@@ -190,6 +223,8 @@ class GAModel(QObject):
         self._population = []
         self._history = []
         self._pareto = []
+        self._obj_count = 0
+        self._obj_names = []
         self._generation = 0
         self._running = True
         self.runningChanged.emit()
@@ -231,10 +266,20 @@ class GAModel(QObject):
 
     history = Property("QVariant", _get_history, notify=historyChanged)
 
-    def _get_pareto(self) -> List[List[float]]:
+    def _get_pareto(self) -> List[dict]:
         return self._pareto
 
     pareto = Property("QVariant", _get_pareto, notify=paretoChanged)
+
+    def _get_obj_count(self) -> int:
+        return self._obj_count
+
+    objectiveCount = Property(int, _get_obj_count, notify=objectiveCountChanged)
+
+    def _get_obj_names(self) -> List[str]:
+        return self._obj_names
+
+    objectiveNames = Property("QVariant", _get_obj_names, notify=objectiveNamesChanged)
 
     def _get_hof(self) -> List[dict]:
         return self._hof
@@ -280,6 +325,14 @@ class GAModel(QObject):
         self._max_generations = int(val)
 
     maxGenerations = Property(int, _get_max_generations, _set_max_generations)
+
+    def _get_multi_objective(self) -> bool:
+        return self._multi_objective
+
+    def _set_multi_objective(self, val: bool) -> None:
+        self._multi_objective = bool(val)
+
+    multiObjective = Property(bool, _get_multi_objective, _set_multi_objective)
 
     def _get_running(self) -> bool:
         return self._running

@@ -46,6 +46,67 @@ from .artifacts import (
 from .runner import _load_base_config
 
 
+def dominates(a: "Genome", b: "Genome") -> bool:
+    """Return ``True`` when genome ``a`` Pareto-dominates ``b``."""
+
+    if not isinstance(a.fitness, Sequence) or not isinstance(b.fitness, Sequence):
+        return False
+    a_better = False
+    for ax, bx in zip(a.fitness, b.fitness):
+        if ax > bx:
+            return False
+        if ax < bx:
+            a_better = True
+    return a_better
+
+
+def fast_non_dominated_sort(pop: Sequence["Genome"]) -> List[List["Genome"]]:
+    """Split ``pop`` into Pareto fronts using fast non-dominated sorting."""
+
+    fronts: List[List[Genome]] = [[]]
+    for p in pop:
+        p.S = []
+        p.n = 0
+        for q in pop:
+            if dominates(p, q):
+                p.S.append(q)
+            elif dominates(q, p):
+                p.n += 1
+        if p.n == 0:
+            p.rank = 0
+            fronts[0].append(p)
+    i = 0
+    while fronts[i]:
+        next_front: List[Genome] = []
+        for p in fronts[i]:
+            for q in p.S:
+                q.n -= 1
+                if q.n == 0:
+                    q.rank = i + 1
+                    next_front.append(q)
+        i += 1
+        fronts.append(next_front)
+    return fronts[:-1]
+
+
+def crowding_distance(front: Sequence["Genome"]) -> None:
+    """Compute crowding distance for ``front`` in-place."""
+
+    if not front:
+        return
+    m = len(front[0].fitness) if isinstance(front[0].fitness, Sequence) else 0
+    for p in front:
+        p.cd = 0.0
+    for k in range(m):
+        front.sort(key=lambda g: g.fitness[k])
+        front[0].cd = front[-1].cd = float("inf")
+        minv, maxv = front[0].fitness[k], front[-1].fitness[k]
+        denom = max(maxv - minv, 1e-12)
+        for i in range(1, len(front) - 1):
+            p = front[i]
+            p.cd += (front[i + 1].fitness[k] - front[i - 1].fitness[k]) / denom
+
+
 @dataclass
 class Genome:
     """Container describing a single genome in the population.
@@ -360,12 +421,12 @@ class GeneticAlgorithm:
         """Return the best genome among ``tournament_k`` random samples."""
 
         samples = self.rng.sample(self.population, self.tournament_k)
-        if any(hasattr(g, "_rank") for g in samples):
+        if any(hasattr(g, "rank") for g in samples):
             return min(
                 samples,
                 key=lambda g: (
-                    getattr(g, "_rank", float("inf")),
-                    -getattr(g, "_crowding", 0.0),
+                    getattr(g, "rank", float("inf")),
+                    -getattr(g, "cd", 0.0),
                 ),
             )
         return max(samples, key=lambda g: self._score(g))
@@ -397,67 +458,6 @@ class GeneticAlgorithm:
                 genome.toggles[k] = self.rng.choice(choices)
 
     # ------------------------------------------------------------------
-    def _dominates(self, a: Genome, b: Genome) -> bool:
-        """Return ``True`` if genome ``a`` Pareto-dominates ``b``."""
-
-        fa = a.fitness if isinstance(a.fitness, Sequence) else []
-        fb = b.fitness if isinstance(b.fitness, Sequence) else []
-        if not fa or not fb:
-            return False
-        return all(x <= y for x, y in zip(fa, fb)) and any(
-            x < y for x, y in zip(fa, fb)
-        )
-
-    # ------------------------------------------------------------------
-    def _non_dominated_sort(self, pop: Sequence[Genome]) -> List[List[Genome]]:
-        """Split ``pop`` into Pareto fronts using non-dominated sorting."""
-
-        remaining = list(pop)
-        fronts: List[List[Genome]] = []
-        rank = 0
-        while remaining:
-            front: List[Genome] = []
-            for g in remaining:
-                dominated = False
-                for h in remaining:
-                    if g is h:
-                        continue
-                    if self._dominates(h, g):
-                        dominated = True
-                        break
-                if not dominated:
-                    g._rank = rank
-                    front.append(g)
-            fronts.append(front)
-            remaining = [g for g in remaining if g not in front]
-            rank += 1
-        return fronts
-
-    # ------------------------------------------------------------------
-    def _crowding_distance(self, front: Sequence[Genome]) -> None:
-        """Compute crowding distance for genomes in ``front`` in-place."""
-
-        if not front:
-            return
-        n_obj = len(front[0].fitness) if isinstance(front[0].fitness, Sequence) else 0
-        for g in front:
-            g._crowding = 0.0
-        if len(front) <= 2:
-            for g in front:
-                g._crowding = float("inf")
-            return
-        for m in range(n_obj):
-            front.sort(key=lambda g: g.fitness[m])
-            front[0]._crowding = front[-1]._crowding = float("inf")
-            min_f = front[0].fitness[m]
-            max_f = front[-1].fitness[m]
-            span = max_f - min_f or 1.0
-            for i in range(1, len(front) - 1):
-                prev_f = front[i - 1].fitness[m]
-                next_f = front[i + 1].fitness[m]
-                front[i]._crowding += (next_f - prev_f) / span
-
-    # ------------------------------------------------------------------
     def _update_archive(self, front: Sequence[Genome]) -> None:
         """Update the persistent Pareto archive with ``front``."""
 
@@ -474,11 +474,11 @@ class GeneticAlgorithm:
                     dict(g.groups), dict(g.toggles), g.fitness, g.run_id, g.run_path
                 )
         combined = list(combined_map.values())
-        fronts = self._non_dominated_sort(combined)
+        fronts = fast_non_dominated_sort(combined)
         archive = fronts[0] if fronts else []
         if len(archive) > self.population_size:
-            self._crowding_distance(archive)
-            archive.sort(key=lambda g: -g._crowding)
+            crowding_distance(archive)
+            archive.sort(key=lambda g: -g.cd)
             archive = archive[: self.population_size]
         self._archive = archive
 
@@ -491,11 +491,11 @@ class GeneticAlgorithm:
                 self._evaluate(g)
         multi = any(isinstance(g.fitness, Sequence) for g in self.population)
         if multi:
-            fronts = self._non_dominated_sort(self.population)
+            fronts = fast_non_dominated_sort(self.population)
             for front in fronts:
-                self._crowding_distance(front)
+                crowding_distance(front)
             self._update_archive(fronts[0])
-            self.population.sort(key=lambda g: (g._rank, -g._crowding))
+            self.population.sort(key=lambda g: (g.rank, -g.cd))
         else:
             self.population.sort(key=lambda g: self._score(g), reverse=True)
         best = self.population[0]
@@ -532,7 +532,7 @@ class GeneticAlgorithm:
 
         if self._archive:
             return list(self._archive)
-        fronts = self._non_dominated_sort(
+        fronts = fast_non_dominated_sort(
             [g for g in self.population if isinstance(g.fitness, Sequence)]
         )
         return fronts[0] if fronts else []
@@ -556,7 +556,6 @@ class GeneticAlgorithm:
         """Persist top-K and hall-of-fame summaries to disk."""
 
         top_entries: List[TopKEntry] = []
-        hof_entries: List[Dict[str, Any]] = []
         for gen, g in self._hall_of_fame:
             if g.run_id is None or g.run_path is None:
                 continue
@@ -576,9 +575,17 @@ class GeneticAlgorithm:
                     path=g.run_path,
                 )
             )
+        hof_entries: List[Dict[str, Any]] = []
+        for g in self._archive:
+            if g.run_id is None or g.run_path is None:
+                continue
+            obj = (
+                {f"f{i}": float(v) for i, v in enumerate(g.fitness)}
+                if isinstance(g.fitness, Sequence)
+                else {}
+            )
             hof_entries.append(
                 {
-                    "gen": gen,
                     "run_id": g.run_id,
                     "fitness": self._score(g),
                     "objectives": obj,

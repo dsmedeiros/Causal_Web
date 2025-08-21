@@ -13,6 +13,14 @@ DEFAULT_BASELINES = {
     "coherence": 1.0,
 }
 
+# Human-readable labels for the objectives returned by ``vector_fitness``.
+VECTOR_FITNESS_LABELS = [
+    "Residual norm",
+    "No-signaling \u0394 norm",
+    "1 - Target success norm",
+]
+"""Human-readable labels for the objectives returned by :func:`vector_fitness`."""
+
 
 def scalar_fitness(
     metrics: Mapping[str, float | bool],

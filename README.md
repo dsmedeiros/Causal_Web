@@ -116,6 +116,7 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 - Added a lightweight Genetic Algorithm framework with tournament selection, uniform crossover, Gaussian mutation and elitism along with a GA panel showing a live population table with objectives and per-constraint flags, fitness-history and Pareto-front charts, and promote/export actions.
 - Introduced scalar fitness helpers with hard invariant guardrails and normalised terms, providing a clear objective for optimisation and a path toward multi-objective Pareto support.
 - Added NSGA-II-lite multi-objective capabilities with non-dominated sorting, crowding-distance selection, a persistent Pareto archive and UI promotion of chosen trade-offs.
+- GA panel now offers a multi-objective toggle, Pareto scatter with selectable objectives, descriptive axis labels, and a table showing rank and crowding distance with a promotion dialog.
 - DOE and GA batches now persist summaries under ``experiments/``:
   - ``top_k.json`` records the best runs and is consumed by the Top-K UI table.
   - ``hall_of_fame.json`` archives per-generation GA champions.
