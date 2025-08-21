@@ -4,6 +4,37 @@ Causal Web is a simulation engine and GUI for experimenting with causal graphs. 
 
 A GPU-accelerated Qt Quick / QML interface lives in `ui_new` and serves as the default frontend. It renders graph nodes, edges and pulses via instanced `QSGGeometry`, exchanges `GraphStatic` and `SnapshotDelta` messages over a MessagePack WebSocket client, and tracks state via an immutable store with coalesced deltas. GPU buffers are built once and snapshot deltas modify only the affected instance offsets for positions, colors and visibility flags, while the view repaints just the touched region for minimal viewport updates. Per-instance attributes supply offsets, colors and visibility flags directly to the GPU so nodes, edges and pulses render in a single batch. Regression tests exercise graphs with up to 5,000 nodes to verify large-scene stability. GraphStatic can supply initial node labels, colors and visibility flags, and edges reuse a single line mesh with per-edge endpoints while parallel edges are collapsed before rendering. The interface includes basic panels for Telemetry, Meters, Experiment, Replay and Log Explorer, renders node labels, and applies level-of-detail rules that toggle label visibility, antialiasing and edge visibility based on zoom, exposing `labelsVisible` and `edgesVisible` properties so panels can react. Label text nodes are cached and updated in place to minimize scene-graph churn and avoid unnecessary painter state changes. Panels reside in a docked TabView on the right so the graph remains unobscured, and threshold values for label, edge and antialiasing visibility can be tuned via properties on `GraphView`. Users can zoom with the mouse wheel to scale the view and trigger these LOD changes. The Telemetry panel reports live node and edge counts alongside current LOD visibility, the Meters panel shows an estimated frames-per-second rate, the Experiment panel displays live status and residuals, the Replay panel tracks progress, and the Log Explorer streams log entries. Experiment, Replay and Log Explorer panels now offer interactive controls for starting, pausing or resetting experiments, controlling replay position, and filtering or clearing log entries. The Replay panel can load run directories for deterministic playback, streaming logged GraphStatic data and snapshot deltas, provides a timeline scrubber and supports bookmarks and frame annotations. Replays reproduce recorded HUD metrics such as frame count and residual trace for faithful analysis. DOE and GA result lists include a "Replay" button for one-click loading. Both panels also offer a "Promote to baseline" action that writes the selected configuration to `experiments/best_config.yaml` for reuse, with the path echoed in the Experiment panel's status bar. The DOE panel exposes range editors, LHS or grid sweeps, start/stop/resume controls, progress/ETA feedback and an interactive parallel-coordinate brush, while the GA panel surfaces population parameters, a live population table with objective and constraint flags, pause/resume and promote/export actions. A new Compare panel loads two runs side-by-side with synchronized playback controls, shows diff overlays and reports metric deltas. The backend runs experiments in a background thread, records deltas for replay and broadcasts updated experiment status and replay progress to keep panels in sync.
 
+## Architecture & IPC
+
+The engine and QML frontend communicate over a MessagePack WebSocket. The initial
+`GraphStatic` message seeds the scene while subsequent `SnapshotDelta` messages
+stream geometry and metric changes.
+
+```json
+GraphStatic = {
+  "node_positions": [[x, y], ...],
+  "edges": [[src, dst], ...],
+  "node_labels": [...],
+  "node_colors": [...],
+  "node_flags": [...]
+}
+
+SnapshotDelta = {
+  "frame": int,
+  "node_positions": {id: [x, y], ...},
+  "edges": [[src, dst], ...],
+  "closed_windows": [[id, window], ...],
+  "counters": {...},
+  "invariants": {...}
+}
+```
+
+On startup the engine prints a random session token. Clients begin with a
+`Hello` message carrying this token and the server closes connections that omit
+or mismatch it. A single client is accepted by default; set
+`CW_ALLOW_MULTI=true` to allow multiple clients. Float32 fields keep payloads
+lean.
+
 ## Compare panel
 
 The Compare panel accepts two run directories and plays their frames side-by-side. A scrubber and playback buttons keep the runs synchronized while an optional diff overlay and metric list highlight per-category deltas.
@@ -54,16 +85,6 @@ twin-paradox demonstration showcasing this time dilation. Run
 `python -m Causal_Web.analysis.lensing` to approximate lensing wedge amplitudes
 via a Monte-Carlo path sampler over the graph's causal structure.
 
-- Engine can now publish a MessagePack-encoded WebSocket stream. Clients pull
-  `SnapshotDelta` updates on demand after a `DeltaReady` notification and also
-  receive `ExperimentStatus` messages and an EWMA of conservation residuals.
-- WebSocket connections require a random session token printed by the engine on
-  startup. Clients must begin with a ``Hello`` message that includes this token.
-  Connections are kept alive using standard WebSocket ping/pong frames; the
-  client waits for pong replies without consuming the message stream, and the
-  link is dropped if a ping isn't answered within the interval. A single client
-  is accepted by default; set environment variable ``CW_ALLOW_MULTI=true`` to
-  permit multiple clients.
 - The UI disables its controls within a few seconds if the engine connection is
   lost.
 - Fixed runaway zoom in the frames graph that occurred on startup.
@@ -153,7 +174,9 @@ via a Monte-Carlo path sampler over the graph's causal structure.
   for debugging; collection is disabled by default to reduce memory overhead.
 
 ## Table of Contents
+- [Architecture & IPC](#architecture--ipc)
 - [Quick Start](#quick-start)
+- [Troubleshooting](#troubleshooting)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Configuration](#configuration)
@@ -161,27 +184,18 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 - [Contributing](#contributing)
 
 ## Quick Start
-1. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-2. Run the GUI:
-   ```bash
-   cw run
-   ```
-   Or run headless:
-   ```bash
-   cw run --no-gui
-   ```
-3. Verify core invariants with the Phase 0 parity checklist:
-   ```bash
-   python tools/parity_checklist.py
-   ```
-4. Optional flags:
-   - `--config <path>` to use a custom configuration file.
-   - `--graph <path>` to load a different graph.
-   - `--profile <file>` to write `cProfile` stats to the given path.
-   - `--backend cupy` to enable GPU acceleration when available.
+```bash
+pip install -r requirements.txt
+cw run             # GUI
+cw run --no-gui    # headless
+cw sweep --lhs ... # DOE
+cw ga --config ... # GA
+```
+
+## Troubleshooting
+- **Disconnected** → token mismatch or single-client limit.
+- **Low FPS** → zoom out, labels auto-hide; disable AA at far zoom.
+- **Invariant failures** → inspect `result.json` for violations.
 
 ## Installation
 Clone the repository and install the packages listed in `requirements.txt`. The GUI requires an X11 compatible display.
