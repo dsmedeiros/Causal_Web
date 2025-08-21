@@ -1,6 +1,8 @@
 import QtQuick 2.15
 import QtQuick.Window 2.15
+// Use Qt Quick Controls 2 for modern components
 import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 import CausalGraph 1.0
 import "panels"
 
@@ -126,23 +128,48 @@ Window {
         z: 10
     }
 
-    TabView {
+    Item {
         id: panels
         width: 250
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.right: parent.right
         enabled: root.controlsEnabled
+        property alias currentIndex: tabBar.currentIndex
 
-        Tab { title: "Telemetry"; Telemetry { anchors.fill: parent; graphView: graphView } }
-        Tab { title: "Meters"; Meters { anchors.fill: parent } }
-        Tab { title: "Experiment"; Experiment { anchors.fill: parent; graphView: graphView } }
-        Tab { id: replayTab; title: "Replay"; Replay { anchors.fill: parent } }
-        Tab { title: "Logs"; LogExplorer { anchors.fill: parent } }
-        Tab { title: "Inspector"; Inspector { anchors.fill: parent } }
-        Tab { title: "Validation"; Validation { anchors.fill: parent } }
-        Tab { title: "DOE"; DOE { anchors.fill: parent; panels: panels; replayTab: replayTab } }
-        Tab { title: "GA"; GA { anchors.fill: parent; panels: panels; replayTab: replayTab } }
-        Tab { title: "Compare"; Compare { anchors.fill: parent } }
+        TabBar {
+            id: tabBar
+            width: parent.width
+            TabButton { text: "Telemetry" }
+            TabButton { text: "Meters" }
+            TabButton { text: "Experiment" }
+            TabButton { text: "Replay" }
+            TabButton { text: "Logs" }
+            TabButton { text: "Inspector" }
+            TabButton { text: "Validation" }
+            TabButton { text: "DOE" }
+            TabButton { text: "GA" }
+            TabButton { text: "Compare" }
+        }
+
+        StackLayout {
+            id: stack
+            anchors.top: tabBar.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            currentIndex: tabBar.currentIndex
+
+            Telemetry { anchors.fill: parent; graphView: graphView }
+            Meters { anchors.fill: parent }
+            Experiment { anchors.fill: parent; graphView: graphView }
+            Replay { anchors.fill: parent }
+            LogExplorer { anchors.fill: parent }
+            Inspector { anchors.fill: parent }
+            Validation { anchors.fill: parent }
+            DOE { anchors.fill: parent; panels: panels; replayIndex: 3 }
+            GA { anchors.fill: parent; panels: panels; replayIndex: 3 }
+            Compare { anchors.fill: parent }
+        }
     }
 }

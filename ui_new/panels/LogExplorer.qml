@@ -1,6 +1,5 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import QtQml.Models 2.15
 
 Rectangle {
     color: "#202020"
@@ -22,16 +21,14 @@ Rectangle {
                 onClicked: logsModel.clear()
             }
         }
-        SortFilterProxyModel {
-            id: filteredLogs
-            sourceModel: logsModel
-            filterCaseSensitivity: Qt.CaseInsensitive
-            filterRegularExpression: filterField.text
-        }
         ListView {
             anchors.fill: parent
-            model: filteredLogs
-            delegate: Text { text: modelData; color: "white" }
+            model: logsModel
+            delegate: Text {
+                text: modelData
+                color: "white"
+                visible: filterField.text === "" || modelData.toLowerCase().indexOf(filterField.text.toLowerCase()) !== -1
+            }
         }
     }
 }

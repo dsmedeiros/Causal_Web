@@ -424,7 +424,7 @@ class GraphView(QQuickItem):
             for c in self._node_colors
         ]
         self._node_material.flags = self._node_flags
-        if self._node_geom is not None:
+        if self._node_geom is not None and hasattr(self._node_geom, "setInstanceCount"):
             self._node_geom.setInstanceCount(len(self._node_offsets))
 
     def _update_pulses(self, parent: QSGNode) -> None:
@@ -464,14 +464,18 @@ class GraphView(QQuickItem):
         self._pulse_material.offsets = offsets
         self._pulse_material.colors = colors
         self._pulse_material.flags = [1.0] * len(offsets)
-        if self._pulse_geom is not None:
+        if self._pulse_geom is not None and hasattr(
+            self._pulse_geom, "setInstanceCount"
+        ):
             self._pulse_geom.setInstanceCount(len(offsets))
 
     def _update_edges(self, parent: QSGNode) -> None:
         """Render edges using per-instance start and end points when visible."""
 
         if not self._edges_visible or not self._edges:
-            if self._edge_geom is not None:
+            if self._edge_geom is not None and hasattr(
+                self._edge_geom, "setInstanceCount"
+            ):
                 self._edge_geom.setInstanceCount(0)
             return
 
@@ -496,7 +500,7 @@ class GraphView(QQuickItem):
             QVector2D(*self._nodes[a]) for a, _ in self._edges
         ]
         self._edge_material.ends = [QVector2D(*self._nodes[b]) for _, b in self._edges]
-        if self._edge_geom is not None:
+        if self._edge_geom is not None and hasattr(self._edge_geom, "setInstanceCount"):
             self._edge_geom.setInstanceCount(len(self._edges))
 
         self._edges_dirty = False

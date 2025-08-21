@@ -269,15 +269,10 @@ class MainService:
             GAModel,
             CompareModel,
         )
+        from ui_new.graph import GraphView  # noqa: F401  # register QML module
 
         app = QGuiApplication([])
         engine = QQmlApplicationEngine()
-        qml_path = os.path.join(os.path.dirname(__file__), "..", "ui_new", "main.qml")
-        engine.load(qml_path)
-        if not engine.rootObjects():
-            return
-        root = engine.rootObjects()[0]
-        view = root.findChild(QQuickItem, "graphView")
         telemetry = TelemetryModel()
         meters = MetersModel()
         experiment = ExperimentModel()
@@ -287,15 +282,22 @@ class MainService:
         doe = DOEModel()
         ga_model = GAModel()
         compare = CompareModel()
-        engine.rootContext().setContextProperty("telemetryModel", telemetry)
-        engine.rootContext().setContextProperty("metersModel", meters)
-        engine.rootContext().setContextProperty("experimentModel", experiment)
-        engine.rootContext().setContextProperty("replayModel", replay)
-        engine.rootContext().setContextProperty("logsModel", logs)
-        engine.rootContext().setContextProperty("store", store)
-        engine.rootContext().setContextProperty("doeModel", doe)
-        engine.rootContext().setContextProperty("gaModel", ga_model)
-        engine.rootContext().setContextProperty("compareModel", compare)
+        ctx = engine.rootContext()
+        ctx.setContextProperty("telemetryModel", telemetry)
+        ctx.setContextProperty("metersModel", meters)
+        ctx.setContextProperty("experimentModel", experiment)
+        ctx.setContextProperty("replayModel", replay)
+        ctx.setContextProperty("logsModel", logs)
+        ctx.setContextProperty("store", store)
+        ctx.setContextProperty("doeModel", doe)
+        ctx.setContextProperty("gaModel", ga_model)
+        ctx.setContextProperty("compareModel", compare)
+        qml_path = os.path.join(os.path.dirname(__file__), "..", "ui_new", "main.qml")
+        engine.load(qml_path)
+        if not engine.rootObjects():
+            return
+        root = engine.rootObjects()[0]
+        view = root.findChild(QQuickItem, "graphView")
         view.frameRendered.connect(meters.frame_drawn)
 
         loop = asyncio.new_event_loop()
