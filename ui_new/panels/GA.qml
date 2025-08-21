@@ -3,7 +3,7 @@ import QtQuick.Controls 2.15
 
 Rectangle {
     property var panels
-    property var replayTab
+    property int replayIndex: -1
     color: "#202020"
     anchors.fill: parent
 
@@ -59,8 +59,8 @@ Rectangle {
                     onClicked: {
                         if (path) {
                             replayModel.load("experiments/" + path)
-                            if (panels && replayTab)
-                                panels.currentIndex = panels.indexOf(replayTab)
+                            if (panels && replayIndex >= 0)
+                                panels.currentIndex = replayIndex
                         }
                     }
                 }
@@ -146,11 +146,11 @@ Rectangle {
                     anchors.fill: parent
                     onClicked: {
                         replayModel.load("experiments/" + path)
-                        if (panels && replayTab)
-                            panels.currentIndex = panels.indexOf(replayTab)
+                        if (panels && replayIndex >= 0)
+                            panels.currentIndex = replayIndex
+                        }
                     }
                 }
-            }
         }
     }
 }

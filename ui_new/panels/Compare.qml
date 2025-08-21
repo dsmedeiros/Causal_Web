@@ -1,6 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import Qt5Compat.GraphicalEffects 1.15
+import Qt5Compat.GraphicalEffects
 
 Rectangle {
     color: "#202020"
