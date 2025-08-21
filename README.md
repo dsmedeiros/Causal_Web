@@ -6,9 +6,10 @@ A GPU-accelerated Qt Quick / QML interface lives in `ui_new` and serves as the d
 
 ## Architecture & IPC
 
-The engine and QML frontend communicate over a MessagePack WebSocket. The initial
-`GraphStatic` message seeds the scene while subsequent `SnapshotDelta` messages
-stream geometry and metric changes.
+The engine and QML frontend communicate over a MessagePack WebSocket. After a
+session-token handshake, the engine pushes an initial `GraphStatic` message to
+seed the scene and then streams `SnapshotDelta` messages with geometry and
+metric changes.
 
 ```json
 GraphStatic = {
@@ -29,9 +30,9 @@ SnapshotDelta = {
 }
 ```
 
-On startup the engine prints a random session token. Clients begin with a
-`Hello` message carrying this token and the server closes connections that omit
-or mismatch it. A single client is accepted by default; set
+The engine prints a random session token at startup. Clients must begin with a
+`Hello` message carrying this token; the server closes connections that omit or
+mismatch it. A single client is accepted by default; set
 `CW_ALLOW_MULTI=1` to allow additional read-only spectator clients. Only the
 first connection retains control. Float32 fields keep payloads lean.
 
@@ -99,14 +100,14 @@ via a Monte-Carlo path sampler over the graph's causal structure.
   events per second and residual metrics.
 - Experiment panel adds single-step controls, a rate slider and label/edge
   visibility toggles.
-- Canvas renders the latest snapshot diffs at up to 60 FPS via a pull-based loop.
+- Canvas renders the latest snapshot diffs at up to 60 FPS via a push-based stream.
 - Client coalesces snapshot notifications and reuses scratch buffers (including
   pooled unitary, phase and alpha scaling arrays) while edge and event logging respect budgets
   unless diagnostics are enabled.
 - Scratch buffers for ψ and p are bucketed by group size to curb allocations and
   snapshot deltas now encode float32 metrics and positions for leaner payloads.
-- Telemetry histories cap at roughly 3k samples per series and DeltaReady
-  messages drop older snapshots so only the newest frame renders between paints.
+- Telemetry histories cap at roughly 3k samples per series and the client
+  coalesces snapshot deltas so only the newest frame renders between paints.
 - Window closures trigger brief red pulses on affected nodes for visual feedback.
 - GraphView exposes `save_snapshot(path, duration=0.0, fps=30)` to capture the current canvas as a PNG image or MP4 clip. For
   MP4 exports both `duration` and `fps` must be positive.
