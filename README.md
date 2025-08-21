@@ -423,6 +423,24 @@ kernel processes one million edges in under 100 ms on compatible hardware.
 Edge phases ``exp(1j * (phi + A))`` are cached during graph loading so packet
 delivery avoids redundant exponentials.
 
+## Benchmarks
+
+`bench/engine_bench.py` measures engine step throughput while
+`bench/gui_bench.py` records GUI frame rate using an offscreen Qt
+renderer. Both benchmarks run nightly in CI, comparing results against
+checked-in baselines and uploading JSON artifacts. Regressions greater than
+5% generate workflow warnings while slowdowns beyond 10% fail the job. Any
+regression over 5% also opens a GitHub issue so maintainers receive external
+notifications. Both benchmarks record basic hardware metadata for reproducibility. Manual
+GUI frame-rate measurement guidelines remain in `bench/gui_fps.md` for
+scenarios not covered by the automated benchmark.
+
+The GUI benchmark accepts ``--nodes`` to control graph size and
+``--aa/--no-aa`` and ``--labels/--no-labels`` flags to toggle
+anti-aliasing and label rendering. Optional ``--target-fps`` records
+runtime expectations and ``--machine`` adds free-form notes; detailed
+hardware metadata is collected automatically in the output JSON.
+
 ## Output Logs
 Each run creates a timestamped directory under `output/runs` containing the graph, configuration and logs. Logging can be enabled or disabled via the GUI **Log Files** window or the `log_files` section of `config.json`. In `config.json` the keys are the categories (`tick`, `phenomena`, `event`) containing individual label flags. Logging cadence is event-driven; metrics and graph snapshots are written when windows advance or other triggers occur. The `logging_mode` option selects which categories are written: `diagnostic` (all logs), `tick`, `phenomena` and `events`.
 Logs are consolidated by category into `ticks_log.jsonl`, `phenomena_log.jsonl` and `events_log.jsonl`.
