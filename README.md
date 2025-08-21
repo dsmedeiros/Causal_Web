@@ -460,7 +460,9 @@ delivery avoids redundant exponentials.
 `bench/engine_bench.py` measures engine step throughput while
 `bench/gui_bench.py` records GUI frame rate using an offscreen Qt
 renderer. Both benchmarks run nightly in CI, comparing results against
-checked-in baselines and uploading JSON artifacts. Regressions greater than
+checked-in baselines and uploading JSON artifacts. A lightweight
+`bench/gui_smoke.py` also runs offscreen, timing a 5k node
+``GraphView.apply_delta`` call and failing if it exceeds 10 ms. Regressions greater than
 5% generate workflow warnings while slowdowns beyond 10% fail the job. Any
 regression over 5% also opens a GitHub issue so maintainers receive external
 notifications. Both benchmarks record basic hardware metadata for reproducibility. Manual

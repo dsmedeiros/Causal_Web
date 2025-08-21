@@ -19,7 +19,7 @@ jobs:
           pip install -r requirements.txt
       - name: Run engine benchmark
         run: |
-          python bench/engine_bench.py --output engine_bench.json
+          PYTHONPATH=. python bench/engine_bench.py --output engine_bench.json
       - name: Compare to baseline
         id: compare
         run: |
@@ -86,7 +86,23 @@ PY
         env:
           QT_QPA_PLATFORM: offscreen
         run: |
-          xvfb-run -s "-screen 0 1024x768x24" python bench/gui_bench.py --output gui_bench.json
+          PYTHONPATH=. xvfb-run -s "-screen 0 1024x768x24" python bench/gui_bench.py --output gui_bench.json
+      - name: Run GUI apply_delta smoke
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          PYTHONPATH=. xvfb-run -s "-screen 0 1024x768x24" python bench/gui_smoke.py --output gui_smoke.json
+      - name: Check apply_delta threshold
+        run: |
+          python - <<'PY'
+import json, pathlib, sys
+data = json.loads(pathlib.Path('gui_smoke.json').read_text())
+ms = data['apply_delta_ms']
+print(f"apply_delta {ms:.2f} ms")
+if ms > 10.0:
+    print('::error::apply_delta exceeds 10ms')
+    sys.exit(1)
+PY
       - name: Compare to baseline
         id: compare
         run: |
@@ -135,3 +151,8 @@ PY
         with:
           name: gui-bench
           path: gui_bench.json
+      - name: Upload GUI smoke artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: gui-smoke
+          path: gui_smoke.json
