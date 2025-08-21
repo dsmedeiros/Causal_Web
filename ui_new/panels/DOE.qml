@@ -7,6 +7,13 @@ Rectangle {
     color: "#202020"
     anchors.fill: parent
 
+    Connections {
+        target: doeModel
+        function onBaselinePromoted(path) {
+            experimentModel.status = "Baseline saved to " + path
+        }
+    }
+
     Column {
         anchors.margins: 8
         anchors.fill: parent
@@ -53,7 +60,6 @@ Rectangle {
             }
             Button { text: "Stop"; onClicked: doeModel.stop() }
             Button { text: "Resume"; onClicked: doeModel.resume() }
-            Button { text: "Promote"; onClicked: doeModel.promote() }
         }
 
         ProgressBar { width: parent.width; value: doeModel.progress }
@@ -71,16 +77,22 @@ Rectangle {
                     spacing: 4
                     Text { text: (index + 1) + ":"; color: "white" }
                     Text { text: fitness.toFixed(3); color: "white" }
+                    Button {
+                        id: promoteBtn
+                        text: "Promote"
+                        onClicked: doeModel.promote(modelData)
+                    }
                 }
                 MouseArea {
                     anchors.fill: parent
+                    anchors.rightMargin: promoteBtn.width
                     onClicked: {
                         replayModel.load("experiments/" + path)
                         if (panels && replayIndex >= 0)
                             panels.currentIndex = replayIndex
-                        }
                     }
                 }
+            }
         }
         Text { text: "Scatter"; color: "white" }
         Canvas {

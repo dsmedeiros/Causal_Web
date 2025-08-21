@@ -13,6 +13,7 @@ from typing import Any, Dict, Iterable, List, Tuple
 from datetime import datetime
 import json
 import secrets
+import yaml
 
 
 @dataclass
@@ -26,6 +27,40 @@ class TopKEntry:
     toggles: Dict[str, str]
     seed: int
     path: str
+
+
+# ---------------------------------------------------------------------------
+def write_best_config(
+    best_row: Dict[str, Any], path: str = "experiments/best_config.yaml"
+) -> str:
+    """Persist ``best_row`` details to a YAML config and return the path.
+
+    Parameters
+    ----------
+    best_row:
+        Mapping describing a run, typically from top-K summaries.
+        Must include ``groups``, ``seed`` and ``run_id`` fields and may
+        optionally include ``toggles``.
+    path:
+        Destination file path. Defaults to ``experiments/best_config.yaml``.
+
+    Returns
+    -------
+    str
+        The path that was written.
+    """
+
+    cfg = {
+        "dimensionless": best_row["groups"],
+        "toggles": best_row.get("toggles", {}),
+        "seed": best_row["seed"],
+        "notes": f"promoted from {best_row['run_id']}",
+    }
+    out_path = Path(path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(out_path, "w", encoding="utf-8") as fh:
+        yaml.safe_dump(cfg, fh, sort_keys=True)
+    return str(out_path)
 
 
 # ---------------------------------------------------------------------------
@@ -166,6 +201,7 @@ __all__ = [
     "load_top_k",
     "save_hall_of_fame",
     "load_hall_of_fame",
+    "write_best_config",
     "persist_run",
     "allocate_run_dir",
 ]

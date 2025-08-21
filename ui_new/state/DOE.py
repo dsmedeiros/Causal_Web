@@ -17,6 +17,7 @@ from experiments.artifacts import (
     load_top_k,
     persist_run,
     allocate_run_dir,
+    write_best_config,
 )
 
 
@@ -33,6 +34,7 @@ class DOEModel(QObject):
     etaChanged = Signal()
     brushesChanged = Signal()
     groupNamesChanged = Signal()
+    baselinePromoted = Signal(str)
 
     def __init__(self) -> None:
         super().__init__()
@@ -156,7 +158,15 @@ class DOEModel(QObject):
                 )
                 status.run_id = rid
                 status.path = rel_path
-            row = {"fitness": status.fitness or 0.0, **cfg, "path": status.path}
+            row = {
+                "fitness": status.fitness or 0.0,
+                "path": status.path,
+                "run_id": status.run_id or "",
+                "seed": 0,
+                "groups": cfg,
+                "toggles": {},
+                **cfg,
+            }
             rows.append(row)
             metric_keys.update(
                 k
@@ -378,24 +388,12 @@ class DOEModel(QObject):
         return groups.get("Delta_over_W0", 0.0)
 
     # ------------------------------------------------------------------
-    @Slot()
-    def promote(self) -> None:
-        """Write the best run's config to ``best_config.yaml``."""
-
-        if not self._topk:
-            return
-        import json
-        import yaml
-
-        best = self._topk[0]
-        run_path = Path("experiments") / best.get("path", "")
-        try:
-            cfg = json.loads((run_path / "config.json").read_text())
-        except Exception:
-            cfg = {k: v for k, v in best.items() if k not in {"fitness", "path"}}
-        Path("experiments").mkdir(exist_ok=True)
-        with open("experiments/best_config.yaml", "w", encoding="utf8") as fh:
-            yaml.safe_dump(cfg, fh)
+    @Slot("QVariant")
+    def promote(self, row: dict) -> None:
+        """Write ``row`` configuration to ``best_config.yaml``."""
+        if isinstance(row, dict):
+            path = write_best_config(row)
+            self.baselinePromoted.emit(path)
 
     # ------------------------------------------------------------------
     def _get_topk(self) -> List[dict]:
