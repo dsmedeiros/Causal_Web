@@ -60,12 +60,12 @@ Rectangle {
                     Text { text: invAncestry ? "A✓" : "A✗"; color: invAncestry ? "lime" : "red" }
                     Text { text: invResidual ? "R✓" : "R✗"; color: invResidual ? "lime" : "red" }
                     Text { text: invNoSignal ? "N✓" : "N✗"; color: invNoSignal ? "lime" : "red" }
-                }
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        if (path) {
+                    Button {
+                        text: "Replay"
+                        enabled: path
+                        onClicked: {
                             replayModel.load("experiments/" + path)
+                            Qt.callLater(replayModel.play)
                             if (panels && replayIndex >= 0)
                                 panels.currentIndex = replayIndex
                         }
@@ -149,18 +149,18 @@ Rectangle {
                     Text { text: (typeof gen !== "undefined" ? gen : "?") + ":"; color: "white" }
                     Text { text: fitness.toFixed(3); color: "white" }
                     Button {
+                        text: "Replay"
+                        onClicked: {
+                            replayModel.load("experiments/" + path)
+                            Qt.callLater(replayModel.play)
+                            if (panels && replayIndex >= 0)
+                                panels.currentIndex = replayIndex
+                        }
+                    }
+                    Button {
                         id: promoteBtn
                         text: "Promote"
                         onClicked: gaModel.promote(modelData)
-                    }
-                }
-                MouseArea {
-                    anchors.fill: parent
-                    anchors.rightMargin: promoteBtn.width
-                    onClicked: {
-                        replayModel.load("experiments/" + path)
-                        if (panels && replayIndex >= 0)
-                            panels.currentIndex = replayIndex
                     }
                 }
             }

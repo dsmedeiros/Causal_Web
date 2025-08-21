@@ -9,6 +9,9 @@ from PySide6.QtCore import QObject, Property, Signal, Slot
 
 from ..ipc import Client
 
+# Global client reference for module-level helpers
+client: Optional[Client] = None
+
 
 class ReplayModel(QObject):
     """Track replay progress as a fraction [0, 1]."""
@@ -53,9 +56,11 @@ class ReplayModel(QObject):
         self._set_progress(value)
 
     # ------------------------------------------------------------------
-    def set_client(self, client: Client) -> None:
+    def set_client(self, client_in: Client | None) -> None:
         """Attach a WebSocket ``client`` for sending control messages."""
-        self._client = client
+        global client
+        self._client = client_in
+        client = client_in
 
     # ------------------------------------------------------------------
     @Slot()
@@ -107,3 +112,12 @@ class ReplayModel(QObject):
                     {"ReplayControl": {"action": "load", "path": dir_path}}
                 )
             )
+
+
+# ---------------------------------------------------------------------------
+async def open_replay(run_dir: str) -> None:
+    """Load a replay from ``run_dir`` and immediately start playback."""
+    if client is None:
+        raise RuntimeError("client not set")
+    await client.send({"type": "ReplayControl", "cmd": "load", "dir": run_dir})
+    await client.send({"type": "ReplayControl", "cmd": "play"})
