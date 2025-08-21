@@ -5,7 +5,15 @@ from __future__ import annotations
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List
+import base64
 import csv
+import io
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
+from Causal_Web.engine.engine_v2.adapter import EngineAdapter
 
 from PySide6.QtCore import QObject, Property, Signal, Slot
 
@@ -102,9 +110,51 @@ class CompareModel(QObject):
                         continue
             return totals
 
-        def collect_frames(path: Path) -> List[str]:
-            frames = sorted((path / "frames").glob("*.png"))
-            return [str(f) for f in frames]
+        def render_frames(adapter: EngineAdapter) -> List[str]:
+            """Render replay frames to data URIs using matplotlib."""
+
+            if adapter._graph_static is None:  # defensive
+                return []
+
+            positions = {
+                i: tuple(p)
+                for i, p in enumerate(
+                    adapter._graph_static.get("node_positions", [])
+                )
+            }
+            edges = [tuple(e) for e in adapter._graph_static.get("edges", [])]
+
+            fig, ax = plt.subplots()
+            ax.set_aspect("equal")
+            ax.set_axis_off()
+
+            def draw() -> str:
+                ax.clear()
+                ax.set_aspect("equal")
+                ax.set_axis_off()
+                xs = [p[0] for _, p in sorted(positions.items())]
+                ys = [p[1] for _, p in sorted(positions.items())]
+                ax.scatter(xs, ys, c="white", s=10)
+                for a, b in edges:
+                    x0, y0 = positions[a]
+                    x1, y1 = positions[b]
+                    ax.plot([x0, x1], [y0, y1], color="gray", linewidth=0.5)
+                fig.canvas.draw()
+                buf = io.BytesIO()
+                fig.savefig(buf, format="png")
+                buf.seek(0)
+                b64 = base64.b64encode(buf.getvalue()).decode("ascii")
+                return "data:image/png;base64," + b64
+
+            frames = [draw()]
+            for delta in adapter._replay_frames:
+                for nid, pos in delta.get("node_positions", {}).items():
+                    positions[int(nid)] = tuple(pos)
+                edges.extend(tuple(e) for e in delta.get("edges", []))
+                frames.append(draw())
+
+            plt.close(fig)
+            return frames
 
         path_a = Path(run_a)
         path_b = Path(run_b)
@@ -116,8 +166,12 @@ class CompareModel(QObject):
             delta[k] = metrics_b.get(k, 0.0) - metrics_a.get(k, 0.0)
         self._metric_delta = delta
 
-        self._frames_a = collect_frames(path_a)
-        self._frames_b = collect_frames(path_b)
+        adapter_a = EngineAdapter()
+        adapter_b = EngineAdapter()
+        adapter_a.load_replay(path_a)
+        adapter_b.load_replay(path_b)
+        self._frames_a = render_frames(adapter_a)
+        self._frames_b = render_frames(adapter_b)
         self._index = 0
 
         self.metricDeltaChanged.emit()

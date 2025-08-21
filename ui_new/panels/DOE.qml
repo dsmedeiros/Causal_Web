@@ -2,8 +2,11 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 
 Rectangle {
+    id: root
     property var panels
     property int replayIndex: -1
+    property int compareIndex: -1
+    property var compareSelection: []
     color: "#202020"
     anchors.fill: parent
 
@@ -79,6 +82,21 @@ Rectangle {
                 height: 24
                 Row {
                     spacing: 4
+                    CheckBox {
+                        checked: root.compareSelection.indexOf("experiments/" + path) !== -1
+                        onToggled: {
+                            var p = "experiments/" + path
+                            var idx = root.compareSelection.indexOf(p)
+                            if (checked) {
+                                if (idx === -1 && root.compareSelection.length < 2)
+                                    root.compareSelection.push(p)
+                                else
+                                    checked = false
+                            } else if (idx >= 0) {
+                                root.compareSelection.splice(idx, 1)
+                            }
+                        }
+                    }
                     Text { text: (index + 1) + ":"; color: "white" }
                     Text { text: fitness.toFixed(3); color: "white" }
                     Button {
@@ -96,6 +114,15 @@ Rectangle {
                         onClicked: doeModel.promote(modelData)
                     }
                 }
+            }
+        }
+        Button {
+            text: "Compare"
+            enabled: root.compareSelection.length === 2
+            onClicked: {
+                compareModel.loadRuns(root.compareSelection[0], root.compareSelection[1])
+                if (panels && compareIndex >= 0)
+                    panels.currentIndex = compareIndex
             }
         }
         Text { text: "Scatter"; color: "white" }

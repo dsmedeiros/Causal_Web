@@ -167,8 +167,8 @@ Window {
             LogExplorer { anchors.fill: parent }
             Inspector { anchors.fill: parent }
             Validation { anchors.fill: parent }
-            DOE { anchors.fill: parent; panels: panels; replayIndex: 3 }
-            GA { anchors.fill: parent; panels: panels; replayIndex: 3 }
+            DOE { anchors.fill: parent; panels: panels; replayIndex: 3; compareIndex: 9 }
+            GA { anchors.fill: parent; panels: panels; replayIndex: 3; compareIndex: 9 }
             Compare { anchors.fill: parent }
         }
     }

@@ -13,4 +13,4 @@ The right-hand dock hosts:
 - **Compare**
 
 ## Replay
-Select a run from the DOE or GA tables to open a replay. Scrub the timeline and compare A/B runs side by side using the Compare panel.
+Select a run from the DOE or GA tables to open a replay. Select two rows and press **Compare** to view synchronized playback and metric deltas side by side.
