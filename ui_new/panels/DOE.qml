@@ -78,18 +78,18 @@ Rectangle {
                     Text { text: (index + 1) + ":"; color: "white" }
                     Text { text: fitness.toFixed(3); color: "white" }
                     Button {
+                        text: "Replay"
+                        onClicked: {
+                            replayModel.load("experiments/" + path)
+                            Qt.callLater(replayModel.play)
+                            if (panels && replayIndex >= 0)
+                                panels.currentIndex = replayIndex
+                        }
+                    }
+                    Button {
                         id: promoteBtn
                         text: "Promote"
                         onClicked: doeModel.promote(modelData)
-                    }
-                }
-                MouseArea {
-                    anchors.fill: parent
-                    anchors.rightMargin: promoteBtn.width
-                    onClicked: {
-                        replayModel.load("experiments/" + path)
-                        if (panels && replayIndex >= 0)
-                            panels.currentIndex = replayIndex
                     }
                 }
             }
