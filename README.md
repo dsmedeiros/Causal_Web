@@ -477,4 +477,4 @@ Run style checks with `pre-commit`:
 pre-commit run --files <path>
 ```
 
-Unit tests live under `tests/` and can be run with `pytest`. Coding guidelines and packaging instructions are documented in [AGENTS.md](AGENTS.md) and [docs/developer_guide.md](docs/developer_guide.md).
+Unit tests live under `tests/` and can be run with `pytest`. Golden replay logs in `tests/goldens/` span a few hundred frames from production runs and are exercised via `pytest tests/test_replay_golden.py` with unique residual profiles per log. The helper functions `Causal_Web.engine.replay.build_engine` and `replay_from_log` load either run directories or trimmed delta logs for these regressions. New golden logs can be recorded from engine runs using `tools/record_golden.py`. Coding guidelines and packaging instructions are documented in [AGENTS.md](AGENTS.md) and [docs/developer_guide.md](docs/developer_guide.md).
