@@ -1,20 +1,31 @@
 # Developer Guide
 
-This project follows the Single Responsibility Principle and decomposes complex tasks into small service classes. The event/PQ kernel described in [theory.md](../theory.md) §11 is now the canonical execution model.
+This project follows the Single Responsibility Principle and decomposes complex tasks into small modules. The event/PQ kernel described in [theory.md](../theory.md) §11 is the canonical execution model.
 
-Key services include:
+Notable modules:
 
-- **NodeInitializationService** – sets up node instances with runtime state and metadata.
-- **GraphLoadService** – loads graphs from JSON files.
-- **GraphSerializationService** – writes graph snapshots to disk.
-- **NarrativeGeneratorService** – produces textual explanations from logs.
-- **ConnectionDisplayService** – visualises existing links in the GUI.
-- **GlobalDiagnosticsService** – exports run metrics.
-- **SIPRecombinationService** – manages recombination-based spawning.
+- `engine/engine_v2/adapter.py`
+- `engine/engine_v2/scheduler.py`
+- `engine/engine_v2/lccm/`
+- `engine/engine_v2/rho_delay.py`
+- `engine/engine_v2/epairs.py`
+- `engine/stream/server.py`
+- `ui_new/ipc/Client.py`
+- `ui_new/graph/GraphView.py`
+- `experiments/runner.py`
+- `experiments/ga.py`
+- `experiments/artifacts.py`
+- etc.
 
-Logging helpers such as `LoggingMixin`, `OutputDirMixin` and `PathLoggingMixin` provide common functionality across the engine. Services reside under `Causal_Web/engine/services/` or within the GUI package.
+## Dev loop
 
-For coding conventions and testing instructions see [AGENTS.md](../AGENTS.md). Run `pytest` to execute the unit tests and format Python files with `black` before submitting changes.
+```bash
+pre-commit install
+ruff . && black . && mypy .
+pytest -q
+cw run --no-gui
+cw run
+```
 
 ## Ray Cluster
 
