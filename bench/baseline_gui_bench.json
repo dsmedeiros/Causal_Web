@@ -1,0 +1,1 @@
+{"duration": 5.0, "fps": 60.0, "nodes": 100, "aa": true, "labels": true, "target_fps": 60.0, "machine": {"platform": "Linux-6.12.13-x86_64-with-glibc2.39", "python": "3.12.10", "cpu": "x86_64", "cores": 5, "memory_gb": 9.93}}
