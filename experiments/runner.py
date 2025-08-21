@@ -9,6 +9,7 @@ and metrics are logged.
 from __future__ import annotations
 
 import argparse
+import json
 import pathlib
 import logging
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
@@ -21,6 +22,8 @@ from config.normalizer import Normalizer
 from invariants import checks
 from telemetry.metrics import MetricsLogger
 from .gates import run_gates
+from .index import RunIndex, run_key
+from .artifacts import persist_run, allocate_run_dir
 
 
 @dataclass
@@ -155,6 +158,8 @@ def run(
     out_dir: pathlib.Path,
     parallel: int = 1,
     use_processes: bool = False,
+    *,
+    force: bool = False,
 ) -> None:
     """Execute a design-of-experiments sweep.
 
@@ -169,6 +174,8 @@ def run(
         If ``True`` and ``parallel > 1``, a ``ProcessPoolExecutor`` is used
         instead of a thread pool. This helps when gate code is Python-heavy
         while preserving determinism via per-sample seeds.
+    force:
+        When ``True`` evaluate configurations even if present in the run index.
 
     Notes
     -----
@@ -187,6 +194,7 @@ def run(
     logger = MetricsLogger(out_dir)
     normalizer = Normalizer()
     base = _load_base_config(base_path)
+    index = RunIndex()
 
     results: List[
         Tuple[
@@ -199,18 +207,76 @@ def run(
         ]
     ] = []
 
-    if parallel > 1:
+    pending: List[Tuple[int, Dict[str, float], int, str]] = []
+    for i, g in enumerate(samples):
+        seed = _mix(cfg.seed, i)
+        key = run_key({"groups": g, "toggles": {}, "seed": seed, "gates": cfg.gates})
+        info = index.get(key)
+        if info is not None and not force:
+            run_dir = index.runs_root / info
+            try:
+                raw = json.loads((run_dir / "config.json").read_text())
+            except Exception:
+                raw = normalizer.to_raw(base, g)
+            try:
+                res = json.loads((run_dir / "result.json").read_text())
+            except Exception:
+                res = {"metrics": {}, "invariants": {}}
+            results.append(
+                (
+                    i,
+                    g,
+                    raw,
+                    seed,
+                    res.get("metrics", {}),
+                    res.get("invariants", {}),
+                )
+            )
+            continue
+        pending.append((i, g, seed, key))
+
+    if parallel > 1 and pending:
         executor_cls = ProcessPoolExecutor if use_processes else ThreadPoolExecutor
         with executor_cls(max_workers=parallel) as ex:
             futs = [
                 ex.submit(_process_sample, i, g, cfg, normalizer, base, out_dir)
-                for i, g in enumerate(samples)
+                for i, g, _, _ in pending
             ]
-            for f in futs:
-                results.append(f.result())
+            for (i, g, seed, key), fut in zip(pending, futs):
+                result = fut.result()
+                _, _, raw, _, gm, inv = result
+                rid, abs_path, rel = allocate_run_dir()
+                manifest = {
+                    "run_id": rid,
+                    "run_key": key,
+                    "groups": g,
+                    "toggles": {},
+                    "seed": seed,
+                    "gates": cfg.gates,
+                }
+                persist_run(
+                    raw, {"metrics": gm, "invariants": inv}, abs_path, manifest=manifest
+                )
+                index.mark(key, rel)
+                results.append((i, g, raw, seed, gm, inv))
     else:
-        for i, g in enumerate(samples):
-            results.append(_process_sample(i, g, cfg, normalizer, base, out_dir))
+        for i, g, seed, key in pending:
+            res = _process_sample(i, g, cfg, normalizer, base, out_dir)
+            _, _, raw, _, gm, inv = res
+            rid, abs_path, rel = allocate_run_dir()
+            manifest = {
+                "run_id": rid,
+                "run_key": key,
+                "groups": g,
+                "toggles": {},
+                "seed": seed,
+                "gates": cfg.gates,
+            }
+            persist_run(
+                raw, {"metrics": gm, "invariants": inv}, abs_path, manifest=manifest
+            )
+            index.mark(key, rel)
+            results.append((i, g, raw, seed, gm, inv))
 
     for i, groups, raw, seed, gm, inv in sorted(results, key=lambda x: x[0]):
         logger.log(i, groups, raw, seed, gm, inv)
@@ -266,8 +332,20 @@ def main(argv: Iterable[str] | None = None) -> None:
         action="store_true",
         help="Use a process pool instead of threads for parallel execution",
     )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Re-evaluate configurations even if present in the run index",
+    )
     args = parser.parse_args(list(argv) if argv is not None else None)
-    run(args.exp, args.base, args.out, args.parallel, args.processes)
+    run(
+        args.exp,
+        args.base,
+        args.out,
+        args.parallel,
+        args.processes,
+        force=args.force,
+    )
 
 
 if __name__ == "__main__":  # pragma: no cover

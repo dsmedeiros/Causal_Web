@@ -31,7 +31,9 @@ class RunStatus:
 
     ``run_id`` and ``path`` are populated once a run has been persisted to
     disk.  ``path`` is stored relative to the ``experiments`` directory so it
-    can be embedded directly into Top-K artifacts.
+    can be embedded directly into Top-K artifacts.  ``force`` marks runs that
+    should execute even when a matching configuration already exists in the
+    run index.
     """
 
     state: str = "queued"
@@ -40,6 +42,7 @@ class RunStatus:
     error: Optional[str] = None
     run_id: Optional[str] = None
     path: Optional[str] = None
+    force: bool = False
 
 
 class DOEQueueManager:
@@ -88,7 +91,13 @@ class DOEQueueManager:
 
     # ------------------------------------------------------------------
     # queue construction
-    def enqueue_lhs(self, groups: Dict[str, Tuple[float, float]], samples: int) -> None:
+    def enqueue_lhs(
+        self,
+        groups: Dict[str, Tuple[float, float]],
+        samples: int,
+        *,
+        force: bool = False,
+    ) -> None:
         """Enqueue samples via Latin Hypercube sampling.
 
         Parameters
@@ -97,6 +106,8 @@ class DOEQueueManager:
             Mapping of group names to ``(low, high)`` ranges.
         samples:
             Number of samples to generate.
+        force:
+            When ``True`` enqueue runs even if already present in the index.
         """
 
         names = list(groups.keys())
@@ -106,10 +117,26 @@ class DOEQueueManager:
         scaled = lows[None, :] + unit * (highs - lows)[None, :]
         for i in range(samples):
             cfg = dict(zip(names, scaled[i]))
-            self._runs.append((cfg, RunStatus()))
+            raw = self._normalizer.to_raw(self.base, cfg)
+            seed = int(raw.get("seed", self.seed))
+            key = run_key(
+                {
+                    "groups": cfg,
+                    "toggles": {},
+                    "seed": seed,
+                    "gates": self.gates,
+                }
+            )
+            if not force and key in self._index:
+                continue
+            self._runs.append((cfg, RunStatus(force=force)))
 
     def enqueue_grid(
-        self, groups: Dict[str, Tuple[float, float]], steps: Dict[str, int]
+        self,
+        groups: Dict[str, Tuple[float, float]],
+        steps: Dict[str, int],
+        *,
+        force: bool = False,
     ) -> None:
         """Enqueue a uniform grid sweep.
 
@@ -119,6 +146,8 @@ class DOEQueueManager:
             Mapping of group names to ``(low, high)`` ranges.
         steps:
             Number of steps along each group dimension.
+        force:
+            When ``True`` enqueue runs even if already present in the index.
         """
 
         names = list(groups.keys())
@@ -129,7 +158,19 @@ class DOEQueueManager:
             axes.append(np.linspace(low, high, cnt))
         for combo in itertools.product(*axes):
             cfg = dict(zip(names, combo))
-            self._runs.append((cfg, RunStatus()))
+            raw = self._normalizer.to_raw(self.base, cfg)
+            seed = int(raw.get("seed", self.seed))
+            key = run_key(
+                {
+                    "groups": cfg,
+                    "toggles": {},
+                    "seed": seed,
+                    "gates": self.gates,
+                }
+            )
+            if not force and key in self._index:
+                continue
+            self._runs.append((cfg, RunStatus(force=force)))
 
     # ------------------------------------------------------------------
     # execution
@@ -156,18 +197,22 @@ class DOEQueueManager:
                     "gates": self.gates,
                 }
                 key = run_key(cfg)
-                info = self._index.get(key)
+                info = None if status.force else self._index.get(key)
                 if info is not None:
                     status.state = "finished"
-                    run_dir = Path("experiments") / info["path"]
+                    run_dir = self._index.runs_root / info
                     try:
                         res = json.loads((run_dir / "result.json").read_text())
                     except Exception:
                         res = {}
                     status.invariants = res.get("invariants")
                     status.fitness = res.get("fitness")
-                    status.run_id = info["run_id"]
-                    status.path = info["path"]
+                    try:
+                        manifest = json.loads((run_dir / "manifest.json").read_text())
+                        status.run_id = manifest.get("run_id")
+                    except Exception:
+                        status.run_id = None
+                    status.path = str(Path("runs") / info)
                     return status
                 status.state = "running"
                 try:
@@ -193,7 +238,7 @@ class DOEQueueManager:
                         "fitness": status.fitness,
                     }
                     persist_run(raw, res, abs_path, manifest=manifest)
-                    self._index.mark(key, rid, rel_path)
+                    self._index.mark(key, rel_path)
                     status.run_id = rid
                     status.path = rel_path
                 except Exception as exc:  # pragma: no cover - pass through
@@ -225,18 +270,22 @@ class DOEQueueManager:
                     "gates": self.gates,
                 }
                 key = run_key(cfg)
-                info = self._index.get(key)
+                info = None if status.force else self._index.get(key)
                 if info is not None:
                     status.state = "finished"
-                    run_dir = Path("experiments") / info["path"]
+                    run_dir = self._index.runs_root / info
                     try:
                         res = json.loads((run_dir / "result.json").read_text())
                     except Exception:
                         res = {}
                     status.invariants = res.get("invariants")
                     status.fitness = res.get("fitness")
-                    status.run_id = info["run_id"]
-                    status.path = info["path"]
+                    try:
+                        manifest = json.loads((run_dir / "manifest.json").read_text())
+                        status.run_id = manifest.get("run_id")
+                    except Exception:
+                        status.run_id = None
+                    status.path = str(Path("runs") / info)
                     return status
                 status.state = "running"
                 await self._client.send(

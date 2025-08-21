@@ -8,7 +8,7 @@ provided callback which can reuse the same gate runner as the DOE queue
 manager.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import (
     Any,
@@ -21,6 +21,8 @@ from typing import (
     Tuple,
     Union,
 )
+import argparse
+import importlib.util
 import asyncio
 import random
 import json
@@ -41,6 +43,7 @@ from .artifacts import (
     persist_run,
     allocate_run_dir,
 )
+from .runner import _load_base_config
 
 
 @dataclass
@@ -97,6 +100,8 @@ class GeneticAlgorithm:
     run_index:
         Optional :class:`RunIndex` used to track completed runs and avoid
         duplicate evaluations.
+    force:
+        When ``True`` re-evaluate genomes even if present in the run index.
     """
 
     def __init__(
@@ -117,6 +122,7 @@ class GeneticAlgorithm:
         client: Any | None = None,
         loop: asyncio.AbstractEventLoop | None = None,
         run_index: RunIndex | None = None,
+        force: bool = False,
     ) -> None:
         self.base = dict(base)
         self.group_ranges = dict(group_ranges)
@@ -139,6 +145,7 @@ class GeneticAlgorithm:
         self._pending: Dict[int, Tuple[Genome, asyncio.Future, int]] = {}
         self._next_id = 0
         self._index = run_index or RunIndex()
+        self._force = force
         self._archive: List[Genome] = []
         self._init_population()
 
@@ -285,17 +292,21 @@ class GeneticAlgorithm:
             "gates": self.gates,
         }
         key = run_key(cfg)
-        info = self._index.get(key)
+        info = None if self._force else self._index.get(key)
         if info is not None:
-            run_dir = Path("experiments") / info["path"]
+            run_dir = self._index.runs_root / info
             try:
                 res = json.loads((run_dir / "result.json").read_text())
             except Exception:
                 res = {}
             genome.fitness = res.get("fitness")
             genome.invariants = res.get("invariants")
-            genome.run_id = info.get("run_id")
-            genome.run_path = info.get("path")
+            try:
+                manifest = json.loads((run_dir / "manifest.json").read_text())
+                genome.run_id = manifest.get("run_id")
+            except Exception:
+                genome.run_id = None
+            genome.run_path = str(Path("runs") / info)
             return genome.fitness
 
         raw = self._normalizer.to_raw(self.base, genome.groups)
@@ -339,7 +350,7 @@ class GeneticAlgorithm:
                 "gates": self.gates,
             }
             persist_run(raw, res, abs_path, manifest=manifest)
-            self._index.mark(key, rid, rel_path)
+            self._index.mark(key, rel_path)
             genome.run_id = rid
             genome.run_path = rel_path
         return genome.fitness
@@ -702,3 +713,104 @@ class GeneticAlgorithm:
                 )
 
         return ga
+
+
+@dataclass
+class GAConfig:
+    """Configuration for command-line GA runs."""
+
+    group_ranges: Dict[str, Tuple[float, float]]
+    toggles: Dict[str, Sequence[int]] = field(default_factory=dict)
+    gates: List[int] = field(default_factory=list)
+    population_size: int = 10
+    generations: int = 1
+    elite: int = 1
+    mutation_sigma: float = 0.1
+    tournament_k: int = 2
+    seed: int = 0
+
+    @classmethod
+    def from_mapping(cls, data: Dict[str, Any]) -> "GAConfig":
+        required = {"groups"}
+        missing = required - data.keys()
+        if missing:
+            raise KeyError(
+                f"GA configuration missing keys: {', '.join(sorted(missing))}"
+            )
+        group_ranges = {
+            k: (float(v[0]), float(v[1])) for k, v in data["groups"].items()
+        }
+        toggles = {k: [int(x) for x in v] for k, v in data.get("toggles", {}).items()}
+        return cls(
+            group_ranges,
+            toggles,
+            list(data.get("gates", [])),
+            int(data.get("population_size", 10)),
+            int(data.get("generations", 1)),
+            int(data.get("elite", 1)),
+            float(data.get("mutation_sigma", 0.1)),
+            int(data.get("tournament_k", 2)),
+            int(data.get("seed", 0)),
+        )
+
+
+def _load_ga_config(path: Path) -> GAConfig:
+    """Return a :class:`GAConfig` loaded from ``path``."""
+
+    if path.suffix in {".yaml", ".yml"}:
+        import yaml
+
+        data = yaml.safe_load(path.read_text())
+    elif path.suffix == ".toml":
+        import tomllib
+
+        data = tomllib.loads(path.read_text())
+    else:
+        raise ValueError(f"Unsupported config extension: {path.suffix}")
+    return GAConfig.from_mapping(data)
+
+
+def main(argv: Iterable[str] | None = None) -> None:
+    """Run a GA optimisation from configuration files."""
+
+    parser = argparse.ArgumentParser(description="Run GA experiments")
+    parser.add_argument("--exp", type=Path, required=True)
+    parser.add_argument("--base", type=Path, required=True)
+    parser.add_argument("--fitness", type=Path, required=True)
+    parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Re-evaluate genomes even if present in the run index",
+    )
+    args = parser.parse_args(list(argv) if argv is not None else None)
+
+    cfg = _load_ga_config(args.exp)
+    base = _load_base_config(args.base)
+    spec = importlib.util.spec_from_file_location("ga_fitness", args.fitness)
+    mod = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(mod)
+    fitness_fn = getattr(mod, "fitness")
+
+    ga = GeneticAlgorithm(
+        base,
+        cfg.group_ranges,
+        cfg.toggles,
+        cfg.gates,
+        fitness_fn,
+        population_size=cfg.population_size,
+        elite=cfg.elite,
+        mutation_sigma=cfg.mutation_sigma,
+        tournament_k=cfg.tournament_k,
+        seed=cfg.seed,
+        run_index=RunIndex(),
+        force=args.force,
+    )
+    ga.run(cfg.generations)
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    ga.promote_best(args.out)
+
+
+if __name__ == "__main__":  # pragma: no cover
+    main()
