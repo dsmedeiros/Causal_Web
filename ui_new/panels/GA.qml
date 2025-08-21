@@ -7,6 +7,13 @@ Rectangle {
     color: "#202020"
     anchors.fill: parent
 
+    Connections {
+        target: gaModel
+        function onBaselinePromoted(path) {
+            experimentModel.status = "Baseline saved to " + path
+        }
+    }
+
     Column {
         anchors.margins: 8
         anchors.fill: parent
@@ -141,16 +148,22 @@ Rectangle {
                     spacing: 4
                     Text { text: (typeof gen !== "undefined" ? gen : "?") + ":"; color: "white" }
                     Text { text: fitness.toFixed(3); color: "white" }
+                    Button {
+                        id: promoteBtn
+                        text: "Promote"
+                        onClicked: gaModel.promote(modelData)
+                    }
                 }
                 MouseArea {
                     anchors.fill: parent
+                    anchors.rightMargin: promoteBtn.width
                     onClicked: {
                         replayModel.load("experiments/" + path)
                         if (panels && replayIndex >= 0)
                             panels.currentIndex = replayIndex
-                        }
                     }
                 }
+            }
         }
     }
 }

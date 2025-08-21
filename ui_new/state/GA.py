@@ -9,7 +9,7 @@ import asyncio
 from PySide6.QtCore import QObject, Property, Signal, Slot
 
 from experiments import GeneticAlgorithm
-from experiments.artifacts import load_hall_of_fame
+from experiments.artifacts import load_hall_of_fame, write_best_config
 from ..ipc import Client
 
 
@@ -21,6 +21,7 @@ class GAModel(QObject):
     paretoChanged = Signal()
     hallOfFameChanged = Signal()
     runningChanged = Signal()
+    baselinePromoted = Signal(str)
 
     def __init__(self) -> None:
         super().__init__()
@@ -121,8 +122,9 @@ class GAModel(QObject):
     @Slot()
     def exportBest(self) -> None:
         """Write the best genome to ``best_config.yaml``."""
-
-        self._ga.promote_best("experiments/best_config.yaml")
+        path = "experiments/best_config.yaml"
+        self._ga.promote_best(path)
+        self.baselinePromoted.emit(path)
 
     @Slot()
     def promoteBaseline(self) -> None:
@@ -136,13 +138,23 @@ class GAModel(QObject):
         )
         raw = self._ga._normalizer.to_raw(self._ga.base, best.groups)
         self._ga.base.update(raw)
-        self._ga.promote_best("experiments/best_config.yaml")
+        path = "experiments/best_config.yaml"
+        self._ga.promote_best(path)
+        self.baselinePromoted.emit(path)
 
     @Slot(int)
     def promoteIndex(self, idx: int) -> None:  # noqa: N802 (Qt slot naming)
         """Promote the ``idx``-th Pareto genome."""
+        path = "experiments/best_config.yaml"
+        self._ga.promote_pareto(idx, path)
+        self.baselinePromoted.emit(path)
 
-        self._ga.promote_pareto(idx, "experiments/best_config.yaml")
+    @Slot("QVariant")
+    def promote(self, row: dict) -> None:
+        """Persist ``row`` to ``best_config.yaml``."""
+        if isinstance(row, dict):
+            path = write_best_config(row)
+            self.baselinePromoted.emit(path)
 
     def set_client(self, client: Client, loop: asyncio.AbstractEventLoop) -> None:
         """Attach a WebSocket ``client`` and event ``loop`` for engine integration."""
