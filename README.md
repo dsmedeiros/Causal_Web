@@ -188,12 +188,26 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 
 ## Quick Start
 ```bash
-pip install -r requirements.txt
-cw run             # GUI
-cw run --no-gui    # headless
-cw sweep --lhs ... # DOE
-cw ga --config ... # GA
+pip install -r requirements-gui.txt
+pyinstaller cw_gui.spec   # build bundle
+./dist/cw_gui/cw_gui      # run GUI bundle
+cw run --no-gui           # headless
+cw sweep --lhs ...        # DOE
+cw ga --config ...        # GA
 ```
+
+### cw gui bundles
+
+Use the provided `cw_gui.spec` with PyInstaller to create a standalone GUI
+application:
+
+```bash
+pip install -r requirements-gui.txt
+pyinstaller cw_gui.spec
+```
+
+The bundle will be written to `dist/cw_gui/` and contains an executable that
+launches the engine and Qt Quick interface.
 
 ## Troubleshooting
 - **Disconnected** → token mismatch or single-client limit.
