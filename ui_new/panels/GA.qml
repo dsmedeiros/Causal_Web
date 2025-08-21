@@ -13,8 +13,11 @@ Rectangle {
         target: gaModel
         function onBaselinePromoted(path) {
             experimentModel.status = "Baseline saved to " + path
+            toast.show("Baseline saved to " + path)
         }
     }
+
+    Toast { id: toast }
 
     Column {
         anchors.margins: 8
@@ -50,6 +53,7 @@ Rectangle {
             Button { text: "Resume"; onClicked: gaModel.resume() }
             Button { text: "Promote Baseline"; onClicked: gaModel.promoteBaseline() }
             Button { text: "Export Best"; onClicked: gaModel.exportBest() }
+            Button { text: "Run baseline"; onClicked: experimentModel.runBaseline() }
         }
         ListView {
             width: parent.width

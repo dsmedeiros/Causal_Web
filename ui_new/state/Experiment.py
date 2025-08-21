@@ -3,10 +3,13 @@ from __future__ import annotations
 """Experiment model exposed to QML panels."""
 
 import asyncio
+from pathlib import Path
 from typing import Optional
 
+import yaml
 from PySide6.QtCore import QObject, Property, Signal, Slot
 
+from config.normalizer import Normalizer
 from ..ipc import Client
 
 
@@ -102,6 +105,39 @@ class ExperimentModel(QObject):
                     {"ExperimentControl": {"action": "set_rate", "rate": value}}
                 )
             )
+
+    # ------------------------------------------------------------------
+    @Slot()
+    def runBaseline(self) -> None:
+        """Execute a run using ``experiments/best_config.yaml``."""
+
+        if self._client is None:
+            return
+        path = Path("experiments/best_config.yaml")
+        if not path.exists():
+            self._set_status(f"Baseline not found: {path}")
+            return
+        try:
+            data = yaml.safe_load(path.read_text()) or {}
+        except Exception as exc:
+            self._set_status(f"Failed to load baseline: {exc}")
+            return
+        groups = data.get("dimensionless", {})
+        toggles = data.get("toggles", {})
+        seed = int(data.get("seed", 0))
+        base = {
+            "W0": 1.0,
+            "alpha_leak": 1.0,
+            "lambda_decay": 1.0,
+            "b": 1.0,
+            "prob": 0.5,
+        }
+        raw = Normalizer().to_raw(base, groups)
+        raw.update(toggles)
+        raw["seed"] = seed
+        asyncio.create_task(
+            self._client.send({"ExperimentControl": {"action": "run", "config": raw}})
+        )
 
     # ------------------------------------------------------------------
     def _get_rate(self) -> float:
