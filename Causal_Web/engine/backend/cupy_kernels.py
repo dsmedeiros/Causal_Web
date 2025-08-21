@@ -1,8 +1,9 @@
 """CUDA kernels for heavy per-edge operations.
 
 The functions in this module offload dense complex-number operations to the
-GPU using `cupy`.  If `cupy` is not installed or a CUDA device is not
-available, the implementations transparently fall back to NumPy.
+GPU using `cupy` when ``Config.cupy_kernels`` is enabled. If `cupy` is not
+installed or a CUDA device is unavailable, the implementations transparently
+fall back to NumPy.
 """
 
 from __future__ import annotations
@@ -44,7 +45,7 @@ def complex_weighted_sum(phases: np.ndarray, weights: np.ndarray) -> np.ndarray:
     if phases.shape != weights.shape:
         raise ValueError("phase and weight arrays must share a shape")
 
-    if cp is None:
+    if cp is None or not Config.cupy_kernels:
         return phases * weights
 
     c_phases = _to_device(phases)
@@ -56,4 +57,4 @@ def complex_weighted_sum(phases: np.ndarray, weights: np.ndarray) -> np.ndarray:
 def is_available() -> bool:
     """Return ``True`` when CuPy is selected and available."""
 
-    return cp is not None and Config.backend == "cupy"
+    return cp is not None and Config.backend == "cupy" and Config.cupy_kernels

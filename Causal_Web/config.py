@@ -52,6 +52,10 @@ class Config:
         Max MPS bond dimension used for tensor chain compression.
     backend:
         Compute backend to use: ``"cpu"`` (default) or ``"cupy"``.
+    cupy_kernels:
+        When ``True`` enables optional vectorised kernels backed by CuPy.
+        Controlled by the ``CW_USE_CUPY`` environment variable and disabled by
+        default.
     engine_mode:
         Selects the simulation engine via :class:`EngineMode`. ``TICK`` refers
         to the legacy engine while ``V2`` enables the strict-local core.
@@ -144,6 +148,12 @@ class Config:
     hawking_delta_e = 1.0  # Energy quantum for horizon emissions
     #: Compute backend; ``"cpu"`` or ``"cupy"``
     backend = "cpu"
+    #: Enable optional CuPy kernels for heavy sweeps
+    cupy_kernels = os.getenv("CW_USE_CUPY", "false").lower() in {
+        "1",
+        "true",
+        "yes",
+    }
 
     # Split-step quantum walk configuration
     qwalk = {"enabled": False, "thetas": {"theta1": 0.35, "theta2": 0.2}}
