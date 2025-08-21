@@ -11,8 +11,11 @@ Rectangle {
         target: doeModel
         function onBaselinePromoted(path) {
             experimentModel.status = "Baseline saved to " + path
+            toast.show("Baseline saved to " + path)
         }
     }
+
+    Toast { id: toast }
 
     Column {
         anchors.margins: 8
@@ -60,6 +63,7 @@ Rectangle {
             }
             Button { text: "Stop"; onClicked: doeModel.stop() }
             Button { text: "Resume"; onClicked: doeModel.resume() }
+            Button { text: "Run baseline"; onClicked: experimentModel.runBaseline() }
         }
 
         ProgressBar { width: parent.width; value: doeModel.progress }
