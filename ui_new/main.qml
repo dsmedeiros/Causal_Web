@@ -173,6 +173,7 @@ Window {
             TabButton { text: "Meters" }
             TabButton { text: "Experiment" }
             TabButton { text: "Replay" }
+            TabButton { text: "Results" }
             TabButton { text: "Logs" }
             TabButton { text: "Inspector" }
             TabButton { text: "Validation" }
@@ -194,11 +195,12 @@ Window {
             Meters { anchors.fill: parent }
             Experiment { anchors.fill: parent; graphView: graphView }
             Replay { anchors.fill: parent }
+            Results { anchors.fill: parent }
             LogExplorer { anchors.fill: parent }
             Inspector { anchors.fill: parent }
             Validation { anchors.fill: parent }
-            DOE { anchors.fill: parent; panels: panels; replayIndex: 3; compareIndex: 10 }
-            GA { anchors.fill: parent; panels: panels; replayIndex: 3; compareIndex: 10 }
+            DOE { anchors.fill: parent; panels: panels; replayIndex: 3; compareIndex: 11 }
+            GA { anchors.fill: parent; panels: panels; replayIndex: 3; compareIndex: 11 }
             MCTS { anchors.fill: parent; panels: panels; replayIndex: 3 }
             Compare { anchors.fill: parent }
         }

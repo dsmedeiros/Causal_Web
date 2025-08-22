@@ -176,6 +176,8 @@ via a Monte-Carlo path sampler over the graph's causal structure.
   - ``hall_of_fame.json`` archives per-generation GA champions.
   - ``best_config.yaml`` captures the promoted configuration for quick reuse.
   - run directories under ``experiments/runs/<date>/<id>/`` hold per-run ``config.json``, ``result.json`` and ``delta_log.jsonl`` for replay.
+- a lightweight SQLite results registry at ``experiments/results.db`` tracks run metadata and MCTS statistics (nodes expanded, promotions, bins, frontier and parameters) for fast ad-hoc queries.
+- a "Results" panel surfaces these runs with optimizer, promotion-rate and proxy↔full correlation filters and supports click-to-replay.
 - GA evaluation can dispatch genomes to the engine via IPC, with engine-side handling of ``ExperimentControl`` messages for ``run`` requests.
 - GA panel evaluations now use the shared IPC loop so genomes are executed on the engine during interactive runs.
 - GA runs can be checkpointed and later resumed from disk—including any in-flight evaluations—to support reproducible interrupted searches.

@@ -269,6 +269,7 @@ class MainService:
             GAModel,
             MCTSModel,
             CompareModel,
+            ResultsModel,
         )
         from ui_new.graph import GraphView  # noqa: F401  # register QML module
 
@@ -284,6 +285,7 @@ class MainService:
         ga_model = GAModel()
         mcts_model = MCTSModel()
         compare = CompareModel()
+        results = ResultsModel()
         ctx = engine.rootContext()
         ctx.setContextProperty("telemetryModel", telemetry)
         ctx.setContextProperty("metersModel", meters)
@@ -295,6 +297,7 @@ class MainService:
         ctx.setContextProperty("gaModel", ga_model)
         ctx.setContextProperty("mctsModel", mcts_model)
         ctx.setContextProperty("compareModel", compare)
+        ctx.setContextProperty("resultsModel", results)
         qml_path = os.path.join(os.path.dirname(__file__), "..", "ui_new", "main.qml")
         engine.load(qml_path)
         if not engine.rootObjects():
