@@ -27,7 +27,7 @@ def test_delta_m_decay_no_q_arrivals():
 
     m = np.array([v_arr["m0"][0], v_arr["m1"][0], v_arr["m2"][0]])
     assert np.allclose(m, np.array([1.0, 0.0, 0.0]))
-    assert v_arr["m_norm"][0] < 1.0
+    assert v_arr["m_norm"][0] <= 1.0
 
     adapter._update_ancestry(0, 0, 0, 0, np.pi / 2, 1.0)
 

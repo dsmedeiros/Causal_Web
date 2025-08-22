@@ -140,6 +140,24 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 - Added a lightweight Genetic Algorithm framework with tournament selection, uniform crossover, Gaussian mutation and elitism along with a GA panel showing a live population table with objectives and per-constraint flags, fitness-history and Pareto-front charts, and promote/export actions.
 - Introduced scalar fitness helpers with hard invariant guardrails and normalised terms, providing a clear objective for optimisation and a path toward multi-objective Pareto support.
 - Added NSGA-II-lite multi-objective capabilities with non-dominated sorting, crowding-distance selection, a persistent Pareto archive and UI promotion of chosen trade-offs.
+- Introduced an experimental MCTS-H optimiser that explores hyperparameter trees with progressive widening, prior-guided rollouts, proxy/full evaluation promotion and a simple transposition cache. Multi-objective runs are scalarised via random Dirichlet weights when ``multi_objective`` or the ``--multi-objective`` flag is enabled.
+- Optimiser state can now be saved and reloaded to resume MCTS-H searches.
+- A new ``OptimizerQueueManager`` wires MCTS-H into the existing gate runner and persists Top-K and hall-of-fame artifacts for promoted full evaluations.
+- The ``cw optim`` command accepts ``--state`` to checkpoint and resume tree searches across invocations.
+- Full evaluation manifests now record ``mcts_run_id`` so each run can be traced back to the MCTS search session.
+- ``cw optim`` now exposes ``--proxy-frames`` and ``--full-frames`` to control
+  the frame budgets for proxy and promoted evaluations, ``--bins`` to set
+  quantile bins for priors, ``--promote-quantile`` for percentile-based
+  promotion, ``--promote-window`` to restrict the quantile to recent
+  proxy scores, and ``--multi-objective`` to enable Dirichlet scalarisation of
+  multiple objectives.
+- The Qt Quick interface now exposes an ``MCTS`` tab so tree search runs alongside existing DOE and GA panels.
+- The MCTS tab reports live node counts, evaluation totals, and promotion rates during a search.
+- Users can adjust proxy/full frame budgets, promotion thresholds or
+  quantiles, and prior bin counts directly in the MCTS panel for
+  multi-fidelity searches.
+- Regression tests show MCTS-H attains GA-level fitness while using fewer full
+  evaluations than the genetic algorithm.
 - Multi-objective runs now normalise objectives per generation using running median±MAD baselines, exclude infeasible genomes before sorting, cap the Pareto archive via ε-dominance or crowding-distance pruning, and checkpoint RNG state and population for deterministic restarts.
 - GA panel now offers a multi-objective toggle, Pareto scatter with selectable objectives, descriptive axis labels, and a table showing rank and crowding distance with a promotion dialog.
 - DOE and GA batches now persist summaries under ``experiments/``:
@@ -195,6 +213,7 @@ pyinstaller cw_gui.spec   # build bundle
 cw run --no-gui           # headless
 cw sweep --lhs ...        # DOE
 cw ga --config ...        # GA
+cw optim --base base.yaml --space space.yaml --optim mcts_h --multi-objective  # MCTS-H
 ```
 
 ### cw gui bundles

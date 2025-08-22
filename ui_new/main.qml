@@ -149,6 +149,7 @@ Window {
             TabButton { text: "Validation" }
             TabButton { text: "DOE" }
             TabButton { text: "GA" }
+            TabButton { text: "MCTS" }
             TabButton { text: "Compare" }
         }
 
@@ -167,8 +168,9 @@ Window {
             LogExplorer { anchors.fill: parent }
             Inspector { anchors.fill: parent }
             Validation { anchors.fill: parent }
-            DOE { anchors.fill: parent; panels: panels; replayIndex: 3; compareIndex: 9 }
-            GA { anchors.fill: parent; panels: panels; replayIndex: 3; compareIndex: 9 }
+            DOE { anchors.fill: parent; panels: panels; replayIndex: 3; compareIndex: 10 }
+            GA { anchors.fill: parent; panels: panels; replayIndex: 3; compareIndex: 10 }
+            MCTS { anchors.fill: parent; panels: panels; replayIndex: 3 }
             Compare { anchors.fill: parent }
         }
     }

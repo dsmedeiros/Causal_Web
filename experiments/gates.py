@@ -345,7 +345,9 @@ def _gate6_chsh(mi_mode: str, kappa_a: float) -> Dict[str, float]:
     return {"G6_CHSH": S, "G6_marginal_delta": marginal_delta}
 
 
-def run_gates(config: Dict[str, float], which: List[int]) -> Dict[str, float]:
+def run_gates(
+    config: Dict[str, float], which: List[int], frames: int | None = None
+) -> Dict[str, float]:
     """Execute selected gates and collect metrics.
 
     Parameters
@@ -356,6 +358,10 @@ def run_gates(config: Dict[str, float], which: List[int]) -> Dict[str, float]:
         and ``config['gate4']`` optionally override parameters for those gates.
     which:
         List of gate identifiers to execute. Supports gate IDs 1–6.
+    frames:
+        Optional number of simulation frames to execute. ``None`` uses the
+        default for each gate. The argument is currently advisory and exists so
+        callers can model multi-fidelity evaluations.
 
     Returns
     -------

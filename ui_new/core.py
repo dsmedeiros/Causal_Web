@@ -14,6 +14,7 @@ from .state import (
     LogsModel,
     DOEModel,
     GAModel,
+    MCTSModel,
 )
 
 
@@ -27,6 +28,7 @@ async def run(
     store: Store,
     doe: DOEModel,
     ga: GAModel,
+    mcts: MCTSModel,
     window: Any,
     token: str | None = None,
 ) -> None:
@@ -51,6 +53,7 @@ async def run(
     store.set_client(client)
     doe.set_client(client)
     ga.set_client(client, loop)
+    mcts.set_client(client, loop)
 
     try:
         while True:
@@ -88,6 +91,7 @@ async def run(
                 experiment.update(msg.get("status", ""), msg.get("residual", 0.0))
                 doe.handle_status(msg)
                 ga.handle_status(msg)
+                mcts.handle_status(msg)
                 continue
 
             if mtype == "ReplayProgress":
@@ -108,3 +112,4 @@ async def run(
         store.set_client(None)
         doe.set_client(None)
         ga.set_client(None)
+        mcts.set_client(None)

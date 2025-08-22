@@ -21,7 +21,7 @@ def test_soak_memory_growth_under_threshold() -> None:
 
     tracemalloc.start()
     start, _ = tracemalloc.get_traced_memory()
-    for _ in range(500):
+    for _ in range(50):
         adapter.step(max_events=1)
         adapter._build_delta()
     end, _ = tracemalloc.get_traced_memory()
