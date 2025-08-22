@@ -1,0 +1,14 @@
+task,conditional,winner
+bell,False,MCTS-H
+interference,False,CMA-ES
+conservation,True,GA
+
+optimizer,conditional,evals_per_s
+GA,conditional,868.2421131075598
+TPE,conditional,823.0903881628008
+CMA-ES,conditional,506.0694980694981
+MCTS-H,conditional,1002.9421329507413
+GA,unconditional,701.5038524618008
+TPE,unconditional,821.1586079515881
+CMA-ES,unconditional,418.92384588973846
+MCTS-H,unconditional,931.2823384705019
