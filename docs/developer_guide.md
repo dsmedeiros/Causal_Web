@@ -21,6 +21,7 @@ Notable modules:
 
 ```bash
 pre-commit install
+pre-commit run --files <file1> <file2>
 ruff . && black . && mypy .
 pytest -q
 cw run --no-gui
@@ -36,3 +37,10 @@ python -m Causal_Web.main --ray-init '{"num_cpus":4}'
 ```
 
 The JSON payload is forwarded directly to `ray.init` allowing resource limits or addresses to be specified.
+
+## Troubleshooting
+
+- **Token mismatch** – restart the engine and GUI to refresh the token.
+- **Single-client limit** – only one GUI may connect; close any extra instances.
+- **Low FPS** – zoom out; labels auto-hide; disable AA at far zoom.
+- **Invariant failures** – inspect `result.json` in the run directory.
