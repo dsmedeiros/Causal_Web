@@ -357,7 +357,11 @@ class OptimizerQueueManager:
     This manager requests configurations from an optimizer, evaluates them via
     :func:`run_gates` and reports results back through
     :meth:`Optimizer.observe`.  Proxy evaluations can be promoted to full
-    runs, in which case artifacts and the run index are updated.
+    runs, in which case artifacts and the run index are updated.  When the
+    optimizer emits multi-objective vectors they are forwarded directly and
+    persisted in the shared Pareto archive.  Hall-of-fame entries derived from
+    tree search are tagged with ``origin="mcts"`` so the GA panel can replay
+    them alongside genetic candidates.
 
     Parameters
     ----------
@@ -435,8 +439,11 @@ class OptimizerQueueManager:
             self._asha_eta = 2.0
             self._rung_times = [0.0 for _ in self._rung_frames]
         self._mcts_run_id: Optional[str] = None
+        self._multi_objective = getattr(self.optimizer, "multi_objective", False)
+        self._origin: Optional[str] = None
         if isinstance(self.optimizer, MCTS_H):
             self._mcts_run_id = allocate_run_dir()[0]
+            self._origin = "mcts"
 
     # ------------------------------------------------------------------
     def _checkpoint(self) -> None:
@@ -472,21 +479,36 @@ class OptimizerQueueManager:
             inv = checks.from_metrics(metrics)
             fit = self.fitness_fn(metrics, inv, cfg)
             self._rung_counts[rung] += 1
+            if self._multi_objective:
+                if isinstance(fit, dict):
+                    objs = {k: float(v) for k, v in fit.items()}
+                else:
+                    objs = {f"f{i}": float(v) for i, v in enumerate(fit)}
+                fit_scalar = float(next(iter(objs.values())))
+            else:
+                objs = {"f0": float(fit)}
+                fit_scalar = float(fit)
             if rung < len(self._rung_frames) - 1:
-                self._rung_data[rung].append((float(fit), cfg))
+                self._rung_data[rung].append((fit_scalar, cfg))
                 data = self._rung_data[rung]
-                penal = float(fit)
+                penal = fit_scalar
                 if len(data) >= self._asha_eta:
                     k = max(1, int(len(data) / self._asha_eta))
                     thresh = sorted(data, key=lambda x: x[0])[k - 1][0]
-                    if float(fit) <= thresh:
+                    if fit_scalar <= thresh:
                         self._pending.append((cfg, rung + 1))
                         self._promotions[rung] += 1
                     else:
                         penal = float(thresh)
-                self.optimizer.observe([{"config": cfg, "fitness_proxy": penal}])
+                if self._multi_objective:
+                    self.optimizer.observe([{"config": cfg, "objectives_proxy": objs}])
+                else:
+                    self.optimizer.observe([{"config": cfg, "fitness_proxy": penal}])
             else:
-                res = {"config": cfg, "fitness": float(fit)}
+                if self._multi_objective:
+                    res = {"config": cfg, "objectives": objs}
+                else:
+                    res = {"config": cfg, "fitness": fit_scalar}
                 self.optimizer.observe([res])
                 run_id, abs_path, rel_path = allocate_run_dir()
                 key_hash = run_key(
@@ -511,33 +533,37 @@ class OptimizerQueueManager:
                     "status": "ok",
                     "metrics": metrics,
                     "invariants": inv,
-                    "fitness": float(fit),
                 }
+                if self._multi_objective:
+                    result_payload["objectives"] = objs
+                else:
+                    result_payload["fitness"] = fit_scalar
                 persist_run(raw, result_payload, abs_path, manifest=manifest)
                 self._index.mark(key_hash, rel_path)
                 entry = TopKEntry(
                     run_id=run_id,
-                    fitness=-float(fit),
-                    objectives={"f0": float(fit)},
+                    fitness=-fit_scalar,
+                    objectives=objs,
                     groups=cfg,
                     toggles={},
                     seed=int(raw["seed"]),
                     path=rel_path,
                 )
                 update_top_k([entry], self._top_k_path)
-                self._hof.append(
-                    {
-                        "run_id": run_id,
-                        "fitness": -float(fit),
-                        "objectives": {"f0": float(fit)},
-                        "path": rel_path,
-                    }
-                )
+                hof_entry = {
+                    "run_id": run_id,
+                    "fitness": -fit_scalar,
+                    "objectives": objs,
+                    "path": rel_path,
+                }
+                if self._origin:
+                    hof_entry["origin"] = self._origin
+                self._hof.append(hof_entry)
                 save_hall_of_fame(self._hof, self._hof_path)
                 self._checkpoint()
-                return OptimizerResult(cfg, "full", float(fit), rel_path)
+                return OptimizerResult(cfg, "full", fit_scalar, rel_path)
             self._checkpoint()
-            return OptimizerResult(cfg, "proxy", float(fit))
+            return OptimizerResult(cfg, "proxy", fit_scalar)
         # legacy single proxy/full path
         cfg = self.optimizer.suggest(1)[0]
         key = tuple(sorted(cfg.items()))
@@ -554,16 +580,35 @@ class OptimizerQueueManager:
             metrics = run_gates(raw, self.gates, frames=self.proxy_frames)
             inv = checks.from_metrics(metrics)
             fit = self.fitness_fn(metrics, inv, cfg)
+            if self._multi_objective:
+                if isinstance(fit, dict):
+                    objs = {k: float(v) for k, v in fit.items()}
+                else:
+                    objs = {f"f{i}": float(v) for i, v in enumerate(fit)}
+                fit_scalar = float(next(iter(objs.values())))
+                self.optimizer.observe([{"config": cfg, "objectives_proxy": objs}])
+            else:
+                fit_scalar = float(fit)
+                self.optimizer.observe([{"config": cfg, "fitness_proxy": fit_scalar}])
             self._proxy_seen.add(key)
-            self.optimizer.observe([{"config": cfg, "fitness_proxy": float(fit)}])
             self._checkpoint()
-            return OptimizerResult(cfg, "proxy", float(fit))
+            return OptimizerResult(cfg, "proxy", fit_scalar)
 
         metrics = run_gates(raw, self.gates, frames=self.full_frames)
         inv = checks.from_metrics(metrics)
         fit = self.fitness_fn(metrics, inv, cfg)
+        if self._multi_objective:
+            if isinstance(fit, dict):
+                objs = {k: float(v) for k, v in fit.items()}
+            else:
+                objs = {f"f{i}": float(v) for i, v in enumerate(fit)}
+            fit_scalar = float(next(iter(objs.values())))
+            res = {"config": cfg, "objectives": objs}
+        else:
+            fit_scalar = float(fit)
+            res = {"config": cfg, "fitness": fit_scalar}
+            objs = {"f0": fit_scalar}
         self._proxy_seen.discard(key)
-        res = {"config": cfg, "fitness": float(fit)}
         self.optimizer.observe([res])
         self._checkpoint()
 
@@ -590,31 +635,35 @@ class OptimizerQueueManager:
             "status": "ok",
             "metrics": metrics,
             "invariants": inv,
-            "fitness": float(fit),
         }
+        if self._multi_objective:
+            result_payload["objectives"] = objs
+        else:
+            result_payload["fitness"] = fit_scalar
         persist_run(raw, result_payload, abs_path, manifest=manifest)
         self._index.mark(key_hash, rel_path)
 
         entry = TopKEntry(
             run_id=run_id,
-            fitness=-float(fit),
-            objectives={"f0": float(fit)},
+            fitness=-fit_scalar,
+            objectives=objs,
             groups=cfg,
             toggles={},
             seed=int(raw["seed"]),
             path=rel_path,
         )
         update_top_k([entry], self._top_k_path)
-        self._hof.append(
-            {
-                "run_id": run_id,
-                "fitness": -float(fit),
-                "objectives": {"f0": float(fit)},
-                "path": rel_path,
-            }
-        )
+        hof_entry = {
+            "run_id": run_id,
+            "fitness": -fit_scalar,
+            "objectives": objs,
+            "path": rel_path,
+        }
+        if self._origin:
+            hof_entry["origin"] = self._origin
+        self._hof.append(hof_entry)
         save_hall_of_fame(self._hof, self._hof_path)
-        return OptimizerResult(cfg, "full", float(fit), rel_path)
+        return OptimizerResult(cfg, "full", fit_scalar, rel_path)
 
     # ------------------------------------------------------------------
     def rung_stats(self) -> Dict[str, Any]:

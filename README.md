@@ -149,6 +149,8 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 - MCTS-H can route evaluations through an ASHA-style scheduler with configurable rungs (e.g. 20%, 40%, 100% of full frames) to prune weak candidates early, logging promotion fractions, per-rung wall-clock times, and demonstrated wall-clock savings across simulated workloads.
 - The ``cw optim`` command accepts ``--state`` to checkpoint and resume tree searches across invocations.
 - Full evaluation manifests now record ``mcts_run_id`` so each run can be traced back to the MCTS search session.
+- Multi-objective MCTS runs now write results to the shared Pareto archive as ``origin: "mcts"``, allowing the GA panel to replay tree-search trade-offs.
+- GA panel automatically refreshes to surface new MCTS Pareto points without manual reload.
 - ``cw optim`` now exposes ``--proxy-frames`` and ``--full-frames`` to control
   the frame budgets for proxy and promoted evaluations, ``--bins`` to set
   quantile bins for priors, ``--promote-quantile`` for percentile-based
