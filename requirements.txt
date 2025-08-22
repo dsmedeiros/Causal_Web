@@ -1,4 +1,5 @@
 cupy-cuda12x
+imageio
 matplotlib
 networkx
 numpy
@@ -10,4 +11,5 @@ PySide6
 pytest
 pyyaml
 ray
+websockets
 zstandard

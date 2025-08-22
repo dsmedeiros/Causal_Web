@@ -249,9 +249,83 @@ class MainService:
     # ------------------------------------------------------------------
     @staticmethod
     def _launch_gui() -> None:
-        from .gui_pyside import launch
+        """Launch the Qt Quick interface."""
 
-        launch()
+        import asyncio
+        import os
+        import threading
+        from PySide6.QtGui import QGuiApplication
+        from PySide6.QtQml import QQmlApplicationEngine
+        from PySide6.QtQuick import QQuickItem
+        from ui_new import core
+        from ui_new.state import (
+            Store,
+            TelemetryModel,
+            MetersModel,
+            ExperimentModel,
+            ReplayModel,
+            LogsModel,
+            DOEModel,
+            GAModel,
+            CompareModel,
+        )
+        from ui_new.graph import GraphView  # noqa: F401  # register QML module
+
+        app = QGuiApplication([])
+        engine = QQmlApplicationEngine()
+        telemetry = TelemetryModel()
+        meters = MetersModel()
+        experiment = ExperimentModel()
+        replay = ReplayModel()
+        logs = LogsModel()
+        store = Store()
+        doe = DOEModel()
+        ga_model = GAModel()
+        compare = CompareModel()
+        ctx = engine.rootContext()
+        ctx.setContextProperty("telemetryModel", telemetry)
+        ctx.setContextProperty("metersModel", meters)
+        ctx.setContextProperty("experimentModel", experiment)
+        ctx.setContextProperty("replayModel", replay)
+        ctx.setContextProperty("logsModel", logs)
+        ctx.setContextProperty("store", store)
+        ctx.setContextProperty("doeModel", doe)
+        ctx.setContextProperty("gaModel", ga_model)
+        ctx.setContextProperty("compareModel", compare)
+        qml_path = os.path.join(os.path.dirname(__file__), "..", "ui_new", "main.qml")
+        engine.load(qml_path)
+        if not engine.rootObjects():
+            return
+        root = engine.rootObjects()[0]
+        view = root.findChild(QQuickItem, "graphView")
+        view.frameRendered.connect(meters.frame_drawn)
+
+        loop = asyncio.new_event_loop()
+
+        def _run_loop() -> None:
+            asyncio.set_event_loop(loop)
+            loop.run_forever()
+
+        threading.Thread(target=_run_loop, daemon=True).start()
+        token = os.getenv("CW_SESSION_TOKEN", "secret")
+        asyncio.run_coroutine_threadsafe(
+            core.run(
+                "ws://localhost:8765",
+                view,
+                telemetry,
+                experiment,
+                replay,
+                logs,
+                store,
+                doe,
+                ga_model,
+                root,
+                token=token,
+            ),
+            loop,
+        )
+        app.exec()
+        loop.call_soon_threadsafe(loop.stop)
 
 
 def main() -> None:

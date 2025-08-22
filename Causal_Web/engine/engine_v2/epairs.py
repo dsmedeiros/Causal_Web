@@ -22,6 +22,9 @@ import numpy as np
 import logging
 
 from ..logging.logger import log_record
+from ...config import Config
+
+EVENT_LOG_BUDGET = 100
 
 
 @dataclass
@@ -146,13 +149,25 @@ class EPairs:
         # Track sites that have already emitted a capacity warning
         self._overflow_warned: Set[int] = set()
         self.overflow_drops: int = 0
+        self._seed_logs = 0
+        self._bridge_logs = 0
 
     # Internal helpers -------------------------------------------------
-    def _log_seed(self, label: str, value: Dict[str, int | float]) -> None:
-        log_record(category="event", label=label, value=value)
+    def _log_seed(self, label: str, value: Dict[str, int | float | str]) -> None:
+        self._seed_logs += 1
+        if (
+            "diagnostic" in getattr(Config, "logging_mode", [])
+            or self._seed_logs % EVENT_LOG_BUDGET == 0
+        ):
+            log_record(category="event", label=label, value=value)
 
-    def _log_bridge(self, label: str, value: Dict[str, int | float]) -> None:
-        log_record(category="event", label=label, value=value)
+    def _log_bridge(self, label: str, value: Dict[str, int | float | str]) -> None:
+        self._bridge_logs += 1
+        if (
+            "diagnostic" in getattr(Config, "logging_mode", [])
+            or self._bridge_logs % EVENT_LOG_BUDGET == 0
+        ):
+            log_record(category="event", label=label, value=value)
 
     def _add_adj(self, src: int, dst: int) -> None:
         arr = self.adjacency.setdefault(src, array("i"))
@@ -493,8 +508,8 @@ class EPairs:
     def decay_all(self) -> None:
         """Decay all bridges, removing those below :attr:`sigma_min`."""
 
-        factor = 1.0 - self.lambda_decay
-        if factor >= 1.0:
+        factor = 1 - self.lambda_decay
+        if factor >= 1:
             return
         for (a, b), bridge in list(self.bridges.items()):
             bridge.sigma *= factor

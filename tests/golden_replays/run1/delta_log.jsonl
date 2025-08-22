@@ -1,0 +1,3 @@
+{"frame": 0, "node_positions": {"0": [0.0, 0.0], "1": [0.0, 0.0]}, "edges": [[0, 1]], "counters": {"window": 0, "events_per_sec": 51.235023498535156, "gates_fired": 0, "active_bridges": 0, "residual": 0.0}, "invariants": {"inv_conservation_residual": 0.0}}
+{"frame": 1, "node_positions": {"1": [0.0, 0.0]}, "closed_windows": [["1", 0]], "counters": {"window": 0, "events_per_sec": 615.0006103515625, "gates_fired": 0, "active_bridges": 0, "residual": 0.21199999749660492}, "invariants": {"inv_conservation_residual": 0.21199999749660492}}
+{"frame": 1, "counters": {"window": 0, "events_per_sec": 1798.586669921875, "gates_fired": 0, "active_bridges": 0, "residual": 0.21199999749660492}, "invariants": {"inv_conservation_residual": 0.21199999749660492}}

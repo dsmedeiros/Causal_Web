@@ -72,7 +72,7 @@ def record_run(
         "edge_count": metadata["edge_count"],
         "archive_path": archive_path,
     }
-    conn = psycopg2.connect(**Config.database)
+    conn = psycopg2.connect(**Config.database)  # type: ignore[call-overload]
     try:
         with conn.cursor() as cur:
             cols = ",".join(data.keys())

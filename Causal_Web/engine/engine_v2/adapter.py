@@ -9,7 +9,10 @@ to remove outdated hooks from the legacy engine.
 
 from __future__ import annotations
 
-from typing import Any, Dict, Iterable, List, Optional, Set
+from typing import Any, Dict, Iterable, List, Set, Tuple
+import json
+import os
+from pathlib import Path
 from collections import deque, defaultdict, OrderedDict
 import threading
 import time
@@ -20,7 +23,7 @@ import numpy as np
 
 from Causal_Web.view import EdgeView, NodeView, ViewSnapshot, WindowEvent
 
-from ..logging.logger import log_record, flush_metrics
+from ..logging.logger import log_record, flush_metrics, _get_aggregator
 from .lccm import LCCM, WindowParams, WindowState, on_window_close
 from .scheduler import DepthScheduler
 from .state import Packet, TelemetryFrame
@@ -36,9 +39,13 @@ from .qtheta_c import (
 from .epairs import EPairs
 from .bell import BellHelpers, Ancestry
 from ...config import Config, RunConfig
+from experiments.gates import run_gates
+from invariants import checks
 
 
 EDGE_LOG_BUDGET = 100
+POOL_MAX_ENTRIES = 8
+EPSILON = 0.0
 
 
 class EngineAdapter:
@@ -62,8 +69,21 @@ class EngineAdapter:
         self._packet_buf: Dict[str, Any] = {}
         self._edge_buf: Dict[str, Any] = {}
         self._payload_buf: Dict[str, Any] = {}
-        self._psi_arr_pool: OrderedDict[int, np.ndarray] = OrderedDict()
-        self._p_arr_pool: OrderedDict[int, np.ndarray] = OrderedDict()
+        self._psi_arr_pool: OrderedDict[tuple[int, ...], deque[np.ndarray]] = (
+            OrderedDict()
+        )
+        self._p_arr_pool: OrderedDict[tuple[int, ...], deque[np.ndarray]] = (
+            OrderedDict()
+        )
+        self._phase_arr_pool: OrderedDict[tuple[int, ...], deque[np.ndarray]] = (
+            OrderedDict()
+        )
+        self._U_arr_pool: OrderedDict[tuple[int, ...], deque[np.ndarray]] = (
+            OrderedDict()
+        )
+        self._alpha_arr_pool: OrderedDict[tuple[int, ...], deque[np.ndarray]] = (
+            OrderedDict()
+        )
         self._neigh_sums_cache: np.ndarray | None = None
         self._delay_changed: Set[int] = set()
         self._lock = threading.RLock()
@@ -75,25 +95,97 @@ class EngineAdapter:
         self._energy_totals: Dict[int, float] = {}
         self._residuals: Dict[int, float] = {}
         self._residual: float = 0.0
+        self._residual_ewma: float = 0.0
+        self._residual_max: float = 0.0
+        self._ns_plus: int = 0
+        self._ns_total: int = 0
+        self._ns_delta: float = 0.0
+        self._edges_traversed: int = 0
+        self._windows_closed_total: int = 0
+        self._experiment_status: Dict[str, Any] | None = None
+        self._replay_progress: float | None = None
+        self._replay_playing: bool = False
+        self._target_rate: float = 1.0
+        self._thread: threading.Thread | None = None
+        self._current_delta: Dict[str, Any] | None = None
+        self._graph_static: Dict[str, Any] | None = None
+        self._replay_frames: List[Dict[str, Any]] = []
+        self._replay_index = 0
+
+    # ------------------------------------------------------------------
+    def load_replay(self, path: str | os.PathLike[str]) -> dict[str, Any] | None:
+        """Load replay data from ``path`` directory and return ``GraphStatic``.
+
+        The directory may contain ``graph_static.json`` describing the graph and
+        a ``delta_log.jsonl`` file with one JSON snapshot delta per line. Missing
+        files are ignored.
+        """
+
+        p = Path(path)
+        with self._lock:
+            self._replay_frames.clear()
+            self._replay_index = 0
+            self._graph_static = None
+            graph_file = p / "graph_static.json"
+            if graph_file.exists():
+                try:
+                    self._graph_static = json.loads(graph_file.read_text())
+                except json.JSONDecodeError:
+                    self._graph_static = None
+            delta_file = p / "delta_log.jsonl"
+            if delta_file.exists():
+                for line in delta_file.read_text().splitlines():
+                    try:
+                        self._replay_frames.append(json.loads(line))
+                    except json.JSONDecodeError:
+                        continue
+            self._replay_playing = False
+            self._replay_progress = 0.0
+            return self._graph_static
 
     # ------------------------------------------------------------------
     def _get_pool_arr(
         self,
-        pool: OrderedDict[int, np.ndarray],
-        length: int,
+        pool: OrderedDict[tuple[int, ...], deque[np.ndarray]],
+        base_shape: tuple[int, ...],
         rows: int,
         dtype: np.dtype,
     ) -> np.ndarray:
-        """Return a reusable array from ``pool`` with at least ``rows`` rows."""
+        """Return an array from ``pool`` sized for ``rows`` in bucketed groups.
 
-        arr = pool.get(length)
-        if arr is None or arr.shape[0] < rows:
-            new_rows = max(rows, arr.shape[0] * 2 if arr is not None else rows)
-            arr = np.empty((new_rows, length), dtype=dtype)
-            pool[length] = arr
-            while len(pool) > 4:
-                pool.popitem(last=False)
+        Arrays are grouped by ``rows`` rounded up to the next power-of-two so
+        transient batch sizes reuse a small set of allocations. ``pool`` is keyed
+        by ``(bucket, *base_shape)`` where ``bucket`` is this rounded row count.
+        """
+
+        bucket = 1 << (rows - 1).bit_length()
+        key = (bucket, *base_shape)
+        dq = pool.setdefault(key, deque())
+        arr = dq.pop() if dq else None
+        if arr is None:
+            arr = np.empty((bucket, *base_shape), dtype=dtype)
+        pool[key] = dq
+        pool.move_to_end(key)
+        while len(pool) > POOL_MAX_ENTRIES:
+            pool.popitem(last=False)
         return arr
+
+    def _recycle_pool_arr(
+        self,
+        pool: OrderedDict[tuple[int, ...], deque[np.ndarray]],
+        base_shape: tuple[int, ...],
+        arr: np.ndarray,
+    ) -> None:
+        """Return ``arr`` to ``pool`` grouped by its bucketed row count."""
+
+        key = (arr.shape[0], *base_shape)
+        dq = pool.setdefault(key, deque())
+        dq.append(arr)
+        pool.move_to_end(key)
+        while len(dq) > POOL_MAX_ENTRIES:
+            dq.popleft()
+        while len(pool) > POOL_MAX_ENTRIES:
+            pool.popitem(last=False)
 
     # ------------------------------------------------------------------
     def _splitmix64(self, x: int) -> int:
@@ -302,28 +394,71 @@ class EngineAdapter:
                 "lccm": lccm,
                 "psi_acc": self._arrays.vertices["psi_acc"][vid],
                 "p_v": self._arrays.vertices["p"][vid],
-                "bit_deque": deque(maxlen=8),
+                "bit_deque": deque(maxlen=POOL_MAX_ENTRIES),
                 "base_deg": deg,
                 "win_state": WindowState(M_v=rho_mean, W_v=w_init),
             }
             self._vertices[vid] = vertex_state
 
+        v_arr = self._arrays.vertices
+        e_arr = self._arrays.edges
+        x_vals = v_arr.get("x")
+        y_vals = v_arr.get("y")
+        if x_vals is not None and y_vals is not None:
+            positions = [(float(x_vals[i]), float(y_vals[i])) for i in range(n_vert)]
+        else:
+            positions = [(0.0, 0.0) for _ in range(n_vert)]
+        edge_list = [
+            (int(e_arr["src"][i]), int(e_arr["dst"][i]))
+            for i in range(len(e_arr["src"]))
+        ]
+        labels = [str(i) for i in range(n_vert)]
+        colors = ["#ffffff" for _ in range(n_vert)]
+        flags = [True for _ in range(n_vert)]
+        self._graph_static = {
+            "node_positions": positions,
+            "edges": edge_list,
+            "node_labels": labels,
+            "node_colors": colors,
+            "node_flags": flags,
+        }
+
+    def graph_static(self) -> Dict[str, Any]:
+        """Return a static description of the loaded graph for the UI."""
+
+        return self._graph_static or {
+            "node_positions": [],
+            "edges": [],
+            "node_labels": [],
+            "node_colors": [],
+            "node_flags": [],
+        }
+
     def start(self) -> None:
         """Mark the engine as running."""
 
+        if self._running:
+            return
         self._running = True
+        if self._thread is None or not self._thread.is_alive():
+            self._thread = threading.Thread(target=self._run_loop, daemon=True)
+            self._thread.start()
 
     def pause(self) -> None:
         """Pause execution."""
-
         self._running = False
 
     def stop(self) -> None:
         """Stop execution and reset all state."""
-
         self._running = False
+        if self._thread is not None:
+            self._thread.join(timeout=0.1)
+            self._thread = None
         self._vertices.clear()
         self._scheduler.clear()
+        self._replay_frames.clear()
+        self._replay_index = 0
+        self._current_delta = None
 
     def step(
         self, max_events: int | None = None, *, collect_packets: bool = False
@@ -393,6 +528,8 @@ class EngineAdapter:
         events = 0
         packets: list[Packet] | None = [] if collect_packets else None
         edge_logs = 0
+        diagnostic_mode = "diagnostic" in getattr(self._cfg, "logging_mode", [])
+        event_logs = 0
         decay_counter = 0
         decay_interval = self._cfg.epsilon_pairs.get("decay_interval", 32)
         packet_struct = self._packet_buf
@@ -492,23 +629,36 @@ class EngineAdapter:
             for item in requeue:
                 self._scheduler.push(*item)
 
-            U_arr = np.asarray(U_list, dtype=np.complex64)
-            phase_arr = np.asarray(phase_list, dtype=np.complex64)
-            alpha_arr = np.asarray(alpha_list, dtype=np.float32)
+            dim = U_list[0].shape[0] if U_list else 0
+            U_buf = self._get_pool_arr(
+                self._U_arr_pool, (dim, dim), pkt_count, np.complex64
+            )
+            for i, U_mat in enumerate(U_list):
+                U_buf[i] = U_mat
+            phase_buf = self._get_pool_arr(
+                self._phase_arr_pool, (), pkt_count, np.complex64
+            )
+            phase_buf[:pkt_count] = phase_list
+            alpha_buf = self._get_pool_arr(
+                self._alpha_arr_pool, (), pkt_count, np.float32
+            )
+            alpha_buf[:pkt_count] = alpha_list
             psi_len = len(psi_list[0]) if psi_list else 0
             psi_buf = self._get_pool_arr(
-                self._psi_arr_pool, psi_len, pkt_count, np.complex64
+                self._psi_arr_pool, (psi_len,), pkt_count, np.complex64
             )
             for i, psi_vec in enumerate(psi_list):
                 psi_buf[i] = psi_vec
             mu_arr, kappa_arr, psi_rot_arr = phase_stats_batch(
-                U_arr, phase_arr, psi_buf[:pkt_count]
+                U_buf[:pkt_count], phase_buf[:pkt_count], psi_buf[:pkt_count]
             )
             mu_list = mu_arr.tolist()
             kappa_list = kappa_arr.tolist()
 
             p_len = len(p_list[0]) if p_list else 0
-            p_buf = self._get_pool_arr(self._p_arr_pool, p_len, pkt_count, np.float32)
+            p_buf = self._get_pool_arr(
+                self._p_arr_pool, (p_len,), pkt_count, np.float32
+            )
             for i, p_vec in enumerate(p_list):
                 p_buf[i] = p_vec
             theta_vals = np.sum(np.abs(p_buf[:pkt_count]), axis=1)
@@ -537,9 +687,9 @@ class EngineAdapter:
                     p_buf[:pkt_count],
                     bit_list,
                     depth_list,
-                    alpha_arr,
-                    phase_arr,
-                    U_arr,
+                    alpha_buf[:pkt_count],
+                    phase_buf[:pkt_count],
+                    U_buf[:pkt_count],
                     max_deque=self._cfg.max_deque,
                     update_p=lccm.layer == "Θ",
                 )
@@ -570,6 +720,12 @@ class EngineAdapter:
                     update_p=lccm.layer == "Θ",
                 )
 
+            self._recycle_pool_arr(self._U_arr_pool, (dim, dim), U_buf)
+            self._recycle_pool_arr(self._phase_arr_pool, (), phase_buf)
+            self._recycle_pool_arr(self._alpha_arr_pool, (), alpha_buf)
+            self._recycle_pool_arr(self._psi_arr_pool, (psi_len,), psi_buf)
+            self._recycle_pool_arr(self._p_arr_pool, (p_len,), p_buf)
+
             vertex["psi_acc"][:] = psi_acc
             vertex["p_v"][:] = p_v
             if self._arrays is not None:
@@ -584,7 +740,7 @@ class EngineAdapter:
                 if vertex["bit_deque"]
                 else 0.0
             )
-            p_v = np.where(np.isfinite(p_v), p_v, np.zeros_like(p_v))
+            p_v[:] = np.where(np.isfinite(p_v), p_v, 0.0)
             entropy = float(-(p_v * np.log2(p_v + 1e-12)).sum()) if len(p_v) else 0.0
             lccm.update_classical_metrics(bit_fraction, entropy, conf)
             is_q = lccm.layer == "Q"
@@ -686,6 +842,10 @@ class EngineAdapter:
                         kappa_a,
                         batch=self._frame,
                     )
+                    self._ns_total += 1
+                    if outcome == 1:
+                        self._ns_plus += 1
+                    self._ns_delta = abs(self._ns_plus / self._ns_total - 0.5)
                     log_record(
                         category="entangled",
                         label="measurement",
@@ -743,22 +903,24 @@ class EngineAdapter:
                 else:
                     H_pv = 0.0
                     EQ = lccm._eq
-                    log_record(
-                        category="event",
-                        label="layer_transition",
-                        frame=self._frame,
-                        tick=self._frame,
-                        value={
-                            "v_id": dst,
-                            "from_layer": prev_layer,
-                            "to_layer": lccm.layer,
-                            "reason": reason,
-                            "window_idx": lccm.window_idx,
-                            "Lambda_v": lccm._lambda,
-                            "EQ": EQ,
-                            "H_p": H_pv,
-                        },
-                    )
+                    event_logs += 1
+                    if diagnostic_mode or event_logs % EDGE_LOG_BUDGET == 0:
+                        log_record(
+                            category="event",
+                            label="layer_transition",
+                            frame=self._frame,
+                            tick=self._frame,
+                            value={
+                                "v_id": dst,
+                                "from_layer": prev_layer,
+                                "to_layer": lccm.layer,
+                                "reason": reason,
+                                "window_idx": lccm.window_idx,
+                                "Lambda_v": lccm._lambda,
+                                "EQ": EQ,
+                                "H_p": H_pv,
+                            },
+                        )
                 if prev_layer == "C" and lccm.layer != "C":
                     if self._arrays is not None:
                         self._arrays.vertices["bit"][dst] = 0
@@ -977,8 +1139,8 @@ class EngineAdapter:
                     self._changed_nodes.add(dst_id)
                     self._changed_edges.add((dst, dst_id))
                     if (
-                        edge_logs % EDGE_LOG_BUDGET == 0
-                        and rate > 0.0
+                        (diagnostic_mode or edge_logs % EDGE_LOG_BUDGET == 0)
+                        and rate > EPSILON
                         and rng_rand() < rate
                     ):
                         log_record(
@@ -1013,8 +1175,8 @@ class EngineAdapter:
                 self._changed_edges.add((dst, other))
                 rate = self._cfg.logging.get("sample_rho_rate", 0.01)
                 if (
-                    edge_logs % EDGE_LOG_BUDGET == 0
-                    and rate > 0.0
+                    (diagnostic_mode or edge_logs % EDGE_LOG_BUDGET == 0)
+                    and rate > EPSILON
                     and self._rng.random() < rate
                 ):
                     log_record(
@@ -1060,6 +1222,14 @@ class EngineAdapter:
             packets=packets if collect_packets else None,
             window=max_window,
         )
+        self._edges_traversed += edge_logs
+        self._windows_closed_total += len(self._closed_windows)
+        bridges_active = len(self._epairs.bridges) if self._epairs is not None else 0
+        agg = _get_aggregator()
+        agg.counts["events_processed"] += events
+        agg.counts["edges_traversed"] += edge_logs
+        agg.counts["windows_closed"] += len(self._closed_windows)
+        agg.counts["bridges_active"] += bridges_active
 
         depth_bucket = max_depth // 10
         flush_metrics(self._frame)
@@ -1086,6 +1256,7 @@ class EngineAdapter:
             metadata={"window_idx": max_window},
         )
 
+        residual_max_local = 0.0
         for vid, data in self._vertices.items():
             lccm = data["lccm"]
             if lccm.window_idx != start_windows.get(vid, lccm.window_idx):
@@ -1121,13 +1292,13 @@ class EngineAdapter:
                             p_v.fill(1.0 / len(p_v))
                         case "renorm":
                             total = float(p_v.sum())
-                            if total > 0.0:
+                            if total > EPSILON:
                                 p_v /= total
                         case "hold":
                             pass
                         case _:
                             p_v.fill(1.0 / len(p_v))
-                    p_v = np.where(np.isfinite(p_v), p_v, np.zeros_like(p_v))
+                    p_v[:] = np.where(np.isfinite(p_v), p_v, EPSILON)
                     self._arrays.vertices["p"][vid] = p_v
                     if lccm.layer != "C":
                         self._arrays.vertices["bit"][vid] = 0
@@ -1186,23 +1357,25 @@ class EngineAdapter:
                     E_theta = 0.0
                     E_C = 0.0
                     E_rho = 0.0
-                log_record(
-                    category="event",
-                    label="vertex_window_close",
-                    frame=self._frame,
-                    tick=self._frame,
-                    value={
-                        "layer": lccm.layer,
-                        "Lambda_v": lccm._lambda,
-                        "EQ": EQ,
-                        "H_p": H_pv,
-                        "E_theta": E_theta,
-                        "E_C": E_C,
-                        "E_rho": E_rho,
-                        "v_id": vid,
-                    },
-                    metadata={"window_idx": lccm.window_idx},
-                )
+                event_logs += 1
+                if diagnostic_mode or event_logs % EDGE_LOG_BUDGET == 0:
+                    log_record(
+                        category="event",
+                        label="vertex_window_close",
+                        frame=self._frame,
+                        tick=self._frame,
+                        value={
+                            "layer": lccm.layer,
+                            "Lambda_v": lccm._lambda,
+                            "EQ": EQ,
+                            "H_p": H_pv,
+                            "E_theta": E_theta,
+                            "E_C": E_C,
+                            "E_rho": E_rho,
+                            "v_id": vid,
+                        },
+                        metadata={"window_idx": lccm.window_idx},
+                    )
                 E_total = EQ + E_theta + E_C + E_rho
                 prev = self._energy_totals.get(vid, 0.0)
                 leak_coeff = self._cfg.rho_delay.get("alpha_leak", 0.0)
@@ -1210,12 +1383,17 @@ class EngineAdapter:
                 resid = E_total - prev - leak
                 alpha_res = self._cfg.windowing.get("alpha_residual", 0.1)
                 prev_res = self._residuals.get(vid, 0.0)
-                self._residuals[vid] = (1 - alpha_res) * prev_res + alpha_res * abs(
-                    resid
-                )
+                abs_resid = abs(resid)
+                self._residuals[vid] = (
+                    1 - alpha_res
+                ) * prev_res + alpha_res * abs_resid
+                residual_max_local = max(residual_max_local, abs_resid)
                 self._energy_totals[vid] = E_total
                 if self._residuals:
                     self._residual = float(np.mean(list(self._residuals.values())))
+                    self._residual_ewma = (
+                        1 - alpha_res
+                    ) * self._residual_ewma + alpha_res * self._residual
                 self._closed_windows.append(
                     WindowEvent(v_id=str(vid), window_idx=lccm.window_idx)
                 )
@@ -1223,6 +1401,8 @@ class EngineAdapter:
                 if self._cfg.epsilon_pairs.get("decay_on_window_close", True):
                     # Decay bridges when vertices advance a window.
                     self._epairs.decay_all()
+
+        self._residual_max = residual_max_local
 
         if self._delay_changed and self._epairs is not None:
             for vid in self._delay_changed:
@@ -1271,6 +1451,10 @@ class EngineAdapter:
                 changed_edges=edges,
                 closed_windows=closed,
                 counters=counters,
+                invariants={
+                    "inv_conservation_residual": self._residual,
+                    "inv_no_signaling_delta": self._ns_delta,
+                },
             )
 
     def current_depth(self) -> int:
@@ -1285,6 +1469,227 @@ class EngineAdapter:
         """Return the number of steps executed so far."""
 
         return self._frame
+
+    # ------------------------------------------------------------------
+    def _build_delta(self) -> Dict[str, Any] | None:
+        """Coalesce geometry changes, metrics and window events into a delta."""
+
+        if self._arrays is None:
+            return None
+        v_arr = self._arrays.vertices
+
+        # Depth and window counters
+        max_depth = 0
+        max_window = 0
+        for data in self._vertices.values():
+            lccm = data["lccm"]
+            max_depth = max(max_depth, lccm.depth)
+            max_window = max(max_window, lccm.window_idx)
+
+        delta: Dict[str, Any] = {"frame": max_depth}
+
+        positions: Dict[int, tuple[float, float]] = {}
+        x_vals = v_arr.get("x")
+        y_vals = v_arr.get("y")
+        for vid in self._changed_nodes:
+            if x_vals is not None and y_vals is not None:
+                positions[int(vid)] = (
+                    float(np.float32(x_vals[vid])),
+                    float(np.float32(y_vals[vid])),
+                )
+            else:
+                positions[int(vid)] = (0.0, 0.0)
+        if positions:
+            delta["node_positions"] = positions
+        if self._changed_edges:
+            delta["edges"] = [(int(a), int(b)) for a, b in self._changed_edges]
+        if self._closed_windows:
+            delta["closed_windows"] = [
+                (ev.v_id, ev.window_idx) for ev in self._closed_windows
+            ]
+
+        now = time.time()
+        elapsed = now - self._last_snapshot_time
+        events_per_sec = 0.0
+        if elapsed > 0:
+            events_per_sec = (self._frame - self._last_frame) / elapsed
+        self._last_snapshot_time = now
+        self._last_frame = self._frame
+        counters = {
+            "window": max_window,
+            "windows_closed": self._windows_closed_total,
+            "bridges_active": len(getattr(self._epairs, "bridges", {})),
+            "events_processed": self._frame,
+            "edges_traversed": self._edges_traversed,
+            "events_per_sec": float(np.float32(events_per_sec)),
+            "gates_fired": getattr(self._epairs, "gates_fired", 0),
+            "residual": float(np.float32(self._residual)),
+            "residual_ewma": float(np.float32(self._residual_ewma)),
+            "residual_max": float(np.float32(self._residual_max)),
+        }
+        delta["counters"] = counters
+        delta["invariants"] = {
+            "inv_conservation_residual": float(np.float32(self._residual)),
+            "inv_no_signaling_delta": float(np.float32(self._ns_delta)),
+        }
+
+        self._changed_nodes.clear()
+        self._changed_edges.clear()
+        self._closed_windows.clear()
+        return delta if len(delta) > 1 else None
+
+    # ------------------------------------------------------------------
+    def _run_loop(self) -> None:
+        """Background thread advancing the experiment and recording deltas."""
+
+        while self._running:
+            self.step()
+            delta = self._build_delta()
+            if delta:
+                with self._lock:
+                    self._current_delta = delta
+                    self._replay_frames.append(dict(delta))
+                log_record("delta", "snapshot", frame=self._frame, value=delta)
+            self.set_experiment_status(
+                {"status": "running", "residual": self._residual}
+            )
+            time.sleep(0)
+
+    # ------------------------------------------------------------------
+    def snapshot_delta(self) -> Dict[str, Any] | None:
+        """Return the next snapshot delta for live or replay playback."""
+
+        with self._lock:
+            if self._running:
+                delta = self._current_delta
+                self._current_delta = None
+                return delta
+            if self._replay_playing and self._replay_frames:
+                if self._replay_index >= len(self._replay_frames):
+                    self._replay_playing = False
+                    self._replay_progress = 1.0
+                    return None
+                delta = self._replay_frames[self._replay_index]
+                self._replay_index += 1
+                self._replay_progress = self._replay_index / len(self._replay_frames)
+                return delta
+        return None
+
+    # ------------------------------------------------------------------
+    def handle_control(self, msg: Dict[str, Any]) -> Dict[str, Any] | None:
+        """Handle experiment, replay and graph control messages from the UI."""
+
+        if msg.get("cmd") == "load_graph":
+            graph = msg.get("graph")
+            if graph is not None:
+                self.build_graph(graph)
+                return {"type": "GraphStatic", "v": 1, **self.graph_static()}
+            return None
+
+        exp = msg.get("ExperimentControl")
+        if exp:
+            action = exp.get("action")
+            if action == "start":
+                self.start()
+                self.set_experiment_status(
+                    {"status": "running", "residual": self._residual}
+                )
+            elif action == "pause":
+                self.pause()
+                self.set_experiment_status(
+                    {"status": "paused", "residual": self._residual}
+                )
+            elif action == "resume":
+                self.start()
+                self.set_experiment_status(
+                    {"status": "running", "residual": self._residual}
+                )
+            elif action == "reset":
+                self.stop()
+                self.set_experiment_status({"status": "idle", "residual": 0.0})
+            elif action == "step":
+                self.step()
+                self.set_experiment_status(
+                    {"status": "paused", "residual": self._residual}
+                )
+            elif action == "set_rate":
+                self._target_rate = float(exp.get("rate", 1.0))
+            elif action == "run":
+                cfg = exp.get("config") or {}
+                rid = exp.get("id", 0)
+                gates = exp.get("gates", [1, 2, 3, 4, 5, 6])
+                try:
+                    metrics = run_gates(cfg, gates)
+                    inv = checks.from_metrics(metrics)
+                    self.set_experiment_status(
+                        {
+                            "id": rid,
+                            "state": "finished",
+                            "metrics": metrics,
+                            "invariants": inv,
+                        }
+                    )
+                except Exception as exc:
+                    self.set_experiment_status(
+                        {"id": rid, "state": "failed", "error": str(exc)}
+                    )
+            return None
+
+        replay = msg.get("ReplayControl")
+        if replay:
+            action = replay.get("action")
+            if action == "load":
+                path = replay.get("path")
+                if isinstance(path, str):
+                    gs = self.load_replay(path)
+                    if gs is not None:
+                        return {"type": "GraphStatic", "v": 1, **gs}
+                return None
+            if action == "play":
+                self._replay_playing = True
+                self._replay_progress = self._replay_progress or 0.0
+            elif action == "pause":
+                self._replay_playing = False
+                self._replay_progress = self._replay_progress or 0.0
+            elif action == "seek":
+                prog = float(replay.get("progress", 0.0))
+                self._replay_index = int(prog * len(self._replay_frames))
+                self._replay_progress = prog
+            return None
+
+        return None
+
+    # ------------------------------------------------------------------
+    def replay_progress(self) -> float | None:
+        """Return and clear the latest replay progress if available."""
+
+        with self._lock:
+            progress = self._replay_progress
+            self._replay_progress = None
+        return progress
+
+    # ------------------------------------------------------------------
+    def set_experiment_status(self, status: Dict[str, Any]) -> None:
+        """Record the most recent experiment status.
+
+        Parameters
+        ----------
+        status:
+            Mapping containing ``id``, ``state``, ``progress`` and
+            ``best_metrics`` fields.
+        """
+
+        with self._lock:
+            self._experiment_status = status
+
+    # ------------------------------------------------------------------
+    def experiment_status(self) -> Dict[str, Any] | None:
+        """Return and clear the latest experiment status if available."""
+
+        with self._lock:
+            status = self._experiment_status
+            self._experiment_status = None
+        return status
 
 
 # Lazily constructed engine instance; GUI code may read this handle but

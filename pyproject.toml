@@ -2,3 +2,6 @@
 version_variable = "setup.cfg:version"
 branch = "main"
 commit_parser = "angular"
+
+[tool.ruff]
+extend-select = ["PLR2004"]

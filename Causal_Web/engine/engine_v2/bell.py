@@ -213,14 +213,14 @@ class BellHelpers:
         source_ancestry: Ancestry,
         kappa_a: float,
         batch: int,
-    ) -> Tuple[int, Dict[str, float]]:
+    ) -> Tuple[int, Dict[str, float | int | str]]:
         """Compute the detector readout and associated log values."""
 
         rotated = self._rotate(lam_u, detector_ancestry.h, zeta)
         noise = self._rng.normal(scale=1.0 / max(kappa_xi, 1e-9))
         outcome = 1 if float(np.dot(a_D, rotated) + noise) > 0 else -1
 
-        log = {
+        log: Dict[str, float | int | str] = {
             "mode": mode,
             "kappa_a": kappa_a,
             "kappa_xi": kappa_xi,

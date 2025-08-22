@@ -1,6 +1,55 @@
 # Causal Web
 
-Causal Web is a simulation engine and GUI for experimenting with causal graphs. Nodes emit frames that propagate through edges with delay and attenuation while observers infer hidden state from the resulting activity. Delays now retain sub-frame precision and are quantised only when scheduled, enabling finer-grained simulations. The project is written in Python and uses [PySide6](https://doc.qt.io/qtforpython/) for the graphical interface.
+Causal Web is a simulation engine and GUI for experimenting with causal graphs. Nodes emit frames that propagate through edges with delay and attenuation while observers infer hidden state from the resulting activity. Delays now retain sub-frame precision and are quantised only when scheduled, enabling finer-grained simulations. The project is written in Python and uses [PySide6](https://doc.qt.io/qtforpython/) for the graphical interface. The legacy PySide6 widget interface has been removed in favour of a Qt Quick / QML frontend.
+
+A GPU-accelerated Qt Quick / QML interface lives in `ui_new` and serves as the default frontend. It renders graph nodes, edges and pulses via instanced `QSGGeometry`, exchanges `GraphStatic` and `SnapshotDelta` messages over a MessagePack WebSocket client, and tracks state via an immutable store with coalesced deltas. GPU buffers are built once and snapshot deltas modify only the affected instance offsets for positions, colors and visibility flags, while the view repaints just the touched region for minimal viewport updates. Per-instance attributes supply offsets, colors and visibility flags directly to the GPU so nodes, edges and pulses render in a single batch. Regression tests exercise graphs with up to 5,000 nodes to verify large-scene stability. GraphStatic can supply initial node labels, colors and visibility flags, and edges reuse a single line mesh with per-edge endpoints while parallel edges are collapsed before rendering. The interface includes basic panels for Telemetry, Meters, Experiment, Replay and Log Explorer, renders node labels, and applies level-of-detail rules that toggle label visibility, antialiasing and edge visibility based on zoom, exposing `labelsVisible` and `edgesVisible` properties so panels can react. Label text nodes are cached and updated in place to minimize scene-graph churn and avoid unnecessary painter state changes. Panels reside in a docked TabView on the right so the graph remains unobscured, and threshold values for label, edge and antialiasing visibility can be tuned via properties on `GraphView`. Users can zoom with the mouse wheel to scale the view and trigger these LOD changes. The Telemetry panel reports live node and edge counts alongside current LOD visibility, the Meters panel shows an estimated frames-per-second rate, the Experiment panel displays live status and residuals, the Replay panel tracks progress, and the Log Explorer streams log entries. Experiment, Replay and Log Explorer panels now offer interactive controls for starting, pausing or resetting experiments, controlling replay position, and filtering or clearing log entries. The Replay panel can load run directories for deterministic playback, streaming logged GraphStatic data and snapshot deltas, provides a timeline scrubber and supports bookmarks and frame annotations. Replays reproduce recorded HUD metrics such as frame count and residual trace for faithful analysis. DOE and GA result lists include a "Replay" button for one-click loading. Selecting two rows enables a "Compare" action that opens the runs side-by-side with synchronized scrubbing and metric deltas. Both panels also offer a "Promote to baseline" action that writes the selected configuration to `experiments/best_config.yaml` for reuse and shows a toast with the saved path. A "Run with baseline" button launches a run using this file. The DOE panel exposes range editors, LHS or grid sweeps, start/stop/resume controls, progress/ETA feedback and an interactive parallel-coordinate brush, while the GA panel surfaces population parameters, a live population table with objective and constraint flags, pause/resume and promote/export actions. A new Compare panel loads two runs side-by-side with synchronized playback controls, shows diff overlays and reports metric deltas. The backend runs experiments in a background thread, records deltas for replay and broadcasts updated experiment status and replay progress to keep panels in sync.
+
+## Architecture & IPC
+
+The engine and QML frontend communicate over a MessagePack WebSocket. After a
+session-token handshake, the engine pushes an initial `GraphStatic` message to
+seed the scene and then streams `SnapshotDelta` messages with geometry and
+metric changes.
+
+```json
+GraphStatic = {
+  "node_positions": [[x, y], ...],
+  "edges": [[src, dst], ...],
+  "node_labels": [...],
+  "node_colors": [...],
+  "node_flags": [...]
+}
+
+SnapshotDelta = {
+  "frame": int,
+  "node_positions": {id: [x, y], ...},
+  "edges": [[src, dst], ...],
+  "closed_windows": [[id, window], ...],
+  "counters": {...},
+  "invariants": {...}
+}
+```
+
+The engine prints a random session token at startup. Clients must begin with a
+`Hello` message carrying this token; the server closes connections that omit or
+mismatch it. A single client is accepted by default; set
+`CW_ALLOW_MULTI=1` to allow additional read-only spectator clients. Only the
+first connection retains control. Float32 fields keep payloads lean.
+
+## Compare panel
+
+The Compare panel accepts two run directories and plays their frames side-by-side. A scrubber and playback buttons keep the runs synchronized while an optional diff overlay and metric list highlight per-category deltas.
+
+The interface exposes an Edit/Run toggle. Edit mode keeps the canvas interactive while Run mode locks edits, compiles the current graph into a deterministic `GraphDTO` and loads it into the engine.
+
+Edit mode now includes basic editor tools for adding, selecting, connecting, dragging and deleting nodes alongside a property inspector panel for nodes, edges, observers and bridges plus a validation console that checks for duplicate identifiers, self-loops and missing properties.
+Observers and bridges are rendered on the canvas and can be selected for editing.
+
+Launch the GUI with:
+
+```bash
+python -m Causal_Web.main
+```
 
 Frames carry both phase and amplitude. Their influence on interference and coherence is weighted by amplitude and each frame records the local `generation_tick` at which it was emitted.
 
@@ -37,8 +86,8 @@ twin-paradox demonstration showcasing this time dilation. Run
 `python -m Causal_Web.analysis.lensing` to approximate lensing wedge amplitudes
 via a Monte-Carlo path sampler over the graph's causal structure.
 
-### Recent Changes
-
+- The UI disables its controls within a few seconds if the engine connection is
+  lost.
 - Fixed runaway zoom in the frames graph that occurred on startup.
 - Closing the GUI no longer hangs; the engine worker thread now shuts down
   cleanly.
@@ -46,6 +95,24 @@ via a Monte-Carlo path sampler over the graph's causal structure.
   and lightweight real-time plots using ``pyqtgraph``.
 - Canvas performance improved with minimal viewport updates, item caching and
   label level-of-detail. HUD wording clarified and telemetry buffers capped.
+- Telemetry panel now exposes rolling counter and invariant histories for live plots.
+- HUD overlay reports frame, depth, active windows, active bridges, FPS,
+  events per second and residual metrics.
+- Experiment panel adds single-step controls, a rate slider and label/edge
+  visibility toggles.
+- Canvas renders the latest snapshot diffs at up to 60 FPS via a push-based stream.
+- Client coalesces snapshot notifications and reuses scratch buffers (including
+  pooled unitary, phase and alpha scaling arrays) while edge and event logging respect budgets
+  unless diagnostics are enabled.
+- Scratch buffers for ψ and p are bucketed by group size to curb allocations and
+  snapshot deltas now encode float32 metrics and positions for leaner payloads.
+- Telemetry histories cap at roughly 3k samples per series and the client
+  coalesces snapshot deltas so only the newest frame renders between paints.
+- Window closures trigger brief red pulses on affected nodes for visual feedback.
+- GraphView exposes `save_snapshot(path, duration=0.0, fps=30)` to capture the current canvas as a PNG image or MP4 clip. For
+  MP4 exports both `duration` and `fps` must be positive.
+- A headless `video_export` utility under `tools/` composites logged snapshots
+  into an MP4 without launching the GUI.
 - Fixed a startup crash in read-only mode where a stale HUD item was
   re-added after clearing the scene.
 - Visible "Tick" terminology has been replaced with "Frame" throughout the
@@ -62,10 +129,32 @@ via a Monte-Carlo path sampler over the graph's causal structure.
   saturation with high fan-in.
 - Added DOE runner with invariant checks and metrics logging.
 - Runner CLI now accepts separate experiment (`--exp`) and base (`--base`)
-  configs, persists per-sample seeds and gate metrics, and supports
-  parallel execution via `--parallel` (use `--processes` for a process pool).
+  configs, persists per-sample seeds and gate metrics, supports
+  parallel execution via `--parallel` (use `--processes` for a process pool),
+  and can re-evaluate cached configurations with `--force`. The genetic
+  algorithm runner exposes the same `--force` option to rerun cached genomes.
 - DOE summaries now record selected gates and aggregate gate metrics
   (mean and standard deviation).
+- DOE queue manager can generate Latin Hypercube or grid sweeps, tracks live per-run invariant and fitness status, and dispatches runs to the engine via IPC.
+- New DOE panel integrates the queue manager into the Qt Quick UI with a Top-K table, scatter plot, parallel-coordinate view linking groups to metric axes with brush filtering, fitness heatmap and live status updates for sampled configurations.
+- Added a lightweight Genetic Algorithm framework with tournament selection, uniform crossover, Gaussian mutation and elitism along with a GA panel showing a live population table with objectives and per-constraint flags, fitness-history and Pareto-front charts, and promote/export actions.
+- Introduced scalar fitness helpers with hard invariant guardrails and normalised terms, providing a clear objective for optimisation and a path toward multi-objective Pareto support.
+- Added NSGA-II-lite multi-objective capabilities with non-dominated sorting, crowding-distance selection, a persistent Pareto archive and UI promotion of chosen trade-offs.
+- Multi-objective runs now normalise objectives per generation using running median±MAD baselines, exclude infeasible genomes before sorting, cap the Pareto archive via ε-dominance or crowding-distance pruning, and checkpoint RNG state and population for deterministic restarts.
+- GA panel now offers a multi-objective toggle, Pareto scatter with selectable objectives, descriptive axis labels, and a table showing rank and crowding distance with a promotion dialog.
+- DOE and GA batches now persist summaries under ``experiments/``:
+  - ``top_k.json`` records the best runs and is consumed by the Top-K UI table.
+  - ``hall_of_fame.json`` archives per-generation GA champions.
+  - ``best_config.yaml`` captures the promoted configuration for quick reuse.
+  - run directories under ``experiments/runs/<date>/<id>/`` hold per-run ``config.json``, ``result.json`` and ``delta_log.jsonl`` for replay.
+- GA evaluation can dispatch genomes to the engine via IPC, with engine-side handling of ``ExperimentControl`` messages for ``run`` requests.
+- GA panel evaluations now use the shared IPC loop so genomes are executed on the engine during interactive runs.
+- GA runs can be checkpointed and later resumed from disk—including any in-flight evaluations—to support reproducible interrupted searches.
+- Sweeps and GA populations reuse existing results via a persistent run index
+  at ``experiments/runs/index.json`` keyed by a deterministic run hash,
+  skipping duplicate configurations and allowing interrupted batches to
+  resume safely. Command-line sweeps accept ``--force`` to re-evaluate
+  configurations even when present in the index.
 - Gate harness now executes Gates 1–6 via engine primitives rather than
   returning proxy metrics.
 - Gate metrics now capture interference visibility, delay slopes and
@@ -89,7 +178,9 @@ via a Monte-Carlo path sampler over the graph's causal structure.
   for debugging; collection is disabled by default to reduce memory overhead.
 
 ## Table of Contents
+- [Architecture & IPC](#architecture--ipc)
 - [Quick Start](#quick-start)
+- [Troubleshooting](#troubleshooting)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Configuration](#configuration)
@@ -97,23 +188,32 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 - [Contributing](#contributing)
 
 ## Quick Start
-1. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-2. Run the GUI:
-   ```bash
-   python -m Causal_Web.main
-   ```
-   Or run headless:
-   ```bash
-   python -m Causal_Web.main --no-gui
-   ```
-3. Optional flags:
-   - `--config <path>` to use a custom configuration file.
-   - `--graph <path>` to load a different graph.
-   - `--profile <file>` to write `cProfile` stats to the given path.
-   - `--backend cupy` to enable GPU acceleration when available.
+```bash
+pip install -r requirements-gui.txt
+pyinstaller cw_gui.spec   # build bundle
+./dist/cw_gui/cw_gui      # run GUI bundle
+cw run --no-gui           # headless
+cw sweep --lhs ...        # DOE
+cw ga --config ...        # GA
+```
+
+### cw gui bundles
+
+Use the provided `cw_gui.spec` with PyInstaller to create a standalone GUI
+application:
+
+```bash
+pip install -r requirements-gui.txt
+pyinstaller cw_gui.spec
+```
+
+The bundle will be written to `dist/cw_gui/` and contains an executable that
+launches the engine and Qt Quick interface.
+
+## Troubleshooting
+- **Disconnected** → token mismatch or single-client limit.
+- **Low FPS** → zoom out, labels auto-hide; disable AA at far zoom.
+- **Invariant failures** → inspect `result.json` for violations.
 
 ## Installation
 Clone the repository and install the packages listed in `requirements.txt`. The GUI requires an X11 compatible display.
@@ -273,7 +373,11 @@ The adapter exposes methods like `build_graph`, `step`, `pause` and
 compatible. Snapshots include the identifiers of nodes and edges touched since
 the previous call along with any closed window events, allowing the GUI to
 incrementally update its model. An EWMA of the energy conservation residual
-is tracked per window and surfaced via the snapshot counters. Internally a depth-based
+is tracked per window and surfaced via the snapshot counters. Additional
+micro-counters such as ``windows_closed``, ``bridges_active``,
+``events_processed`` and ``edges_traversed`` are exposed alongside global
+``residual_ewma`` and per-window ``residual_max`` to aid diagnostics. For Bell experiments the
+adapter also tracks a no-signaling delta under ``inv_no_signaling_delta``. Internally a depth-based
 scheduler orders packets by their arrival depth and advances vertex windows
 using the Local Causal Consistency Model (LCCM).  The LCCM computes a window
 size ``W(v)`` from the vertex's incident degree (fan-in plus fan-out) and local
@@ -332,7 +436,7 @@ These settings drive the helper modules in ``experiments.dispersion`` and
 ``experiments.lightcone``.
 
 ## GPU and Distributed Acceleration
-The engine optionally accelerates per-edge calculations on the GPU when [Cupy](https://cupy.dev) is installed and can shard classical zones across a [Ray](https://www.ray.io) cluster. Classical nodes are partitioned into coherent zones and dispatched in parallel to Ray workers; if Ray is unavailable an info-level message is logged and processing continues locally. Select the backend with `Config.backend` or `--backend` (`cpu` by default, `cupy` for CUDA).
+The engine optionally accelerates per-edge calculations on the GPU when [Cupy](https://cupy.dev) is installed and can shard classical zones across a [Ray](https://www.ray.io) cluster. Classical nodes are partitioned into coherent zones and dispatched in parallel to Ray workers; if Ray is unavailable an info-level message is logged and processing continues locally. Select the backend with `Config.backend` or `--backend` (`cpu` by default, `cupy` for CUDA). Set `CW_USE_CUPY=1` to enable optional vectorised kernels for heavy sweeps when using the `cupy` backend.
 
 Density accumulation and matrix-product-state propagation also leverage CuPy
 when the backend is set to `cupy`, keeping computation on the GPU.
@@ -351,6 +455,26 @@ unavailable. A micro-benchmark under `tests/perf_edge_kernel.py` asserts the
 kernel processes one million edges in under 100 ms on compatible hardware.
 Edge phases ``exp(1j * (phi + A))`` are cached during graph loading so packet
 delivery avoids redundant exponentials.
+
+## Benchmarks
+
+`bench/engine_bench.py` measures engine step throughput while
+`bench/gui_bench.py` records GUI frame rate using an offscreen Qt
+renderer. Both benchmarks run nightly in CI, comparing results against
+checked-in baselines and uploading JSON artifacts. A lightweight
+`bench/gui_smoke.py` also runs offscreen, timing a 5k node
+``GraphView.apply_delta`` call and failing if it exceeds 10 ms. Regressions greater than
+5% generate workflow warnings while slowdowns beyond 10% fail the job. Any
+regression over 5% also opens a GitHub issue so maintainers receive external
+notifications. Both benchmarks record basic hardware metadata for reproducibility. Manual
+GUI frame-rate measurement guidelines remain in `bench/gui_fps.md` for
+scenarios not covered by the automated benchmark.
+
+The GUI benchmark accepts ``--nodes`` to control graph size and
+``--aa/--no-aa`` and ``--labels/--no-labels`` flags to toggle
+anti-aliasing and label rendering. Optional ``--target-fps`` records
+runtime expectations and ``--machine`` adds free-form notes; detailed
+hardware metadata is collected automatically in the output JSON.
 
 ## Output Logs
 Each run creates a timestamped directory under `output/runs` containing the graph, configuration and logs. Logging can be enabled or disabled via the GUI **Log Files** window or the `log_files` section of `config.json`. In `config.json` the keys are the categories (`tick`, `phenomena`, `event`) containing individual label flags. Logging cadence is event-driven; metrics and graph snapshots are written when windows advance or other triggers occur. The `logging_mode` option selects which categories are written: `diagnostic` (all logs), `tick`, `phenomena` and `events`.
@@ -399,4 +523,11 @@ generators, so parallel sweeps should run in separate processes to avoid
 contention.
 
 ## Contributing
-Unit tests live under `tests/` and can be run with `pytest`. Coding guidelines and packaging instructions are documented in [AGENTS.md](AGENTS.md) and [docs/developer_guide.md](docs/developer_guide.md).
+
+Run style checks with `pre-commit`:
+
+```bash
+pre-commit run --files <path>
+```
+
+Unit tests live under `tests/` and can be run with `pytest`. Golden replay logs in `tests/goldens/` span a few hundred frames from production runs and are exercised via `pytest tests/test_replay_golden.py` with unique residual profiles per log. The helper functions `Causal_Web.engine.replay.build_engine` and `replay_from_log` load either run directories or trimmed delta logs for these regressions. New golden logs can be recorded from engine runs using `tools/record_golden.py`. Coding guidelines and packaging instructions are documented in [AGENTS.md](AGENTS.md) and [docs/developer_guide.md](docs/developer_guide.md).

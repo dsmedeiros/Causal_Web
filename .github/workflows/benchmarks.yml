@@ -1,0 +1,158 @@
+name: Benchmarks
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * *'
+
+jobs:
+  engine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run engine benchmark
+        run: |
+          PYTHONPATH=. python bench/engine_bench.py --output engine_bench.json
+      - name: Compare to baseline
+        id: compare
+        run: |
+          python - <<'PY'
+import json, os, pathlib, sys
+baseline = json.loads(pathlib.Path('bench/baseline_engine_bench.json').read_text())
+current = json.loads(pathlib.Path('engine_bench.json').read_text())
+ratio = current['steps_per_sec'] / baseline['steps_per_sec']
+print(f"Baseline {baseline['steps_per_sec']:.2f} steps/s")
+print(f"Current  {current['steps_per_sec']:.2f} steps/s")
+status = 'ok'
+message = ''
+if ratio < 0.9:
+    print('::error::Performance regression exceeds 10%')
+    status = 'fail'
+    message = f"Engine benchmark dropped from {baseline['steps_per_sec']:.2f} to {current['steps_per_sec']:.2f} steps/s"
+elif ratio < 0.95:
+    print('::warning::Performance regression exceeds 5%')
+    status = 'warn'
+    message = f"Engine benchmark dropped from {baseline['steps_per_sec']:.2f} to {current['steps_per_sec']:.2f} steps/s"
+with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+    fh.write(f"status={status}\n")
+    if message:
+        fh.write(f"message={message}\n")
+if status == 'fail':
+    sys.exit(1)
+PY
+      - name: Notify regression
+        if: steps.compare.outputs.status != 'ok'
+        uses: actions/github-script@v6
+        env:
+          MESSAGE: ${{ steps.compare.outputs.message }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const status = '${{ steps.compare.outputs.status }}';
+            const msg = process.env.MESSAGE || 'Benchmark regression detected.';
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[benchmarks] Engine ${status === 'fail' ? 'failure' : 'regression'}`,
+              body: msg
+            });
+      - name: Upload benchmark artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: engine-bench
+          path: engine_bench.json
+
+  gui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgl1-mesa-dev
+      - name: Run GUI benchmark
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          PYTHONPATH=. xvfb-run -s "-screen 0 1024x768x24" python bench/gui_bench.py --output gui_bench.json
+      - name: Run GUI apply_delta smoke
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          PYTHONPATH=. xvfb-run -s "-screen 0 1024x768x24" python bench/gui_smoke.py --output gui_smoke.json
+      - name: Check apply_delta threshold
+        run: |
+          python - <<'PY'
+import json, pathlib, sys
+data = json.loads(pathlib.Path('gui_smoke.json').read_text())
+ms = data['apply_delta_ms']
+print(f"apply_delta {ms:.2f} ms")
+if ms > 10.0:
+    print('::error::apply_delta exceeds 10ms')
+    sys.exit(1)
+PY
+      - name: Compare to baseline
+        id: compare
+        run: |
+          python - <<'PY'
+import json, os, pathlib, sys
+baseline = json.loads(pathlib.Path('bench/baseline_gui_bench.json').read_text())
+current = json.loads(pathlib.Path('gui_bench.json').read_text())
+ratio = current['fps'] / baseline['fps']
+print(f"Baseline {baseline['fps']:.2f} fps")
+print(f"Current  {current['fps']:.2f} fps")
+status = 'ok'
+message = ''
+if ratio < 0.9:
+    print('::error::FPS regression exceeds 10%')
+    status = 'fail'
+    message = f"GUI benchmark dropped from {baseline['fps']:.2f} to {current['fps']:.2f} fps"
+elif ratio < 0.95:
+    print('::warning::FPS regression exceeds 5%')
+    status = 'warn'
+    message = f"GUI benchmark dropped from {baseline['fps']:.2f} to {current['fps']:.2f} fps"
+with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+    fh.write(f"status={status}\n")
+    if message:
+        fh.write(f"message={message}\n")
+if status == 'fail':
+    sys.exit(1)
+PY
+      - name: Notify regression
+        if: steps.compare.outputs.status != 'ok'
+        uses: actions/github-script@v6
+        env:
+          MESSAGE: ${{ steps.compare.outputs.message }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const status = '${{ steps.compare.outputs.status }}';
+            const msg = process.env.MESSAGE || 'Benchmark regression detected.';
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[benchmarks] GUI ${status === 'fail' ? 'failure' : 'regression'}`,
+              body: msg
+            });
+      - name: Upload benchmark artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: gui-bench
+          path: gui_bench.json
+      - name: Upload GUI smoke artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: gui-smoke
+          path: gui_smoke.json

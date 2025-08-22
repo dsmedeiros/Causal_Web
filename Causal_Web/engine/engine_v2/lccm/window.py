@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """Event-driven window sizing helpers for the LCCM.
 
 This module implements a strictly local update rule for the LCCM window size
@@ -9,15 +7,24 @@ both density and vertex degree.  The actual ``W(v)`` is rate-limited toward the
 target to avoid oscillation.
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 import math
-from typing import Iterable, Sequence
+from typing import Sequence
+from numpy.typing import NDArray
 
 import numpy as np
 
 
+TRIM_MAX_FRACTION = 0.5
+
+
 def robust_weighted_mean(
-    values: Sequence[float], weights: Sequence[float], *, trim: float = 0.1
+    values: Sequence[float] | NDArray[np.float64],
+    weights: Sequence[float] | NDArray[np.float64],
+    *,
+    trim: float = 0.1,
 ) -> float:
     """Return a 10% trimmed weighted mean.
 
@@ -30,7 +37,7 @@ def robust_weighted_mean(
         raise ValueError("values must be non-empty")
     if len(values) != len(weights):
         raise ValueError("values and weights must be the same length")
-    if not 0 <= trim < 0.5:
+    if not 0 <= trim < TRIM_MAX_FRACTION:
         raise ValueError("trim fraction must be in [0, 0.5)")
 
     v = np.asarray(values, dtype=float)

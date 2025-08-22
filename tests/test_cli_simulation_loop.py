@@ -1,4 +1,3 @@
-import sys
 from Causal_Web.main import MainService
 from Causal_Web.config import Config
 from Causal_Web.engine.engine_v2 import adapter
@@ -26,4 +25,3 @@ def test_cli_headless_uses_v2_simulation_loop(monkeypatch, tmp_path):
     service.run()
 
     assert called.get("loop")
-    assert "Causal_Web.gui_pyside.engine_worker" not in sys.modules

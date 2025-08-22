@@ -34,7 +34,7 @@ class MetricsLogger:
     """Collect metrics and emit them to disk."""
 
     out_dir: Path
-    records: List[Dict[str, object]] = field(default_factory=list)
+    records: List[Dict[str, float | bool | str]] = field(default_factory=list)
 
     def log(
         self,
@@ -47,7 +47,7 @@ class MetricsLogger:
     ) -> None:
         """Store metrics for a single sample."""
 
-        entry = {
+        entry: Dict[str, float | bool | str] = {
             "sample": sample,
             "seed": seed,
             "git": _GIT,
@@ -75,11 +75,11 @@ class MetricsLogger:
                 writer.writeheader()
                 writer.writerows(self.records)
 
-        def _aggregate(rows: List[Dict[str, object]]) -> Dict[str, float]:
+        def _aggregate(rows: List[Dict[str, float | bool | str]]) -> Dict[str, float]:
             keys = {k for row in rows for k in row.keys() if k.startswith("G")}
             agg: Dict[str, float] = {}
             for k in sorted(keys):
-                vals = [r[k] for r in rows if k in r]
+                vals = [float(r[k]) for r in rows if k in r]
                 agg[f"mean_{k}"] = float(np.mean(vals))
                 agg[f"std_{k}"] = float(np.std(vals))
             return agg
