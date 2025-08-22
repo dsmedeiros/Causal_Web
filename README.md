@@ -155,6 +155,10 @@ via a Monte-Carlo path sampler over the graph's causal structure.
   promotion (default 0.6), ``--promote-window`` to restrict the quantile to recent
   proxy scores, and ``--multi-objective`` to enable Dirichlet scalarisation of
   multiple objectives.
+- ``cw bench-optim`` runs a small bake-off across GA, TPE, CMA-ES and MCTS-H,
+  supports conditional search spaces, recommends an optimizer order based on
+  past wins and evaluation rates, and writes per-task and aggregate reports
+  to ``bench/optim``.
 - The Qt Quick interface now exposes an ``MCTS`` tab so tree search runs alongside existing DOE and GA panels.
 - The MCTS tab reports live node counts, evaluation totals, and promotion rates during a search.
 - Users can adjust proxy/full frame budgets, promotion thresholds or
@@ -221,6 +225,8 @@ cw run --no-gui           # headless
 cw sweep --lhs ...        # DOE
 cw ga --config ...        # GA
 cw optim --base base.yaml --space space.yaml --optim mcts_h --multi-objective  # MCTS-H
+cw bench-optim --task bell --budget 10  # optimizer bake-off
+cw bench-optim --task all --budget 10   # run all tasks and summary
 ```
 
 ### cw gui bundles

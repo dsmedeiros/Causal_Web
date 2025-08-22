@@ -10,6 +10,7 @@ from typing import List, Optional
 import yaml
 
 from experiments import OptimizerQueueManager, MCTS_H, build_priors, scalar_fitness
+from experiments.bench_optim import TASKS, bench as bench_optim, bench_all
 
 
 def main(argv: Optional[List[str]] = None) -> None:
@@ -57,6 +58,16 @@ def main(argv: Optional[List[str]] = None) -> None:
         "--bins", type=int, default=3, help="Quantile bins per parameter"
     )
     optim_p.add_argument("--state", help="Path to optimiser state checkpoint")
+    bench_p = sub.add_parser("bench-optim", help="Benchmark optimisers")
+    bench_p.add_argument(
+        "--task",
+        choices=sorted(TASKS) + ["all"],
+        required=True,
+        help="Benchmark task id or 'all' for every task",
+    )
+    bench_p.add_argument(
+        "--budget", type=int, default=20, help="Evaluation budget per optimiser"
+    )
 
     args, rest = parser.parse_known_args(argv)
     if args.command == "run":
@@ -102,6 +113,11 @@ def main(argv: Optional[List[str]] = None) -> None:
         for _ in range(args.budget):
             if mgr.run_next() is None:
                 break
+    elif args.command == "bench-optim":
+        if args.task == "all":
+            bench_all(args.budget)
+        else:
+            bench_optim(args.task, args.budget)
 
 
 if __name__ == "__main__":

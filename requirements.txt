@@ -13,3 +13,5 @@ pyyaml
 ray
 websockets
 zstandard
+hyperopt
+cma
