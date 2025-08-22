@@ -11,6 +11,8 @@ Window {
     property bool editMode: true
     property string tool: "select"
     property bool controlsEnabled: false
+    property string role: "spectator"
+    property bool controlRequested: false
     width: 800
     height: 600
     visible: true
@@ -126,6 +128,33 @@ Window {
               (telemetryModel.counters["events_per_sec"] ? telemetryModel.counters["events_per_sec"][telemetryModel.counters["events_per_sec"].length - 1].toFixed(1) : 0) +
               " residual: " + experimentModel.residual.toFixed(3)
         z: 10
+    }
+
+    Text {
+        id: roleBadge
+        anchors.right: parent.right
+        anchors.top: parent.top
+        color: "white"
+        text: root.role === "controller" ? "Controller" : "Spectator"
+        z: 10
+    }
+
+    Button {
+        id: requestButton
+        text: "Request control"
+        anchors.right: parent.right
+        anchors.top: roleBadge.bottom
+        visible: root.role === "spectator"
+        onClicked: root.requestControl()
+    }
+
+    Button {
+        id: transferButton
+        text: root.controlRequested ? "Grant control" : "Transfer control"
+        anchors.right: parent.right
+        anchors.top: roleBadge.bottom
+        visible: root.role === "controller"
+        onClicked: root.transferControl()
     }
 
     Item {

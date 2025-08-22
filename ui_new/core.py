@@ -38,14 +38,16 @@ async def run(
     Other models receive telemetry, experiment status, replay progress and log
     entries for display in QML panels. ``token`` is forwarded to the server for
     simple session authentication. ``window`` controls overall UI enabling and
-    is disabled on disconnect. A 2-second heartbeat detects dead engines and
-    drops the connection after missed pongs.
+    is disabled on disconnect. The window is augmented with ``requestControl``
+    and ``transferControl`` callables for role hand-offs. A 2-second heartbeat
+    detects dead engines and drops the connection after missed pongs.
     """
 
     window.controlsEnabled = False
+    window.role = "spectator"
+    window.controlRequested = False
     client = Client(url, token, ping_interval=2.0)
     await client.connect()
-    window.controlsEnabled = True
 
     loop = asyncio.get_running_loop()
     experiment.set_client(client)
@@ -54,6 +56,12 @@ async def run(
     doe.set_client(client)
     ga.set_client(client, loop)
     mcts.set_client(client, loop)
+    window.requestControl = lambda: asyncio.create_task(
+        client.send({"type": "RequestControl", "v": 1})
+    )
+    window.transferControl = lambda: asyncio.create_task(
+        client.send({"type": "TransferControl", "v": 1})
+    )
 
     try:
         while True:
@@ -104,6 +112,18 @@ async def run(
                 entry = msg.get("entry")
                 if entry is not None:
                     logs.add_entry(str(entry))
+                continue
+
+            if mtype == "Role":
+                role = msg.get("role", "spectator")
+                window.role = role
+                window.controlsEnabled = role == "controller"
+                if role != "controller":
+                    window.controlRequested = False
+                continue
+            if mtype == "ControlRequest":
+                window.controlRequested = True
+                continue
     finally:
         view.editable = False
         window.controlsEnabled = False
