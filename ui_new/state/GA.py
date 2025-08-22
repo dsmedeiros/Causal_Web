@@ -25,6 +25,7 @@ class GAModel(QObject):
     baselinePromoted = Signal(str)
     objectiveCountChanged = Signal()
     objectiveNamesChanged = Signal()
+    statsChanged = Signal()
 
     def __init__(self) -> None:
         super().__init__()
@@ -80,6 +81,10 @@ class GAModel(QObject):
         self._running = False
         self._task: Optional[asyncio.Task] = None
         self._generation = 0
+        self._node_count = 0
+        self._frontier = 0
+        self._expansion_rate = 0.0
+        self._promotion_rate = 0.0
 
     # ------------------------------------------------------------------
     def _reload_hof(self) -> None:
@@ -158,6 +163,17 @@ class GAModel(QObject):
         self.hallOfFameChanged.emit()
         self.objectiveCountChanged.emit()
         self.objectiveNamesChanged.emit()
+        self._node_count = self._generation * self._population_size
+        self._frontier = max(
+            0, (self._max_generations - self._generation) * self._population_size
+        )
+        self._expansion_rate = (
+            self._generation / self._max_generations if self._max_generations else 0.0
+        )
+        self._promotion_rate = (
+            len(self._hof) / self._node_count if self._node_count else 0.0
+        )
+        self.statsChanged.emit()
 
     # ------------------------------------------------------------------
     @Slot()
@@ -237,8 +253,13 @@ class GAModel(QObject):
         self._obj_count = 0
         self._obj_names = []
         self._generation = 0
+        self._node_count = 0
+        self._frontier = self._population_size * self._max_generations
+        self._expansion_rate = 0.0
+        self._promotion_rate = 0.0
         self._running = True
         self.runningChanged.emit()
+        self.statsChanged.emit()
 
         async def _run() -> None:
             while self._running and self._generation < self._max_generations:
@@ -349,3 +370,20 @@ class GAModel(QObject):
         return self._running
 
     running = Property(bool, _get_running, notify=runningChanged)
+
+    def _get_node_count(self) -> int:
+        return self._node_count
+
+    def _get_frontier(self) -> int:
+        return self._frontier
+
+    def _get_expansion_rate(self) -> float:
+        return self._expansion_rate
+
+    def _get_promotion_rate(self) -> float:
+        return self._promotion_rate
+
+    nodeCount = Property(int, _get_node_count, notify=statsChanged)
+    frontier = Property(int, _get_frontier, notify=statsChanged)
+    expansionRate = Property(float, _get_expansion_rate, notify=statsChanged)
+    promotionRate = Property(float, _get_promotion_rate, notify=statsChanged)

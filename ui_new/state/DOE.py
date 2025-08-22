@@ -35,6 +35,7 @@ class DOEModel(QObject):
     brushesChanged = Signal()
     groupNamesChanged = Signal()
     baselinePromoted = Signal(str)
+    statsChanged = Signal()
 
     def __init__(self) -> None:
         super().__init__()
@@ -65,6 +66,10 @@ class DOEModel(QObject):
         self._brushes: Dict[int, Tuple[float, float]] = {}
         data = load_top_k(Path("experiments/top_k.json"))
         self._topk = data.get("rows", [])
+        self._node_count = 0
+        self._frontier = 0
+        self._expansion_rate = 0.0
+        self._promotion_rate = 0.0
 
     # ------------------------------------------------------------------
     @Slot(int, bool)
@@ -341,12 +346,20 @@ class DOEModel(QObject):
         if not self._mgr:
             self._progress = 0.0
             self._eta = 0.0
+            self._node_count = 0
+            self._frontier = 0
+            self._expansion_rate = 0.0
+            self._promotion_rate = 0.0
         else:
             total = len(self._mgr.runs)
             done = sum(
                 1 for _, s in self._mgr.runs if s.state in {"finished", "failed"}
             )
             self._progress = done / total if total else 0.0
+            self._node_count = total
+            self._frontier = total - done
+            self._expansion_rate = done / total if total else 0.0
+            self._promotion_rate = len(self._topk) / total if total else 0.0
             if self._start_time and done:
                 elapsed = time.time() - self._start_time
                 remaining = (elapsed / done) * (total - done)
@@ -355,6 +368,7 @@ class DOEModel(QObject):
                 self._eta = 0.0
         self.progressChanged.emit()
         self.etaChanged.emit()
+        self.statsChanged.emit()
 
     # ------------------------------------------------------------------
     @Slot()
@@ -459,3 +473,20 @@ class DOEModel(QObject):
         return self._brushes
 
     brushes = Property("QVariant", _get_brushes, notify=brushesChanged)
+
+    def _get_node_count(self) -> int:
+        return self._node_count
+
+    def _get_frontier(self) -> int:
+        return self._frontier
+
+    def _get_expansion_rate(self) -> float:
+        return self._expansion_rate
+
+    def _get_promotion_rate(self) -> float:
+        return self._promotion_rate
+
+    nodeCount = Property(int, _get_node_count, notify=statsChanged)
+    frontier = Property(int, _get_frontier, notify=statsChanged)
+    expansionRate = Property(float, _get_expansion_rate, notify=statsChanged)
+    promotionRate = Property(float, _get_promotion_rate, notify=statsChanged)

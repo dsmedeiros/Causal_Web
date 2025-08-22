@@ -72,6 +72,19 @@ Rectangle {
         ProgressBar { width: parent.width; value: doeModel.progress }
         Text { text: "ETA: " + doeModel.eta.toFixed(1) + "s"; color: "white" }
 
+        Row {
+            spacing: 8
+            Text { text: "Nodes: " + doeModel.nodeCount; color: "white" }
+            Text { text: "Frontier: " + doeModel.frontier; color: "white" }
+        }
+        Row {
+            spacing: 4
+            Text { text: "Expand"; color: "white" }
+            ProgressBar { width: 80; value: doeModel.expansionRate }
+            Text { text: "Promote"; color: "white" }
+            ProgressBar { width: 80; value: doeModel.promotionRate }
+        }
+
         Text { text: "Top-K"; color: "white" }
         ListView {
             width: parent.width

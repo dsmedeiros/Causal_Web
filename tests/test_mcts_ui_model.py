@@ -46,4 +46,6 @@ def test_mcts_model_metrics(tmp_path, monkeypatch):
     assert model.nodeCount > 0
     assert model.proxyEvaluations == model.fullEvaluations > 0
     assert model.promotionRate == pytest.approx(1.0)
+    assert model.frontier >= 0
+    assert 0 <= model.expansionRate <= 1
     loop.close()
