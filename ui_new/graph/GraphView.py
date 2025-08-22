@@ -572,7 +572,6 @@ class GraphView(QQuickItem):
             from PySide6.QtGui import QImage  # Local import to avoid GUI deps
             import numpy as np
             import imageio
-
             img = result.image().convertToFormat(QImage.Format_RGBA8888)
             width, height = img.width(), img.height()
             ptr = img.constBits()
