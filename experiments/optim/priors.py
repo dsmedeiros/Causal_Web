@@ -51,7 +51,8 @@ def build_priors(
         Optional number of quantile bins for continuous parameters. When
         provided, continuous values are converted to a :class:`DiscretePrior`
         with ``bins`` equally spaced quantiles.  When ``None`` the continuous
-        values are modelled with a :class:`GaussianPrior`.
+        values are modelled with a :class:`GaussianPrior` whose parameters are
+        estimated with robust statistics (median and median absolute deviation).
     """
 
     priors: Dict[str, Prior] = {}
@@ -74,7 +75,8 @@ def build_priors(
                 probs = np.full(len(centres), 1.0 / len(centres))
                 priors[k] = DiscretePrior(list(map(float, centres)), list(probs))
             else:
-                mu = float(arr.mean())
-                sigma = float(arr.std() or 1.0)
+                mu = float(np.median(arr))
+                mad = float(np.median(np.abs(arr - mu)))
+                sigma = float(mad * 1.4826) or 1.0
                 priors[k] = GaussianPrior(mu, sigma)
     return priors

@@ -9,7 +9,7 @@ import pytest
 from experiments import OptimizerQueueManager
 from experiments.ga import GeneticAlgorithm
 from experiments.optim import MCTS_H, build_priors
-from experiments.optim.priors import DiscretePrior
+from experiments.optim.priors import DiscretePrior, GaussianPrior
 
 
 def test_progressive_widening():
@@ -51,6 +51,23 @@ def test_build_priors_quantile_bins():
     rng = np.random.default_rng(0)
     samples = {priors["a"].sample(rng) for _ in range(20)}
     assert len(samples) == 2
+
+
+def test_build_priors_robust_gaussian():
+    rows = [{"a": 0.0}, {"a": 1.0}, {"a": 10.0}]
+    priors = build_priors(rows)
+    assert isinstance(priors["a"], GaussianPrior)
+    assert priors["a"].mu == pytest.approx(1.0)
+    assert priors["a"].sigma == pytest.approx(1.4826, rel=1e-3)
+
+
+def test_online_prior_update():
+    priors = build_priors([{"a": 0.0}])
+    opt = MCTS_H(["a"], priors, {"rng_seed": 0})
+    opt._update_priors({"a": 0.5}, 0.1)
+    assert isinstance(opt.priors["a"], GaussianPrior)
+    assert opt.priors["a"].mu == pytest.approx(0.25)
+    assert opt.priors["a"].sigma == pytest.approx(0.37065, rel=1e-3)
 
 
 def test_transposition_reuses_nodes():
@@ -327,3 +344,29 @@ def test_mcts_beats_ga(tmp_path, monkeypatch):
 
     assert full < ga_evals
     assert best_err <= ga_best
+
+
+def test_generation_promotion_rate_improvement():
+    priors = {"a": DiscretePrior([0, 1], [0.5, 0.5])}
+    opt = MCTS_H(["a"], priors, {"rng_seed": 0, "promote_threshold": 0.5})
+    cfg = opt.suggest(1)[0]
+    opt.observe([{"config": cfg, "fitness_proxy": 0.6}])
+    m1 = opt.metrics()
+    assert m1["promotion_rate_gen"] == pytest.approx(0.0)
+    cfg = opt.suggest(1)[0]
+    opt.observe([{"config": cfg, "fitness_proxy": 0.4}])
+    m2 = opt.metrics()
+    assert m2["promotion_rate_gen"] == pytest.approx(1.0)
+    assert m2["promotion_rate_improvement"] == pytest.approx(1.0)
+
+
+def test_generation_best_so_far_improvement():
+    priors = {"a": DiscretePrior([0], [1.0])}
+    opt = MCTS_H(["a"], priors, {"rng_seed": 0})
+    cfg = opt.suggest(1)[0]
+    opt.observe([{"config": cfg, "fitness": 1.0}])
+    cfg = opt.suggest(1)[0]
+    opt.observe([{"config": cfg, "fitness": 0.5}])
+    m = opt.metrics()
+    assert m["best_so_far"] == pytest.approx(0.5)
+    assert m["best_so_far_improvement"] == pytest.approx(0.5)

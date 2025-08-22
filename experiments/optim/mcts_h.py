@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Sequence, Tuple
 import numpy as np
 
 from .api import Optimizer
-from .priors import Prior
+from .priors import DiscretePrior, GaussianPrior, Prior
 
 
 @dataclass
@@ -95,6 +95,24 @@ class MCTS_H(Optimizer):
         self._proxy_cache: Dict[Tuple[Tuple[str, float], ...], float] = {}
         self._proxy_full_pairs: List[Tuple[float, float]] = []
         self._frontier = 1
+        self._prior_data: Dict[str, List[float]] = {}
+        self._prior_bins: Dict[str, int] = {}
+        self._bin_stats: Dict[str, Dict[float, List[float]]] = {}
+        for k, prior in self.priors.items():
+            if isinstance(prior, GaussianPrior):
+                self._prior_data[k] = [prior.mu]
+            elif isinstance(prior, DiscretePrior):
+                self._prior_bins[k] = len(prior.values)
+                self._bin_stats[k] = {v: [] for v in prior.values}
+                self._prior_data[k] = list(prior.values)
+            else:
+                self._prior_data[k] = []
+        for p in self.space:
+            self._prior_data.setdefault(p, [])
+        # generation tracking
+        self._generation = 0
+        self._promotion_history: List[float] = []
+        self._best_history: List[float] = []
 
     # ------------------------------------------------------------------
     # public API
@@ -124,6 +142,9 @@ class MCTS_H(Optimizer):
         return out
 
     def observe(self, results: List[Dict[str, float]]) -> None:
+        gen_proxy = 0
+        gen_promote = 0
+        gen_best: float | None = None
         for res in results:
             cfg = res["config"]
             key = tuple(sorted(cfg.items()))
@@ -144,6 +165,7 @@ class MCTS_H(Optimizer):
                     if not self.multi_objective
                     else float(np.dot(weights, vals))
                 )
+                gen_best = full_score if gen_best is None else min(gen_best, full_score)
                 self._paths.pop(key, None)
                 for node in path:
                     node.N += 1
@@ -152,6 +174,7 @@ class MCTS_H(Optimizer):
                     self._proxy_full_pairs.append(
                         (self._proxy_cache.pop(key), full_score)
                     )
+                self._update_priors(cfg, full_score)
             elif "objectives_proxy" in res:
                 objs = res["objectives_proxy"]
                 vals = np.array([objs[k] for k in sorted(objs)], dtype=float)
@@ -166,6 +189,7 @@ class MCTS_H(Optimizer):
                 self._proxy_scores.append(score)
                 self._proxy_cache[key] = score
                 self._proxy_evals += 1
+                gen_proxy += 1
                 if (
                     self.promote_window > 0
                     and len(self._proxy_scores) > self.promote_window
@@ -187,10 +211,12 @@ class MCTS_H(Optimizer):
                 if promote:
                     self._pending_full.append(cfg)
                     self._promotions += 1
+                    gen_promote += 1
                 else:
                     self._paths.pop(key, None)
             elif "fitness" in res or "fitness_full" in res:
                 full_score = float(res.get("fitness", res.get("fitness_full", 0.0)))
+                gen_best = full_score if gen_best is None else min(gen_best, full_score)
                 reward = -full_score
                 self._paths.pop(key, None)
                 for node in path:
@@ -200,11 +226,13 @@ class MCTS_H(Optimizer):
                     self._proxy_full_pairs.append(
                         (self._proxy_cache.pop(key), full_score)
                     )
+                self._update_priors(cfg, full_score)
             elif "fitness_proxy" in res:
                 score = float(res["fitness_proxy"])
                 self._proxy_scores.append(score)
                 self._proxy_cache[key] = score
                 self._proxy_evals += 1
+                gen_proxy += 1
                 if (
                     self.promote_window > 0
                     and len(self._proxy_scores) > self.promote_window
@@ -226,10 +254,17 @@ class MCTS_H(Optimizer):
                 if promote:
                     self._pending_full.append(cfg)
                     self._promotions += 1
+                    gen_promote += 1
                 else:
                     self._paths.pop(key, None)
             else:
                 self._paths.pop(key, None)
+        self._generation += 1
+        rate = gen_promote / gen_proxy if gen_proxy else 0.0
+        self._promotion_history.append(rate)
+        prev_best = self._best_history[-1] if self._best_history else float("inf")
+        best = min(prev_best, gen_best) if gen_best is not None else prev_best
+        self._best_history.append(best)
 
     def done(self) -> bool:
         return self._nodes >= self.max_nodes
@@ -388,20 +423,42 @@ class MCTS_H(Optimizer):
         """Return collected search metrics.
 
         The dictionary includes expansion and promotion rates, average rollout
-        depth, Spearman correlation between proxy and full evaluations and the
-        current frontier size.
+        depth, Spearman correlation between proxy and full evaluations, the
+        current frontier size, and per-generation promotion and best-so-far
+        improvements.
         """
 
         expansion_rate = self._expansions / max(1, self._suggestions)
         promotion_rate = self._promotions / max(1, self._proxy_evals)
         avg_depth = self._rollout_depth_total / max(1, self._suggestions)
         spearman = self._spearman()
+        gen_rate = (
+            self._promotion_history[-1] if self._promotion_history else float("nan")
+        )
+        rate_delta = (
+            self._promotion_history[-1] - self._promotion_history[-2]
+            if len(self._promotion_history) > 1
+            else float("nan")
+        )
+        best = self._best_history[-1] if self._best_history else float("inf")
+        if (
+            len(self._best_history) > 1
+            and math.isfinite(self._best_history[-2])
+            and math.isfinite(best)
+        ):
+            best_improve = self._best_history[-2] - best
+        else:
+            best_improve = 0.0
         return {
             "expansion_rate": expansion_rate,
             "promotion_rate": promotion_rate,
             "avg_rollout_depth": avg_depth,
             "spearman_proxy_full": spearman,
             "frontier": float(self._frontier),
+            "promotion_rate_gen": gen_rate,
+            "promotion_rate_improvement": rate_delta,
+            "best_so_far": best,
+            "best_so_far_improvement": best_improve,
         }
 
     def _spearman(self) -> float:
@@ -428,3 +485,40 @@ class MCTS_H(Optimizer):
             ranks[order[i : j + 1]] = rank
             i = j + 1
         return ranks
+
+    # ------------------------------------------------------------------
+    # adaptive priors
+    def _update_priors(self, cfg: Dict[str, float], reward: float) -> None:
+        for param, val in cfg.items():
+            prior = self.priors.get(param)
+            if prior is None:
+                continue
+            self._prior_data[param].append(val)
+            if isinstance(prior, GaussianPrior):
+                arr = np.array(self._prior_data[param], dtype=float)
+                mu = float(np.median(arr))
+                mad = float(np.median(np.abs(arr - mu)))
+                sigma = float(mad * 1.4826) or 1.0
+                self.priors[param] = GaussianPrior(mu, sigma)
+            elif isinstance(prior, DiscretePrior):
+                stats = self._bin_stats.setdefault(param, {})
+                stats.setdefault(val, []).append(reward)
+                bins = self._prior_bins.get(param, len(prior.values))
+                variances = [np.var(r) for r in stats.values() if len(r) > 1]
+                if variances:
+                    median_var = float(np.median(variances))
+                    for v, r in list(stats.items()):
+                        if len(r) > 1 and np.var(r) > median_var:
+                            bins += 1
+                            break
+                empty = [v for v, r in stats.items() if len(r) == 0]
+                bins = max(1, bins - len(empty))
+                arr = np.array(self._prior_data[param], dtype=float)
+                qs = np.linspace(0, 1, bins + 2)[1:-1]
+                centres = np.quantile(arr, qs)
+                probs = np.full(len(centres), 1.0 / len(centres))
+                self.priors[param] = DiscretePrior(
+                    list(map(float, centres)), list(probs)
+                )
+                self._prior_bins[param] = bins
+                self._bin_stats[param] = {v: [] for v in self.priors[param].values}
