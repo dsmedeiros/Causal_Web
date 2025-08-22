@@ -6,7 +6,7 @@ from typing import Dict, List, Optional
 from pathlib import Path
 import asyncio
 
-from PySide6.QtCore import QObject, Property, Signal, Slot
+from PySide6.QtCore import QFileSystemWatcher, QObject, Property, Signal, Slot
 
 from experiments import GeneticAlgorithm
 from experiments.artifacts import load_hall_of_fame, write_best_config
@@ -72,11 +72,22 @@ class GAModel(QObject):
         self._pareto: List[dict] = []
         self._obj_count = 0
         self._obj_names: List[str] = []
-        data = load_hall_of_fame(Path("experiments/hall_of_fame.json"))
+        self._hof_path = Path("experiments/hall_of_fame.json")
+        data = load_hall_of_fame(self._hof_path)
         self._hof: List[dict] = list(data.get("archive", []))
+        self._hof_watcher = QFileSystemWatcher([str(self._hof_path)])
+        self._hof_watcher.fileChanged.connect(self._reload_hof)
         self._running = False
         self._task: Optional[asyncio.Task] = None
         self._generation = 0
+
+    # ------------------------------------------------------------------
+    def _reload_hof(self) -> None:
+        data = load_hall_of_fame(self._hof_path)
+        self._hof = list(data.get("archive", []))
+        self.hallOfFameChanged.emit()
+        if str(self._hof_path) not in self._hof_watcher.files():
+            self._hof_watcher.addPath(str(self._hof_path))
 
     # ------------------------------------------------------------------
     @Slot()

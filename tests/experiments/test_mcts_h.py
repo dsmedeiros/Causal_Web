@@ -185,6 +185,28 @@ def test_optimizer_queue_promotion(tmp_path, monkeypatch):
     assert manifest.get("mcts_run_id")
 
 
+def test_optimizer_queue_multi_objective_archive(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    priors = {"a": DiscretePrior([0.0], [1.0])}
+    opt = MCTS_H(["a"], priors, {"multi_objective": True})
+
+    def fit_fn(metrics, inv, groups):
+        val = groups["a"]
+        return (val, val**2)
+
+    mgr = OptimizerQueueManager(
+        _base_config(), [1], fit_fn, opt, proxy_frames=1, full_frames=1
+    )
+    res1 = mgr.run_next()
+    assert res1 and res1.status == "proxy"
+    res2 = mgr.run_next()
+    assert res2 and res2.status == "full"
+    hof = json.loads(Path("experiments/hall_of_fame.json").read_text())
+    entry = hof["archive"][0]
+    assert entry.get("origin") == "mcts"
+    assert set(entry["objectives"].keys()) == {"f0", "f1"}
+
+
 @pytest.mark.parametrize("frame_time", [0.001, 0.002])
 def test_mcts_h_asha_scheduler(tmp_path, monkeypatch, frame_time):
     """ASHA reduces full evaluations while retaining fitness across workloads."""
