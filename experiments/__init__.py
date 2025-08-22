@@ -1,7 +1,8 @@
 """Experiment helpers and runners."""
 
-from .queue import DOEQueueManager
+from .queue import DOEQueueManager, OptimizerQueueManager
 from .ga import GeneticAlgorithm
+from .optim import MCTS_H, build_priors
 from .artifacts import (
     TopKEntry,
     update_top_k,
@@ -15,7 +16,10 @@ from .fitness import scalar_fitness, vector_fitness
 
 __all__ = [
     "DOEQueueManager",
+    "OptimizerQueueManager",
     "GeneticAlgorithm",
+    "MCTS_H",
+    "build_priors",
     "TopKEntry",
     "update_top_k",
     "load_top_k",

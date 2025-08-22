@@ -89,7 +89,8 @@ def test_ga_promote_uses_run_config(tmp_path: pathlib.Path, monkeypatch) -> None
     assert data == {"y": 5}
 
 
-def test_pareto_front() -> None:
+def test_pareto_front(tmp_path: pathlib.Path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
     base = {"W0": 1.0}
     group_ranges = {"x": (0.0, 1.0)}
     toggles: dict[str, list[int]] = {}
@@ -176,7 +177,8 @@ def test_epsilon_dominance_prunes_archive() -> None:
     assert len(ga.pareto_front()) <= 3
 
 
-def test_promote_pareto(tmp_path: pathlib.Path) -> None:
+def test_promote_pareto(tmp_path: pathlib.Path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
     base = {"W0": 1.0}
     group_ranges = {"x": (0.0, 1.0)}
     toggles: dict[str, list[int]] = {}

@@ -22,7 +22,14 @@ from invariants import checks
 from .gates import run_gates
 from .runner import _latin_hypercube
 from .index import RunIndex, run_key
-from .artifacts import persist_run, allocate_run_dir
+from .artifacts import (
+    TopKEntry,
+    update_top_k,
+    save_hall_of_fame,
+    persist_run,
+    allocate_run_dir,
+)
+from .optim import Optimizer, MCTS_H
 
 
 @dataclass
@@ -328,3 +335,171 @@ class DOEQueueManager:
         """Return queued runs with their status."""
 
         return list(self._runs)
+
+
+@dataclass
+class OptimizerResult:
+    """Summary of a single optimizer-driven evaluation."""
+
+    config: Dict[str, float]
+    status: str
+    fitness: Optional[float] = None
+    path: Optional[str] = None
+
+
+class OptimizerQueueManager:
+    """Drive an :class:`~experiments.optim.Optimizer` using existing runners.
+
+    This manager requests configurations from an optimizer, evaluates them via
+    :func:`run_gates` and reports results back through
+    :meth:`Optimizer.observe`.  Proxy evaluations can be promoted to full
+    runs, in which case artifacts and the run index are updated.
+
+    Parameters
+    ----------
+    base:
+        Baseline raw configuration used to materialise groups.
+    gates:
+        Sequence of gate identifiers executed for each suggestion.
+    fitness_fn:
+        Callback returning a scalar fitness given metrics, invariants and the
+        evaluated groups.  Higher fitness indicates a better configuration.
+    optimizer:
+        Optimizer instance implementing ``suggest`` and ``observe``.
+    seed:
+        Seed used when materialising raw configurations.
+    proxy_frames:
+        Number of frames used for initial proxy evaluations.
+    full_frames:
+        Number of frames used for promoted full evaluations.
+    state_path:
+        Optional path where the optimiser state is checkpointed after each
+        evaluation.
+    run_index:
+        Optional :class:`RunIndex` used to skip previously evaluated full
+        configurations.
+    When the optimiser is an instance of :class:`MCTS_H`, a unique
+    ``mcts_run_id`` is generated and attached to every persisted run so
+    evaluations can be traced back to the search session.
+    """
+
+    def __init__(
+        self,
+        base: Dict[str, float],
+        gates: Iterable[int],
+        fitness_fn: Callable[
+            [Dict[str, float], Dict[str, float], Dict[str, float]], float
+        ],
+        optimizer: "Optimizer",
+        seed: int = 0,
+        *,
+        proxy_frames: int = 300,
+        full_frames: int = 3000,
+        state_path: str | Path | None = None,
+        run_index: RunIndex | None = None,
+    ) -> None:
+        self.base = dict(base)
+        self.gates = list(gates)
+        self.fitness_fn = fitness_fn
+        self.optimizer = optimizer
+        self.seed = seed
+        self._normalizer = Normalizer()
+        self._index = run_index or RunIndex()
+        self._proxy_seen: set[Tuple[Tuple[str, float], ...]] = set()
+        self._top_k_path = Path("experiments/top_k.json")
+        self._hof_path = Path("experiments/hall_of_fame.json")
+        self._hof: List[Dict[str, Any]] = []
+        self._state_path = Path(state_path) if state_path else None
+        self.proxy_frames = int(proxy_frames)
+        self.full_frames = int(full_frames)
+        self._mcts_run_id: Optional[str] = None
+        if isinstance(self.optimizer, MCTS_H):
+            self._mcts_run_id = allocate_run_dir()[0]
+
+    # ------------------------------------------------------------------
+    def _checkpoint(self) -> None:
+        if self._state_path and hasattr(self.optimizer, "save"):
+            self.optimizer.save(self._state_path)
+
+    # ------------------------------------------------------------------
+    def run_next(self) -> Optional[OptimizerResult]:
+        """Evaluate the next configuration from the optimizer."""
+
+        if self.optimizer.done():
+            return None
+        cfg = self.optimizer.suggest(1)[0]
+        key = tuple(sorted(cfg.items()))
+        full = key in self._proxy_seen
+        if not full and hasattr(self.optimizer, "_suggest_full"):
+            if key in getattr(self.optimizer, "_suggest_full"):
+                full = True
+                getattr(self.optimizer, "_suggest_full").discard(key)
+
+        raw = self._normalizer.to_raw(self.base, cfg)
+        raw.setdefault("seed", self.seed)
+
+        if not full:
+            metrics = run_gates(raw, self.gates, frames=self.proxy_frames)
+            inv = checks.from_metrics(metrics)
+            fit = self.fitness_fn(metrics, inv, cfg)
+            self._proxy_seen.add(key)
+            self.optimizer.observe([{"config": cfg, "fitness_proxy": float(fit)}])
+            self._checkpoint()
+            return OptimizerResult(cfg, "proxy", float(fit))
+
+        metrics = run_gates(raw, self.gates, frames=self.full_frames)
+        inv = checks.from_metrics(metrics)
+        fit = self.fitness_fn(metrics, inv, cfg)
+        self._proxy_seen.discard(key)
+        res = {"config": cfg, "fitness": float(fit)}
+        self.optimizer.observe([res])
+        self._checkpoint()
+
+        run_id, abs_path, rel_path = allocate_run_dir()
+        key_hash = run_key(
+            {
+                "groups": cfg,
+                "toggles": {},
+                "seed": int(raw["seed"]),
+                "gates": self.gates,
+            }
+        )
+        manifest = {
+            "run_id": run_id,
+            "run_key": key_hash,
+            "groups": cfg,
+            "toggles": {},
+            "seed": int(raw["seed"]),
+            "gates": self.gates,
+        }
+        if self._mcts_run_id is not None:
+            manifest["mcts_run_id"] = self._mcts_run_id
+        result_payload = {
+            "status": "ok",
+            "metrics": metrics,
+            "invariants": inv,
+            "fitness": float(fit),
+        }
+        persist_run(raw, result_payload, abs_path, manifest=manifest)
+        self._index.mark(key_hash, rel_path)
+
+        entry = TopKEntry(
+            run_id=run_id,
+            fitness=-float(fit),
+            objectives={"f0": float(fit)},
+            groups=cfg,
+            toggles={},
+            seed=int(raw["seed"]),
+            path=rel_path,
+        )
+        update_top_k([entry], self._top_k_path)
+        self._hof.append(
+            {
+                "run_id": run_id,
+                "fitness": -float(fit),
+                "objectives": {"f0": float(fit)},
+                "path": rel_path,
+            }
+        )
+        save_hall_of_fame(self._hof, self._hof_path)
+        return OptimizerResult(cfg, "full", float(fit), rel_path)

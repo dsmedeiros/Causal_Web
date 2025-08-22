@@ -267,6 +267,7 @@ class MainService:
             LogsModel,
             DOEModel,
             GAModel,
+            MCTSModel,
             CompareModel,
         )
         from ui_new.graph import GraphView  # noqa: F401  # register QML module
@@ -281,6 +282,7 @@ class MainService:
         store = Store()
         doe = DOEModel()
         ga_model = GAModel()
+        mcts_model = MCTSModel()
         compare = CompareModel()
         ctx = engine.rootContext()
         ctx.setContextProperty("telemetryModel", telemetry)
@@ -291,6 +293,7 @@ class MainService:
         ctx.setContextProperty("store", store)
         ctx.setContextProperty("doeModel", doe)
         ctx.setContextProperty("gaModel", ga_model)
+        ctx.setContextProperty("mctsModel", mcts_model)
         ctx.setContextProperty("compareModel", compare)
         qml_path = os.path.join(os.path.dirname(__file__), "..", "ui_new", "main.qml")
         engine.load(qml_path)
@@ -319,6 +322,7 @@ class MainService:
                 store,
                 doe,
                 ga_model,
+                mcts_model,
                 root,
                 token=token,
             ),

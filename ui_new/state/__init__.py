@@ -9,6 +9,7 @@ from .Logs import LogsModel
 from .DOE import DOEModel
 from .GA import GAModel
 from .Compare import CompareModel
+from .MCTS import MCTSModel
 
 __all__ = [
     "Store",
@@ -19,5 +20,6 @@ __all__ = [
     "LogsModel",
     "DOEModel",
     "GAModel",
+    "MCTSModel",
     "CompareModel",
 ]
