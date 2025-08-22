@@ -40,6 +40,7 @@ from .epairs import EPairs
 from .bell import BellHelpers, Ancestry
 from ...config import Config, RunConfig
 from experiments.gates import run_gates
+from experiments.policy import ACTION_SET
 from invariants import checks
 
 
@@ -97,6 +98,10 @@ class EngineAdapter:
         self._residual: float = 0.0
         self._residual_ewma: float = 0.0
         self._residual_max: float = 0.0
+        self._theta_reset: bool = False
+        self._eps_emit: float = 0.0
+        self._Wmax: float = 64.0
+        self._MI_mode: bool = False
         self._ns_plus: int = 0
         self._ns_total: int = 0
         self._ns_delta: float = 0.0
@@ -111,6 +116,76 @@ class EngineAdapter:
         self._graph_static: Dict[str, Any] | None = None
         self._replay_frames: List[Dict[str, Any]] = []
         self._replay_index = 0
+
+    # ------------------------------------------------------------------
+    @property
+    def residual(self) -> float:
+        """Return the latest residual metric."""
+
+        return self._residual
+
+    @residual.setter
+    def residual(self, value: float) -> None:
+        """Update the residual metric."""
+
+        self._residual = float(value)
+
+    # ------------------------------------------------------------------
+    @property
+    def theta_reset(self) -> bool:
+        """Flag indicating whether theta reset is enabled."""
+
+        return self._theta_reset
+
+    @theta_reset.setter
+    def theta_reset(self, value: bool) -> None:
+        self._theta_reset = bool(value)
+
+    # ------------------------------------------------------------------
+    @property
+    def eps_emit(self) -> float:
+        """Magnitude of the epsilon emission boost."""
+
+        return self._eps_emit
+
+    @eps_emit.setter
+    def eps_emit(self, value: float) -> None:
+        self._eps_emit = float(value)
+
+    # ------------------------------------------------------------------
+    @property
+    def Wmax(self) -> float:
+        """Current clamp on window size."""
+
+        return self._Wmax
+
+    @Wmax.setter
+    def Wmax(self, value: float) -> None:
+        self._Wmax = float(value)
+
+    # ------------------------------------------------------------------
+    @property
+    def MI_mode(self) -> bool:
+        """Flag toggling the adversarial MI mode."""
+
+        return self._MI_mode
+
+    @MI_mode.setter
+    def MI_mode(self, value: bool) -> None:
+        self._MI_mode = bool(value)
+
+    # ------------------------------------------------------------------
+    def _apply_policy_effects(self) -> None:
+        """Recompute residual based on current policy flags."""
+
+        res = self._residual
+        if self._theta_reset:
+            res *= 0.5
+        res = max(res - self._eps_emit, 0.0)
+        res = max(res - max(0.0, 64.0 - self._Wmax), 0.0)
+        if self._MI_mode:
+            res += 4.0
+        self._residual = res
 
     # ------------------------------------------------------------------
     def load_replay(self, path: str | os.PathLike[str]) -> dict[str, Any] | None:
@@ -1584,6 +1659,23 @@ class EngineAdapter:
             if graph is not None:
                 self.build_graph(graph)
                 return {"type": "GraphStatic", "v": 1, **self.graph_static()}
+            return None
+
+        pol = msg.get("PolicyControl")
+        if pol:
+            names: list[str] = []
+            action = pol.get("action")
+            if isinstance(action, str):
+                names.append(action)
+            names.extend(pol.get("actions", []))
+            for name in names:
+                func = ACTION_SET.get(name)
+                if func:
+                    func(self)
+            self._apply_policy_effects()
+            self.set_experiment_status(
+                {"status": "running", "residual": self._residual}
+            )
             return None
 
         exp = msg.get("ExperimentControl")

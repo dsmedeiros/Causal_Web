@@ -162,6 +162,11 @@ via a Monte-Carlo path sampler over the graph's causal structure.
   past wins and evaluation rates, and writes per-task and aggregate reports
   to ``bench/optim``.
 - The Qt Quick interface now exposes an ``MCTS`` tab so tree search runs alongside existing DOE and GA panels.
+- A new ``Policy`` tab hosts an MCTS-C planner over safe engine toggles,
+  supports horizons of 2–5 windows with ``γ≈0.95`` and renders icon
+  overlays of the planned action sequence along the timeline. Planned
+  actions can now be dispatched to the running engine, which adjusts its
+  internal toggles rather than mutating the residual directly.
 - The DOE, GA, and MCTS tabs report live node and frontier counts and expansion/promotion gauges during a search.
 - Users can adjust proxy/full frame budgets, promotion thresholds or
   quantiles, and prior bin counts directly in the MCTS panel for

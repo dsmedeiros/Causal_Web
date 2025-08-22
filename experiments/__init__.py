@@ -3,6 +3,7 @@
 from .queue import DOEQueueManager, OptimizerQueueManager
 from .ga import GeneticAlgorithm
 from .optim import MCTS_H, build_priors
+from .policy import MCTS_C, ACTION_SET
 from .artifacts import (
     TopKEntry,
     update_top_k,
@@ -19,7 +20,9 @@ __all__ = [
     "OptimizerQueueManager",
     "GeneticAlgorithm",
     "MCTS_H",
+    "MCTS_C",
     "build_priors",
+    "ACTION_SET",
     "TopKEntry",
     "update_top_k",
     "load_top_k",

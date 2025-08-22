@@ -10,6 +10,7 @@ from .DOE import DOEModel
 from .GA import GAModel
 from .Compare import CompareModel
 from .MCTS import MCTSModel
+from .Policy import PolicyModel
 from .Results import ResultsModel
 
 __all__ = [
@@ -22,6 +23,7 @@ __all__ = [
     "DOEModel",
     "GAModel",
     "MCTSModel",
+    "PolicyModel",
     "CompareModel",
     "ResultsModel",
 ]

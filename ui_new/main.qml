@@ -157,6 +157,34 @@ Window {
         onClicked: root.transferControl()
     }
 
+    Row {
+        id: planOverlay
+        anchors.bottom: parent.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
+        spacing: 4
+        visible: policyModel.planIcons.length > 0
+        Repeater {
+            model: policyModel.planIcons
+            delegate: Rectangle {
+                width: 24
+                height: 24
+                color: "#404040"
+                border.color: "white"
+                Text { anchors.centerIn: parent; color: "white"; text: modelData }
+                property bool hovering: false
+                MouseArea {
+                    id: ma
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: parent.hovering = true
+                    onExited: parent.hovering = false
+                }
+                ToolTip.visible: hovering
+                ToolTip.text: policyModel.planSteps[index]
+            }
+        }
+    }
+
     Item {
         id: panels
         width: 250
@@ -180,6 +208,7 @@ Window {
             TabButton { text: "DOE" }
             TabButton { text: "GA" }
             TabButton { text: "MCTS" }
+            TabButton { text: "Policy" }
             TabButton { text: "Compare" }
         }
 
@@ -199,9 +228,10 @@ Window {
             LogExplorer { anchors.fill: parent }
             Inspector { anchors.fill: parent }
             Validation { anchors.fill: parent }
-            DOE { anchors.fill: parent; panels: panels; replayIndex: 3; compareIndex: 11 }
-            GA { anchors.fill: parent; panels: panels; replayIndex: 3; compareIndex: 11 }
+            DOE { anchors.fill: parent; panels: panels; replayIndex: 3; compareIndex: 12 }
+            GA { anchors.fill: parent; panels: panels; replayIndex: 3; compareIndex: 12 }
             MCTS { anchors.fill: parent; panels: panels; replayIndex: 3 }
+            Policy { anchors.fill: parent }
             Compare { anchors.fill: parent }
         }
     }
