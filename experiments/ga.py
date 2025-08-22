@@ -98,13 +98,15 @@ def crowding_distance(front: Sequence["Genome"]) -> None:
     for p in front:
         p.cd = 0.0
     for k in range(m):
-        front.sort(key=lambda g: g.fitness[k])
+        front.sort(key=lambda g: (getattr(g, "_norm", g.fitness))[k])
         front[0].cd = front[-1].cd = float("inf")
-        minv, maxv = front[0].fitness[k], front[-1].fitness[k]
+        minv = (getattr(front[0], "_norm", front[0].fitness))[k]
+        maxv = (getattr(front[-1], "_norm", front[-1].fitness))[k]
         denom = max(maxv - minv, 1e-12)
         for i in range(1, len(front) - 1):
-            p = front[i]
-            p.cd += (front[i + 1].fitness[k] - front[i - 1].fitness[k]) / denom
+            nextv = (getattr(front[i + 1], "_norm", front[i + 1].fitness))[k]
+            prevv = (getattr(front[i - 1], "_norm", front[i - 1].fitness))[k]
+            front[i].cd += (nextv - prevv) / denom
 
 
 @dataclass
@@ -163,6 +165,9 @@ class GeneticAlgorithm:
         duplicate evaluations.
     force:
         When ``True`` re-evaluate genomes even if present in the run index.
+    archive_eps:
+        Optional epsilon grid used to prune the Pareto archive by retaining
+        at most one genome per ``epsilon``-sized cell in objective space.
     """
 
     def __init__(
@@ -184,6 +189,7 @@ class GeneticAlgorithm:
         loop: asyncio.AbstractEventLoop | None = None,
         run_index: RunIndex | None = None,
         force: bool = False,
+        archive_eps: float | Sequence[float] | None = None,
     ) -> None:
         self.base = dict(base)
         self.group_ranges = dict(group_ranges)
@@ -208,6 +214,14 @@ class GeneticAlgorithm:
         self._index = run_index or RunIndex()
         self._force = force
         self._archive: List[Genome] = []
+        self._fit_medians: List[float] = []
+        self._fit_mads: List[float] = []
+        if archive_eps is None:
+            self._archive_eps: List[float] | None = None
+        elif isinstance(archive_eps, Sequence):
+            self._archive_eps = [float(x) for x in archive_eps]
+        else:
+            self._archive_eps = [float(archive_eps)]
         self._init_population()
 
     # ------------------------------------------------------------------
@@ -458,6 +472,31 @@ class GeneticAlgorithm:
                 genome.toggles[k] = self.rng.choice(choices)
 
     # ------------------------------------------------------------------
+    def _normalize_objectives(self, genomes: Sequence[Genome]) -> None:
+        """Normalise objective values using running median and MAD."""
+
+        if not genomes:
+            return
+        arr = np.array([g.fitness for g in genomes], dtype=float)
+        med = np.median(arr, axis=0)
+        mad = np.median(np.abs(arr - med), axis=0)
+        if not self._fit_medians:
+            self._fit_medians = med.tolist()
+            self._fit_mads = mad.tolist()
+        else:
+            self._fit_medians = [
+                0.5 * a + 0.5 * b for a, b in zip(self._fit_medians, med)
+            ]
+            self._fit_mads = [
+                0.5 * a + 0.5 * b for a, b in zip(self._fit_mads, mad)
+            ]
+        for g in genomes:
+            g._norm = tuple(
+                (f - m) / max(s, 1e-9)
+                for f, m, s in zip(g.fitness, self._fit_medians, self._fit_mads)
+            )
+
+    # ------------------------------------------------------------------
     def _update_archive(self, front: Sequence[Genome]) -> None:
         """Update the persistent Pareto archive with ``front``."""
 
@@ -476,6 +515,20 @@ class GeneticAlgorithm:
         combined = list(combined_map.values())
         fronts = fast_non_dominated_sort(combined)
         archive = fronts[0] if fronts else []
+        if self._archive_eps and archive:
+            m = len(archive[0].fitness) if isinstance(archive[0].fitness, Sequence) else 0
+            eps = (
+                self._archive_eps
+                if len(self._archive_eps) > 1
+                else self._archive_eps * m
+            )
+            grid: Dict[Tuple[int, ...], Genome] = {}
+            for g in archive:
+                cell = tuple(int(f / e) for f, e in zip(g.fitness, eps))
+                existing = grid.get(cell)
+                if existing is None or dominates(g, existing):
+                    grid[cell] = g
+            archive = list(grid.values())
         if len(archive) > self.population_size:
             crowding_distance(archive)
             archive.sort(key=lambda g: -g.cd)
@@ -489,16 +542,28 @@ class GeneticAlgorithm:
         for g in self.population:
             if g.fitness is None:
                 self._evaluate(g)
-        multi = any(isinstance(g.fitness, Sequence) for g in self.population)
+        feasible = [g for g in self.population if g.fitness is not None]
+        infeasible = [g for g in self.population if g.fitness is None]
+        multi = any(isinstance(g.fitness, Sequence) for g in feasible)
         if multi:
-            fronts = fast_non_dominated_sort(self.population)
+            feas_multi = [g for g in feasible if isinstance(g.fitness, Sequence)]
+            self._normalize_objectives(feas_multi)
+            fronts = fast_non_dominated_sort(feas_multi)
             for front in fronts:
                 crowding_distance(front)
             self._update_archive(fronts[0])
-            self.population.sort(key=lambda g: (g.rank, -g.cd))
+            ordered = [g for front in fronts for g in front]
+            feas_single = [g for g in feasible if not isinstance(g.fitness, Sequence)]
+            feas_single.sort(key=lambda g: self._score(g), reverse=True)
+            ordered.extend(feas_single)
         else:
-            self.population.sort(key=lambda g: self._score(g), reverse=True)
-        best = self.population[0]
+            feasible.sort(key=lambda g: self._score(g), reverse=True)
+            ordered = feasible
+        for g in infeasible:
+            g.rank = float("inf")
+            g.cd = 0.0
+        self.population = ordered + infeasible
+        best = ordered[0] if ordered else self.population[0]
         self.history.append(self._score(best))
         self._hall_of_fame.append((self._generation, best))
 
@@ -656,10 +721,26 @@ class GeneticAlgorithm:
                     "groups": g.groups,
                     "toggles": g.toggles,
                     "fitness": g.fitness,
+                    "run_id": g.run_id,
+                    "run_path": g.run_path,
                 }
                 for g in self.population
             ],
             "history": self.history,
+            "generation": self._generation,
+            "archive": [
+                {
+                    "groups": g.groups,
+                    "toggles": g.toggles,
+                    "fitness": g.fitness,
+                    "run_id": g.run_id,
+                    "run_path": g.run_path,
+                }
+                for g in self._archive
+            ],
+            "fit_medians": self._fit_medians,
+            "fit_mads": self._fit_mads,
+            "archive_eps": self._archive_eps,
             "rng_state": self.rng.getstate(),
             "np_rng_state": self._np_rng.bit_generator.state,
             "next_id": self._next_id,
@@ -705,12 +786,34 @@ class GeneticAlgorithm:
             seed=0,
             client=client,
             loop=loop,
+            archive_eps=data.get("archive_eps"),
         )
         ga.population = [
-            Genome(d["groups"], d["toggles"], d.get("fitness"))
+            Genome(
+                d["groups"],
+                d["toggles"],
+                d.get("fitness"),
+                None,
+                d.get("run_id"),
+                d.get("run_path"),
+            )
             for d in data["population"]
         ]
         ga.history = list(data["history"])
+        ga._generation = data.get("generation", 0)
+        ga._archive = [
+            Genome(
+                d["groups"],
+                d["toggles"],
+                d.get("fitness"),
+                None,
+                d.get("run_id"),
+                d.get("run_path"),
+            )
+            for d in data.get("archive", [])
+        ]
+        ga._fit_medians = list(data.get("fit_medians", []))
+        ga._fit_mads = list(data.get("fit_mads", []))
         ga.rng.setstate(data["rng_state"])
         ga._np_rng = np.random.default_rng()
         ga._np_rng.bit_generator.state = data["np_rng_state"]

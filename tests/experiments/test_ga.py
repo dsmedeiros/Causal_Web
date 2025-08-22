@@ -107,6 +107,33 @@ def test_pareto_front() -> None:
     assert len(front) >= 2
 
 
+def test_infeasible_excluded_from_front(monkeypatch) -> None:
+    base = {"W0": 1.0}
+    group_ranges = {"x": (0.0, 1.0)}
+    toggles: dict[str, list[int]] = {}
+
+    def fitness(metrics, invariants, groups, toggles):
+        x = groups["x"]
+        return (x, 1 - x)
+
+    ga = GeneticAlgorithm(
+        base, group_ranges, toggles, [], fitness, population_size=4, seed=0
+    )
+    bad = ga.population[0]
+    real_eval = ga._evaluate
+
+    def fake_eval(genome):  # type: ignore[override]
+        if genome is bad:
+            genome.fitness = None
+            genome.invariants = {"inv_causality_ok": False}
+            return None
+        return real_eval(genome)
+
+    monkeypatch.setattr(ga, "_evaluate", fake_eval)
+    ga.step()
+    assert bad not in ga.pareto_front()
+
+
 def test_pareto_archive_shrinks() -> None:
     base = {"W0": 1.0}
     group_ranges = {"x": (0.0, 1.0)}
@@ -124,6 +151,29 @@ def test_pareto_archive_shrinks() -> None:
     ga.step()
     size2 = len(ga.pareto_front())
     assert size2 <= size1
+
+
+def test_epsilon_dominance_prunes_archive() -> None:
+    base = {"W0": 1.0}
+    group_ranges = {"x": (0.0, 1.0)}
+    toggles: dict[str, list[int]] = {}
+
+    def fitness(metrics, invariants, groups, toggles):
+        x = groups["x"]
+        return (x, 1 - x)
+
+    ga = GeneticAlgorithm(
+        base,
+        group_ranges,
+        toggles,
+        [],
+        fitness,
+        population_size=10,
+        seed=0,
+        archive_eps=0.6,
+    )
+    ga.step()
+    assert len(ga.pareto_front()) <= 3
 
 
 def test_promote_pareto(tmp_path: pathlib.Path) -> None:
