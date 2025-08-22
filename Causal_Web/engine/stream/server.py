@@ -134,26 +134,37 @@ async def serve(
 
     clients: Set[websockets.WebSocketServerProtocol] = set()
     primary: websockets.WebSocketServerProtocol | None = None
+    pending: websockets.WebSocketServerProtocol | None = None
 
     publisher_task = asyncio.create_task(publisher(bus, clients))
+
+    async def _send_roles() -> None:
+        nonlocal primary
+        for ws in list(clients):
+            role = "controller" if ws is primary else "spectator"
+            try:
+                await ws.send(
+                    msgpack.packb(
+                        {"type": "Role", "v": 1, "role": role},
+                        use_bin_type=True,
+                        use_single_float=True,
+                    )
+                )
+            except Exception:
+                clients.discard(ws)
+                if ws is primary:
+                    primary = next(iter(clients), None)
 
     async def handler(ws: websockets.WebSocketServerProtocol) -> None:
         """Handle a single client connection.
 
-        The first connected client retains control privileges. Subsequent
-        clients are treated as read-only spectators unless ``allow_multi`` is
-        ``False`` in which case they are rejected.
+        The first client completing the hello handshake becomes the controller.
+        Subsequent clients are spectators unless ``allow_multi`` is ``False`` in
+        which case they are rejected. Spectators may issue ``RequestControl`` and
+        the current controller can yield via ``TransferControl``.
         """
 
-        nonlocal primary
-
-        is_primary = False
-        if primary is None:
-            primary = ws
-            is_primary = True
-        elif not allow_multi:
-            await ws.close(reason="single client only")
-            return
+        nonlocal primary, pending
 
         raw = await ws.recv()
         msg = msgpack.unpackb(raw, raw=False)
@@ -165,22 +176,28 @@ async def serve(
             await ws.close(reason="unauthorized")
             return
 
+        if primary is None:
+            primary = ws
+        elif not allow_multi:
+            await ws.close(reason="single client only")
+            return
+
         clients.add(ws)
         try:
             await ws.send(
                 msgpack.packb(
-                    {"type": "Hello", "v": 1, "read_only": not is_primary},
-                    use_bin_type=True,
-                    use_single_float=True,
+                    {"type": "Hello", "v": 1}, use_bin_type=True, use_single_float=True
                 )
             )
             graph_static = {"type": "GraphStatic", "v": 1, **adapter.graph_static()}
             await ws.send(
                 msgpack.packb(graph_static, use_bin_type=True, use_single_float=True)
             )
+            await _send_roles()
             async for raw in ws:
                 msg = msgpack.unpackb(raw, raw=False)
-                if msg.get("type") == "Ping":
+                mtype = msg.get("type")
+                if mtype == "Ping":
                     await ws.send(
                         msgpack.packb(
                             {"type": "Pong", "v": 1},
@@ -188,6 +205,35 @@ async def serve(
                             use_single_float=True,
                         )
                     )
+                    continue
+                if mtype == "RequestControl" and ws is not primary:
+                    pending = ws
+                    if primary is not None:
+                        try:
+                            await primary.send(
+                                msgpack.packb(
+                                    {"type": "ControlRequest", "v": 1},
+                                    use_bin_type=True,
+                                    use_single_float=True,
+                                )
+                            )
+                        except Exception:
+                            clients.discard(primary)
+                            primary = None
+                    continue
+                if mtype == "TransferControl" and ws is primary:
+                    if pending in clients:
+                        primary = pending
+                        pending = None
+                        await _send_roles()
+                    else:
+                        await ws.send(
+                            msgpack.packb(
+                                {"type": "Error", "v": 1, "reason": "no requester"},
+                                use_bin_type=True,
+                                use_single_float=True,
+                            )
+                        )
                     continue
                 cmd = msg.get("cmd")
                 if cmd == "pull":
@@ -199,10 +245,10 @@ async def serve(
                                 payload, use_bin_type=True, use_single_float=True
                             )
                         )
-                elif not is_primary:
+                elif ws is not primary:
                     await ws.send(
                         msgpack.packb(
-                            {"type": "Error", "v": 1, "reason": "read-only"},
+                            {"type": "Error", "v": 1, "reason": "spectator"},
                             use_bin_type=True,
                             use_single_float=True,
                         )
@@ -218,7 +264,11 @@ async def serve(
         finally:
             clients.discard(ws)
             if ws is primary:
-                primary = next(iter(clients), None)
+                primary = pending if pending in clients else next(iter(clients), None)
+                pending = None
+            elif ws is pending:
+                pending = None
+            await _send_roles()
 
     try:
         async with websockets.serve(handler, host, port):

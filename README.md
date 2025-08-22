@@ -32,9 +32,12 @@ SnapshotDelta = {
 
 The engine prints a random session token at startup. Clients must begin with a
 `Hello` message carrying this token; the server closes connections that omit or
-mismatch it. A single client is accepted by default; set
-`CW_ALLOW_MULTI=1` to allow additional read-only spectator clients. Only the
-first connection retains control. Float32 fields keep payloads lean.
+mismatch it. The first client to complete this handshake becomes the controller.
+Set `CW_ALLOW_MULTI=1` to permit additional spectators. Spectators receive
+read-only updates and any control commands they send are rejected. They may
+issue a request for control which the current controller can grant without
+restarting. Role changes are broadcast so UIs can display a small
+"Controller"/"Spectator" badge. Float32 fields keep payloads lean.
 
 ## Compare panel
 
