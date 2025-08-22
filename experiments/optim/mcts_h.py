@@ -65,12 +65,15 @@ class MCTS_H(Optimizer):
         self.space = list(space)
         self.priors = priors or {}
         cfg = cfg or {}
-        self.c_ucb = float(cfg.get("c_ucb", 1.0))
-        self.alpha = float(cfg.get("alpha_pw", 0.5))
-        self.k = float(cfg.get("k_pw", 2.0))
+        self.c_ucb = float(cfg.get("c_ucb", 0.7))
+        self.alpha = float(cfg.get("alpha_pw", 0.4))
+        self.k = float(cfg.get("k_pw", 1.0))
         self.max_nodes = int(cfg.get("max_nodes", 10000))
         self.promote_threshold = cfg.get("promote_threshold")
-        self.promote_quantile = cfg.get("promote_quantile")
+        if self.promote_threshold is None:
+            self.promote_quantile = float(cfg.get("promote_quantile", 0.6))
+        else:
+            self.promote_quantile = cfg.get("promote_quantile")
         self.promote_window = int(cfg.get("promote_window", 0))
         self.multi_objective = bool(cfg.get("multi_objective", False))
         self.rng = rng or np.random.default_rng(int(cfg.get("rng_seed", 0)))
@@ -83,6 +86,14 @@ class MCTS_H(Optimizer):
         }
         self._nodes = 1
         self._proxy_scores: List[float] = []
+        # instrumentation
+        self._expansions = 0
+        self._suggestions = 0
+        self._rollout_depth_total = 0
+        self._proxy_evals = 0
+        self._promotions = 0
+        self._proxy_cache: Dict[Tuple[Tuple[str, float], ...], float] = {}
+        self._proxy_full_pairs: List[Tuple[float, float]] = []
 
     # ------------------------------------------------------------------
     # public API
@@ -94,18 +105,21 @@ class MCTS_H(Optimizer):
                 key = tuple(sorted(cfg.items()))
                 self._suggest_full.add(key)
                 out.append(cfg)
+                self._suggestions += 1
                 continue
             node, path = self._select(self.root, [self.root])
             if node.pending:
                 node = self._expand(node)
                 path.append(node)
             full, path = self._rollout(node, path)
+            self._rollout_depth_total += len(path) - 1
             key = tuple(sorted(full.items()))
             info: Dict[str, Any] = {"path": path}
             if self.multi_objective:
                 info["weights"] = None
             self._paths[key] = info
             out.append(full)
+            self._suggestions += 1
         return out
 
     def observe(self, results: List[Dict[str, float]]) -> None:
@@ -124,10 +138,19 @@ class MCTS_H(Optimizer):
                     reward = -float(np.dot(weights, vals))
                 else:
                     reward = -float(vals[0])
+                full_score = (
+                    float(vals[0])
+                    if not self.multi_objective
+                    else float(np.dot(weights, vals))
+                )
                 self._paths.pop(key, None)
                 for node in path:
                     node.N += 1
                     node.Q += (reward - node.Q) / node.N
+                if key in self._proxy_cache:
+                    self._proxy_full_pairs.append(
+                        (self._proxy_cache.pop(key), full_score)
+                    )
             elif "objectives_proxy" in res:
                 objs = res["objectives_proxy"]
                 vals = np.array([objs[k] for k in sorted(objs)], dtype=float)
@@ -144,6 +167,8 @@ class MCTS_H(Optimizer):
                     node.N += 1
                     node.Q += (reward - node.Q) / node.N
                 self._proxy_scores.append(score)
+                self._proxy_cache[key] = score
+                self._proxy_evals += 1
                 if (
                     self.promote_window > 0
                     and len(self._proxy_scores) > self.promote_window
@@ -159,12 +184,18 @@ class MCTS_H(Optimizer):
                     thresh = float(np.quantile(scores, self.promote_quantile))
                 if thresh is None or score <= float(thresh):
                     self._pending_full.append(cfg)
+                    self._promotions += 1
             elif "fitness" in res or "fitness_full" in res:
-                reward = -float(res.get("fitness", res.get("fitness_full", 0.0)))
+                full_score = float(res.get("fitness", res.get("fitness_full", 0.0)))
+                reward = -full_score
                 self._paths.pop(key, None)
                 for node in path:
                     node.N += 1
                     node.Q += (reward - node.Q) / node.N
+                if key in self._proxy_cache:
+                    self._proxy_full_pairs.append(
+                        (self._proxy_cache.pop(key), full_score)
+                    )
             elif "fitness_proxy" in res:
                 score = float(res["fitness_proxy"])
                 reward = -score
@@ -172,6 +203,8 @@ class MCTS_H(Optimizer):
                     node.N += 1
                     node.Q += (reward - node.Q) / node.N
                 self._proxy_scores.append(score)
+                self._proxy_cache[key] = score
+                self._proxy_evals += 1
                 if (
                     self.promote_window > 0
                     and len(self._proxy_scores) > self.promote_window
@@ -187,6 +220,7 @@ class MCTS_H(Optimizer):
                     thresh = float(np.quantile(scores, self.promote_quantile))
                 if thresh is None or score <= float(thresh):
                     self._pending_full.append(cfg)
+                    self._promotions += 1
             else:
                 self._paths.pop(key, None)
 
@@ -306,6 +340,7 @@ class MCTS_H(Optimizer):
             child = Node(x, node.pending[1:])
             self._ttable[key] = child
             self._nodes += 1
+            self._expansions += 1
         node.children.append(child)
         return child
 
@@ -324,7 +359,49 @@ class MCTS_H(Optimizer):
                 child = Node(x, current.pending[1:])
                 self._ttable[key] = child
                 self._nodes += 1
+                self._expansions += 1
             current.children.append(child)
             path.append(child)
             current = child
         return current.x_partial, path
+
+    # ------------------------------------------------------------------
+    # metrics
+    def metrics(self) -> Dict[str, float]:
+        """Return collected search metrics."""
+
+        expansion_rate = self._expansions / max(1, self._suggestions)
+        promotion_rate = self._promotions / max(1, self._proxy_evals)
+        avg_depth = self._rollout_depth_total / max(1, self._suggestions)
+        spearman = self._spearman()
+        return {
+            "expansion_rate": expansion_rate,
+            "promotion_rate": promotion_rate,
+            "avg_rollout_depth": avg_depth,
+            "spearman_proxy_full": spearman,
+        }
+
+    def _spearman(self) -> float:
+        if len(self._proxy_full_pairs) < 2:
+            return float("nan")
+        proxy, full = zip(*self._proxy_full_pairs)
+        rx = self._rank(proxy)
+        ry = self._rank(full)
+        if np.all(rx == rx[0]) or np.all(ry == ry[0]):
+            return float("nan")
+        return float(np.corrcoef(rx, ry)[0, 1])
+
+    @staticmethod
+    def _rank(vals: Sequence[float]) -> np.ndarray:
+        arr = np.array(vals)
+        order = np.argsort(arr)
+        ranks = np.empty(len(arr), dtype=float)
+        i = 0
+        while i < len(arr):
+            j = i
+            while j + 1 < len(arr) and arr[order[j + 1]] == arr[order[i]]:
+                j += 1
+            rank = 0.5 * (i + j) + 1
+            ranks[order[i : j + 1]] = rank
+            i = j + 1
+        return ranks

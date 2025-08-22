@@ -151,7 +151,7 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 - ``cw optim`` now exposes ``--proxy-frames`` and ``--full-frames`` to control
   the frame budgets for proxy and promoted evaluations, ``--bins`` to set
   quantile bins for priors, ``--promote-quantile`` for percentile-based
-  promotion, ``--promote-window`` to restrict the quantile to recent
+  promotion (default 0.6), ``--promote-window`` to restrict the quantile to recent
   proxy scores, and ``--multi-objective`` to enable Dirichlet scalarisation of
   multiple objectives.
 - The Qt Quick interface now exposes an ``MCTS`` tab so tree search runs alongside existing DOE and GA panels.
@@ -161,6 +161,9 @@ via a Monte-Carlo path sampler over the graph's causal structure.
   multi-fidelity searches.
 - Regression tests show MCTS-H attains GA-level fitness while using fewer full
   evaluations than the genetic algorithm.
+- ``experiments/calibrate_mcts_h.py`` sweeps ``c_ucb``, ``alpha_pw``, ``k_pw``
+  and prior bins on a canonical single-node graph, now exploring bins
+  ``{3,5,7}`` for deeper calibration.
 - Multi-objective runs now normalise objectives per generation using running median±MAD baselines, exclude infeasible genomes before sorting, cap the Pareto archive via ε-dominance or crowding-distance pruning, and checkpoint RNG state and population for deterministic restarts.
 - GA panel now offers a multi-objective toggle, Pareto scatter with selectable objectives, descriptive axis labels, and a table showing rank and crowding distance with a promotion dialog.
 - DOE and GA batches now persist summaries under ``experiments/``:
