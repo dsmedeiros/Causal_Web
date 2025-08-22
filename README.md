@@ -147,6 +147,8 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 - Optimiser state can now be saved and reloaded to resume MCTS-H searches.
 - A new ``OptimizerQueueManager`` wires MCTS-H into the existing gate runner and persists Top-K and hall-of-fame artifacts for promoted full evaluations.
 - MCTS-H can route evaluations through an ASHA-style scheduler with configurable rungs (e.g. 20%, 40%, 100% of full frames) to prune weak candidates early, logging promotion fractions, per-rung wall-clock times, and demonstrated wall-clock savings across simulated workloads.
+- MCTS-H supports adaptive priors built from Top-K runs using median/MAD with online updates and bin zooming to focus search on high-signal regions.
+- MCTS-H now tracks per-generation promotion rates and best-so-far improvements to confirm search focus shifts toward promising regions.
 - The ``cw optim`` command accepts ``--state`` to checkpoint and resume tree searches across invocations.
 - Full evaluation manifests now record ``mcts_run_id`` so each run can be traced back to the MCTS search session.
 - Multi-objective MCTS runs now write results to the shared Pareto archive as ``origin: "mcts"``, allowing the GA panel to replay tree-search trade-offs.
