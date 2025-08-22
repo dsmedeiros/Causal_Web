@@ -15,6 +15,7 @@ from .state import (
     DOEModel,
     GAModel,
     MCTSModel,
+    PolicyModel,
 )
 
 
@@ -29,6 +30,7 @@ async def run(
     doe: DOEModel,
     ga: GAModel,
     mcts: MCTSModel,
+    policy: PolicyModel,
     window: Any,
     token: str | None = None,
 ) -> None:
@@ -56,6 +58,7 @@ async def run(
     doe.set_client(client)
     ga.set_client(client, loop)
     mcts.set_client(client, loop)
+    policy.set_client(client)
     window.requestControl = lambda: asyncio.create_task(
         client.send({"type": "RequestControl", "v": 1})
     )

@@ -268,6 +268,7 @@ class MainService:
             DOEModel,
             GAModel,
             MCTSModel,
+            PolicyModel,
             CompareModel,
             ResultsModel,
         )
@@ -284,6 +285,7 @@ class MainService:
         doe = DOEModel()
         ga_model = GAModel()
         mcts_model = MCTSModel()
+        policy_model = PolicyModel()
         compare = CompareModel()
         results = ResultsModel()
         ctx = engine.rootContext()
@@ -296,6 +298,7 @@ class MainService:
         ctx.setContextProperty("doeModel", doe)
         ctx.setContextProperty("gaModel", ga_model)
         ctx.setContextProperty("mctsModel", mcts_model)
+        ctx.setContextProperty("policyModel", policy_model)
         ctx.setContextProperty("compareModel", compare)
         ctx.setContextProperty("resultsModel", results)
         qml_path = os.path.join(os.path.dirname(__file__), "..", "ui_new", "main.qml")
@@ -326,6 +329,7 @@ class MainService:
                 doe,
                 ga_model,
                 mcts_model,
+                policy_model,
                 root,
                 token=token,
             ),
