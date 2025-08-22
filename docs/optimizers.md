@@ -51,6 +51,12 @@ Regression tests compare MCTS-H against the genetic algorithm on a toy task,
 demonstrating that MCTS-H reaches comparable fitness with fewer full
 evaluations.
 
+Leaf evaluations can be processed in parallel via ``OptimizerQueueManager.run_parallel``.
+Passing ``parallel>1`` and ``use_processes=True`` dispatches rollouts to a
+process pool, while ``use_ray=True`` ships evaluations to a Ray cluster.
+Both modes retain deterministic seed streams and honour ASHA rung scheduling
+when configured.
+
 The ``experiments/calibrate_mcts_h.py`` helper sweeps ``c_ucb``, ``alpha_pw``,
 ``k_pw`` and initial prior bins over a canonical single-node graph. The sweep
 now explores bins ``{3,5,7}`` to provide deeper insight into prior

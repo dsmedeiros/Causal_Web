@@ -153,6 +153,7 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 - Full evaluation manifests now record ``mcts_run_id`` so each run can be traced back to the MCTS search session.
 - Multi-objective MCTS runs now write results to the shared Pareto archive as ``origin: "mcts"``, allowing the GA panel to replay tree-search trade-offs.
 - GA panel automatically refreshes to surface new MCTS Pareto points without manual reload.
+- Leaf evaluations can now be dispatched in parallel via ``OptimizerQueueManager.run_parallel`` using thread or process pools or a Ray cluster, preserving deterministic seed streams and honouring ASHA rung scheduling.
 - ``cw optim`` now exposes ``--proxy-frames`` and ``--full-frames`` to control
   the frame budgets for proxy and promoted evaluations, ``--bins`` to set
   quantile bins for priors, ``--promote-quantile`` for percentile-based

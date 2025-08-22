@@ -16,8 +16,14 @@ import logging
 import time
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 
 import numpy as np
+
+try:  # pragma: no cover - optional dependency
+    import ray
+except Exception:  # pragma: no cover - gracefully handle missing Ray
+    ray = None
 
 from config.normalizer import Normalizer
 from invariants import checks
@@ -449,6 +455,332 @@ class OptimizerQueueManager:
     def _checkpoint(self) -> None:
         if self._state_path and hasattr(self.optimizer, "save"):
             self.optimizer.save(self._state_path)
+
+    # ------------------------------------------------------------------
+    def run_parallel(
+        self,
+        n: int,
+        parallel: int = 1,
+        *,
+        use_processes: bool = False,
+        use_ray: bool = False,
+    ) -> List[OptimizerResult]:
+        """Evaluate up to ``n`` suggestions in parallel.
+
+        Parameters
+        ----------
+        n:
+            Total number of evaluations to perform.
+        parallel:
+            Maximum number of concurrent workers. ``1`` falls back to
+            :meth:`run_next` semantics.
+        use_processes:
+            When ``True`` a :class:`~concurrent.futures.ProcessPoolExecutor`
+            dispatches evaluations across processes. Otherwise a thread pool is
+            used.
+        use_ray:
+            When ``True`` leaf evaluations are dispatched to a Ray cluster for
+            distributed execution. ``ray`` must be installed.
+
+        Notes
+        -----
+        Evaluations are processed in the order suggestions are issued to
+        preserve determinism. ASHA-style rung scheduling is honoured when
+        configured.
+        """
+
+        if parallel <= 1:
+            return [res for _ in range(n) if (res := self.run_next()) is not None]
+        if use_processes and use_ray:
+            raise ValueError("use_processes and use_ray are mutually exclusive")
+
+        if use_ray:
+            if ray is None:
+                raise RuntimeError("ray is required for use_ray=True")
+            if not ray.is_initialized():
+                ray.init()
+
+            @ray.remote  # pragma: no cover - requires ray
+            def _ray_run_gates(raw, gates, frames=1):
+                return run_gates(raw, gates, frames=frames)
+
+            def submit(raw: Dict[str, float], frames: int) -> Tuple[Any, float]:
+                t0 = time.perf_counter()
+                fut = _ray_run_gates.remote(raw, self.gates, frames=frames)
+                return fut, t0
+
+            def fetch(fut: Any) -> Any:
+                return ray.get(fut)
+
+            return self._run_parallel(n, parallel, submit, fetch)
+
+        executor_cls = ProcessPoolExecutor if use_processes else ThreadPoolExecutor
+        with executor_cls(max_workers=parallel) as ex:
+
+            def submit(raw: Dict[str, float], frames: int) -> Tuple[Any, float]:
+                t0 = time.perf_counter()
+                fut = ex.submit(run_gates, raw, self.gates, frames=frames)
+                return fut, t0
+
+            def fetch(fut: Any) -> Any:
+                return fut.result()
+
+            return self._run_parallel(n, parallel, submit, fetch)
+
+    # ------------------------------------------------------------------
+    def _run_parallel(
+        self,
+        n: int,
+        parallel: int,
+        submit: Callable[[Dict[str, float], int], Tuple[Any, float]],
+        fetch: Callable[[Any], Any],
+    ) -> List[OptimizerResult]:
+        if self._rung_frames:
+            return self._run_parallel_rungs(n, parallel, submit, fetch)
+        return self._run_parallel_basic(n, parallel, submit, fetch)
+
+    # ------------------------------------------------------------------
+    def _run_parallel_basic(
+        self,
+        n: int,
+        parallel: int,
+        submit: Callable[[Dict[str, float], int], Tuple[Any, float]],
+        fetch: Callable[[Any], Any],
+    ) -> List[OptimizerResult]:
+        results: List[OptimizerResult] = []
+        generated = 0
+        inflight: List[
+            Tuple[
+                Any,
+                Dict[str, float],
+                Tuple[Tuple[str, float], ...],
+                Dict[str, float],
+                bool,
+            ]
+        ] = []
+        while len(results) < n:
+            while (
+                len(inflight) < parallel and generated < n and not self.optimizer.done()
+            ):
+                cfg = self.optimizer.suggest(1)[0]
+                key = tuple(sorted(cfg.items()))
+                full = key in self._proxy_seen
+                if not full and hasattr(self.optimizer, "_suggest_full"):
+                    if key in getattr(self.optimizer, "_suggest_full"):
+                        full = True
+                        getattr(self.optimizer, "_suggest_full").discard(key)
+                raw = self._normalizer.to_raw(self.base, cfg)
+                raw.setdefault("seed", self.seed)
+                frames = self.full_frames if full else self.proxy_frames
+                fut, _ = submit(raw, frames)
+                inflight.append((fut, cfg, key, raw, full))
+                generated += 1
+            if not inflight:
+                break
+            fut, cfg, key, raw, full = inflight.pop(0)
+            metrics = fetch(fut)
+            inv = checks.from_metrics(metrics)
+            fit = self.fitness_fn(metrics, inv, cfg)
+            if self._multi_objective:
+                if isinstance(fit, dict):
+                    objs = {k: float(v) for k, v in fit.items()}
+                else:
+                    objs = {f"f{i}": float(v) for i, v in enumerate(fit)}
+                fit_scalar = float(next(iter(objs.values())))
+            else:
+                fit_scalar = float(fit)
+                objs = {"f0": fit_scalar}
+            if not full:
+                if self._multi_objective:
+                    self.optimizer.observe([{"config": cfg, "objectives_proxy": objs}])
+                else:
+                    self.optimizer.observe(
+                        [{"config": cfg, "fitness_proxy": fit_scalar}]
+                    )
+                self._proxy_seen.add(key)
+                results.append(OptimizerResult(cfg, "proxy", fit_scalar))
+            else:
+                if self._multi_objective:
+                    res = {"config": cfg, "objectives": objs}
+                else:
+                    res = {"config": cfg, "fitness": fit_scalar}
+                self._proxy_seen.discard(key)
+                self.optimizer.observe([res])
+                run_id, abs_path, rel_path = allocate_run_dir()
+                key_hash = run_key(
+                    {
+                        "groups": cfg,
+                        "toggles": {},
+                        "seed": int(raw["seed"]),
+                        "gates": self.gates,
+                    }
+                )
+                manifest = {
+                    "run_id": run_id,
+                    "run_key": key_hash,
+                    "groups": cfg,
+                    "toggles": {},
+                    "seed": int(raw["seed"]),
+                    "gates": self.gates,
+                }
+                if self._mcts_run_id is not None:
+                    manifest["mcts_run_id"] = self._mcts_run_id
+                result_payload = {
+                    "status": "ok",
+                    "metrics": metrics,
+                    "invariants": inv,
+                }
+                if self._multi_objective:
+                    result_payload["objectives"] = objs
+                else:
+                    result_payload["fitness"] = fit_scalar
+                persist_run(raw, result_payload, abs_path, manifest=manifest)
+                self._index.mark(key_hash, rel_path)
+                entry = TopKEntry(
+                    run_id=run_id,
+                    fitness=-fit_scalar,
+                    objectives=objs,
+                    groups=cfg,
+                    toggles={},
+                    seed=int(raw["seed"]),
+                    path=rel_path,
+                )
+                update_top_k([entry], self._top_k_path)
+                hof_entry = {
+                    "run_id": run_id,
+                    "fitness": -fit_scalar,
+                    "objectives": objs,
+                    "path": rel_path,
+                }
+                if self._origin:
+                    hof_entry["origin"] = self._origin
+                self._hof.append(hof_entry)
+                save_hall_of_fame(self._hof, self._hof_path)
+                results.append(OptimizerResult(cfg, "full", fit_scalar, rel_path))
+            self._checkpoint()
+        return results
+
+    # ------------------------------------------------------------------
+    def _run_parallel_rungs(
+        self,
+        n: int,
+        parallel: int,
+        submit: Callable[[Dict[str, float], int], Tuple[Any, float]],
+        fetch: Callable[[Any], Any],
+    ) -> List[OptimizerResult]:
+        results: List[OptimizerResult] = []
+        generated = 0
+        inflight: List[Tuple[Any, Dict[str, float], int, Dict[str, float], float]] = []
+        while len(results) < n:
+            while (
+                len(inflight) < parallel
+                and generated < n
+                and (self._pending or not self.optimizer.done())
+            ):
+                if self._pending:
+                    cfg, rung = self._pending.pop(0)
+                else:
+                    cfg = self.optimizer.suggest(1)[0]
+                    rung = 0
+                raw = self._normalizer.to_raw(self.base, cfg)
+                raw.setdefault("seed", self.seed)
+                frames = self._rung_frames[rung]
+                fut, t0 = submit(raw, frames)
+                inflight.append((fut, cfg, rung, raw, t0))
+                generated += 1
+            if not inflight:
+                break
+            fut, cfg, rung, raw, t0 = inflight.pop(0)
+            metrics = fetch(fut)
+            self._rung_times[rung] += time.perf_counter() - t0
+            inv = checks.from_metrics(metrics)
+            fit = self.fitness_fn(metrics, inv, cfg)
+            self._rung_counts[rung] += 1
+            if self._multi_objective:
+                if isinstance(fit, dict):
+                    objs = {k: float(v) for k, v in fit.items()}
+                else:
+                    objs = {f"f{i}": float(v) for i, v in enumerate(fit)}
+                fit_scalar = float(next(iter(objs.values())))
+            else:
+                objs = {"f0": float(fit)}
+                fit_scalar = float(fit)
+            if rung < len(self._rung_frames) - 1:
+                self._rung_data[rung].append((fit_scalar, cfg))
+                data = self._rung_data[rung]
+                penal = fit_scalar
+                if len(data) >= self._asha_eta:
+                    k = max(1, int(len(data) / self._asha_eta))
+                    thresh = sorted(data, key=lambda x: x[0])[k - 1][0]
+                    if fit_scalar <= thresh:
+                        self._pending.append((cfg, rung + 1))
+                        self._promotions[rung] += 1
+                    else:
+                        penal = float(thresh)
+                if self._multi_objective:
+                    self.optimizer.observe([{"config": cfg, "objectives_proxy": objs}])
+                else:
+                    self.optimizer.observe([{"config": cfg, "fitness_proxy": penal}])
+                results.append(OptimizerResult(cfg, "proxy", fit_scalar))
+            else:
+                if self._multi_objective:
+                    res = {"config": cfg, "objectives": objs}
+                else:
+                    res = {"config": cfg, "fitness": fit_scalar}
+                self.optimizer.observe([res])
+                run_id, abs_path, rel_path = allocate_run_dir()
+                key_hash = run_key(
+                    {
+                        "groups": cfg,
+                        "toggles": {},
+                        "seed": int(raw["seed"]),
+                        "gates": self.gates,
+                    }
+                )
+                manifest = {
+                    "run_id": run_id,
+                    "run_key": key_hash,
+                    "groups": cfg,
+                    "toggles": {},
+                    "seed": int(raw["seed"]),
+                    "gates": self.gates,
+                }
+                if self._mcts_run_id is not None:
+                    manifest["mcts_run_id"] = self._mcts_run_id
+                result_payload = {
+                    "status": "ok",
+                    "metrics": metrics,
+                    "invariants": inv,
+                }
+                if self._multi_objective:
+                    result_payload["objectives"] = objs
+                else:
+                    result_payload["fitness"] = fit_scalar
+                persist_run(raw, result_payload, abs_path, manifest=manifest)
+                self._index.mark(key_hash, rel_path)
+                entry = TopKEntry(
+                    run_id=run_id,
+                    fitness=-fit_scalar,
+                    objectives=objs,
+                    groups=cfg,
+                    toggles={},
+                    seed=int(raw["seed"]),
+                    path=rel_path,
+                )
+                update_top_k([entry], self._top_k_path)
+                hof_entry = {
+                    "run_id": run_id,
+                    "fitness": -fit_scalar,
+                    "objectives": objs,
+                    "path": rel_path,
+                }
+                if self._origin:
+                    hof_entry["origin"] = self._origin
+                self._hof.append(hof_entry)
+                save_hall_of_fame(self._hof, self._hof_path)
+                results.append(OptimizerResult(cfg, "full", fit_scalar, rel_path))
+            self._checkpoint()
+        return results
 
     # ------------------------------------------------------------------
     def run_next(self) -> Optional[OptimizerResult]:

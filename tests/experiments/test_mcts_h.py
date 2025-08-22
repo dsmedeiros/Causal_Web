@@ -224,6 +224,90 @@ def test_optimizer_queue_multi_objective_archive(tmp_path, monkeypatch):
     assert set(entry["objectives"].keys()) == {"f0", "f1"}
 
 
+def _slow_gates(raw, gates, frames=1):
+    time.sleep(0.05)
+    return {}
+
+
+@pytest.mark.parametrize("backend", ["process", "ray"])
+def test_optimizer_queue_parallel(tmp_path, monkeypatch, backend):
+    monkeypatch.chdir(tmp_path)
+    priors = {"a": DiscretePrior([0.0, 0.5], [0.5, 0.5])}
+
+    def fitness_fn(metrics, inv, groups):
+        return groups["a"]
+
+    base = _base_config()
+
+    evals = 8
+    if backend == "process":
+        monkeypatch.setattr("experiments.queue.run_gates", _slow_gates)
+        opt_seq = MCTS_H(["a"], priors, {"rng_seed": 0})
+        mgr_seq = OptimizerQueueManager(base, [1], fitness_fn, opt_seq)
+        start = time.perf_counter()
+        for _ in range(evals):
+            mgr_seq.run_next()
+        seq_time = time.perf_counter() - start
+
+    opt_par1 = MCTS_H(["a"], priors, {"rng_seed": 0})
+    mgr_par1 = OptimizerQueueManager(base, [1], fitness_fn, opt_par1)
+    start = time.perf_counter()
+    if backend == "ray":
+        ray = pytest.importorskip("ray")
+        repo = Path(__file__).resolve().parents[2]
+        ray.init(runtime_env={"env_vars": {"PYTHONPATH": str(repo)}})
+        res1 = mgr_par1.run_parallel(evals, parallel=2, use_ray=True)
+        par_time = time.perf_counter() - start
+        ray.shutdown()
+    else:
+        res1 = mgr_par1.run_parallel(evals, parallel=2, use_processes=True)
+        par_time = time.perf_counter() - start
+
+    opt_par2 = MCTS_H(["a"], priors, {"rng_seed": 0})
+    mgr_par2 = OptimizerQueueManager(base, [1], fitness_fn, opt_par2)
+    if backend == "ray":
+        ray.init(runtime_env={"env_vars": {"PYTHONPATH": str(repo)}})
+        res2 = mgr_par2.run_parallel(evals, parallel=2, use_ray=True)
+        ray.shutdown()
+    else:
+        res2 = mgr_par2.run_parallel(evals, parallel=2, use_processes=True)
+
+    assert [r.config for r in res1] == [r.config for r in res2]
+    if backend == "process":
+        assert par_time <= seq_time
+
+
+def test_optimizer_queue_parallel_rungs(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    priors = {"a": DiscretePrior([0.0, 0.5], [0.5, 0.5])}
+
+    def fitness_fn(metrics, inv, groups):
+        return groups["a"]
+
+    base = _base_config()
+    monkeypatch.setattr("experiments.queue.run_gates", _slow_gates)
+    evals = 6
+
+    opt_par1 = MCTS_H(["a"], priors, {"rng_seed": 0})
+    mgr_par1 = OptimizerQueueManager(
+        base, [1], fitness_fn, opt_par1, full_frames=10, rung_fractions=[0.5, 1.0]
+    )
+    res1 = mgr_par1.run_parallel(evals, parallel=2, use_processes=True)
+
+    opt_par2 = MCTS_H(["a"], priors, {"rng_seed": 0})
+    mgr_par2 = OptimizerQueueManager(
+        base, [1], fitness_fn, opt_par2, full_frames=10, rung_fractions=[0.5, 1.0]
+    )
+    res2 = mgr_par2.run_parallel(evals, parallel=2, use_processes=True)
+
+    assert [r.config for r in res1] == [r.config for r in res2]
+    assert [r.status for r in res1] == [r.status for r in res2]
+    stats1 = mgr_par1.rung_stats()
+    stats2 = mgr_par2.rung_stats()
+    assert stats1["rung_counts"] == stats2["rung_counts"]
+    assert stats1["promotion_fractions"] == stats2["promotion_fractions"]
+
+
 @pytest.mark.parametrize("frame_time", [0.001, 0.002])
 def test_mcts_h_asha_scheduler(tmp_path, monkeypatch, frame_time):
     """ASHA reduces full evaluations while retaining fitness across workloads."""
