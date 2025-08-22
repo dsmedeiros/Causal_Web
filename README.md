@@ -146,6 +146,7 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 - Introduced an experimental MCTS-H optimiser that explores hyperparameter trees with progressive widening, prior-guided rollouts, proxy/full evaluation promotion and a simple transposition cache. Multi-objective runs are scalarised via random Dirichlet weights when ``multi_objective`` or the ``--multi-objective`` flag is enabled.
 - Optimiser state can now be saved and reloaded to resume MCTS-H searches.
 - A new ``OptimizerQueueManager`` wires MCTS-H into the existing gate runner and persists Top-K and hall-of-fame artifacts for promoted full evaluations.
+- MCTS-H can route evaluations through an ASHA-style scheduler with configurable rungs (e.g. 20%, 40%, 100% of full frames) to prune weak candidates early, logging promotion fractions, per-rung wall-clock times, and demonstrated wall-clock savings across simulated workloads.
 - The ``cw optim`` command accepts ``--state`` to checkpoint and resume tree searches across invocations.
 - Full evaluation manifests now record ``mcts_run_id`` so each run can be traced back to the MCTS search session.
 - ``cw optim`` now exposes ``--proxy-frames`` and ``--full-frames`` to control

@@ -1,8 +1,10 @@
 import json
 import os
+import time
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 from experiments import OptimizerQueueManager
 from experiments.ga import GeneticAlgorithm
@@ -73,6 +75,15 @@ def test_proxy_promotion_requeues_config():
     assert cfg2 == cfg
     opt.observe([{"config": cfg2, "fitness": 0.2}])
     assert opt.root.N > 0
+
+
+def test_proxy_non_promotion_penalises_leaf():
+    priors = {"a": DiscretePrior([0, 1], [0.5, 0.5])}
+    opt = MCTS_H(["a"], priors, {"rng_seed": 0, "promote_threshold": 0.5})
+    cfg = opt.suggest(1)[0]
+    opt.observe([{"config": cfg, "fitness_proxy": 0.9}])
+    assert not opt._pending_full
+    assert opt.root.children[0].Q <= -1e8
 
 
 def test_quantile_promotion():
@@ -172,6 +183,69 @@ def test_optimizer_queue_promotion(tmp_path, monkeypatch):
         (Path("experiments") / res2.path / "manifest.json").read_text()
     )
     assert manifest.get("mcts_run_id")
+
+
+@pytest.mark.parametrize("frame_time", [0.001, 0.002])
+def test_mcts_h_asha_scheduler(tmp_path, monkeypatch, frame_time):
+    """ASHA reduces full evaluations while retaining fitness across workloads."""
+
+    monkeypatch.chdir(tmp_path)
+    priors = {"Delta_over_W0": DiscretePrior([0.0, 0.5], [0.5, 0.5])}
+
+    def fitness_fn(metrics, inv, groups):
+        return groups["Delta_over_W0"]
+
+    base = _base_config()
+
+    def fake_run_gates(raw, gates, frames=1):
+        time.sleep(frames * frame_time)
+        return {}
+
+    monkeypatch.setattr("experiments.queue.run_gates", fake_run_gates)
+
+    # Baseline without ASHA: all evaluations are full
+    start = time.perf_counter()
+    opt_base = MCTS_H(["Delta_over_W0"], priors, {"rng_seed": 0})
+    mgr_base = OptimizerQueueManager(base, [1], fitness_fn, opt_base, full_frames=50)
+    full_base = 0
+    best_base = 1.0
+    for _ in range(8):
+        res = mgr_base.run_next()
+        assert res
+        if res.status == "full":
+            full_base += 1
+            best_base = min(best_base, res.fitness or 1.0)
+    base_time = time.perf_counter() - start
+
+    # With ASHA rungs 20%, 40%, 100%
+    start = time.perf_counter()
+    opt_asha = MCTS_H(["Delta_over_W0"], priors, {"rng_seed": 0})
+    mgr_asha = OptimizerQueueManager(
+        base,
+        [1],
+        fitness_fn,
+        opt_asha,
+        full_frames=50,
+        rung_fractions=[0.2, 0.4, 1.0],
+    )
+    full_asha = 0
+    best_asha = 1.0
+    for _ in range(8):
+        res = mgr_asha.run_next()
+        assert res
+        if res.status == "full":
+            full_asha += 1
+            best_asha = min(best_asha, res.fitness or 1.0)
+    asha_time = time.perf_counter() - start
+
+    assert full_asha <= max(1, full_base // 2)
+    assert best_asha <= best_base + 1e-9
+    assert asha_time <= base_time
+    stats = mgr_asha.rung_stats()
+    assert stats["rung_counts"][0] >= stats["rung_counts"][1] >= stats["rung_counts"][2]
+    assert "rung_times" in stats and len(stats["rung_times"]) == len(
+        stats["rung_counts"]
+    )
 
 
 def test_mcts_beats_ga(tmp_path, monkeypatch):
