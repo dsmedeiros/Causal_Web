@@ -12,8 +12,10 @@ from dataclasses import dataclass
 import asyncio
 import itertools
 import json
+import logging
+import time
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
 import numpy as np
 
@@ -30,6 +32,8 @@ from .artifacts import (
     allocate_run_dir,
 )
 from .optim import Optimizer, MCTS_H
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -372,6 +376,11 @@ class OptimizerQueueManager:
         Number of frames used for initial proxy evaluations.
     full_frames:
         Number of frames used for promoted full evaluations.
+    rung_fractions:
+        Optional fractions of ``full_frames`` allocated to successive
+        evaluation rungs. When provided, a simple ASHA-style scheduler routes
+        configurations through these budgets and tracks per-rung counts,
+        promotions and wall-clock time.
     state_path:
         Optional path where the optimiser state is checkpointed after each
         evaluation.
@@ -397,6 +406,7 @@ class OptimizerQueueManager:
         full_frames: int = 3000,
         state_path: str | Path | None = None,
         run_index: RunIndex | None = None,
+        rung_fractions: Sequence[float] | None = None,
     ) -> None:
         self.base = dict(base)
         self.gates = list(gates)
@@ -412,6 +422,18 @@ class OptimizerQueueManager:
         self._state_path = Path(state_path) if state_path else None
         self.proxy_frames = int(proxy_frames)
         self.full_frames = int(full_frames)
+        self._rung_frames: List[int] | None = (
+            [int(full_frames * f) for f in rung_fractions] if rung_fractions else None
+        )
+        if self._rung_frames:
+            self._pending: List[Tuple[Dict[str, float], int]] = []
+            self._rung_data: List[List[Tuple[float, Dict[str, float]]]] = [
+                [] for _ in self._rung_frames[:-1]
+            ]
+            self._rung_counts = [0 for _ in self._rung_frames]
+            self._promotions = [0 for _ in self._rung_frames[:-1]]
+            self._asha_eta = 2.0
+            self._rung_times = [0.0 for _ in self._rung_frames]
         self._mcts_run_id: Optional[str] = None
         if isinstance(self.optimizer, MCTS_H):
             self._mcts_run_id = allocate_run_dir()[0]
@@ -426,7 +448,97 @@ class OptimizerQueueManager:
         """Evaluate the next configuration from the optimizer."""
 
         if self.optimizer.done():
+            if self._rung_frames:
+                stats = self.rung_stats()
+                logger.info(
+                    "ASHA rungs: counts=%s promotions=%s times=%s",
+                    stats["rung_counts"],
+                    stats["promotion_fractions"],
+                    stats.get("rung_times"),
+                )
             return None
+        if self._rung_frames:
+            if self._pending:
+                cfg, rung = self._pending.pop(0)
+            else:
+                cfg = self.optimizer.suggest(1)[0]
+                rung = 0
+            raw = self._normalizer.to_raw(self.base, cfg)
+            raw.setdefault("seed", self.seed)
+            frames = self._rung_frames[rung]
+            t0 = time.perf_counter()
+            metrics = run_gates(raw, self.gates, frames=frames)
+            self._rung_times[rung] += time.perf_counter() - t0
+            inv = checks.from_metrics(metrics)
+            fit = self.fitness_fn(metrics, inv, cfg)
+            self._rung_counts[rung] += 1
+            if rung < len(self._rung_frames) - 1:
+                self._rung_data[rung].append((float(fit), cfg))
+                data = self._rung_data[rung]
+                penal = float(fit)
+                if len(data) >= self._asha_eta:
+                    k = max(1, int(len(data) / self._asha_eta))
+                    thresh = sorted(data, key=lambda x: x[0])[k - 1][0]
+                    if float(fit) <= thresh:
+                        self._pending.append((cfg, rung + 1))
+                        self._promotions[rung] += 1
+                    else:
+                        penal = float(thresh)
+                self.optimizer.observe([{"config": cfg, "fitness_proxy": penal}])
+            else:
+                res = {"config": cfg, "fitness": float(fit)}
+                self.optimizer.observe([res])
+                run_id, abs_path, rel_path = allocate_run_dir()
+                key_hash = run_key(
+                    {
+                        "groups": cfg,
+                        "toggles": {},
+                        "seed": int(raw["seed"]),
+                        "gates": self.gates,
+                    }
+                )
+                manifest = {
+                    "run_id": run_id,
+                    "run_key": key_hash,
+                    "groups": cfg,
+                    "toggles": {},
+                    "seed": int(raw["seed"]),
+                    "gates": self.gates,
+                }
+                if self._mcts_run_id is not None:
+                    manifest["mcts_run_id"] = self._mcts_run_id
+                result_payload = {
+                    "status": "ok",
+                    "metrics": metrics,
+                    "invariants": inv,
+                    "fitness": float(fit),
+                }
+                persist_run(raw, result_payload, abs_path, manifest=manifest)
+                self._index.mark(key_hash, rel_path)
+                entry = TopKEntry(
+                    run_id=run_id,
+                    fitness=-float(fit),
+                    objectives={"f0": float(fit)},
+                    groups=cfg,
+                    toggles={},
+                    seed=int(raw["seed"]),
+                    path=rel_path,
+                )
+                update_top_k([entry], self._top_k_path)
+                self._hof.append(
+                    {
+                        "run_id": run_id,
+                        "fitness": -float(fit),
+                        "objectives": {"f0": float(fit)},
+                        "path": rel_path,
+                    }
+                )
+                save_hall_of_fame(self._hof, self._hof_path)
+                self._checkpoint()
+                return OptimizerResult(cfg, "full", float(fit), rel_path)
+            self._checkpoint()
+            return OptimizerResult(cfg, "proxy", float(fit))
+        # legacy single proxy/full path
         cfg = self.optimizer.suggest(1)[0]
         key = tuple(sorted(cfg.items()))
         full = key in self._proxy_seen
@@ -503,3 +615,26 @@ class OptimizerQueueManager:
         )
         save_hall_of_fame(self._hof, self._hof_path)
         return OptimizerResult(cfg, "full", float(fit), rel_path)
+
+    # ------------------------------------------------------------------
+    def rung_stats(self) -> Dict[str, Any]:
+        """Return evaluation counts, promotion fractions and times per rung."""
+
+        if not self._rung_frames:
+            return {}
+        fracs = []
+        for i, cnt in enumerate(self._rung_counts[:-1]):
+            total = cnt or 1
+            fracs.append(self._promotions[i] / total)
+        stats = {
+            "rung_counts": list(self._rung_counts),
+            "promotion_fractions": fracs,
+            "rung_times": list(self._rung_times),
+        }
+        logger.info(
+            "ASHA rungs: counts=%s promotions=%s times=%s",
+            stats["rung_counts"],
+            stats["promotion_fractions"],
+            stats["rung_times"],
+        )
+        return stats

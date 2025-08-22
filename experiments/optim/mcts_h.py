@@ -162,10 +162,6 @@ class MCTS_H(Optimizer):
                     score = float(np.dot(weights, vals))
                 else:
                     score = float(vals[0])
-                reward = -score
-                for node in path:
-                    node.N += 1
-                    node.Q += (reward - node.Q) / node.N
                 self._proxy_scores.append(score)
                 self._proxy_cache[key] = score
                 self._proxy_evals += 1
@@ -182,9 +178,16 @@ class MCTS_H(Optimizer):
                         else self._proxy_scores
                     )
                     thresh = float(np.quantile(scores, self.promote_quantile))
-                if thresh is None or score <= float(thresh):
+                promote = thresh is None or score <= float(thresh)
+                reward = -score if promote else -1e9
+                for node in path:
+                    node.N += 1
+                    node.Q += (reward - node.Q) / node.N
+                if promote:
                     self._pending_full.append(cfg)
                     self._promotions += 1
+                else:
+                    self._paths.pop(key, None)
             elif "fitness" in res or "fitness_full" in res:
                 full_score = float(res.get("fitness", res.get("fitness_full", 0.0)))
                 reward = -full_score
@@ -198,10 +201,6 @@ class MCTS_H(Optimizer):
                     )
             elif "fitness_proxy" in res:
                 score = float(res["fitness_proxy"])
-                reward = -score
-                for node in path:
-                    node.N += 1
-                    node.Q += (reward - node.Q) / node.N
                 self._proxy_scores.append(score)
                 self._proxy_cache[key] = score
                 self._proxy_evals += 1
@@ -218,9 +217,16 @@ class MCTS_H(Optimizer):
                         else self._proxy_scores
                     )
                     thresh = float(np.quantile(scores, self.promote_quantile))
-                if thresh is None or score <= float(thresh):
+                promote = thresh is None or score <= float(thresh)
+                reward = -score if promote else -1e9
+                for node in path:
+                    node.N += 1
+                    node.Q += (reward - node.Q) / node.N
+                if promote:
                     self._pending_full.append(cfg)
                     self._promotions += 1
+                else:
+                    self._paths.pop(key, None)
             else:
                 self._paths.pop(key, None)
 
