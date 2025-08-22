@@ -162,7 +162,7 @@ via a Monte-Carlo path sampler over the graph's causal structure.
   past wins and evaluation rates, and writes per-task and aggregate reports
   to ``bench/optim``.
 - The Qt Quick interface now exposes an ``MCTS`` tab so tree search runs alongside existing DOE and GA panels.
-- The MCTS tab reports live node counts, evaluation totals, and promotion rates during a search.
+- The DOE, GA, and MCTS tabs report live node and frontier counts and expansion/promotion gauges during a search.
 - Users can adjust proxy/full frame budgets, promotion thresholds or
   quantiles, and prior bin counts directly in the MCTS panel for
   multi-fidelity searches.
@@ -557,6 +557,18 @@ The resulting `*_sweep.csv` and `*_heatmap.png` files summarise Bell scores,
 interference visibility and proper-time ratios. Sweeps seed module-level random
 generators, so parallel sweeps should run in separate processes to avoid
 contention.
+
+## Optimizer Decision Tree
+
+Use the following flow to pick an optimizer:
+
+- Do you have a cheap proxy metric to screen candidates?
+  - **Yes** → **MCTS-H** expands a tree and promotes promising runs.
+  - **No** → Is the space mostly continuous and low-dimensional?
+    - **Yes** → **CMA-ES** excels on smooth continuous spaces.
+    - **No** → Are there conditional or categorical parameters?
+      - **Yes** → **TPE** handles conditional spaces efficiently.
+      - **No** → **GA** offers broad, multi-objective search.
 
 ## Contributing
 

@@ -1,5 +1,18 @@
 # Optimizers
 
+## When to use which optimizer
+
+Choose an optimizer based on the characteristics of your search space:
+
+- **MCTS-H** – leverage when you have a cheap proxy metric and want to expand a
+  tree incrementally, promoting only promising configurations.
+- **GA** – suited to large or multi-objective spaces where populations of
+  candidates explore broadly.
+- **TPE** – effective for conditional or categorical spaces and when you want a
+  quick suggestion-based search without maintaining a population.
+- **CMA-ES** – best for low-dimensional, smooth and purely continuous
+  parameters.
+
 ## MCTS-H
 
 The Monte Carlo Tree Search optimiser explores hyperparameter spaces as a

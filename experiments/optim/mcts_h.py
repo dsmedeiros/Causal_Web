@@ -94,6 +94,7 @@ class MCTS_H(Optimizer):
         self._promotions = 0
         self._proxy_cache: Dict[Tuple[Tuple[str, float], ...], float] = {}
         self._proxy_full_pairs: List[Tuple[float, float]] = []
+        self._frontier = 1
 
     # ------------------------------------------------------------------
     # public API
@@ -341,13 +342,18 @@ class MCTS_H(Optimizer):
         val = prior.sample(self.rng) if prior else float(self.rng.random())
         x = {**node.x_partial, param: val}
         key = (tuple(sorted(x.items())), len(x))
+        parent_leaf = len(node.children) == 0
         child = self._ttable.get(key)
         if child is None:
             child = Node(x, node.pending[1:])
             self._ttable[key] = child
             self._nodes += 1
             self._expansions += 1
+            if child.pending:
+                self._frontier += 1
         node.children.append(child)
+        if parent_leaf:
+            self._frontier -= 1
         return child
 
     def _rollout(
@@ -360,13 +366,18 @@ class MCTS_H(Optimizer):
             val = prior.sample(self.rng) if prior else float(self.rng.random())
             x = {**current.x_partial, param: val}
             key = (tuple(sorted(x.items())), len(x))
+            parent_leaf = len(current.children) == 0
             child = self._ttable.get(key)
             if child is None:
                 child = Node(x, current.pending[1:])
                 self._ttable[key] = child
                 self._nodes += 1
                 self._expansions += 1
+                if child.pending:
+                    self._frontier += 1
             current.children.append(child)
+            if parent_leaf:
+                self._frontier -= 1
             path.append(child)
             current = child
         return current.x_partial, path
@@ -374,7 +385,12 @@ class MCTS_H(Optimizer):
     # ------------------------------------------------------------------
     # metrics
     def metrics(self) -> Dict[str, float]:
-        """Return collected search metrics."""
+        """Return collected search metrics.
+
+        The dictionary includes expansion and promotion rates, average rollout
+        depth, Spearman correlation between proxy and full evaluations and the
+        current frontier size.
+        """
 
         expansion_rate = self._expansions / max(1, self._suggestions)
         promotion_rate = self._promotions / max(1, self._proxy_evals)
@@ -385,6 +401,7 @@ class MCTS_H(Optimizer):
             "promotion_rate": promotion_rate,
             "avg_rollout_depth": avg_depth,
             "spearman_proxy_full": spearman,
+            "frontier": float(self._frontier),
         }
 
     def _spearman(self) -> float:

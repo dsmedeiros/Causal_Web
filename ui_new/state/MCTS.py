@@ -48,6 +48,8 @@ class MCTSModel(QObject):
         self._node_count = 0
         self._proxy_evals = 0
         self._full_evals = 0
+        self._frontier = 0
+        self._expansion_rate = 0.0
         self._max_nodes = 10000
         self._proxy_frames = 300
         self._full_frames = 3000
@@ -122,9 +124,13 @@ class MCTSModel(QObject):
                     self._hof = list(data.get("archive", []))
                     self.hallOfFameChanged.emit()
                 if self._mgr and getattr(self._mgr, "optimizer", None) is not None:
-                    self._node_count = getattr(
-                        self._mgr.optimizer, "_nodes", self._node_count
+                    opt = self._mgr.optimizer
+                    self._node_count = getattr(opt, "_nodes", self._node_count)
+                    metrics = opt.metrics()
+                    self._expansion_rate = float(
+                        metrics.get("expansion_rate", self._expansion_rate)
                     )
+                    self._frontier = int(metrics.get("frontier", self._frontier))
                 self.statsChanged.emit()
                 await asyncio.sleep(0)
             self._running = False
@@ -164,9 +170,13 @@ class MCTSModel(QObject):
                     self._hof = list(data.get("archive", []))
                     self.hallOfFameChanged.emit()
                 if self._mgr and getattr(self._mgr, "optimizer", None) is not None:
-                    self._node_count = getattr(
-                        self._mgr.optimizer, "_nodes", self._node_count
+                    opt = self._mgr.optimizer
+                    self._node_count = getattr(opt, "_nodes", self._node_count)
+                    metrics = opt.metrics()
+                    self._expansion_rate = float(
+                        metrics.get("expansion_rate", self._expansion_rate)
                     )
+                    self._frontier = int(metrics.get("frontier", self._frontier))
                 self.statsChanged.emit()
                 await asyncio.sleep(0)
             self._running = False
@@ -311,7 +321,15 @@ class MCTSModel(QObject):
             return 0.0
         return self._full_evals / self._proxy_evals
 
+    def _get_frontier(self) -> int:
+        return self._frontier
+
+    def _get_expansion_rate(self) -> float:
+        return self._expansion_rate
+
     nodeCount = Property(int, _get_node_count, notify=statsChanged)
     proxyEvaluations = Property(int, _get_proxy, notify=statsChanged)
     fullEvaluations = Property(int, _get_full, notify=statsChanged)
     promotionRate = Property(float, _get_promotion_rate, notify=statsChanged)
+    frontier = Property(int, _get_frontier, notify=statsChanged)
+    expansionRate = Property(float, _get_expansion_rate, notify=statsChanged)

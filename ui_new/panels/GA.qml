@@ -58,6 +58,18 @@ Rectangle {
             Button { text: "Export Best"; onClicked: gaModel.exportBest() }
             Button { text: "Run baseline"; onClicked: experimentModel.runBaseline() }
         }
+        Row {
+            spacing: 8
+            Text { text: "Nodes: " + gaModel.nodeCount; color: "white" }
+            Text { text: "Frontier: " + gaModel.frontier; color: "white" }
+        }
+        Row {
+            spacing: 4
+            Text { text: "Expand"; color: "white" }
+            ProgressBar { width: 80; value: gaModel.expansionRate }
+            Text { text: "Promote"; color: "white" }
+            ProgressBar { width: 80; value: gaModel.promotionRate }
+        }
         ListView {
             width: parent.width
             height: 100

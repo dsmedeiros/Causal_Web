@@ -65,9 +65,19 @@ Rectangle {
         Row {
             spacing: 8
             Text { text: "Nodes: " + mctsModel.nodeCount; color: "white" }
+            Text { text: "Frontier: " + mctsModel.frontier; color: "white" }
+        }
+        Row {
+            spacing: 8
             Text { text: "Proxy: " + mctsModel.proxyEvaluations; color: "white" }
             Text { text: "Full: " + mctsModel.fullEvaluations; color: "white" }
-            Text { text: "Promoted: " + (mctsModel.promotionRate * 100).toFixed(1) + "%"; color: "white" }
+        }
+        Row {
+            spacing: 4
+            Text { text: "Expand"; color: "white" }
+            ProgressBar { width: 80; value: mctsModel.expansionRate }
+            Text { text: "Promote"; color: "white" }
+            ProgressBar { width: 80; value: mctsModel.promotionRate }
         }
         Text { text: "Hall of Fame"; color: "white" }
         ListView {
