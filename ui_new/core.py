@@ -50,14 +50,12 @@ async def run(
     window.controlRequested = False
     client = Client(url, token, ping_interval=2.0)
     await client.connect()
-
-    loop = asyncio.get_running_loop()
     experiment.set_client(client)
     replay.set_client(client)
     store.set_client(client)
     doe.set_client(client)
-    ga.set_client(client, loop)
-    mcts.set_client(client, loop)
+    ga.set_client(client)
+    mcts.set_client(client)
     policy.set_client(client)
     window.requestControl = lambda: asyncio.create_task(
         client.send({"type": "RequestControl", "v": 1})

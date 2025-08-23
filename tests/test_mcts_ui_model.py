@@ -34,18 +34,23 @@ def test_mcts_model_metrics(tmp_path, monkeypatch):
     model.maxNodes = 100
     model.proxyFrames = 5
     model.fullFrames = 5
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    model.start()
-    for _ in range(50):
-        loop.run_until_complete(asyncio.sleep(0))
-        if model.proxyEvaluations and model.proxyEvaluations == model.fullEvaluations:
-            break
-    model.pause()
-    loop.run_until_complete(asyncio.sleep(0))
+
+    async def run_model() -> None:
+        model.start()
+        for _ in range(50):
+            await asyncio.sleep(0)
+            if (
+                model.proxyEvaluations
+                and model.proxyEvaluations == model.fullEvaluations
+            ):
+                break
+        model.pause()
+        await asyncio.sleep(0)
+
+    asyncio.run(run_model())
+
     assert model.nodeCount > 0
     assert model.proxyEvaluations == model.fullEvaluations > 0
     assert model.promotionRate == pytest.approx(1.0)
     assert model.frontier >= 0
     assert 0 <= model.expansionRate <= 1
-    loop.close()

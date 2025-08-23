@@ -39,7 +39,6 @@ class MCTSModel(QObject):
         self._groups = {"Delta_over_W0": (0.0, 1.0)}
         self._gates: List[int] = [1]
         self._client: Optional[Client] = None
-        self._loop: Optional[asyncio.AbstractEventLoop] = None
         self._mgr: Optional[OptimizerQueueManager] = None
         self._running = False
         self._task: Optional[asyncio.Task] = None
@@ -64,13 +63,10 @@ class MCTSModel(QObject):
         self._ablations: List[dict] = []
 
     # ------------------------------------------------------------------
-    def set_client(
-        self, client: Optional[Client], loop: Optional[asyncio.AbstractEventLoop] = None
-    ) -> None:
-        """Bind an IPC client and event loop for asynchronous execution."""
+    def set_client(self, client: Optional[Client]) -> None:
+        """Bind an IPC ``client`` for asynchronous execution."""
 
         self._client = client
-        self._loop = loop
 
     # ------------------------------------------------------------------
     def handle_status(self, msg: Dict[str, object]) -> None:  # pragma: no cover - no-op
@@ -142,9 +138,7 @@ class MCTSModel(QObject):
                 await asyncio.sleep(0)
             self._running = False
             self.runningChanged.emit()
-
-        loop = self._loop or asyncio.get_event_loop()
-        self._task = loop.create_task(_run())
+        self._task = asyncio.create_task(_run())
 
     # ------------------------------------------------------------------
     @Slot()
@@ -188,9 +182,7 @@ class MCTSModel(QObject):
                 await asyncio.sleep(0)
             self._running = False
             self.runningChanged.emit()
-
-        loop = self._loop or asyncio.get_event_loop()
-        self._task = loop.create_task(_run())
+        self._task = asyncio.create_task(_run())
 
     # ------------------------------------------------------------------
     @Slot()

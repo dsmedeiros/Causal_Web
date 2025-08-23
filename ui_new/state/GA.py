@@ -51,7 +51,6 @@ class GAModel(QObject):
         self._fitness_single = _fitness_single
         self._fitness = _fitness_single
         self._client: Optional[Client] = None
-        self._loop: Optional[asyncio.AbstractEventLoop] = None
         self._population_size = 8
         self._mutation_rate = 0.1
         self._crossover_rate = 0.5
@@ -214,13 +213,16 @@ class GAModel(QObject):
             path = write_best_config(row)
             self.baselinePromoted.emit(path)
 
-    def set_client(self, client: Client, loop: asyncio.AbstractEventLoop) -> None:
-        """Attach a WebSocket ``client`` and event ``loop`` for engine integration."""
+    def set_client(self, client: Client) -> None:
+        """Attach a WebSocket ``client`` for engine integration.
+
+        The current asyncio event loop is forwarded to the underlying
+        :class:`~experiments.GeneticAlgorithm` so it can schedule IPC tasks.
+        """
 
         self._client = client
-        self._loop = loop
         self._ga.set_client(client)
-        self._ga.set_event_loop(loop)
+        self._ga.set_event_loop(asyncio.get_running_loop())
 
     def handle_status(self, msg: Dict) -> None:
         """Forward ``ExperimentStatus`` messages to the GA."""

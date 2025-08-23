@@ -1,2 +1,7 @@
 -r requirements.txt
 pyinstaller
+numpy==1.26.4
+PySide6==6.6.3.1
+shiboken6==6.6.3.1
+qasync>=0.24.0
+websockets>=10.4
