@@ -270,6 +270,7 @@ launches the engine and Qt Quick interface.
 
 ## Installation
 Clone the repository and install the packages listed in `requirements.txt`. The GUI requires an X11 compatible display.
+On Linux, install the system packages `libgl1`, `libegl1`, and `libxkbcommon-x11-0` to satisfy Qt runtime dependencies and avoid `libGL.so.1` errors during tests.
 
 ## Usage
 Graphs are stored as JSON files under `Causal_Web/input/`. Each file defines
