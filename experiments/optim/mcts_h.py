@@ -35,7 +35,10 @@ class MCTS_H(Optimizer):
     can be promoted for a subsequent full evaluation when the proxy score
     meets a configurable threshold or falls within a promotion quantile.
     When ``multi_objective`` is enabled the optimiser draws random Dirichlet
-    weights to scalarise objective vectors for backpropagation.
+    weights to scalarise objective vectors for backpropagation.  Supplying an
+    ``hv_box`` in the configuration instead uses the expected hypervolume
+    improvement within the given reference box as the node value, reverting to
+    scalarisation when omitted.
     """
 
     def __init__(
@@ -56,8 +59,8 @@ class MCTS_H(Optimizer):
         cfg:
             Optional configuration dictionary. Recognised keys include
             ``c_ucb``, ``alpha_pw``, ``k_pw``, ``max_nodes``,
-            ``promote_threshold``, ``promote_quantile``, ``promote_window``
-            and ``multi_objective``.
+            ``promote_threshold``, ``promote_quantile``, ``promote_window``,
+            ``multi_objective`` and ``hv_box``.
         rng:
             Optional NumPy random generator used for deterministic sampling.
         """
@@ -76,6 +79,11 @@ class MCTS_H(Optimizer):
             self.promote_quantile = cfg.get("promote_quantile")
         self.promote_window = int(cfg.get("promote_window", 0))
         self.multi_objective = bool(cfg.get("multi_objective", False))
+        self.hv_box = cfg.get("hv_box")
+        if self.hv_box is not None:
+            self.hv_box = np.array(self.hv_box, dtype=float)
+        self._pareto: List[np.ndarray] = []
+        self._hv = 0.0
         self.rng = rng or np.random.default_rng(int(cfg.get("rng_seed", 0)))
         self.root = Node({}, self.space.copy())
         self._paths: Dict[Tuple[Tuple[str, float], ...], Dict[str, Any]] = {}
@@ -134,7 +142,7 @@ class MCTS_H(Optimizer):
             self._rollout_depth_total += len(path) - 1
             key = tuple(sorted(full.items()))
             info: Dict[str, Any] = {"path": path}
-            if self.multi_objective:
+            if self.multi_objective and self.hv_box is None:
                 info["weights"] = None
             self._paths[key] = info
             out.append(full)
@@ -154,17 +162,17 @@ class MCTS_H(Optimizer):
             if "objectives" in res:
                 objs = res["objectives"]
                 vals = np.array([objs[k] for k in sorted(objs)], dtype=float)
-                if self.multi_objective:
+                if self.multi_objective and self.hv_box is not None:
+                    reward = float(self._hv_improvement(vals))
+                    full_score = -reward
+                elif self.multi_objective:
                     if weights is None:
                         weights = self.rng.dirichlet(np.ones(len(vals)))
                     reward = -float(np.dot(weights, vals))
+                    full_score = float(np.dot(weights, vals))
                 else:
                     reward = -float(vals[0])
-                full_score = (
-                    float(vals[0])
-                    if not self.multi_objective
-                    else float(np.dot(weights, vals))
-                )
+                    full_score = float(vals[0])
                 gen_best = full_score if gen_best is None else min(gen_best, full_score)
                 self._paths.pop(key, None)
                 for node in path:
@@ -174,11 +182,15 @@ class MCTS_H(Optimizer):
                     self._proxy_full_pairs.append(
                         (self._proxy_cache.pop(key), full_score)
                     )
+                if self.multi_objective and self.hv_box is not None:
+                    self._update_pareto(vals, reward)
                 self._update_priors(cfg, full_score)
             elif "objectives_proxy" in res:
                 objs = res["objectives_proxy"]
                 vals = np.array([objs[k] for k in sorted(objs)], dtype=float)
-                if self.multi_objective:
+                if self.multi_objective and self.hv_box is not None:
+                    score = -float(self._hv_improvement(vals))
+                elif self.multi_objective:
                     if weights is None:
                         weights = self.rng.dirichlet(np.ones(len(vals)))
                         info["weights"] = weights
@@ -294,11 +306,14 @@ class MCTS_H(Optimizer):
                 "promote_quantile": self.promote_quantile,
                 "promote_window": self.promote_window,
                 "multi_objective": self.multi_objective,
+                "hv_box": self.hv_box.tolist() if self.hv_box is not None else None,
             },
             "root": encode(self.root),
             "pending_full": self._pending_full,
             "proxy_scores": self._proxy_scores,
             "rng_state": self.rng.bit_generator.state,
+            "pareto": [p.tolist() for p in self._pareto],
+            "hypervolume": self._hv,
         }
 
     def save(self, path: str | pathlib.Path) -> None:
@@ -338,6 +353,8 @@ class MCTS_H(Optimizer):
         opt._pending_full = [dict(x) for x in data.get("pending_full", [])]
         opt._proxy_scores = [float(s) for s in data.get("proxy_scores", [])]
         opt._ttable = {}
+        opt._pareto = [np.array(p, dtype=float) for p in data.get("pareto", [])]
+        opt._hv = float(data.get("hypervolume", 0.0))
 
         def rebuild(node: Node) -> None:
             key = (tuple(sorted(node.x_partial.items())), len(node.x_partial))
@@ -418,6 +435,95 @@ class MCTS_H(Optimizer):
         return current.x_partial, path
 
     # ------------------------------------------------------------------
+    # hypervolume helpers
+    def _hv_value(self, front: List[np.ndarray]) -> float:
+        """Return dominated hypervolume for ``front`` within ``hv_box``.
+
+        Parameters
+        ----------
+        front:
+            Non-dominated list of objective vectors.
+
+        Returns
+        -------
+        float
+            Lebesgue measure of the dominated region clipped to ``hv_box``.
+
+        Notes
+        -----
+        The implementation uses a simple recursive slicing algorithm and is
+        intended for small Pareto fronts. Complexity grows exponentially with
+        the number of objectives and points.
+        """
+
+        if not front or self.hv_box is None:
+            return 0.0
+        pts = np.array(front, dtype=float)
+        if pts.shape[1] != len(self.hv_box):
+            raise ValueError("hv_box dimension mismatch")
+
+        lower = self.hv_box[:, 0]
+        upper = self.hv_box[:, 1]
+        # shift to origin for easier slicing
+        pts = pts - lower
+        ref = upper - lower
+
+        pts = pts[np.all(pts <= ref, axis=1)]
+        if pts.size == 0:
+            return 0.0
+
+        order = np.argsort(pts[:, 0])
+        pts = pts[order]
+
+        def hv_recursive(points: np.ndarray, ref_point: np.ndarray) -> float:
+            if points.size == 0:
+                return 0.0
+            if points.shape[1] == 1:
+                return float(ref_point[0] - np.min(points[:, 0]))
+            volume = 0.0
+            while points.size:
+                x = points[-1, 0]
+                width = ref_point[0] - x
+                if width > 0:
+                    volume += width * hv_recursive(points[:, 1:], ref_point[1:])
+                ref_point = ref_point.copy()
+                ref_point[0] = x
+                points = points[points[:, 0] < x]
+            return float(volume)
+
+        return hv_recursive(pts, ref)
+
+    def _hv_improvement(self, vals: np.ndarray) -> float:
+        if self.hv_box is None:
+            return 0.0
+        if not np.all(vals <= self.hv_box[:, 1]) or not np.all(
+            vals >= self.hv_box[:, 0]
+        ):
+            return 0.0
+        front = []
+        for p in self._pareto:
+            if np.all(p <= vals) and np.any(p < vals):
+                continue
+            if np.all(vals <= p) and np.any(vals < p):
+                return 0.0
+            front.append(p)
+        front.append(vals)
+        hv_after = self._hv_value(front)
+        return max(0.0, hv_after - self._hv)
+
+    def _update_pareto(self, vals: np.ndarray, hv_impr: float) -> None:
+        if hv_impr <= 0:
+            return
+        new_front = []
+        for p in self._pareto:
+            if np.all(p <= vals) and np.any(p < vals):
+                continue
+            new_front.append(p)
+        new_front.append(vals)
+        self._pareto = new_front
+        self._hv += hv_impr
+
+    # ------------------------------------------------------------------
     # metrics
     def metrics(self) -> Dict[str, float]:
         """Return collected search metrics.
@@ -449,7 +555,7 @@ class MCTS_H(Optimizer):
             best_improve = self._best_history[-2] - best
         else:
             best_improve = 0.0
-        return {
+        out = {
             "expansion_rate": expansion_rate,
             "promotion_rate": promotion_rate,
             "avg_rollout_depth": avg_depth,
@@ -460,6 +566,9 @@ class MCTS_H(Optimizer):
             "best_so_far": best,
             "best_so_far_improvement": best_improve,
         }
+        if self.hv_box is not None:
+            out["hypervolume"] = self._hv
+        return out
 
     def _spearman(self) -> float:
         if len(self._proxy_full_pairs) < 2:
