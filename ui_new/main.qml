@@ -220,19 +220,71 @@ Window {
             anchors.bottom: parent.bottom
             currentIndex: tabBar.currentIndex
 
-            Telemetry { Layout.fillWidth: true; Layout.fillHeight: true; graphView: graphView }
-            Meters { Layout.fillWidth: true; Layout.fillHeight: true }
-            Experiment { Layout.fillWidth: true; Layout.fillHeight: true; graphView: graphView }
-            Replay { Layout.fillWidth: true; Layout.fillHeight: true }
-            Results { Layout.fillWidth: true; Layout.fillHeight: true }
-            LogExplorer { Layout.fillWidth: true; Layout.fillHeight: true }
-            Inspector { Layout.fillWidth: true; Layout.fillHeight: true }
-            Validation { Layout.fillWidth: true; Layout.fillHeight: true }
-            DOE { Layout.fillWidth: true; Layout.fillHeight: true; panels: panels; replayIndex: 3; compareIndex: 12 }
-            GA { Layout.fillWidth: true; Layout.fillHeight: true; panels: panels; replayIndex: 3; compareIndex: 12 }
-            MCTS { Layout.fillWidth: true; Layout.fillHeight: true; panels: panels; replayIndex: 3 }
-            Policy { Layout.fillWidth: true; Layout.fillHeight: true }
-            Compare { Layout.fillWidth: true; Layout.fillHeight: true }
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Telemetry { graphView: graphView }
+            }
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Meters { }
+            }
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Experiment { graphView: graphView }
+            }
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Replay { }
+            }
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Results { }
+            }
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                LogExplorer { }
+            }
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Inspector { }
+            }
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Validation { }
+            }
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                DOE { panels: panels; replayIndex: 3; compareIndex: 12 }
+            }
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                GA { panels: panels; replayIndex: 3; compareIndex: 12 }
+            }
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                MCTS { panels: panels; replayIndex: 3 }
+            }
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Policy { }
+            }
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Compare { }
+            }
         }
     }
 }

@@ -71,7 +71,9 @@ Rectangle {
                 Blend {
                     source: imgA
                     foregroundSource: imgB
-                    mode: Blend.Difference
+                    // Qt5Compat.GraphicalEffects expects a string for blend mode.
+                    // Using the literal ensures compatibility across Qt versions.
+                    mode: "difference"
                     width: 200; height: 200
                 }
             }
