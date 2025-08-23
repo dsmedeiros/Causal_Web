@@ -263,6 +263,7 @@ The bundle will be written to `dist/cw_gui/` and contains an executable that
 launches the engine and Qt Quick interface.
 
 ## Troubleshooting
+- **ModuleNotFoundError: No module named 'msgpack'** → run `pip install -r requirements.txt` to install dependencies.
 - **Disconnected** → token mismatch or single-client limit.
 - **Low FPS** → zoom out, labels auto-hide; disable AA at far zoom.
 - **Invariant failures** → inspect `result.json` for violations.
