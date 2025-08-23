@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 
+import hashlib
 import numpy as np
 
 try:  # pragma: no cover - optional dependency
@@ -40,6 +41,11 @@ from .artifacts import (
 from .optim import Optimizer, MCTS_H
 
 logger = logging.getLogger(__name__)
+
+try:  # Compute theory version from the local theory document
+    THEORY_VERSION = hashlib.sha256(Path("theory.md").read_bytes()).hexdigest()
+except Exception:  # pragma: no cover - fall back when unavailable
+    THEORY_VERSION = "unknown"
 
 
 @dataclass
@@ -393,7 +399,8 @@ class OptimizerQueueManager:
         promotions and wall-clock time.
     state_path:
         Optional path where the optimiser state is checkpointed after each
-        evaluation.
+        evaluation. Defaults to ``experiments/mcts_state.json`` for
+        :class:`MCTS_H`.
     run_index:
         Optional :class:`RunIndex` used to skip previously evaluated full
         configurations.
@@ -430,6 +437,8 @@ class OptimizerQueueManager:
         self._hof_path = Path("experiments/hall_of_fame.json")
         self._hof: List[Dict[str, Any]] = []
         self._state_path = Path(state_path) if state_path else None
+        if self._state_path is None and isinstance(self.optimizer, MCTS_H):
+            self._state_path = Path("experiments/mcts_state.json")
         self.proxy_frames = int(proxy_frames)
         self.full_frames = int(full_frames)
         self._rung_frames: List[int] | None = (
@@ -455,6 +464,17 @@ class OptimizerQueueManager:
     def _checkpoint(self) -> None:
         if self._state_path and hasattr(self.optimizer, "save"):
             self.optimizer.save(self._state_path)
+
+    def _populate_manifest(self, manifest: Dict[str, Any]) -> Dict[str, Any]:
+        """Enrich ``manifest`` with optimizer and theory metadata."""
+
+        if self._mcts_run_id is not None:
+            manifest["mcts_run_id"] = self._mcts_run_id
+        manifest["optimizer"] = type(self.optimizer).__name__.lower()
+        manifest["theory_version"] = THEORY_VERSION
+        if isinstance(self.optimizer, MCTS_H):
+            manifest["mcts_cfg"] = self.optimizer.state_dict()["cfg"]
+        return manifest
 
     # ------------------------------------------------------------------
     def run_parallel(
@@ -615,16 +635,16 @@ class OptimizerQueueManager:
                         "gates": self.gates,
                     }
                 )
-                manifest = {
-                    "run_id": run_id,
-                    "run_key": key_hash,
-                    "groups": cfg,
-                    "toggles": {},
-                    "seed": int(raw["seed"]),
-                    "gates": self.gates,
-                }
-                if self._mcts_run_id is not None:
-                    manifest["mcts_run_id"] = self._mcts_run_id
+                manifest = self._populate_manifest(
+                    {
+                        "run_id": run_id,
+                        "run_key": key_hash,
+                        "groups": cfg,
+                        "toggles": {},
+                        "seed": int(raw["seed"]),
+                        "gates": self.gates,
+                    }
+                )
                 result_payload = {
                     "status": "ok",
                     "metrics": metrics,
@@ -737,16 +757,16 @@ class OptimizerQueueManager:
                         "gates": self.gates,
                     }
                 )
-                manifest = {
-                    "run_id": run_id,
-                    "run_key": key_hash,
-                    "groups": cfg,
-                    "toggles": {},
-                    "seed": int(raw["seed"]),
-                    "gates": self.gates,
-                }
-                if self._mcts_run_id is not None:
-                    manifest["mcts_run_id"] = self._mcts_run_id
+                manifest = self._populate_manifest(
+                    {
+                        "run_id": run_id,
+                        "run_key": key_hash,
+                        "groups": cfg,
+                        "toggles": {},
+                        "seed": int(raw["seed"]),
+                        "gates": self.gates,
+                    }
+                )
                 result_payload = {
                     "status": "ok",
                     "metrics": metrics,
@@ -851,16 +871,16 @@ class OptimizerQueueManager:
                         "gates": self.gates,
                     }
                 )
-                manifest = {
-                    "run_id": run_id,
-                    "run_key": key_hash,
-                    "groups": cfg,
-                    "toggles": {},
-                    "seed": int(raw["seed"]),
-                    "gates": self.gates,
-                }
-                if self._mcts_run_id is not None:
-                    manifest["mcts_run_id"] = self._mcts_run_id
+                manifest = self._populate_manifest(
+                    {
+                        "run_id": run_id,
+                        "run_key": key_hash,
+                        "groups": cfg,
+                        "toggles": {},
+                        "seed": int(raw["seed"]),
+                        "gates": self.gates,
+                    }
+                )
                 result_payload = {
                     "status": "ok",
                     "metrics": metrics,
@@ -953,16 +973,16 @@ class OptimizerQueueManager:
                 "gates": self.gates,
             }
         )
-        manifest = {
-            "run_id": run_id,
-            "run_key": key_hash,
-            "groups": cfg,
-            "toggles": {},
-            "seed": int(raw["seed"]),
-            "gates": self.gates,
-        }
-        if self._mcts_run_id is not None:
-            manifest["mcts_run_id"] = self._mcts_run_id
+        manifest = self._populate_manifest(
+            {
+                "run_id": run_id,
+                "run_key": key_hash,
+                "groups": cfg,
+                "toggles": {},
+                "seed": int(raw["seed"]),
+                "gates": self.gates,
+            }
+        )
         result_payload = {
             "status": "ok",
             "metrics": metrics,

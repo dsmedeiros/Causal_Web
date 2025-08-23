@@ -3,6 +3,7 @@ from __future__ import annotations
 """Monte Carlo Tree Search optimiser for hyperparameters."""
 
 from dataclasses import dataclass, field
+import hashlib
 import json
 import math
 import pathlib
@@ -283,17 +284,23 @@ class MCTS_H(Optimizer):
 
     # ------------------------------------------------------------------
     # persistence
+    def _encode(self, node: Node) -> Dict[str, object]:
+        return {
+            "x": node.x_partial,
+            "pending": node.pending,
+            "N": node.N,
+            "Q": node.Q,
+            "children": [self._encode(c) for c in node.children],
+        }
+
+    def tree_hash(self) -> str:
+        """Return a stable hash of the current search tree."""
+
+        data = json.dumps(self._encode(self.root), sort_keys=True).encode()
+        return hashlib.sha256(data).hexdigest()
+
     def state_dict(self) -> Dict[str, object]:
         """Return a JSON-serialisable snapshot of the optimiser state."""
-
-        def encode(node: Node) -> Dict[str, object]:
-            return {
-                "x": node.x_partial,
-                "pending": node.pending,
-                "N": node.N,
-                "Q": node.Q,
-                "children": [encode(c) for c in node.children],
-            }
 
         return {
             "space": self.space,
@@ -308,12 +315,13 @@ class MCTS_H(Optimizer):
                 "multi_objective": self.multi_objective,
                 "hv_box": self.hv_box.tolist() if self.hv_box is not None else None,
             },
-            "root": encode(self.root),
+            "root": self._encode(self.root),
             "pending_full": self._pending_full,
             "proxy_scores": self._proxy_scores,
             "rng_state": self.rng.bit_generator.state,
             "pareto": [p.tolist() for p in self._pareto],
             "hypervolume": self._hv,
+            "tree_hash": self.tree_hash(),
         }
 
     def save(self, path: str | pathlib.Path) -> None:

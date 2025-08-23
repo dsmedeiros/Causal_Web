@@ -142,6 +142,8 @@ def test_state_roundtrip(tmp_path):
     opt.observe([{"config": first, "fitness": 0.1}])
     state = tmp_path / "mcts.json"
     opt.save(state)
+    data = json.loads(state.read_text())
+    assert "rng_state" in data and "tree_hash" in data
     next1 = opt.suggest(1)[0]
     opt2 = MCTS_H.load(state, priors)
     next2 = opt2.suggest(1)[0]
@@ -283,6 +285,10 @@ def test_optimizer_queue_promotion(tmp_path, monkeypatch):
         (Path("experiments") / res2.path / "manifest.json").read_text()
     )
     assert manifest.get("mcts_run_id")
+    assert manifest["optimizer"] == "mcts_h"
+    assert "mcts_cfg" in manifest and "theory_version" in manifest
+    state = json.loads(Path("experiments/mcts_state.json").read_text())
+    assert state.get("tree_hash")
 
 
 def test_optimizer_queue_multi_objective_archive(tmp_path, monkeypatch):
