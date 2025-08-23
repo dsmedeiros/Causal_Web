@@ -7,7 +7,7 @@ from pathlib import Path
 import asyncio
 import time
 
-from PySide6.QtCore import QObject, Property, Signal, Slot
+from ..qt import QObject, Property, Signal, Slot
 
 from experiments import DOEQueueManager
 from ..ipc import Client

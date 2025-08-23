@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from PySide6.QtCore import QObject, Property, Signal, QElapsedTimer
+from ..qt import QObject, Property, Signal, QElapsedTimer
 
 
 class MetersModel(QObject):

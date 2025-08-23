@@ -7,6 +7,7 @@ pyqtgraph>=0.13.7
 PyYAML
 msgpack
 networkx
+matplotlib
 pytest
 pytest-qt
 ruff

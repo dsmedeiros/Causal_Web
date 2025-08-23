@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Optional
 
 import yaml
-from PySide6.QtCore import QObject, Property, Signal, Slot
+from ..qt import QObject, Property, Signal, Slot
 
 from config.normalizer import Normalizer
 from ..ipc import Client

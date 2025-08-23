@@ -2,7 +2,7 @@ from __future__ import annotations
 
 """Logs model exposing entries to QML."""
 
-from PySide6.QtCore import QStringListModel, Slot
+from ..qt import QStringListModel, Slot
 
 
 class LogsModel(QStringListModel):

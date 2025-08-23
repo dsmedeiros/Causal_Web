@@ -6,7 +6,7 @@ import asyncio
 from pathlib import Path
 from typing import List, Dict, Any
 
-from PySide6.QtCore import QObject, Property, Signal, Slot
+from ..qt import QObject, Property, Signal, Slot
 
 from experiments import results_registry as rr
 from .Replay import open_replay

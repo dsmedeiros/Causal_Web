@@ -7,7 +7,7 @@ from typing import Dict, List, Optional
 import asyncio
 import json
 
-from PySide6.QtCore import QObject, Property, Signal, Slot
+from ..qt import QObject, Property, Signal, Slot
 
 from config.normalizer import Normalizer
 from experiments import OptimizerQueueManager, MCTS_H, build_priors
@@ -138,6 +138,7 @@ class MCTSModel(QObject):
                 await asyncio.sleep(0)
             self._running = False
             self.runningChanged.emit()
+
         self._task = asyncio.create_task(_run())
 
     # ------------------------------------------------------------------
@@ -182,6 +183,7 @@ class MCTSModel(QObject):
                 await asyncio.sleep(0)
             self._running = False
             self.runningChanged.emit()
+
         self._task = asyncio.create_task(_run())
 
     # ------------------------------------------------------------------
