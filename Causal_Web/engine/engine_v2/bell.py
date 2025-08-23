@@ -3,7 +3,7 @@
 This module implements a minimal Bell experiment simulator with
 ancestry-aware hidden variables and measurement setting draws that can
 be either strictly independent or weakly conditioned on the shared
-``lambda``.  The implementation is intentionally lightweight but
+``lambda``. The implementation is intentionally lightweight but
 captures the interfaces required by the engine.
 """
 
@@ -15,8 +15,12 @@ from typing import Dict, Tuple
 import numpy as np
 
 
-def _splitmix64(x: np.uint64) -> np.uint64:
+def _splitmix64(x: np.uint64 | int) -> np.uint64:
     """Return SplitMix64 hash of ``x``.
+
+    The input is coerced to ``np.uint64`` to avoid dtype surprises when
+    NumPy's ``right_shift`` ufunc receives a float or platform-dependent
+    integer type.
 
     Parameters
     ----------
@@ -29,10 +33,13 @@ def _splitmix64(x: np.uint64) -> np.uint64:
         Hashed output value.
     """
 
-    z = x + np.uint64(0x9E3779B97F4A7C15)
-    z = (z ^ (z >> 30)) * np.uint64(0xBF58476D1CE4E5B9)
-    z = (z ^ (z >> 27)) * np.uint64(0x94D049BB133111EB)
-    return z ^ (z >> 31)
+    z = np.uint64(x)
+    z = (z + np.uint64(0x9E3779B97F4A7C15)) & np.uint64(0xFFFFFFFFFFFFFFFF)
+    z = (z ^ (z >> np.uint64(30))) * np.uint64(0xBF58476D1CE4E5B9)
+    z &= np.uint64(0xFFFFFFFFFFFFFFFF)
+    z = (z ^ (z >> np.uint64(27))) * np.uint64(0x94D049BB133111EB)
+    z &= np.uint64(0xFFFFFFFFFFFFFFFF)
+    return z ^ (z >> np.uint64(31))
 
 
 def _splitmix_vec3(seed: np.ndarray) -> np.ndarray:
@@ -42,7 +49,7 @@ def _splitmix_vec3(seed: np.ndarray) -> np.ndarray:
     sequential SplitMix64 applications.
     """
 
-    s = np.uint64(int(np.bitwise_xor.reduce(seed)))
+    s = np.uint64(np.bitwise_xor.reduce(seed.astype(np.uint64)))
     return np.array(
         [_splitmix64(s + np.uint64(i)) & np.uint64(0xFFFFFFFF) for i in range(3)],
         dtype=np.uint32,

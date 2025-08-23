@@ -253,10 +253,10 @@ class MainService:
 
         import asyncio
         import os
-        import threading
         from PySide6.QtGui import QGuiApplication
         from PySide6.QtQml import QQmlApplicationEngine
         from PySide6.QtQuick import QQuickItem
+        from qasync import QEventLoop
         from ui_new import core
         from ui_new.state import (
             Store,
@@ -309,15 +309,10 @@ class MainService:
         view = root.findChild(QQuickItem, "graphView")
         view.frameRendered.connect(meters.frame_drawn)
 
-        loop = asyncio.new_event_loop()
-
-        def _run_loop() -> None:
-            asyncio.set_event_loop(loop)
-            loop.run_forever()
-
-        threading.Thread(target=_run_loop, daemon=True).start()
+        loop = QEventLoop(app)
+        asyncio.set_event_loop(loop)
         token = os.getenv("CW_SESSION_TOKEN", "secret")
-        asyncio.run_coroutine_threadsafe(
+        loop.create_task(
             core.run(
                 "ws://localhost:8765",
                 view,
@@ -332,11 +327,10 @@ class MainService:
                 policy_model,
                 root,
                 token=token,
-            ),
-            loop,
+            )
         )
-        app.exec()
-        loop.call_soon_threadsafe(loop.stop)
+        with loop:
+            loop.run_forever()
 
 
 def main() -> None:

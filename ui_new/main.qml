@@ -27,6 +27,16 @@ Window {
         anchors.left: parent.left
         anchors.right: panels.left
         enabled: root.controlsEnabled
+
+        Repeater {
+            model: graphView.labelsVisible ? graphView.nodeModel : []
+            delegate: Text {
+                text: modelData.label
+                x: modelData.x
+                y: modelData.y
+                color: "white"
+            }
+        }
     }
 
     // editing overlay

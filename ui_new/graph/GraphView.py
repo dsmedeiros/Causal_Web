@@ -15,9 +15,8 @@ from PySide6.QtQuick import (
     QSGMaterialType,
     QSGRendererInterface,
     QSGNode,
-    QSGTextNode,
 )
-from PySide6.QtCore import QByteArray, Property, QRectF, QPointF, Signal, Slot
+from PySide6.QtCore import QByteArray, Property, QRectF, Signal, Slot
 
 QML_IMPORT_NAME = "CausalGraph"
 QML_IMPORT_MAJOR_VERSION = 1
@@ -210,8 +209,6 @@ class GraphView(QQuickItem):
         self._node_colors: List[QColor] = []
         self._node_flags: List[float] = []
         self._node_labels: List[str] = []
-        self._label_container: QSGNode | None = None
-        self._label_nodes: List[QSGTextNode] = []
         self._edges_dirty = True
         self._editable = True
         self._zoom = 1.0
@@ -221,6 +218,17 @@ class GraphView(QQuickItem):
         self._label_threshold = 0.3
         self._edge_threshold = 0.2
         self._update_lod()
+
+    nodeModelChanged = Signal()
+
+    def _get_node_model(self):
+        """Return node data for QML bindings."""
+        return [
+            {"x": x, "y": y, "label": label}
+            for (x, y), label in zip(self._nodes, self._node_labels)
+        ]
+
+    nodeModel = Property("QVariantList", _get_node_model, notify=nodeModelChanged)
 
     zoomChanged = Signal(float)
     labelsVisibleChanged = Signal(bool)
@@ -268,6 +276,7 @@ class GraphView(QQuickItem):
             self.update(rect)
         except TypeError:  # PySide binding without QRectF overload
             self.update()
+        self.nodeModelChanged.emit()
 
     def apply_delta(self, delta: Dict[str, Dict[int, Tuple[float, float]]]) -> None:
         """Apply ``delta`` updates to buffers and schedule minimal repaint.
@@ -327,6 +336,7 @@ class GraphView(QQuickItem):
             self.update(rect)
         except TypeError:  # PySide binding without QRectF overload
             self.update()
+        self.nodeModelChanged.emit()
 
     # --- level of detail -----------------------------------------------------
     def _update_lod(self) -> None:
@@ -424,7 +434,6 @@ class GraphView(QQuickItem):
         self._update_edges(root)
         self._update_nodes(root)
         self._update_pulses(root)
-        self._update_labels(root)
         self.frameRendered.emit()
         return root
 
@@ -534,39 +543,6 @@ class GraphView(QQuickItem):
             self._edge_geom.setInstanceCount(len(self._edges))
 
         self._edges_dirty = False
-
-    def _update_labels(self, parent: QSGNode) -> None:
-        """Render node labels when visible with cached text nodes."""
-
-        if not self._labels_visible:
-            if self._label_container is not None:
-                parent.removeChildNode(self._label_container)
-                self._label_container = None
-                self._label_nodes = []
-            return
-
-        if self._label_container is None:
-            self._label_container = QSGNode()
-            parent.appendChildNode(self._label_container)
-
-        count = min(len(self._nodes), len(self._node_labels))
-
-        while len(self._label_nodes) < count:
-            node = QSGTextNode()
-            node.setColor(QColor("white"))
-            self._label_container.appendChildNode(node)
-            self._label_nodes.append(node)
-
-        for i in range(count):
-            node = self._label_nodes[i]
-            node.setText(self._node_labels[i])
-            x, y = self._nodes[i]
-            node.setPosition(QPointF(x, y))
-
-        for node in self._label_nodes[count:]:
-            self._label_container.removeChildNode(node)
-
-        self._label_nodes = self._label_nodes[:count]
 
     @Slot(str)
     @Slot(str, float, int)
