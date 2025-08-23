@@ -23,6 +23,8 @@ def test_engine_gui_smoke():
         LogsModel,
         DOEModel,
         GAModel,
+        MCTSModel,
+        PolicyModel,
         CompareModel,
     )
 
@@ -54,6 +56,8 @@ def test_engine_gui_smoke():
     store = Store()
     doe = DOEModel()
     ga = GAModel()
+    mcts = MCTSModel()
+    policy = PolicyModel()
     compare = CompareModel()
 
     class View:
@@ -77,6 +81,8 @@ def test_engine_gui_smoke():
             store,
             doe,
             ga,
+            mcts,
+            policy,
             Window(),
             token=None,
         ),
