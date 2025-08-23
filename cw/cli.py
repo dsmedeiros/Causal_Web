@@ -68,6 +68,8 @@ def main(argv: Optional[List[str]] = None) -> None:
     bench_p.add_argument(
         "--budget", type=int, default=20, help="Evaluation budget per optimiser"
     )
+    repro_p = sub.add_parser("reproduce", help="Re-run a recorded experiment")
+    repro_p.add_argument("run_dir", help="Path to run directory")
 
     args, rest = parser.parse_known_args(argv)
     if args.command == "run":
@@ -118,6 +120,35 @@ def main(argv: Optional[List[str]] = None) -> None:
             bench_all(args.budget)
         else:
             bench_optim(args.task, args.budget)
+    elif args.command == "reproduce":
+        from experiments.reproduce import reproduce_run
+
+        run_dir = Path(args.run_dir)
+        reproduced = reproduce_run(run_dir)
+        recorded = json.loads((run_dir / "result.json").read_text())
+
+        def _close(a: float, b: float) -> bool:
+            return abs(a - b) <= 1e-9
+
+        ok = True
+        for k, v in recorded.get("metrics", {}).items():
+            if k not in reproduced["metrics"] or not _close(
+                reproduced["metrics"][k], v
+            ):
+                print(f"metric {k} mismatch: {reproduced['metrics'].get(k)} != {v}")
+                ok = False
+        for k, v in recorded.get("invariants", {}).items():
+            if k not in reproduced["invariants"] or not _close(
+                reproduced["invariants"][k], v
+            ):
+                print(
+                    f"invariant {k} mismatch: {reproduced['invariants'].get(k)} != {v}"
+                )
+                ok = False
+        if reproduced.get("tree_hash"):
+            print(f"MCTS tree hash: {reproduced['tree_hash']}")
+        if not ok:
+            raise SystemExit(1)
 
 
 if __name__ == "__main__":

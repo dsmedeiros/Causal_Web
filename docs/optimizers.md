@@ -43,7 +43,13 @@ The optimiser defaults to ``c_ucb=0.7``, ``alpha_pw=0.4`` and ``k_pw=1`` with
 promotion based on the 60th percentile of recent proxy scores.
 
 Passing ``--state`` ensures the optimiser writes its state to ``mcts_state.json``
-after each evaluation and reloads it on subsequent invocations.
+after each evaluation and reloads it on subsequent invocations. The checkpoint
+captures the RNG state and a SHA256 hash of the search tree so runs can be
+reproduced deterministically from the saved artifacts.
+
+Recorded runs can be verified via ``cw reproduce <run_dir>`` which re-executes
+the saved configuration and reports mismatches. For MCTS runs the helper also
+loads ``mcts_state.json`` and prints the checkpoint's tree hash.
 
 The Qt Quick UI also exposes an ``MCTS`` tab, allowing interactive tree search runs alongside the existing DOE and GA panels.
 

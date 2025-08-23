@@ -151,6 +151,9 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 - MCTS-H now tracks per-generation promotion rates and best-so-far improvements to confirm search focus shifts toward promising regions.
 - The ``cw optim`` command accepts ``--state`` to checkpoint and resume tree searches across invocations.
 - Full evaluation manifests now record ``mcts_run_id`` so each run can be traced back to the MCTS search session.
+- ``mcts_state.json`` now captures the RNG state and a SHA256 hash of the search tree for deterministic reproduction. Run manifests stamp the optimiser name, MCTS configuration and ``theory_version`` for provenance.
+- ``cw reproduce <run_dir>`` replays recorded runs using their saved configuration and ``mcts_state.json`` for deterministic verification.
+- ``Dockerfile.cpu`` and ``Dockerfile.gpu`` build minimal images for reproducing runs on CPU-only or CUDA-enabled machines.
 - Multi-objective MCTS runs now write results to the shared Pareto archive as ``origin: "mcts"``, allowing the GA panel to replay tree-search trade-offs.
 - GA panel automatically refreshes to surface new MCTS Pareto points without manual reload.
 - Leaf evaluations can now be dispatched in parallel via ``OptimizerQueueManager.run_parallel`` using thread or process pools or a Ray cluster, preserving deterministic seed streams and honouring ASHA rung scheduling.
