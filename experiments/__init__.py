@@ -14,6 +14,7 @@ from .artifacts import (
 )
 from .index import RunIndex, run_key
 from .fitness import scalar_fitness, vector_fitness
+from .ablation import local_ablation
 
 __all__ = [
     "DOEQueueManager",
@@ -33,4 +34,5 @@ __all__ = [
     "run_key",
     "scalar_fitness",
     "vector_fitness",
+    "local_ablation",
 ]

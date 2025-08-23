@@ -2,6 +2,7 @@ import pytest
 
 pytest.importorskip("PySide6")
 from ui_new.state.Telemetry import TelemetryModel
+import pytest
 
 
 def test_record_updates_histories():
@@ -14,3 +15,6 @@ def test_record_updates_histories():
     assert tm.depthLabel == "depth"
     tm.record({"events": 3.0}, {"inv": True}, depth=5, label="frame")
     assert tm.depthLabel == "frame"
+    ci = tm.counterIntervals["events"]
+    assert pytest.approx(ci[0]) == 2.5
+    assert ci[1] <= ci[0] <= ci[2]

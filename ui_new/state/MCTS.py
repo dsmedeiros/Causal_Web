@@ -5,10 +5,14 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Dict, List, Optional
 import asyncio
+import json
 
 from PySide6.QtCore import QObject, Property, Signal, Slot
 
+from config.normalizer import Normalizer
 from experiments import OptimizerQueueManager, MCTS_H, build_priors
+from experiments.ablation import local_ablation
+from experiments.gates import run_gates
 from experiments.artifacts import load_hall_of_fame, load_top_k, write_best_config
 from ..ipc import Client
 
@@ -20,6 +24,7 @@ class MCTSModel(QObject):
     runningChanged = Signal()
     baselinePromoted = Signal(str)
     statsChanged = Signal()
+    ablationsChanged = Signal()
 
     def __init__(self) -> None:
         super().__init__()
@@ -55,6 +60,7 @@ class MCTSModel(QObject):
         self._full_frames = 3000
         data = load_hall_of_fame(Path("experiments/hall_of_fame.json"))
         self._hof: List[dict] = list(data.get("archive", []))
+        self._ablations: List[dict] = []
 
     # ------------------------------------------------------------------
     def set_client(
@@ -198,6 +204,51 @@ class MCTSModel(QObject):
         self.baselinePromoted.emit(path)
 
     # ------------------------------------------------------------------
+    @Slot()
+    def localAblation(self) -> None:
+        """Compute local ablations around the best configuration.
+
+        The best configuration is loaded from ``experiments/top_k.json`` and
+        partial dependence slices are evaluated around it. Results are stored in
+        :attr:`ablations` for immediate UI display and written to
+        ``experiments/local_ablation.json`` for archival.
+        """
+
+        data = load_top_k(Path("experiments/top_k.json"))
+        rows = data.get("rows", [])
+        if not rows:
+            self._ablations = []
+            self.ablationsChanged.emit()
+            return
+        best = rows[0]["groups"]
+        norm = Normalizer()
+
+        def evaluate(cfg: Dict[str, float]) -> float:
+            raw = norm.to_raw(self._base, cfg)
+            metrics = run_gates(raw, self._gates, frames=self._full_frames)
+            return self._fitness(metrics, {}, cfg)
+
+        dims = list(best.keys())
+        ablations: List[dict] = []
+        for d in dims:
+            res = local_ablation(best, evaluate, [d])
+            ablations.append(
+                {"params": res.params, "values": res.values, "scores": res.scores}
+            )
+        if len(dims) >= 2:
+            res = local_ablation(best, evaluate, dims[:2])
+            ablations.append(
+                {"params": res.params, "values": res.values, "scores": res.scores}
+            )
+
+        self._ablations = ablations
+        self.ablationsChanged.emit()
+
+        out = Path("experiments/local_ablation.json")
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps({"ablations": ablations}, indent=2))
+
+    # ------------------------------------------------------------------
     def _fitness(
         self,
         metrics: Dict[str, float],
@@ -213,6 +264,11 @@ class MCTSModel(QObject):
         return self._hof
 
     hallOfFame = Property("QVariant", _get_hof, notify=hallOfFameChanged)
+
+    def _get_ablations(self) -> List[dict]:
+        return self._ablations
+
+    ablations = Property("QVariant", _get_ablations, notify=ablationsChanged)
 
     def _get_running(self) -> bool:
         return self._running

@@ -174,6 +174,11 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 - Users can adjust proxy/full frame budgets, promotion thresholds or
   quantiles, and prior bin counts directly in the MCTS panel for
   multi-fidelity searches.
+- A Local Ablation button in the MCTS tab generates 1D and 2D partial
+  dependence slices around the best configuration and renders them in-line,
+  revealing which dimensions influence performance without external plots.
+- Telemetry charts now expose bootstrapped confidence bands to visualise
+  uncertainty around rolling metrics.
 - Regression tests show MCTS-H attains GA-level fitness while using fewer full
   evaluations than the genetic algorithm.
 - ``experiments/calibrate_mcts_h.py`` sweeps ``c_ucb``, ``alpha_pw``, ``k_pw``

@@ -32,12 +32,18 @@ Rectangle {
             width: parent.width
             height: 40
             points: telemetryModel.counters["events_per_sec"] || []
+            band: telemetryModel.counterIntervals["events_per_sec"]
+                  ? telemetryModel.counterIntervals["events_per_sec"].slice(1, 3)
+                  : null
         }
         Text { text: "residual"; color: "white" }
         RollingPlot {
             width: parent.width
             height: 40
             points: telemetryModel.invariants["inv_conservation_residual"] || []
+            band: telemetryModel.counterIntervals["inv_conservation_residual"]
+                  ? telemetryModel.counterIntervals["inv_conservation_residual"].slice(1, 3)
+                  : null
         }
     }
 }
