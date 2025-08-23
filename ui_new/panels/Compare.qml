@@ -48,22 +48,22 @@ Rectangle {
             Column {
                 spacing: 2
                 Text { text: "Run A"; color: "white" }
-                Image {
-                    id: imgA
-                    source: compareModel.frameA
-                    width: 200; height: 200
-                    fillMode: Image.PreserveAspectFit
-                }
+                  Image {
+                      id: imgA
+                      source: compareModel.frameA || ""
+                      width: 200; height: 200
+                      fillMode: Image.PreserveAspectFit
+                  }
             }
             Column {
                 spacing: 2
                 Text { text: "Run B"; color: "white" }
-                Image {
-                    id: imgB
-                    source: compareModel.frameB
-                    width: 200; height: 200
-                    fillMode: Image.PreserveAspectFit
-                }
+                  Image {
+                      id: imgB
+                      source: compareModel.frameB || ""
+                      width: 200; height: 200
+                      fillMode: Image.PreserveAspectFit
+                  }
             }
             Column {
                 spacing: 2

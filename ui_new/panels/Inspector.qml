@@ -31,10 +31,10 @@ Item {
             visible: store.selectedEdge >= 0
             property var edge: store.get_edge(store.selectedEdge)
             Text { text: "Edge " + store.selectedEdge }
-            Text { text: edge ? ("from: " + edge.from + " to: " + edge.to) : "" }
+            Text { text: edgeCol.edge ? ("from: " + edgeCol.edge.from + " to: " + edgeCol.edge.to) : "" }
             TextField {
                 id: edgeDelay
-                text: edge && edge.delay !== undefined ? edge.delay : ""
+                text: edgeCol.edge && edgeCol.edge.delay !== undefined ? edgeCol.edge.delay : ""
                 onEditingFinished: {
                     var val = parseInt(text);
                     if (!isNaN(val)) {
@@ -49,15 +49,15 @@ Item {
             spacing: 4
             visible: store.selectedObserver >= 0
             property var obs: store.get_observer(store.selectedObserver)
-            Text { text: obs ? ("Observer " + obs.id) : "" }
+            Text { text: obsCol.obs ? ("Observer " + obsCol.obs.id) : "" }
             TextField {
                 id: obsId
-                text: obs ? obs.id || "" : ""
+                text: obsCol.obs ? obsCol.obs.id || "" : ""
                 onEditingFinished: store.set_observer_id(store.selectedObserver, text)
             }
             TextField {
                 id: obsFreq
-                text: obs && obs.frequency !== undefined ? obs.frequency : ""
+                text: obsCol.obs && obsCol.obs.frequency !== undefined ? obsCol.obs.frequency : ""
                 onEditingFinished: {
                     var freq = parseFloat(text);
                     if (!isNaN(freq)) {
@@ -76,26 +76,26 @@ Item {
             CheckBox {
                 id: entangledBox
                 text: "Entangled"
-                checked: bridge && bridge.is_entangled ? true : false
+                checked: bridgeCol.bridge && bridgeCol.bridge.is_entangled ? true : false
                 onToggled: store.set_bridge_entangled(store.selectedBridge, checked)
             }
         }
     }
     Connections {
         target: store
-        onSelectionChanged: {
+        function onSelectionChanged() {
             nodeLabel.text = store.selectedNode >= 0 ? store.get_node(store.selectedNode).label || "" : ""
         }
-        onEdgeSelectionChanged: {
+        function onEdgeSelectionChanged() {
             edgeCol.edge = store.get_edge(store.selectedEdge)
             edgeDelay.text = edgeCol.edge && edgeCol.edge.delay !== undefined ? edgeCol.edge.delay : ""
         }
-        onObserverSelectionChanged: {
+        function onObserverSelectionChanged() {
             obsCol.obs = store.get_observer(store.selectedObserver)
             obsId.text = obsCol.obs ? obsCol.obs.id || "" : ""
             obsFreq.text = obsCol.obs && obsCol.obs.frequency !== undefined ? obsCol.obs.frequency : ""
         }
-        onBridgeSelectionChanged: {
+        function onBridgeSelectionChanged() {
             bridgeCol.bridge = store.get_bridge(store.selectedBridge)
             entangledBox.checked = bridgeCol.bridge && bridgeCol.bridge.is_entangled ? true : false
         }

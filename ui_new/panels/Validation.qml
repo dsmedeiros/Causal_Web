@@ -1,8 +1,9 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 
 Item {
-    Column {
+    ColumnLayout {
         anchors.fill: parent
         spacing: 4
         Button {
@@ -16,7 +17,8 @@ Item {
             }
         }
         ListView {
-            anchors.fill: parent
+            Layout.fillWidth: true
+            Layout.fillHeight: true
             model: ListModel { id: warningsModel }
             delegate: Text { text: msg }
         }

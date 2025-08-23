@@ -1,11 +1,12 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 
 Rectangle {
     color: "#202020"
     anchors.fill: parent
 
-    Column {
+    ColumnLayout {
         anchors.margins: 8
         anchors.fill: parent
         spacing: 4
@@ -46,7 +47,8 @@ Rectangle {
         }
         Button { text: "Refresh"; onClicked: resultsModel.refresh() }
         ListView {
-            anchors.fill: parent
+            Layout.fillWidth: true
+            Layout.fillHeight: true
             model: resultsModel.rows
             delegate: Rectangle {
                 width: parent.width
