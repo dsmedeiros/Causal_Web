@@ -50,7 +50,7 @@ Rectangle {
                 Text { text: "Run A"; color: "white" }
                   Image {
                       id: imgA
-                      source: compareModel.frameA || ""
+                      source: compareModel.frameA !== undefined ? compareModel.frameA : ""
                       width: 200; height: 200
                       fillMode: Image.PreserveAspectFit
                   }
@@ -60,7 +60,7 @@ Rectangle {
                 Text { text: "Run B"; color: "white" }
                   Image {
                       id: imgB
-                      source: compareModel.frameB || ""
+                      source: compareModel.frameB !== undefined ? compareModel.frameB : ""
                       width: 200; height: 200
                       fillMode: Image.PreserveAspectFit
                   }
