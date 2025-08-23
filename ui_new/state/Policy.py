@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 from typing import Dict, List, Optional
 
-from PySide6.QtCore import QObject, Property, Signal, Slot
+from ..qt import QObject, Property, Signal, Slot
 
 from experiments.policy import ACTION_ICONS, ACTION_SET, MCTS_C
 from ..ipc import Client

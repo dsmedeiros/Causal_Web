@@ -6,7 +6,7 @@ from typing import Dict, List, Optional
 from pathlib import Path
 import asyncio
 
-from PySide6.QtCore import QFileSystemWatcher, QObject, Property, Signal, Slot
+from ..qt import QFileSystemWatcher, QObject, Property, Signal, Slot
 
 from experiments import GeneticAlgorithm
 from experiments.artifacts import load_hall_of_fame, write_best_config

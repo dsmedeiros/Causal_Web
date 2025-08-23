@@ -2,7 +2,7 @@ from __future__ import annotations
 
 """Telemetry model exposed to QML panels."""
 
-from PySide6.QtCore import QObject, Property, Signal
+from ..qt import QObject, Property, Signal
 
 from telemetry import RollingTelemetry
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 from typing import List, Optional, Tuple
 
-from PySide6.QtCore import QObject, Property, Signal, Slot
+from ..qt import QObject, Property, Signal, Slot
 
 from ..ipc import Client
 

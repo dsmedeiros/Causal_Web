@@ -10,12 +10,13 @@ import csv
 import io
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from Causal_Web.engine.engine_v2.adapter import EngineAdapter
 
-from PySide6.QtCore import QObject, Property, Signal, Slot
+from ..qt import QObject, Property, Signal, Slot
 
 
 class CompareModel(QObject):
@@ -118,9 +119,7 @@ class CompareModel(QObject):
 
             positions = {
                 i: tuple(p)
-                for i, p in enumerate(
-                    adapter._graph_static.get("node_positions", [])
-                )
+                for i, p in enumerate(adapter._graph_static.get("node_positions", []))
             }
             edges = [tuple(e) for e in adapter._graph_static.get("edges", [])]
 
