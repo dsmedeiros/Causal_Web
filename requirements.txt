@@ -5,6 +5,5 @@ qasync>=0.24.0
 websockets>=10.4
 pyqtgraph>=0.13.7
 pytest
-pytest-qt
 ruff
 mypy
