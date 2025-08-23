@@ -3,7 +3,7 @@ imageio
 matplotlib
 msgpack
 networkx
-numpy
+numpy==1.26.4
 pandas
 pydantic
 psycopg2
