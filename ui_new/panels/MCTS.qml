@@ -1,5 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import "."
 
 Rectangle {
     id: root
@@ -61,6 +62,7 @@ Rectangle {
             }
             Button { text: "Resume"; onClicked: mctsModel.resume() }
             Button { text: "Promote Baseline"; onClicked: mctsModel.promoteBaseline() }
+            Button { text: "Local Ablation"; onClicked: mctsModel.localAblation() }
         }
         Row {
             spacing: 8
@@ -99,6 +101,30 @@ Rectangle {
                             if (panels && replayIndex >= 0)
                                 panels.currentIndex = replayIndex
                         }
+                    }
+                }
+            }
+        }
+
+        Text { text: "Local Ablations"; color: "white"; visible: mctsModel.ablations.length > 0 }
+        Repeater {
+            model: mctsModel.ablations
+            delegate: Column {
+                width: parent.width
+                spacing: 4
+                Text { text: modelData.params.join(", "); color: "white" }
+                Item {
+                    width: parent.width
+                    height: 100
+                    RollingPlot {
+                        anchors.fill: parent
+                        points: modelData.scores.map(function(row) { return row[0]; })
+                        visible: modelData.params.length === 1
+                    }
+                    AblationHeatmap {
+                        anchors.fill: parent
+                        scores: modelData.scores
+                        visible: modelData.params.length === 2
                     }
                 }
             }

@@ -51,6 +51,14 @@ Regression tests compare MCTS-H against the genetic algorithm on a toy task,
 demonstrating that MCTS-H reaches comparable fitness with fewer full
 evaluations.
 
+To aid interpretation, ``experiments.ablation.local_ablation`` computes
+partial dependence slices around the best discovered configuration. These
+1D or 2D sweeps highlight which dimensions most influence optimisation near
+the optimum and can be triggered from the MCTS tab via the *Local Ablation*
+button, with the resulting curves and heatmaps rendered directly below the
+controls. Telemetry plots now surface bootstrapped confidence bands on rolling
+metrics so uncertainty is visible directly in the UI.
+
 Leaf evaluations can be processed in parallel via ``OptimizerQueueManager.run_parallel``.
 Passing ``parallel>1`` and ``use_processes=True`` dispatches rollouts to a
 process pool, while ``use_ray=True`` ships evaluations to a Ray cluster.

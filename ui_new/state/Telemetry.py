@@ -18,6 +18,7 @@ class TelemetryModel(QObject):
     edgeCountChanged = Signal(int)
     countersChanged = Signal(dict)
     invariantsChanged = Signal(dict)
+    counterIntervalsChanged = Signal(dict)
     depthChanged = Signal(int)
     depthLabelChanged = Signal(str)
 
@@ -64,6 +65,14 @@ class TelemetryModel(QObject):
     invariants = Property(dict, _get_invariants, notify=invariantsChanged)
 
     # ------------------------------------------------------------------
+    def _get_counter_intervals(self) -> dict[str, tuple[float, float, float]]:
+        return self._telemetry.get_counter_intervals()
+
+    counterIntervals = Property(
+        dict, _get_counter_intervals, notify=counterIntervalsChanged
+    )
+
+    # ------------------------------------------------------------------
     def record(
         self,
         counters: dict[str, float] | None = None,
@@ -81,6 +90,7 @@ class TelemetryModel(QObject):
         self._telemetry.record(counters, invariants)
         self.countersChanged.emit(self._telemetry.get_counters())
         self.invariantsChanged.emit(self._telemetry.get_invariants())
+        self.counterIntervalsChanged.emit(self._telemetry.get_counter_intervals())
 
     def update_counts(self, nodes: int, edges: int) -> None:
         """Convenience method to update both counts."""
