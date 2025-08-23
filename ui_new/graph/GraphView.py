@@ -76,8 +76,18 @@ class _InstancedShader(QSGMaterialShader):
 
     def __init__(self) -> None:  # pragma: no cover - Qt binding detail
         super().__init__()
-        self.setShaderSourceCode(QSGMaterialShader.VertexStage, self.VERTEX)
-        self.setShaderSourceCode(QSGMaterialShader.FragmentStage, self.FRAG)
+        if hasattr(self, "setShaderSourceCode"):
+            self.setShaderSourceCode(QSGMaterialShader.VertexStage, self.VERTEX)
+            self.setShaderSourceCode(QSGMaterialShader.FragmentStage, self.FRAG)
+        else:
+            from tempfile import NamedTemporaryFile
+
+            with NamedTemporaryFile(delete=False, suffix=".vert") as vf:
+                vf.write(self.VERTEX)
+            with NamedTemporaryFile(delete=False, suffix=".frag") as ff:
+                ff.write(self.FRAG)
+            self.setShaderFileName(QSGMaterialShader.VertexStage, vf.name)
+            self.setShaderFileName(QSGMaterialShader.FragmentStage, ff.name)
         self.setAttributeNames([b"aVertex", b"aOffset", b"aColor", b"aFlag"])
 
     def updateState(
@@ -145,8 +155,18 @@ class _EdgeShader(QSGMaterialShader):
 
     def __init__(self) -> None:  # pragma: no cover - Qt binding detail
         super().__init__()
-        self.setShaderSourceCode(QSGMaterialShader.VertexStage, self.VERTEX)
-        self.setShaderSourceCode(QSGMaterialShader.FragmentStage, self.FRAG)
+        if hasattr(self, "setShaderSourceCode"):
+            self.setShaderSourceCode(QSGMaterialShader.VertexStage, self.VERTEX)
+            self.setShaderSourceCode(QSGMaterialShader.FragmentStage, self.FRAG)
+        else:
+            from tempfile import NamedTemporaryFile
+
+            with NamedTemporaryFile(delete=False, suffix=".vert") as vf:
+                vf.write(self.VERTEX)
+            with NamedTemporaryFile(delete=False, suffix=".frag") as ff:
+                ff.write(self.FRAG)
+            self.setShaderFileName(QSGMaterialShader.VertexStage, vf.name)
+            self.setShaderFileName(QSGMaterialShader.FragmentStage, ff.name)
         self.setAttributeNames([b"aVertex", b"aStart", b"aEnd"])
 
     def updateState(
