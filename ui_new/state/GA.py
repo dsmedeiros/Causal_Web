@@ -26,6 +26,7 @@ class GAModel(QObject):
     objectiveCountChanged = Signal()
     objectiveNamesChanged = Signal()
     statsChanged = Signal()
+    paramsChanged = Signal()
 
     def __init__(self) -> None:
         super().__init__()
@@ -323,48 +324,64 @@ class GAModel(QObject):
 
     def _set_population_size(self, val: int) -> None:
         self._population_size = int(val)
+        self.paramsChanged.emit()
 
-    populationSize = Property(int, _get_population_size, _set_population_size)
+    populationSize = Property(
+        int, _get_population_size, _set_population_size, notify=paramsChanged
+    )
 
     def _get_mutation_rate(self) -> float:
         return self._mutation_rate
 
     def _set_mutation_rate(self, val: float) -> None:
         self._mutation_rate = float(val)
+        self.paramsChanged.emit()
 
-    mutationRate = Property(float, _get_mutation_rate, _set_mutation_rate)
+    mutationRate = Property(
+        float, _get_mutation_rate, _set_mutation_rate, notify=paramsChanged
+    )
 
     def _get_crossover_rate(self) -> float:
         return self._crossover_rate
 
     def _set_crossover_rate(self, val: float) -> None:
         self._crossover_rate = float(val)
+        self.paramsChanged.emit()
 
-    crossoverRate = Property(float, _get_crossover_rate, _set_crossover_rate)
+    crossoverRate = Property(
+        float, _get_crossover_rate, _set_crossover_rate, notify=paramsChanged
+    )
 
     def _get_elitism(self) -> int:
         return self._elitism
 
     def _set_elitism(self, val: int) -> None:
         self._elitism = int(val)
+        self.paramsChanged.emit()
 
-    elitism = Property(int, _get_elitism, _set_elitism)
+    elitism = Property(int, _get_elitism, _set_elitism, notify=paramsChanged)
 
     def _get_max_generations(self) -> int:
         return self._max_generations
 
     def _set_max_generations(self, val: int) -> None:
         self._max_generations = int(val)
+        self.paramsChanged.emit()
 
-    maxGenerations = Property(int, _get_max_generations, _set_max_generations)
+    maxGenerations = Property(
+        int, _get_max_generations, _set_max_generations, notify=paramsChanged
+    )
 
     def _get_multi_objective(self) -> bool:
         return self._multi_objective
 
     def _set_multi_objective(self, val: bool) -> None:
         self._multi_objective = bool(val)
+        self.paramsChanged.emit()
 
-    multiObjective = Property(bool, _get_multi_objective, _set_multi_objective)
+    multiObjective = Property(
+        bool, _get_multi_objective, _set_multi_objective, notify=paramsChanged
+    )
 
     def _get_running(self) -> bool:
         return self._running

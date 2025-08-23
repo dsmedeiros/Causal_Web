@@ -16,6 +16,7 @@ class ResultsModel(QObject):
     """Filter and retrieve experiment results for display."""
 
     rowsChanged = Signal()
+    filtersChanged = Signal()
 
     def __init__(self) -> None:
         super().__init__()
@@ -33,8 +34,9 @@ class ResultsModel(QObject):
     def _set_optimizer(self, val: str) -> None:
         self._optimizer = val
         self.refresh()
+        self.filtersChanged.emit()
 
-    optimizer = Property(str, _get_optimizer, _set_optimizer)
+    optimizer = Property(str, _get_optimizer, _set_optimizer, notify=filtersChanged)
 
     def _get_promotion(self) -> float:
         return self._promotion
@@ -42,8 +44,11 @@ class ResultsModel(QObject):
     def _set_promotion(self, val: float) -> None:
         self._promotion = float(val)
         self.refresh()
+        self.filtersChanged.emit()
 
-    promotionMin = Property(float, _get_promotion, _set_promotion)
+    promotionMin = Property(
+        float, _get_promotion, _set_promotion, notify=filtersChanged
+    )
 
     def _get_corr(self) -> float:
         return self._corr
@@ -51,8 +56,9 @@ class ResultsModel(QObject):
     def _set_corr(self, val: float) -> None:
         self._corr = float(val)
         self.refresh()
+        self.filtersChanged.emit()
 
-    proxyFullCorrMin = Property(float, _get_corr, _set_corr)
+    proxyFullCorrMin = Property(float, _get_corr, _set_corr, notify=filtersChanged)
 
     def _get_rows(self) -> List[Dict[str, Any]]:
         return self._rows

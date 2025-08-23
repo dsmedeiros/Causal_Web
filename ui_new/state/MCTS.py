@@ -25,6 +25,7 @@ class MCTSModel(QObject):
     baselinePromoted = Signal(str)
     statsChanged = Signal()
     ablationsChanged = Signal()
+    paramsChanged = Signal()
 
     def __init__(self) -> None:
         super().__init__()
@@ -280,88 +281,105 @@ class MCTSModel(QObject):
 
     def _set_c_ucb(self, val: float) -> None:
         self._c_ucb = float(val)
+        self.paramsChanged.emit()
 
-    cUcb = Property(float, _get_c_ucb, _set_c_ucb)
+    cUcb = Property(float, _get_c_ucb, _set_c_ucb, notify=paramsChanged)
 
     def _get_alpha_pw(self) -> float:
         return self._alpha_pw
 
     def _set_alpha_pw(self, val: float) -> None:
         self._alpha_pw = float(val)
+        self.paramsChanged.emit()
 
-    alphaPw = Property(float, _get_alpha_pw, _set_alpha_pw)
+    alphaPw = Property(float, _get_alpha_pw, _set_alpha_pw, notify=paramsChanged)
 
     def _get_k_pw(self) -> float:
         return self._k_pw
 
     def _set_k_pw(self, val: float) -> None:
         self._k_pw = float(val)
+        self.paramsChanged.emit()
 
-    kPw = Property(float, _get_k_pw, _set_k_pw)
+    kPw = Property(float, _get_k_pw, _set_k_pw, notify=paramsChanged)
 
     def _get_promote(self) -> float:
         return self._promote
 
     def _set_promote(self, val: float) -> None:
         self._promote = float(val)
+        self.paramsChanged.emit()
 
-    promoteThreshold = Property(float, _get_promote, _set_promote)
+    promoteThreshold = Property(float, _get_promote, _set_promote, notify=paramsChanged)
 
     def _get_promote_q(self) -> float:
         return self._promote_q
 
     def _set_promote_q(self, val: float) -> None:
         self._promote_q = float(val)
+        self.paramsChanged.emit()
 
-    promoteQuantile = Property(float, _get_promote_q, _set_promote_q)
+    promoteQuantile = Property(
+        float, _get_promote_q, _set_promote_q, notify=paramsChanged
+    )
 
     def _get_promote_w(self) -> float:
         return self._promote_w
 
     def _set_promote_w(self, val: float) -> None:
         self._promote_w = float(val)
+        self.paramsChanged.emit()
 
-    promoteWindow = Property(float, _get_promote_w, _set_promote_w)
+    promoteWindow = Property(
+        float, _get_promote_w, _set_promote_w, notify=paramsChanged
+    )
 
     def _get_max_nodes(self) -> int:
         return self._max_nodes
 
     def _set_max_nodes(self, val: int) -> None:
         self._max_nodes = int(val)
+        self.paramsChanged.emit()
 
-    maxNodes = Property(int, _get_max_nodes, _set_max_nodes)
+    maxNodes = Property(int, _get_max_nodes, _set_max_nodes, notify=paramsChanged)
 
     def _get_proxy_frames(self) -> int:
         return self._proxy_frames
 
     def _set_proxy_frames(self, val: int) -> None:
         self._proxy_frames = int(val)
+        self.paramsChanged.emit()
 
-    proxyFrames = Property(int, _get_proxy_frames, _set_proxy_frames)
+    proxyFrames = Property(
+        int, _get_proxy_frames, _set_proxy_frames, notify=paramsChanged
+    )
 
     def _get_full_frames(self) -> int:
         return self._full_frames
 
     def _set_full_frames(self, val: int) -> None:
         self._full_frames = int(val)
+        self.paramsChanged.emit()
 
-    fullFrames = Property(int, _get_full_frames, _set_full_frames)
+    fullFrames = Property(int, _get_full_frames, _set_full_frames, notify=paramsChanged)
 
     def _get_bins(self) -> int:
         return self._bins
 
     def _set_bins(self, val: int) -> None:
         self._bins = int(val)
+        self.paramsChanged.emit()
 
-    bins = Property(int, _get_bins, _set_bins)
+    bins = Property(int, _get_bins, _set_bins, notify=paramsChanged)
 
     def _get_multi(self) -> bool:
         return self._multi_objective
 
     def _set_multi(self, val: bool) -> None:
         self._multi_objective = bool(val)
+        self.paramsChanged.emit()
 
-    multiObjective = Property(bool, _get_multi, _set_multi)
+    multiObjective = Property(bool, _get_multi, _set_multi, notify=paramsChanged)
 
     def _get_node_count(self) -> int:
         return self._node_count
