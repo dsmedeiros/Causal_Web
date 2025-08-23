@@ -1,6 +1,7 @@
 cupy-cuda12x
 imageio
 matplotlib
+msgpack
 networkx
 numpy
 pandas
