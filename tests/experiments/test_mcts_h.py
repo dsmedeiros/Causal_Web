@@ -2,6 +2,7 @@ import json
 import os
 import time
 from pathlib import Path
+from typing import Dict, List
 
 import numpy as np
 import pytest
@@ -147,6 +148,30 @@ def test_state_roundtrip(tmp_path):
     assert next1 == next2
 
 
+def test_multi_objective_hypervolume():
+    priors = {"a": DiscretePrior([0], [1.0])}
+    cfg = {
+        "rng_seed": 0,
+        "multi_objective": True,
+        "hv_box": [[0, 2], [0, 2], [0, 2]],
+    }
+    opt = MCTS_H(["a"], priors, cfg)
+    cfgs = opt.suggest(1)
+    opt.observe([{"config": cfgs[0], "objectives": {"f1": 1.0, "f2": 1.0, "f3": 1.0}}])
+    assert opt.metrics()["hypervolume"] == pytest.approx(1.0)
+    cfgs = opt.suggest(1)
+    opt.observe(
+        [
+            {
+                "config": cfgs[0],
+                "objectives": {"f1": 0.5, "f2": 1.5, "f3": 1.5},
+            }
+        ]
+    )
+    assert opt.metrics()["hypervolume"] == pytest.approx(1.125)
+    assert opt.root.Q == pytest.approx((1.0 + 0.125) / 2)
+
+
 def test_multi_objective_scalarisation():
     priors = {"a": DiscretePrior([0], [1.0])}
     cfg = {"rng_seed": 0, "multi_objective": True}
@@ -165,6 +190,64 @@ def test_multi_objective_scalarisation():
     )
     assert opt.root.N == 1
     assert np.isclose(opt.root.Q, expected)
+
+
+def test_hypervolume_beats_scalarisation():
+    grid = np.linspace(0.0, 1.0, 21).tolist()
+    priors = {
+        "x": DiscretePrior(grid, [1 / len(grid)] * len(grid)),
+        "y": DiscretePrior(grid, [1 / len(grid)] * len(grid)),
+    }
+    hv_box = [[0, 310], [0, 15]]
+    hv_cfg = {"rng_seed": 0, "multi_objective": True, "hv_box": hv_box}
+    sc_cfg = {"rng_seed": 0, "multi_objective": True}
+    opt_hv = MCTS_H(["x", "y"], priors, hv_cfg)
+    opt_sc = MCTS_H(["x", "y"], priors, sc_cfg)
+    sc_points: List[np.ndarray] = []
+
+    def evaluate(x: float, y: float) -> Dict[str, float]:
+        x1 = x * 15 - 5
+        x2 = y * 15
+        a = 1.0
+        b = 5.1 / (4 * np.pi**2)
+        c = 5.0 / np.pi
+        r = 6.0
+        s = 10.0
+        t = 1.0 / (8 * np.pi)
+        branin = a * (x2 - b * x1**2 + c * x1 - r) ** 2 + s * (1 - t) * np.cos(x1) + s
+        if y == 0:
+            y = 1e-7
+        currin = (1 - np.exp(-1 / (2 * y))) * (
+            (2300 * x**3 + 1900 * x**2 + 2092 * x + 60)
+            / (100 * x**3 + 500 * x**2 + 4 * x + 20)
+        )
+        return {"branin": branin, "currin": currin}
+
+    for _ in range(40):
+        cfg = opt_hv.suggest(1)[0]
+        objs = evaluate(cfg["x"], cfg["y"])
+        opt_hv.observe([{"config": cfg, "objectives": objs}])
+
+        cfg = opt_sc.suggest(1)[0]
+        objs = evaluate(cfg["x"], cfg["y"])
+        opt_sc.observe([{"config": cfg, "objectives": objs}])
+        sc_points.append(np.array(list(objs.values())))
+
+    # compute hypervolume for scalarisation run
+    opt_sc.hv_box = np.array(hv_box, dtype=float)
+    front: List[np.ndarray] = []
+    for p in sc_points:
+        dominated = False
+        for q in front:
+            if np.all(q <= p) and np.any(q < p):
+                dominated = True
+                break
+        if dominated:
+            continue
+        front = [q for q in front if not (np.all(p <= q) and np.any(p < q))]
+        front.append(p)
+    hv_sc = opt_sc._hv_value(front)
+    assert opt_hv._hv > hv_sc
 
 
 def _base_config():

@@ -143,7 +143,7 @@ via a Monte-Carlo path sampler over the graph's causal structure.
 - Added a lightweight Genetic Algorithm framework with tournament selection, uniform crossover, Gaussian mutation and elitism along with a GA panel showing a live population table with objectives and per-constraint flags, fitness-history and Pareto-front charts, and promote/export actions.
 - Introduced scalar fitness helpers with hard invariant guardrails and normalised terms, providing a clear objective for optimisation and a path toward multi-objective Pareto support.
 - Added NSGA-II-lite multi-objective capabilities with non-dominated sorting, crowding-distance selection, a persistent Pareto archive and UI promotion of chosen trade-offs.
-- Introduced an experimental MCTS-H optimiser that explores hyperparameter trees with progressive widening, prior-guided rollouts, proxy/full evaluation promotion and a simple transposition cache. Multi-objective runs are scalarised via random Dirichlet weights when ``multi_objective`` or the ``--multi-objective`` flag is enabled.
+ - Introduced an experimental MCTS-H optimiser that explores hyperparameter trees with progressive widening, prior-guided rollouts, proxy/full evaluation promotion and a simple transposition cache. Multi-objective runs default to random Dirichlet scalarisation but may instead use expected hypervolume improvement over an ``hv_box`` reference spanning any number of objectives.
 - Optimiser state can now be saved and reloaded to resume MCTS-H searches.
 - A new ``OptimizerQueueManager`` wires MCTS-H into the existing gate runner and persists Top-K and hall-of-fame artifacts for promoted full evaluations.
 - MCTS-H can route evaluations through an ASHA-style scheduler with configurable rungs (e.g. 20%, 40%, 100% of full frames) to prune weak candidates early, logging promotion fractions, per-rung wall-clock times, and demonstrated wall-clock savings across simulated workloads.
@@ -513,6 +513,10 @@ regression over 5% also opens a GitHub issue so maintainers receive external
 notifications. Both benchmarks record basic hardware metadata for reproducibility. Manual
 GUI frame-rate measurement guidelines remain in `bench/gui_fps.md` for
 scenarios not covered by the automated benchmark.
+
+`bench/hv_vs_scalarization.py` compares EHVI-driven MCTS-H against
+Dirichlet scalarisation on the two-objective Branin–Currin problem and
+prints the resulting hypervolumes as JSON.
 
 The GUI benchmark accepts ``--nodes`` to control graph size and
 ``--aa/--no-aa`` and ``--labels/--no-labels`` flags to toggle
