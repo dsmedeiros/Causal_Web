@@ -4,6 +4,9 @@ shiboken6==6.6.3.1
 qasync>=0.24.0
 websockets>=10.4
 pyqtgraph>=0.13.7
+PyYAML
+msgpack
+networkx
 pytest
 pytest-qt
 ruff
