@@ -220,19 +220,19 @@ Window {
             anchors.bottom: parent.bottom
             currentIndex: tabBar.currentIndex
 
-            Telemetry { anchors.fill: parent; graphView: graphView }
-            Meters { anchors.fill: parent }
-            Experiment { anchors.fill: parent; graphView: graphView }
-            Replay { anchors.fill: parent }
-            Results { anchors.fill: parent }
-            LogExplorer { anchors.fill: parent }
-            Inspector { anchors.fill: parent }
-            Validation { anchors.fill: parent }
-            DOE { anchors.fill: parent; panels: panels; replayIndex: 3; compareIndex: 12 }
-            GA { anchors.fill: parent; panels: panels; replayIndex: 3; compareIndex: 12 }
-            MCTS { anchors.fill: parent; panels: panels; replayIndex: 3 }
-            Policy { anchors.fill: parent }
-            Compare { anchors.fill: parent }
+            Telemetry { Layout.fillWidth: true; Layout.fillHeight: true; graphView: graphView }
+            Meters { Layout.fillWidth: true; Layout.fillHeight: true }
+            Experiment { Layout.fillWidth: true; Layout.fillHeight: true; graphView: graphView }
+            Replay { Layout.fillWidth: true; Layout.fillHeight: true }
+            Results { Layout.fillWidth: true; Layout.fillHeight: true }
+            LogExplorer { Layout.fillWidth: true; Layout.fillHeight: true }
+            Inspector { Layout.fillWidth: true; Layout.fillHeight: true }
+            Validation { Layout.fillWidth: true; Layout.fillHeight: true }
+            DOE { Layout.fillWidth: true; Layout.fillHeight: true; panels: panels; replayIndex: 3; compareIndex: 12 }
+            GA { Layout.fillWidth: true; Layout.fillHeight: true; panels: panels; replayIndex: 3; compareIndex: 12 }
+            MCTS { Layout.fillWidth: true; Layout.fillHeight: true; panels: panels; replayIndex: 3 }
+            Policy { Layout.fillWidth: true; Layout.fillHeight: true }
+            Compare { Layout.fillWidth: true; Layout.fillHeight: true }
         }
     }
 }

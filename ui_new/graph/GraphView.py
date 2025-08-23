@@ -12,6 +12,8 @@ from PySide6.QtQuick import (
     QSGGeometryNode,
     QSGMaterial,
     QSGMaterialShader,
+    QSGMaterialType,
+    QSGRendererInterface,
     QSGNode,
     QSGTextNode,
 )
@@ -24,6 +26,8 @@ QML_IMPORT_MAJOR_VERSION = 1
 class _InstancedMaterial(QSGMaterial):
     """Flat material feeding per-instance attributes to the shader."""
 
+    _TYPE = QSGMaterialType()
+
     def __init__(self) -> None:
         super().__init__()
         # Attribute buffers mirroring geometry instance data
@@ -31,10 +35,12 @@ class _InstancedMaterial(QSGMaterial):
         self.colors: List[QVector4D] = []
         self.flags: List[float] = []
 
-    def type(self) -> int:  # pragma: no cover - Qt binding detail
-        return QSGMaterial.UserType + 1
+    def type(self) -> QSGMaterialType:  # pragma: no cover - Qt binding detail
+        return self._TYPE
 
-    def createShader(self) -> QSGMaterialShader:  # pragma: no cover - Qt binding detail
+    def createShader(
+        self, render_mode: QSGRendererInterface.RenderMode
+    ) -> QSGMaterialShader:  # pragma: no cover - Qt binding detail
         return _InstancedShader()
 
 
@@ -92,16 +98,20 @@ class _InstancedShader(QSGMaterialShader):
 class _EdgeMaterial(QSGMaterial):
     """Material supplying per-edge endpoints via instanced attributes."""
 
+    _TYPE = QSGMaterialType()
+
     def __init__(self) -> None:
         super().__init__()
         self.color = QColor("gray")
         self.starts: List[QVector2D] = []
         self.ends: List[QVector2D] = []
 
-    def type(self) -> int:  # pragma: no cover - Qt binding detail
-        return QSGMaterial.UserType + 2
+    def type(self) -> QSGMaterialType:  # pragma: no cover - Qt binding detail
+        return self._TYPE
 
-    def createShader(self) -> QSGMaterialShader:  # pragma: no cover - Qt binding detail
+    def createShader(
+        self, render_mode: QSGRendererInterface.RenderMode
+    ) -> QSGMaterialShader:  # pragma: no cover - Qt binding detail
         return _EdgeShader()
 
 
@@ -572,6 +582,7 @@ class GraphView(QQuickItem):
             from PySide6.QtGui import QImage  # Local import to avoid GUI deps
             import numpy as np
             import imageio
+
             img = result.image().convertToFormat(QImage.Format_RGBA8888)
             width, height = img.width(), img.height()
             ptr = img.constBits()
