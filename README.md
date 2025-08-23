@@ -51,7 +51,7 @@ Observers and bridges are rendered on the canvas and can be selected for editing
 Launch the GUI with:
 
 ```bash
-python -m Causal_Web.main
+cw run
 ```
 
 Frames carry both phase and amplitude. Their influence on interference and coherence is weighted by amplitude and each frame records the local `generation_tick` at which it was emitted.
@@ -242,11 +242,11 @@ pip install -r requirements-gui.txt
 pyinstaller cw_gui.spec   # build bundle
 ./dist/cw_gui/cw_gui      # run GUI bundle
 cw run --no-gui           # headless
-cw sweep --lhs ...        # DOE
-cw ga --config ...        # GA
+cw-sweep sweep.yml        # DOE sweep
 cw optim --base base.yaml --space space.yaml --optim mcts_h --multi-objective  # MCTS-H
 cw bench-optim --task bell --budget 10  # optimizer bake-off
 cw bench-optim --task all --budget 10   # run all tasks and summary
+cw reproduce path/to/run  # replay recorded run
 ```
 
 ### cw gui bundles
@@ -317,7 +317,7 @@ Runs produce a set of JSON logs in `output/`. Full descriptions of each log file
 Runtime parameters are loaded from `Causal_Web/input/config.json`. Any value can
 be overridden with CLI flags using dot notation for nested keys, for example:
 ```bash
-python -m Causal_Web.main --no-gui --max_ticks 20
+cw run --no-gui --max_ticks 20
 ```
 sets a depth limit of 20 for a headless run.
 CLI flags for nested `log_files` entries now include the full path prefix to avoid duplicate
@@ -327,7 +327,7 @@ Additional flags allow enabling or disabling specific logs without editing
 `config.json`:
 
 ```bash
-python -m Causal_Web.main --disable-tick=coherence_log,interference_log \
+cw run --disable-tick=coherence_log,interference_log \
     --enable-events=bridge_rupture_log
 ```
 
@@ -496,7 +496,7 @@ when the backend is set to `cupy`, keeping computation on the GPU.
 Ray cluster initialisation can be customised via the `--ray-init` flag. Pass a JSON string of keyword arguments forwarded to `ray.init`, for example:
 
 ```bash
-python -m Causal_Web.main --ray-init '{"num_cpus":4}'
+cw run --ray-init '{"num_cpus":4}'
 ```
 
 This enables tailoring the local or remote Ray cluster before sharding zones.
@@ -547,8 +547,8 @@ The interpreter provides `records_for_tick()` and `assemble_timeline()` helpers 
 The ingestion service also consumes these unified files, routing records to database tables based on their `label` or `event_type`.
 
 ## Diagnostics Sweep
-Parameter sweeps can be scripted in YAML and executed via `tools/sweep.py`. Each
-experiment logs metrics to a CSV file and produces a Matplotlib heat-map.
+Parameter sweeps can be scripted in YAML and executed via the `cw-sweep` command.
+Each experiment logs metrics to a CSV file and produces a Matplotlib heat-map.
 
 Example configuration:
 
@@ -567,16 +567,11 @@ Run the sweep with:
 cw-sweep sweep.yml
 ```
 
-or directly via the module:
-
-```bash
-python tools/sweep.py sweep.yml
-```
-
 The resulting `*_sweep.csv` and `*_heatmap.png` files summarise Bell scores,
-interference visibility and proper-time ratios. Sweeps seed module-level random
-generators, so parallel sweeps should run in separate processes to avoid
-contention.
+interference visibility and proper-time ratios. The `tools/sweep.py` module
+powers this command and is not intended to be executed directly. Sweeps seed
+module-level random generators, so parallel sweeps should run in separate
+processes to avoid contention.
 
 ## Optimizer Decision Tree
 
