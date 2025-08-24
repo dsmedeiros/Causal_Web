@@ -181,7 +181,7 @@
   "observers": [
     {
       "id": "GLOBAL_OBS",
-      "monitors": [ "collapse", "law_wave", "emergence" ],
+      "monitors": [ "collapse", "emergence" ],
       "frequency": 1,
       "detector_mode": false
     },

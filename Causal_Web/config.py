@@ -248,8 +248,6 @@ class Config:
             "coherence_log": True,
             "decoherence_log": True,
             "coherence_velocity_log": True,
-            "law_wave_log": True,
-            "stable_frequency_log": True,
             "proper_time_log": True,
             "interference_log": True,
             "curvature_log": True,
@@ -291,7 +289,6 @@ class Config:
             "refraction_log": True,
             "node_emergence_log": True,
             "law_drift_log": True,
-            "law_wave_event": True,
             "observer_perceived_field": True,
             "observer_disagreement_log": True,
             "boundary_interaction_log": True,
@@ -348,8 +345,6 @@ class Config:
         "inspection_log",
         "interference_log",
         "law_drift_log",
-        "law_wave_log",
-        "stable_frequency_log",
         "layer_transition_log",
         "layer_transition_events",
         "meta_node_ticks",
@@ -388,7 +383,6 @@ class Config:
         "curvature_log",
         "decoherence_log",
         "interference_log",
-        "law_wave_log",
         "meta_node_ticks",
         "node_state_log",
         "proper_time_log",
@@ -396,7 +390,6 @@ class Config:
         "tick_delivery_log",
         "tick_evaluation_log",
         "tick_seed_log",
-        "stable_frequency_log",
     }
 
     @classmethod

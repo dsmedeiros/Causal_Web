@@ -203,15 +203,6 @@ The following lists describe the JSON keys recorded in each output file.
 #### `law_drift_log.json`
 - `tick`, `node` and the updated `new_refractory_period`.
 
-#### `law_wave_log.json`
-- keyed by tick with `{node: frequency}` values.
-
-#### `law_wave_event`
-- emitted when a law wave propagates with `{origin, affected}`.
-
-#### `stable_frequency_log.json`
-- keyed by tick mapping nodes to stabilised law-wave frequencies.
-
 #### `layer_transition_log.json`
 - `tick`, `node`, source `from` layer, destination `to` layer, `reason`,
   `window_idx`, `Lambda_v`, `EQ` and `H_p`.
@@ -324,7 +315,7 @@ The following lists describe the JSON keys recorded in each output file.
 
 #### `interpretation_log.json`
 - aggregated metrics produced by the interpreter. Keys may include
-  `curvature`, `collapse`, `coherence`, `law_wave`, `decoherence`,
+  `curvature`, `collapse`, `coherence`, `decoherence`,
   `layer_transitions`, `rerouting`, `node_state_transitions`, `clusters`,
   `bridges`, `law_drift`, `meta_nodes`, `tick_counts`, `layer_summary`,
   `inspection_events` and `console`.
