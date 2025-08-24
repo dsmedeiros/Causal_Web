@@ -14,8 +14,8 @@ jobs:
           python-version: '3.11'
       - name: Install system libraries
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libgl1 libegl1 libxkbcommon-x11-0
+          until sudo apt-get update; do sleep 5; done
+          until sudo apt-get install -y libgl1 libegl1 libxkbcommon-x11-0; do sleep 5; done
       - name: Install dependencies
         run: pip install -r requirements.txt -c constraints.txt
       - name: Guard environment
@@ -32,8 +32,8 @@ jobs:
           python-version: '3.11'
       - name: Install system libraries
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libgl1 libegl1 libxkbcommon-x11-0
+          until sudo apt-get update; do sleep 5; done
+          until sudo apt-get install -y libgl1 libegl1 libxkbcommon-x11-0; do sleep 5; done
       - name: Install dependencies
         run: |
           pip install -r requirements.txt -c constraints.txt
@@ -58,8 +58,8 @@ jobs:
           python-version: '3.11'
       - name: Install system libraries
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libgl1 libegl1 libxkbcommon-x11-0
+          until sudo apt-get update; do sleep 5; done
+          until sudo apt-get install -y libgl1 libegl1 libxkbcommon-x11-0; do sleep 5; done
       - name: Install dependencies
         run: pip install -r requirements.txt -c constraints.txt
       - name: Guard environment
