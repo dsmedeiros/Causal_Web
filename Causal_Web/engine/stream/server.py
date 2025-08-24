@@ -12,10 +12,14 @@ import contextlib
 import os
 import secrets
 import tempfile
+import time
+import warnings
 from typing import Any, Dict, Set
 
 import msgpack
 import websockets
+
+from .auth import write_session_bundle
 
 
 class DeltaBus:
@@ -94,6 +98,8 @@ async def serve(
     port: int = 8765,
     allow_multi: bool | None = None,
     session_token: str | None = None,
+    session_file: str | None = None,
+    session_ttl: int | None = None,
 ) -> None:
     """Start a WebSocket server publishing engine deltas.
 
@@ -114,6 +120,10 @@ async def serve(
         Optional token expected from clients on connect. If ``None`` a random
         token is generated, printed to ``stdout`` and written to a temporary
         file prefixed with ``cw_token_``.
+    session_file:
+        Path to the JSON session bundle written for GUI auto-discovery.
+    session_ttl:
+        Lifetime of the session token in seconds. Defaults to ``3600``.
     """
 
     if allow_multi is None:
@@ -123,6 +133,12 @@ async def serve(
             "yes",
         }
 
+    host = os.getenv("CW_WS_HOST", host)
+    port = int(os.getenv("CW_WS_PORT", str(port)))
+    session_file = session_file or os.getenv("CW_SESSION_FILE")
+    session_token = session_token or os.getenv("CW_SESSION_TOKEN")
+    session_ttl = session_ttl or int(os.getenv("CW_SESSION_TTL", "3600"))
+
     if session_token is None:
         session_token = secrets.token_urlsafe(16)
         tmp = tempfile.NamedTemporaryFile(
@@ -130,7 +146,17 @@ async def serve(
         )
         tmp.write(session_token)
         tmp.close()
-        print(f"CW session token: {session_token} (file: {tmp.name})")
+        print(f"CW session token: {session_token} (file: {tmp.name}) [DEPRECATED]")
+        warnings.warn(
+            "Temp token file path output is deprecated; use session bundle",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
+    bundle, _ = write_session_bundle(
+        host, port, session_token, session_ttl, session_file
+    )
+    expires_at = bundle["expires_at"]
 
     clients: Set[websockets.WebSocketServerProtocol] = set()
     primary: websockets.WebSocketServerProtocol | None = None
@@ -172,6 +198,10 @@ async def serve(
             await ws.close(reason="handshake required")
             return
         token = msg.get("token", "")
+        now = time.time()
+        if now >= expires_at:
+            await ws.close(reason="session expired")
+            return
         if session_token and token != session_token:
             await ws.close(reason="unauthorized")
             return

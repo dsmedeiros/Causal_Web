@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 from typing import Any
 
-from .ipc import Client
+from .ipc import Client, ConnectError
 from .state import (
     Store,
     TelemetryModel,
@@ -33,6 +33,8 @@ async def run(
     policy: PolicyModel,
     window: Any,
     token: str | None = None,
+    retries: int = 1,
+    retry_delay: float = 0.3,
 ) -> None:
     """Connect to ``url`` and forward graph updates to the view and models.
 
@@ -48,8 +50,15 @@ async def run(
     window.controlsEnabled = False
     window.role = "spectator"
     window.controlRequested = False
-    client = Client(url, token, ping_interval=2.0)
-    await client.connect()
+    for attempt in range(retries):
+        client = Client(url, token, ping_interval=2.0)
+        try:
+            await client.connect()
+            break
+        except ConnectError:
+            if attempt == retries - 1:
+                raise
+            await asyncio.sleep(retry_delay)
     experiment.set_client(client)
     replay.set_client(client)
     store.set_client(client)
