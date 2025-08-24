@@ -312,7 +312,11 @@ class MainService:
         ctx.setContextProperty("policyModel", policy_model)
         ctx.setContextProperty("compareModel", compare)
         ctx.setContextProperty("resultsModel", results)
-        qml_path = os.path.join(os.path.dirname(__file__), "..", "ui_new", "main.qml")
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        qml_path = os.path.join(base_dir, "..", "ui_new", "main.qml")
+        if not os.path.exists(qml_path):
+            qml_path = os.path.join(base_dir, "ui_new", "main.qml")
+        qml_path = os.path.abspath(qml_path)
         qml_warnings: list = []
         engine.warnings.connect(lambda w: qml_warnings.extend(w))
         engine.load(qml_path)
