@@ -315,6 +315,12 @@ class MainService:
         qml_path = os.path.join(os.path.dirname(__file__), "..", "ui_new", "main.qml")
         engine.load(qml_path)
         if not engine.rootObjects():
+            errors = "\n".join(str(e) for e in engine.warnings())
+            QMessageBox.critical(
+                None,
+                "UI load error",
+                f"Failed to load QML at {qml_path}:\n{errors}",
+            )
             return
         root = engine.rootObjects()[0]
         view = root.findChild(QQuickItem, "graphView")
