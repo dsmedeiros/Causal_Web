@@ -288,6 +288,7 @@ launches the engine and Qt Quick interface.
 - **Disconnected** → token mismatch or single-client limit.
 - **Low FPS** → zoom out, labels auto-hide; disable AA at far zoom.
 - **Invariant failures** → inspect `result.json` for violations.
+- **GUI doesn't launch** → the application will report missing QML resources or other load errors in a pop-up dialog; ensure the `ui_new` directory is present alongside the executable.
 
 ## Installation
 Clone the repository and install the packages listed in `requirements.txt`. The GUI requires an X11 compatible display.
