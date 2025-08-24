@@ -14,6 +14,7 @@ import itertools
 import json
 import logging
 import time
+import sys
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
@@ -496,8 +497,9 @@ class OptimizerQueueManager:
             :meth:`run_next` semantics.
         use_processes:
             When ``True`` a :class:`~concurrent.futures.ProcessPoolExecutor`
-            dispatches evaluations across processes. Otherwise a thread pool is
-            used.
+            dispatches evaluations across processes.  On POSIX platforms a
+            ``fork`` context is used to minimise start-up overhead. Otherwise a
+            thread pool is used.
         use_ray:
             When ``True`` leaf evaluations are dispatched to a Ray cluster for
             distributed execution. ``ray`` must be installed.
@@ -535,7 +537,12 @@ class OptimizerQueueManager:
             return self._run_parallel(n, parallel, submit, fetch)
 
         executor_cls = ProcessPoolExecutor if use_processes else ThreadPoolExecutor
-        with executor_cls(max_workers=parallel) as ex:
+        executor_kwargs: Dict[str, Any] = {}
+        if use_processes and sys.platform != "win32":
+            import multiprocessing as mp
+
+            executor_kwargs["mp_context"] = mp.get_context("fork")
+        with executor_cls(max_workers=parallel, **executor_kwargs) as ex:
 
             def submit(raw: Dict[str, float], frames: int) -> Tuple[Any, float]:
                 t0 = time.perf_counter()

@@ -313,9 +313,11 @@ class MainService:
         ctx.setContextProperty("compareModel", compare)
         ctx.setContextProperty("resultsModel", results)
         qml_path = os.path.join(os.path.dirname(__file__), "..", "ui_new", "main.qml")
+        qml_warnings: list = []
+        engine.warnings.connect(lambda w: qml_warnings.extend(w))
         engine.load(qml_path)
         if not engine.rootObjects():
-            errors = "\n".join(str(e) for e in engine.warnings())
+            errors = "\n".join(str(e) for e in qml_warnings)
             QMessageBox.critical(
                 None,
                 "UI load error",
