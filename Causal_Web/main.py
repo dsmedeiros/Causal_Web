@@ -6,7 +6,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import os
+import sys
 import time
 from dataclasses import dataclass
 from typing import Any
@@ -32,6 +34,24 @@ _PRIVATE_KEYS = {
     "is_running",
     "TICK_POOL_SIZE",
 }
+
+
+def _configure_logging() -> None:
+    """Configure application logging and capture uncaught exceptions."""
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        filename="cw_gui.log",
+        filemode="a",
+    )
+
+    def _log_excepthook(exc_type, exc, tb) -> None:
+        logging.getLogger(__name__).exception(
+            "Uncaught exception", exc_info=(exc_type, exc, tb)
+        )
+
+    sys.excepthook = _log_excepthook
 
 
 def _add_config_args(
@@ -108,6 +128,7 @@ class MainService:
     argv: list[str] | None = None
 
     def run(self) -> None:
+        _configure_logging()
         args, cfg = self._parse_args()
         _apply_overrides(args, cfg)
         self._apply_log_overrides(args)
