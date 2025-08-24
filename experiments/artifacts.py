@@ -10,7 +10,7 @@ and allow users to replay or promote configurations.
 from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Tuple
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import secrets
 import yaml
@@ -186,7 +186,7 @@ def allocate_run_dir(root: Path = Path("experiments")) -> Tuple[str, Path, str]:
         artifact records.
     """
 
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     token = secrets.token_hex(3)
     date = now.strftime("%Y-%m-%d")
     run_id = f"{now.strftime('%Y-%m-%dT%H-%M-%SZ')}-{token}"

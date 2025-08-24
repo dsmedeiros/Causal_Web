@@ -111,15 +111,14 @@ def load_graph_arrays(
 
     # Initialise ancestry hashes using SplitMix64 and seed the moment vector.
 
-    def _smix(x: np.uint64) -> np.uint64:
-        x = (x + np.uint64(0x9E3779B97F4A7C15)) & np.uint64(0xFFFFFFFFFFFFFFFF)
-        z = x
-        z = (z ^ (z >> np.uint64(30))) * np.uint64(0xBF58476D1CE4E5B9)
-        z = (z ^ (z >> np.uint64(27))) * np.uint64(0x94D049BB133111EB)
-        return z ^ (z >> np.uint64(31))
+    def _smix(x: int | np.uint64) -> int:
+        z = (int(x) + 0x9E3779B97F4A7C15) & 0xFFFFFFFFFFFFFFFF
+        z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9 & 0xFFFFFFFFFFFFFFFF
+        z = (z ^ (z >> 27)) * 0x94D049BB133111EB & 0xFFFFFFFFFFFFFFFF
+        return (z ^ (z >> 31)) & 0xFFFFFFFFFFFFFFFF
 
     for vid in range(n_vert):
-        h = _smix(np.uint64(vid))
+        h = _smix(vid)
         vertices["h0"][vid] = h
         h = _smix(h)
         vertices["h1"][vid] = h

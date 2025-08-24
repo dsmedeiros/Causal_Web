@@ -15,12 +15,8 @@ from typing import Dict, Tuple
 import numpy as np
 
 
-def _splitmix64(x: np.uint64 | int) -> np.uint64:
+def _splitmix64(x: int | np.uint64) -> int:
     """Return SplitMix64 hash of ``x``.
-
-    The input is coerced to ``np.uint64`` to avoid dtype surprises when
-    NumPy's ``right_shift`` ufunc receives a float or platform-dependent
-    integer type.
 
     Parameters
     ----------
@@ -29,30 +25,31 @@ def _splitmix64(x: np.uint64 | int) -> np.uint64:
 
     Returns
     -------
-    np.uint64
-        Hashed output value.
+    int
+        Hashed output value in ``[0, 2**64)`` computed with 64-bit wraparound
+        semantics.
     """
 
-    z = np.uint64(x)
-    z = (z + np.uint64(0x9E3779B97F4A7C15)) & np.uint64(0xFFFFFFFFFFFFFFFF)
-    z = (z ^ (z >> np.uint64(30))) * np.uint64(0xBF58476D1CE4E5B9)
-    z &= np.uint64(0xFFFFFFFFFFFFFFFF)
-    z = (z ^ (z >> np.uint64(27))) * np.uint64(0x94D049BB133111EB)
-    z &= np.uint64(0xFFFFFFFFFFFFFFFF)
-    return z ^ (z >> np.uint64(31))
+    z = (int(x) + 0x9E3779B97F4A7C15) & 0xFFFFFFFFFFFFFFFF
+    z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9 & 0xFFFFFFFFFFFFFFFF
+    z = (z ^ (z >> 27)) * 0x94D049BB133111EB & 0xFFFFFFFFFFFFFFFF
+    return (z ^ (z >> 31)) & 0xFFFFFFFFFFFFFFFF
 
 
 def _splitmix_vec3(seed: np.ndarray) -> np.ndarray:
     """Return three ``uint32`` values derived from ``seed``.
 
-    The input ``seed`` is reduced to a single ``uint64`` and expanded via
-    sequential SplitMix64 applications.
+    The ``seed`` array is XOR-reduced using Python integer arithmetic to
+    guarantee 64-bit wraparound semantics, then expanded via sequential
+    SplitMix64 applications.
     """
 
-    s = np.uint64(np.bitwise_xor.reduce(seed.astype(np.uint64)))
+    s = 0
+    for v in np.asarray(seed, dtype=np.uint64):
+        s ^= int(v)
+    s &= 0xFFFFFFFFFFFFFFFF
     return np.array(
-        [_splitmix64(s + np.uint64(i)) & np.uint64(0xFFFFFFFF) for i in range(3)],
-        dtype=np.uint32,
+        [_splitmix64(s + i) & 0xFFFFFFFF for i in range(3)], dtype=np.uint32
     )
 
 
@@ -168,7 +165,7 @@ class BellHelpers:
         u = beta_m * ancestry.m + (1.0 - beta_m) * u_rand
         u = self._unit_vector(u)
 
-        zeta_u64 = _splitmix64(ancestry.h[0])
+        zeta_u64 = _splitmix64(int(ancestry.h[0]))
         zeta_hash = np.float64(zeta_u64) / np.float64(2**64)
         zeta_rand = self._rng.random()
         zeta_float = beta_h * zeta_hash + (1.0 - beta_h) * zeta_rand
