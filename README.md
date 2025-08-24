@@ -30,14 +30,35 @@ SnapshotDelta = {
 }
 ```
 
-The engine prints a random session token at startup. Clients must begin with a
-`Hello` message carrying this token; the server closes connections that omit or
-mismatch it. The first client to complete this handshake becomes the controller.
-Set `CW_ALLOW_MULTI=1` to permit additional spectators. Spectators receive
-read-only updates and any control commands they send are rejected. They may
-issue a request for control which the current controller can grant without
+The engine writes a session bundle containing host, port and a random token to a
+per-user path at startup. Clients must begin with a `Hello` message carrying
+this token; the server closes connections that omit, mismatch or use an expired
+token. Set `CW_ALLOW_MULTI=1` to permit additional spectators. Spectators
+receive read-only updates and any control commands they send are rejected. They
+may issue a request for control which the current controller can grant without
 restarting. Role changes are broadcast so UIs can display a small
 "Controller"/"Spectator" badge. Float32 fields keep payloads lean.
+
+## Two-process mode
+
+Run the engine and GUI as separate processes. The engine writes a session
+bundle to a per-user path and the GUI discovers it automatically:
+
+```bash
+python -m Causal_Web.engine.run --session-file <PATH>
+python -m Causal_Web.main
+```
+
+Override discovery via CLI flags or environment variables:
+
+| Setting | CLI flag | Environment |
+| --- | --- | --- |
+| WebSocket URL | `--ws-url` | `CW_WS_URL` |
+| Host | `--ws-host` / `--host` | `CW_WS_HOST` |
+| Port | `--ws-port` / `--port` | `CW_WS_PORT` |
+| Token | `--token` / `--session-token` | `CW_SESSION_TOKEN` |
+| Session file | `--token-file` / `--session-file` | `CW_SESSION_FILE` |
+| Session TTL | `--session-ttl` | `CW_SESSION_TTL` |
 
 ## Compare panel
 

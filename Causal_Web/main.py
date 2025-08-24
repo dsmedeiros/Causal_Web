@@ -118,7 +118,7 @@ class MainService:
         if args.no_gui:
             self._run_headless()
         else:
-            self._launch_gui()
+            self._launch_gui(args)
 
     # ------------------------------------------------------------------
     @staticmethod
@@ -211,6 +211,15 @@ class MainService:
             default="",
             help="Comma-separated event types to disable",
         )
+        parser.add_argument("--ws-url", default=None, help="WebSocket URL of engine")
+        parser.add_argument("--ws-host", default=None, help="Engine host override")
+        parser.add_argument(
+            "--ws-port", type=int, default=None, help="Engine port override"
+        )
+        parser.add_argument("--token", default=None, help="Session token override")
+        parser.add_argument(
+            "--token-file", default=None, help="Path to session bundle JSON"
+        )
         args = parser.parse_args(self.argv)
         Config.graph_file = args.graph
         return args, defaults
@@ -248,16 +257,18 @@ class MainService:
 
     # ------------------------------------------------------------------
     @staticmethod
-    def _launch_gui() -> None:
+    def _launch_gui(args) -> None:
         """Launch the Qt Quick interface."""
 
         import asyncio
-        import os
-        from PySide6.QtGui import QGuiApplication
+        from PySide6.QtWidgets import QApplication, QMessageBox
         from PySide6.QtQml import QQmlApplicationEngine
         from PySide6.QtQuick import QQuickItem
         from qasync import QEventLoop
         from ui_new import core
+        from ui_new.auth import resolve_connection_info
+        from ui_new.ipc import ConnectError
+        from Causal_Web.engine.stream.auth import default_session_file
         from ui_new.state import (
             Store,
             TelemetryModel,
@@ -274,7 +285,7 @@ class MainService:
         )
         from ui_new.graph import GraphView  # noqa: F401  # register QML module
 
-        app = QGuiApplication([])
+        app = QApplication([])
         engine = QQmlApplicationEngine()
         telemetry = TelemetryModel()
         meters = MetersModel()
@@ -311,24 +322,55 @@ class MainService:
 
         loop = QEventLoop(app)
         asyncio.set_event_loop(loop)
-        token = os.getenv("CW_SESSION_TOKEN", "secret")
-        loop.create_task(
-            core.run(
-                "ws://localhost:8765",
-                view,
-                telemetry,
-                experiment,
-                replay,
-                logs,
-                store,
-                doe,
-                ga_model,
-                mcts_model,
-                policy_model,
-                root,
-                token=token,
+
+        async def runner() -> None:
+            for _ in range(10):
+                try:
+                    url, token = resolve_connection_info(
+                        ws_url=args.ws_url,
+                        token=args.token,
+                        token_file=args.token_file,
+                        ws_host=args.ws_host,
+                        ws_port=args.ws_port,
+                    )
+                    await core.run(
+                        url,
+                        view,
+                        telemetry,
+                        experiment,
+                        replay,
+                        logs,
+                        store,
+                        doe,
+                        ga_model,
+                        mcts_model,
+                        policy_model,
+                        root,
+                        token=token,
+                    )
+                    return
+                except (FileNotFoundError, ConnectError) as e:
+                    if isinstance(e, ConnectError) and "session expired" in str(e):
+                        QMessageBox.critical(
+                            None,
+                            "Session expired",
+                            "Engine session expired. Restart engine.",
+                        )
+                        return
+                    await asyncio.sleep(0.3)
+            path = args.token_file or default_session_file()
+            host = args.ws_host or "127.0.0.1"
+            port = args.ws_port or 8765
+            QMessageBox.critical(
+                None,
+                "Engine not found",
+                (
+                    "Couldn't find local Causal Web engine. "
+                    f"Looked for session file at {path} and tried ws://{host}:{port}."
+                ),
             )
-        )
+
+        loop.create_task(runner())
         with loop:
             loop.run_forever()
 

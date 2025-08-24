@@ -10,6 +10,11 @@ import contextlib
 
 import msgpack
 import websockets
+from websockets.exceptions import ConnectionClosedError
+
+
+class ConnectError(Exception):
+    """Raised when the client fails to establish a connection."""
 
 
 class Client:
@@ -40,8 +45,18 @@ class Client:
 
     async def connect(self) -> None:
         """Open the WebSocket connection and perform the hello handshake."""
-        self.connection = await websockets.connect(self.url)
-        await self.send({"type": "Hello", "token": self.token})
+        try:
+            self.connection = await websockets.connect(self.url)
+            await self.send({"type": "Hello", "token": self.token})
+            data = await self.connection.recv()
+            msg = msgpack.unpackb(data, raw=False)
+            if msg.get("type") != "Hello":
+                raise ConnectError("handshake failed")
+        except (OSError, ConnectionClosedError) as e:
+            if self.connection is not None:
+                await self.connection.close()
+                self.connection = None
+            raise ConnectError(str(e)) from e
         self._recv_task = asyncio.create_task(self._receiver())
         self._ping_task = asyncio.create_task(self._heartbeat())
 
