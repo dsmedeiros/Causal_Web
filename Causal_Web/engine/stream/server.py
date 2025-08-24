@@ -11,9 +11,7 @@ import asyncio
 import contextlib
 import os
 import secrets
-import tempfile
 import time
-import warnings
 from typing import Any, Dict, Set
 
 import msgpack
@@ -118,8 +116,7 @@ async def serve(
         ``False``.
     session_token:
         Optional token expected from clients on connect. If ``None`` a random
-        token is generated, printed to ``stdout`` and written to a temporary
-        file prefixed with ``cw_token_``.
+        token is generated and recorded in the session bundle.
     session_file:
         Path to the JSON session bundle written for GUI auto-discovery.
     session_ttl:
@@ -141,21 +138,11 @@ async def serve(
 
     if session_token is None:
         session_token = secrets.token_urlsafe(16)
-        tmp = tempfile.NamedTemporaryFile(
-            "w", delete=False, prefix="cw_token_", suffix=".txt"
-        )
-        tmp.write(session_token)
-        tmp.close()
-        print(f"CW session token: {session_token} (file: {tmp.name}) [DEPRECATED]")
-        warnings.warn(
-            "Temp token file path output is deprecated; use session bundle",
-            DeprecationWarning,
-            stacklevel=2,
-        )
 
-    bundle, _ = write_session_bundle(
+    bundle, bundle_path = write_session_bundle(
         host, port, session_token, session_ttl, session_file
     )
+    print(f"CW session token: {session_token} (bundle: {bundle_path})")
     expires_at = bundle["expires_at"]
 
     clients: Set[websockets.WebSocketServerProtocol] = set()

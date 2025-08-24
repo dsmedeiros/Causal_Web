@@ -6,7 +6,7 @@ import asyncio
 import io
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, Iterable
 
 import psycopg2
@@ -145,7 +145,7 @@ async def ingest_run(run_dir: str) -> None:
         await asyncio.gather(*tasks)
 
     manifest[run_id] = {
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "status": "ingested",
     }
     _save_manifest(manifest_path, manifest)

@@ -1,6 +1,6 @@
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict
 
 import psycopg2
@@ -62,7 +62,7 @@ def record_run(
         cfg = json.load(fh)
     data = {
         "run_id": run_id,
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "description": cfg.get("description"),
         "seed": cfg.get("random_seed"),
         "tick_limit": cfg.get("tick_limit"),

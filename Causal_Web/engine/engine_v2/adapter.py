@@ -264,13 +264,16 @@ class EngineAdapter:
 
     # ------------------------------------------------------------------
     def _splitmix64(self, x: int) -> int:
-        """Return a SplitMix64 hash of ``x``."""
+        """Return a SplitMix64 hash of ``x``.
 
-        x = (x + 0x9E3779B97F4A7C15) & 0xFFFFFFFFFFFFFFFF
-        z = x
+        Operations use Python integers and explicit masking to emulate
+        unsigned 64-bit wraparound behaviour.
+        """
+
+        z = (int(x) + 0x9E3779B97F4A7C15) & 0xFFFFFFFFFFFFFFFF
         z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9 & 0xFFFFFFFFFFFFFFFF
         z = (z ^ (z >> 27)) * 0x94D049BB133111EB & 0xFFFFFFFFFFFFFFFF
-        return int(z ^ (z >> 31))
+        return (z ^ (z >> 31)) & 0xFFFFFFFFFFFFFFFF
 
     def _update_ancestry(
         self,
@@ -333,22 +336,23 @@ class EngineAdapter:
 
         # --------------------------------------------------------------
         # Rolling hash update
-        def f2u64(x: float) -> np.uint64:
-            return np.frombuffer(np.float64(x).tobytes(), dtype=np.uint64)[0]
+        def f2u64(x: float) -> int:
+            return int.from_bytes(np.float64(x).tobytes(), "little")
 
-        h0 ^= np.uint64(dst) ^ (np.uint64(depth_arr) << np.uint64(1))
-        h1 ^= np.uint64(np.int64(edge_id)) ^ (np.uint64(seq) << np.uint64(1))
-        h2 ^= f2u64(mu)
-        h3 ^= f2u64(kappa)
-        h0 = np.uint64(self._splitmix64(int(h0)))
-        h1 = np.uint64(self._splitmix64(int(h1)))
-        h2 = np.uint64(self._splitmix64(int(h2)))
-        h3 = np.uint64(self._splitmix64(int(h3)))
+        mask = 0xFFFFFFFFFFFFFFFF
+        h0 = (int(h0) ^ int(dst) ^ ((int(depth_arr) << 1) & mask)) & mask
+        h1 = (int(h1) ^ (int(edge_id) & mask) ^ ((int(seq) << 1) & mask)) & mask
+        h2 = (int(h2) ^ f2u64(mu)) & mask
+        h3 = (int(h3) ^ f2u64(kappa)) & mask
+        h0 = self._splitmix64(h0)
+        h1 = self._splitmix64(h1)
+        h2 = self._splitmix64(h2)
+        h3 = self._splitmix64(h3)
 
-        v_arr["h0"][dst] = h0
-        v_arr["h1"][dst] = h1
-        v_arr["h2"][dst] = h2
-        v_arr["h3"][dst] = h3
+        v_arr["h0"][dst] = np.uint64(h0)
+        v_arr["h1"][dst] = np.uint64(h1)
+        v_arr["h2"][dst] = np.uint64(h2)
+        v_arr["h3"][dst] = np.uint64(h3)
 
         ancestry = np.array([h0, h1, h2, h3], dtype=np.uint64)
         return ancestry, m

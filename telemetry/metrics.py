@@ -5,7 +5,7 @@ from __future__ import annotations
 import csv
 import json
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 import subprocess
 from typing import Dict, Iterable, List
@@ -51,7 +51,7 @@ class MetricsLogger:
             "sample": sample,
             "seed": seed,
             "git": _GIT,
-            "ts": datetime.utcnow().isoformat() + "Z",
+            "ts": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             **groups,
             **{f"raw_{k}": v for k, v in raw.items()},
             **gate_metrics,
