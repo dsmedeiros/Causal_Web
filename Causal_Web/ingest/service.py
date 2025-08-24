@@ -35,7 +35,6 @@ LOG_TABLE_MAP = {
     "node_state_log": "node_state_history",
     "coherence_log": "node_state_history",
     "decoherence_log": "node_state_history",
-    "law_wave_log": "node_state_history",
     "classicalization_map": "node_state_history",
     # --- Bridge State History Table ---
     "bridge_state": "bridge_state_history",

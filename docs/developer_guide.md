@@ -30,10 +30,10 @@ cw run
 
 ## Ray Cluster
 
-Distributed execution uses a lightweight wrapper around [Ray](https://www.ray.io). A cluster can be configured programmatically via `ray_cluster.init_cluster()` or from the CLI using `--ray-init`:
+Distributed execution uses a lightweight wrapper around [Ray](https://www.ray.io). Configure a cluster programmatically via `ray_cluster.init_cluster()` before starting the simulation:
 
 ```bash
-python -m Causal_Web.main --ray-init '{"num_cpus":4}'
+python -c 'from Causal_Web.engine.backend import ray_cluster; ray_cluster.init_cluster(num_cpus=4)'
 ```
 
 The JSON payload is forwarded directly to `ray.init` allowing resource limits or addresses to be specified.

@@ -56,7 +56,7 @@ Nodes can optionally set ``allow_self_connection`` to ``true`` to permit self-co
   "observers": [
     {
       "id": "OBS",
-      "monitors": ["collapse", "law_wave", "region", "EQ", "ρ", "d_eff", "σ"],
+      "monitors": ["collapse", "region", "EQ", "ρ", "d_eff", "σ"],
       "frequency": 1
     }
   ],
