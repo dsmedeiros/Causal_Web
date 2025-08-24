@@ -7,6 +7,7 @@ from typing import Any, Deque, Dict, Optional
 import asyncio
 from collections import deque
 import contextlib
+import logging
 
 import msgpack
 import websockets
@@ -42,21 +43,27 @@ class Client:
         self._recv_task: Optional[asyncio.Task] = None
         self._backlog: Deque[Dict[str, Any]] = deque()
         self._backlog_cv = asyncio.Condition()
+        self._logger = logging.getLogger(__name__)
 
     async def connect(self) -> None:
         """Open the WebSocket connection and perform the hello handshake."""
         try:
+            self._logger.info("Connecting to %s", self.url)
             self.connection = await websockets.connect(self.url)
+            self._logger.debug("Sending handshake token")
             await self.send({"type": "Hello", "token": self.token})
             data = await self.connection.recv()
             msg = msgpack.unpackb(data, raw=False)
+            self._logger.debug("Received handshake response: %s", msg)
             if msg.get("type") != "Hello":
                 raise ConnectError("handshake failed")
         except (OSError, ConnectionClosedError) as e:
+            self._logger.exception("Connection to %s failed", self.url)
             if self.connection is not None:
                 await self.connection.close()
                 self.connection = None
             raise ConnectError(str(e)) from e
+        self._logger.info("Handshake with %s completed", self.url)
         self._recv_task = asyncio.create_task(self._receiver())
         self._ping_task = asyncio.create_task(self._heartbeat())
 
