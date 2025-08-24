@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from typing import Any
 
 # Internal Config attributes that should not be exposed as CLI flags
-from .config import Config, load_config
+from Causal_Web.config import Config, load_config
 
 
 _PRIVATE_KEYS = {
@@ -226,7 +226,7 @@ class MainService:
 
     # ------------------------------------------------------------------
     def _init_db(self, cfg_path: str) -> None:
-        from .database import initialize_database
+        from Causal_Web.database import initialize_database
 
         load_config(cfg_path)
         initialize_database(Config.database)
@@ -234,8 +234,8 @@ class MainService:
     # ------------------------------------------------------------------
     def _run_headless(self) -> None:
         """Run the simulation without launching the GUI."""
-        from .config import Config
-        from .engine.engine_v2 import adapter as eng
+        from Causal_Web.config import Config
+        from Causal_Web.engine.engine_v2 import adapter as eng
 
         eng.build_graph()
         with Config.state_lock:

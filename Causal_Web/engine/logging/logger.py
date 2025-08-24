@@ -2,8 +2,9 @@ from __future__ import annotations
 
 """Lightweight JSON line logger for the v2 engine."""
 
-import json
 import csv
+import json
+import threading
 from collections import Counter
 from pathlib import Path
 from typing import Any
@@ -42,6 +43,7 @@ class MetricAggregator:
 
 
 _AGGREGATOR: MetricAggregator | None = None
+_LOG_LOCK = threading.Lock()
 
 
 def _get_aggregator() -> MetricAggregator:
@@ -62,7 +64,7 @@ def log_record(
     path: Path | None = None,
     **extra: Any,
 ) -> None:
-    """Append a record to a JSON lines log file.
+    """Append a record to a JSON lines log file in a thread-safe manner.
 
     ``frame`` is the preferred sequence identifier for new logs. ``tick`` is
     accepted for backward compatibility and copied verbatim when provided.
@@ -85,10 +87,12 @@ def log_record(
         data["metadata"] = metadata
     if extra:
         data.update(extra)
-    with path.open("a") as fh:
-        fh.write(json.dumps(data) + "\n")
-    if frame is not None and label != "adapter_frame":
-        _get_aggregator().add(frame, category)
+    # Serialise writes to prevent concurrent file access from multiple threads.
+    with _LOG_LOCK:
+        with path.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(data) + "\n")
+        if frame is not None and label != "adapter_frame":
+            _get_aggregator().add(frame, category)
 
 
 def log_json(
@@ -136,5 +140,5 @@ logger = log_manager
 
 def flush_metrics(frame: int) -> None:
     """Flush aggregated metrics for ``frame`` to disk."""
-
-    _get_aggregator().flush(frame)
+    with _LOG_LOCK:
+        _get_aggregator().flush(frame)
