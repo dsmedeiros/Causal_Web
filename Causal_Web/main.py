@@ -295,11 +295,26 @@ class MainService:
         """
 
         import asyncio
+        import platform
+
+        # Debug: log which backend Qt picks
+        os.environ.setdefault("QSG_INFO", "1")
+        os.environ.setdefault(
+            "QT_LOGGING_RULES", "qt.qml=true;qt.scenegraph.general=true"
+        )
+
+        # Pick a backend that won't crash on some GPUs
+        if platform.system() == "Windows" and not os.getenv("QSG_RHI_BACKEND"):
+            os.environ["QSG_RHI_BACKEND"] = "software"
 
         try:
             from PySide6.QtWidgets import QApplication, QMessageBox
             from PySide6.QtQml import QQmlApplicationEngine
-            from PySide6.QtQuick import QQuickItem
+            from PySide6.QtQuick import (
+                QQuickItem,
+                QQuickWindow,
+                QSGRendererInterface,
+            )
             from qasync import QEventLoop
         except ImportError:
             msg = (
@@ -309,6 +324,8 @@ class MainService:
             logging.getLogger(__name__).exception(msg)
             print(msg, file=sys.stderr)
             return
+        if os.getenv("QSG_RHI_BACKEND") == "software":
+            QQuickWindow.setGraphicsApi(QSGRendererInterface.GraphicsApi.Software)
         from ui_new import core
         from ui_new.auth import resolve_connection_info
         from ui_new.ipc import ConnectError
@@ -327,7 +344,26 @@ class MainService:
             CompareModel,
             ResultsModel,
         )
-        from ui_new.graph import GraphView  # noqa: F401  # register QML module
+
+        try:
+            from ui_new.graph import GraphView  # noqa: F401  # register QML module
+        except Exception:
+            from pathlib import Path
+            import traceback
+
+            err_msg = "Failed to import GraphView\n\n" + traceback.format_exc()
+            log_path = Path.cwd() / "cw_gui.log"
+            with open(log_path, "a", encoding="utf-8") as f:
+                f.write(err_msg + "\n")
+            print(err_msg, file=sys.stderr)
+            app = QApplication([])
+            QMessageBox.critical(
+                None,
+                "Causal Web",
+                err_msg,
+                QMessageBox.StandardButton.Ok,
+            )
+            sys.exit(1)
 
         app = QApplication([])
         engine = QQmlApplicationEngine()
@@ -365,13 +401,23 @@ class MainService:
         engine.warnings.connect(lambda w: qml_warnings.extend(w))
         engine.load(qml_path)
         if not engine.rootObjects():
-            errors = "\n".join(str(e) for e in qml_warnings)
+            qml_errors = [w.toString() for w in qml_warnings]
+            err_msg = "Failed to load QML at {}\n\n{}".format(
+                qml_path, "\n".join(qml_errors)
+            )
+            from pathlib import Path
+
+            log_path = Path.cwd() / "cw_gui.log"
+            with open(log_path, "a", encoding="utf-8") as f:
+                f.write(err_msg + "\n")
+            print(err_msg, file=sys.stderr)
             QMessageBox.critical(
                 None,
-                "UI load error",
-                f"Failed to load QML at {qml_path}:\n{errors}",
+                "Causal Web",
+                err_msg,
+                QMessageBox.StandardButton.Ok,
             )
-            return
+            sys.exit(1)
         root = engine.rootObjects()[0]
         view = root.findChild(QQuickItem, "graphView")
         view.frameRendered.connect(meters.frame_drawn)
