@@ -198,6 +198,7 @@ async def serve(
         except Exception:
             await _close("invalid handshake")
             return
+
         logging.debug("Handshake message from %s: %s", ws.remote_address, msg)
         if msg.get("type") != "Hello":
             await _close("handshake required")
