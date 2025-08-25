@@ -184,10 +184,21 @@ async def serve(
 
         async def _close(reason: str) -> None:
             logging.warning("Closing connection %s: %s", ws.remote_address, reason)
-            await ws.close(reason=reason)
+            with contextlib.suppress(Exception):
+                await ws.close(reason=reason)
 
-        raw = await ws.recv()
-        msg = msgpack.unpackb(raw, raw=False)
+        try:
+            raw = await ws.recv()
+        except websockets.exceptions.ConnectionClosed:
+            logging.warning("Connection %s closed during handshake", ws.remote_address)
+            return
+
+        try:
+            msg = msgpack.unpackb(raw, raw=False)
+        except Exception:
+            await _close("invalid handshake")
+            return
+
         logging.debug("Handshake message from %s: %s", ws.remote_address, msg)
         if msg.get("type") != "Hello":
             await _close("handshake required")
