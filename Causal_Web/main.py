@@ -286,10 +286,20 @@ class MainService:
         """
 
         import asyncio
-        from PySide6.QtWidgets import QApplication, QMessageBox
-        from PySide6.QtQml import QQmlApplicationEngine
-        from PySide6.QtQuick import QQuickItem
-        from qasync import QEventLoop
+
+        try:
+            from PySide6.QtWidgets import QApplication, QMessageBox
+            from PySide6.QtQml import QQmlApplicationEngine
+            from PySide6.QtQuick import QQuickItem
+            from qasync import QEventLoop
+        except ImportError:
+            msg = (
+                "Failed to import PySide6. Ensure required system libraries such as "
+                "libGL are installed."
+            )
+            logging.getLogger(__name__).exception(msg)
+            print(msg, file=sys.stderr)
+            return
         from ui_new import core
         from ui_new.auth import resolve_connection_info
         from ui_new.ipc import ConnectError
