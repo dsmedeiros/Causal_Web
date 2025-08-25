@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import logging
 import os
 import secrets
 import time
@@ -179,24 +180,30 @@ async def serve(
 
         nonlocal primary, pending
 
+        logging.info("New connection from %s", ws.remote_address)
+
+        async def _close(reason: str) -> None:
+            logging.warning("Closing connection %s: %s", ws.remote_address, reason)
+            await ws.close(reason=reason)
+
         raw = await ws.recv()
         msg = msgpack.unpackb(raw, raw=False)
         if msg.get("type") != "Hello":
-            await ws.close(reason="handshake required")
+            await _close("handshake required")
             return
         token = msg.get("token", "")
         now = time.time()
         if now >= expires_at:
-            await ws.close(reason="session expired")
+            await _close("session expired")
             return
         if session_token and token != session_token:
-            await ws.close(reason="unauthorized")
+            await _close("unauthorized")
             return
 
         if primary is None:
             primary = ws
         elif not allow_multi:
-            await ws.close(reason="single client only")
+            await _close("single client only")
             return
 
         clients.add(ws)
