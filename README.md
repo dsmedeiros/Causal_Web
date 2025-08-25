@@ -10,6 +10,14 @@ The GUI writes diagnostic information and uncaught exceptions to `cw_gui.log`
 in the working directory. Connection attempts and handshake events with the
 engine are recorded to aid troubleshooting when the window closes unexpectedly.
 Use `--verbose` to also stream debug logs to the console.
+QML load errors are appended to this file and the GUI exits with a non-zero
+status so failures are visible to callers and CI.
+Qt enables verbose QML and scene graph logging by default
+(`QT_LOGGING_RULES=qt.qml=true;qt.scenegraph.general=true`) so warnings are
+captured in this log.
+On Windows the GUI defaults to a software renderer
+(`QSG_RHI_BACKEND=software`) to avoid driver crashes. Set
+`QSG_RHI_BACKEND=opengl` before launching to try hardware acceleration.
 
 ## Architecture & IPC
 
@@ -300,6 +308,7 @@ launches the engine and Qt Quick interface.
 - **Low FPS** → zoom out, labels auto-hide; disable AA at far zoom.
 - **Invariant failures** → inspect `result.json` for violations.
 - **GUI doesn't launch** → an error is logged to `cw_gui.log` if Qt dependencies like `libGL` are missing, or a pop-up dialog reports missing QML resources; ensure the `ui_new` directory is present alongside the executable.
+- **Black screen on Windows** → the GUI forces a software renderer; set `QSG_RHI_BACKEND=opengl` to try hardware acceleration.
 
 ## Installation
 Clone the repository and install the packages listed in `requirements.txt`. The GUI requires an X11 compatible display.
