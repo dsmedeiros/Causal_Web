@@ -130,6 +130,10 @@ class MainService:
     def run(self) -> None:
         _configure_logging()
         args, cfg = self._parse_args()
+        if getattr(args, "verbose", False):
+            root = logging.getLogger()
+            root.setLevel(logging.DEBUG)
+            root.addHandler(logging.StreamHandler())
         _apply_overrides(args, cfg)
         self._apply_log_overrides(args)
         Config.profile_output = getattr(args, "profile_output", None)
@@ -231,6 +235,11 @@ class MainService:
             "--disable-events",
             default="",
             help="Comma-separated event types to disable",
+        )
+        parser.add_argument(
+            "--verbose",
+            action="store_true",
+            help="Enable debug logging to console",
         )
         parser.add_argument("--ws-url", default=None, help="WebSocket URL of engine")
         parser.add_argument("--ws-host", default=None, help="Engine host override")

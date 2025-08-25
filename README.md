@@ -9,6 +9,7 @@ A GPU-accelerated Qt Quick / QML interface lives in `ui_new` and serves as the d
 The GUI writes diagnostic information and uncaught exceptions to `cw_gui.log`
 in the working directory. Connection attempts and handshake events with the
 engine are recorded to aid troubleshooting when the window closes unexpectedly.
+Use `--verbose` to also stream debug logs to the console.
 
 ## Architecture & IPC
 
