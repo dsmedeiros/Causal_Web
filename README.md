@@ -55,6 +55,10 @@ python -m Causal_Web.engine.run --session-file <PATH>
 python -m Causal_Web.main
 ```
 
+If the GUI starts before the engine, it remains open and keeps polling
+for a connection. After several failed attempts a dialog prompts to
+retry or quit.
+
 Override discovery via CLI flags or environment variables:
 
 | Setting | CLI flag | Environment |
