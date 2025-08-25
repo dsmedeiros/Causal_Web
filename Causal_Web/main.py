@@ -279,7 +279,11 @@ class MainService:
     # ------------------------------------------------------------------
     @staticmethod
     def _launch_gui(args) -> None:
-        """Launch the Qt Quick interface."""
+        """Launch the Qt Quick interface and connect to the engine.
+
+        The GUI retries engine discovery and, after repeated failures, prompts
+        the user to retry or quit.
+        """
 
         import asyncio
         from PySide6.QtWidgets import QApplication, QMessageBox
@@ -357,7 +361,9 @@ class MainService:
         asyncio.set_event_loop(loop)
 
         async def runner() -> None:
-            for _ in range(10):
+            attempts = 0
+            max_attempts = 20
+            while True:
                 try:
                     url, token = resolve_connection_info(
                         ws_url=args.ws_url,
@@ -390,18 +396,30 @@ class MainService:
                             "Engine session expired. Restart engine.",
                         )
                         return
+                    attempts += 1
+                    if attempts >= max_attempts:
+                        path = args.token_file or default_session_file()
+                        host = args.ws_host or "127.0.0.1"
+                        port = args.ws_port or 8765
+                        box = QMessageBox(
+                            QMessageBox.Warning,
+                            "Engine not found",
+                            (
+                                "Couldn't find local Causal Web engine.\n"
+                                f"Looked for session file at {path} and tried ws://{host}:{port}.\n"
+                                "Retry or quit?"
+                            ),
+                        )
+                        box.setStandardButtons(
+                            QMessageBox.StandardButton.Retry
+                            | QMessageBox.StandardButton.Close
+                        )
+                        box.setDefaultButton(QMessageBox.StandardButton.Retry)
+                        box.button(QMessageBox.StandardButton.Close).setText("Quit")
+                        if box.exec() == QMessageBox.StandardButton.Close:
+                            return
+                        attempts = 0
                     await asyncio.sleep(0.3)
-            path = args.token_file or default_session_file()
-            host = args.ws_host or "127.0.0.1"
-            port = args.ws_port or 8765
-            QMessageBox.critical(
-                None,
-                "Engine not found",
-                (
-                    "Couldn't find local Causal Web engine. "
-                    f"Looked for session file at {path} and tried ws://{host}:{port}."
-                ),
-            )
 
         loop.create_task(runner())
         with loop:
