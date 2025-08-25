@@ -46,7 +46,13 @@ class Client:
         self._logger = logging.getLogger(__name__)
 
     async def connect(self) -> None:
-        """Open the WebSocket connection and perform the hello handshake."""
+        """Open the WebSocket connection and perform the hello handshake.
+
+        Raises
+        ------
+        ConnectError
+            If the connection attempt fails or times out.
+        """
         try:
             self._logger.info("Connecting to %s", self.url)
             self.connection = await websockets.connect(self.url)
@@ -57,7 +63,7 @@ class Client:
             self._logger.debug("Received handshake response: %s", msg)
             if msg.get("type") != "Hello":
                 raise ConnectError("handshake failed")
-        except (OSError, ConnectionClosedError) as e:
+        except (asyncio.TimeoutError, OSError, ConnectionClosedError) as e:
             self._logger.exception("Connection to %s failed", self.url)
             if self.connection is not None:
                 await self.connection.close()
