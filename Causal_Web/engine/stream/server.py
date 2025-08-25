@@ -188,6 +188,7 @@ async def serve(
 
         raw = await ws.recv()
         msg = msgpack.unpackb(raw, raw=False)
+        logging.debug("Handshake message from %s: %s", ws.remote_address, msg)
         if msg.get("type") != "Hello":
             await _close("handshake required")
             return
@@ -199,6 +200,8 @@ async def serve(
         if session_token and token != session_token:
             await _close("unauthorized")
             return
+
+        logging.info("Handshake completed for %s", ws.remote_address)
 
         if primary is None:
             primary = ws
