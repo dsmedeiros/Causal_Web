@@ -1,8 +1,18 @@
 Causal Web Theory & Layered Causal Coherence Model (CWT/LCCM)
 
-Version 1.3 — Strict-Local
-Status: Research draft (2025-08-22).
+Version 1.3.1 — Strict-Local
+Status: Research draft (2025-08-26).
 Principle: Every rule reads/writes only local state and messages on finite causal paths. No global tick; no nonlocal action.
+
+What’s new since 1.3
+• Assumptions & Invariants preface (stability α_d+α_ℓ≤1; determinism/RNG contract; no‑signaling & Tsirelson acceptance; window bounds).
+• ρ‑update vector form sign fix (“+ ηI”) and explicit contraction condition; steady‑state clarified.
+• Q/Θ intensity contract: Q packets are unit‑norm; Θ default inject_mode=incident to avoid ρ saturation on hubs.
+• LCCM: clamp \hat{λ}=min(1,Λ/W); rename C_min→E_{Q,min}; define bitfrac and majority buffer length L_C.
+• ε‑pairs: L→L_bits, TTL→T_TTL; false‑binds include 2^{-L_bits}; per‑vertex seed cap N_seed with eviction.
+• Conservation: sign convention and optional vertex‑star flux residual.
+• SAS/Bell: per‑remote‑setting marginal no‑signaling diagnostic; RNG lane separation; Tsirelson guard S≤2.86.
+• Defaults updated (W_min/W_max, L_C, N_seed; inject_mode default).
 
 What’s new since 1.2
 •Causal order lemma clarifying determinism and partial-order preservation under arrival-depth scheduling.
@@ -13,6 +23,27 @@ What’s new since 1.2
 •Meters & residual: calibration (nondimensionalization) and leak interpretation; explicit residual form.
 •SAS/Bell notes: MI\text{strict} vs MI\text{conditioned} clarified; guidance for CHSH/no-signaling validation.
 •Added an event-lifecycle flowchart and a Validation Appendix scaffold (reproducible figures).
+
+⸻
+
+0. Assumptions & Invariants
+
+Assumptions. Finite graph \mathcal G; d_0(e)∈ℤ_{≥1}; d_eff(e)∈ℤ_{≥1}; all Q‑packets emitted are unit‑norm (‖ψ‖_2=1); parameters α_d,α_ℓ,η,γ,ρ_0>0; per‑destination tiebreak seq is stable and monotone.
+
+Stability constraint. 0≤α_d≤1, 0<α_ℓ≤1, and  α_d+α_ℓ≤1  (required).
+
+Determinism & RNG contract. The per‑event RNG seed is derived only from local data: 
+  seed = splitmix64(run_seed ⊕ d_arr ⊕ (v_dst≪1) ⊕ (e_id≪2) ⊕ (seq≪3)),
+with disjoint lane tags OR’d for (i) detector setting, (ii) readout noise, (iii) seed emission. Changing the queue/tie‑break invalidates replay.
+
+No‑signaling diagnostic (Bell). For each local setting a_D, the remote‑conditioned marginals are flat in the remote setting:
+  max_{a'_D} | P(b=+1 | a_D,a'_D) − 0.5 | ≤ 0.01  (pre‑registered run length).
+
+Tsirelson guard (MDL mode). In MI_conditioned runs, require CHSH S ≤ 2.86 (buffer above 2√2≈2.828); parameter regions exceeding this are flagged inadmissible.
+
+Window bounds. 1 ≤ W_min ≤ W(v) ≤ W_max < ∞.
+
+Notes. These invariants are reported in logs and figure captions (see Validation Appendix).
 
 ⸻
 
@@ -42,6 +73,8 @@ where e_{\mathrm{id}} is a stable edge identifier and \mathrm{seq} is a per-dest
 Lemma (Deterministic processing & partial-order preservation).
 On a finite \mathcal{G} with finite base delays and \max_e d_{\mathrm{eff}}(e)<\infty, the scheduler that processes events in ascending \big(d_{\mathrm{arr}}, v, e_{\mathrm{id}}, \mathrm{seq}\big) (per destination) (i) processes every enqueued event exactly once, and (ii) preserves the causal partial order: if e_1\prec e_2, then e_1 is processed before e_2.
 Sketch. Downstream arrivals satisfy d_{\mathrm{arr}}(e)=d(u)+d_{\mathrm{eff}}(e)\ge d(u)+1, so path-causal events appear in non-decreasing d_{\mathrm{arr}} and the per-destination tie-break makes order deterministic.
+
+Addendum (linear extension). Because d_eff≥1 on every hop, along any causal path d_arr increases by at least 1; thus the per‑destination total order is a linear extension of the causal partial order.
 
 1.4 Oscillators (optional)
 
@@ -84,8 +117,8 @@ Packet payload
 
 Arrival-depth is the only operational time. The kernel keeps a priority queue keyed by
 (d_\text{arr},\, v_\text{dst},\, e,\, \text{seq})
-and repeatedly delivers the minimum. Deterministic seeded RNG uses only local fields and these keys. On delivery to v:
-d(v)\;\leftarrow\;\max\{d(v),\, d_\text{arr}\}.
+and repeatedly delivers the minimum. Deterministic RNG uses only local fields and these keys with the seed contract in §0 (“Determinism & RNG contract”): splitmix64 over (run_seed,d_arr,v_dst,e_id,seq) and disjoint RNG lanes for settings, noise, and seed emission. On delivery to v:
+ d(v)\;\leftarrow\;\max\{d(v),\, d_\text{arr}\}.
 
 Each vertex has a local window length W(v) (Sec. 5.1). The window index is w(v)=\lfloor d(v)/W(v)\rfloor. A window closes at v when w(v) increases; then:
 •compute E_Q and normalize \psi_v;
@@ -181,9 +214,9 @@ Vector form & stability. Let \boldsymbol{\rho}^t\in\mathbb{R}{\ge 0}^{|E|}, inte
 \boxed{
 \boldsymbol{\rho}^{t+1}
 = \Big[(1-\alpha_d-\alpha_\ell)I + \alpha_d\,M\Big]\boldsymbol{\rho}^{t}
-•\eta\,\boldsymbol{I}^t
+\ \mathbf{+}\ \eta\,\boldsymbol{I}^t
 }
-The update matrix has spectral radius \le 1-\alpha_\ell, so with \alpha_\ell>0 the homogeneous mode contracts.
+Stability & contraction. Require α_d+α_ℓ ≤ 1. For any eigenvalue |λ(M)|≤1, the homogeneous multiplier magnitude is ≤ (1−α_ℓ); with α_ℓ>0 the homogeneous mode contracts.
 
 Steady state (homogeneous input). For \boldsymbol{I}^t\equiv \bar I\,\mathbf{1},
 \[
@@ -204,8 +237,8 @@ Steady state (homogeneous input). For \boldsymbol{I}^t\equiv \bar I\,\mathbf{1},
 4.4 Layer intensities (bounded)
 
 Intensity I is taken from the current layer \ell(v) at delivery.
-•Q: I = \|\,U_e\,\psi\,\|_2^2 \le 1.
-•Theta: I = \|p\|_1 (with \sum p\le 1 after mixing).
+•Q: I = \|\,U_e\,\psi\,\|_2^2 \le 1, with all emitted Q‑packets unit‑norm (‖ψ‖_2=1); accumulation scaling uses α_e in the accumulator only.
+•Theta: I = \|p\|_1 (with \sum p\le 1 after mixing). Default inject_mode = incident (mean per‑window), to avoid ρ inflation under high fan‑in; ‘incoming’ remains available for experiments.
 inject_mode="incoming" applies this intensity per delivered edge.
 Non-incoming modes (incident,outgoing) inject using the mean per-edge \|p\|_1 over the window/batch to avoid saturation under high fan-in.
 •C: I = \text{bit}\in\{0,1\}.
@@ -229,15 +262,19 @@ with 0<\beta\le 1 and per-step cap \Delta>0.
 •Stability. Unclipped, this is a contraction with factor 1-\beta; clipping preserves boundedness and prevents overshoot.
 •Settling time. T_{95}\approx 3/\beta window updates (rule of thumb).
 •Theta reset policy: \theta_\text{reset}\in\{\text{uniform},\text{renorm},\text{hold}\} chooses how p_v is reset when the window closes (default renorm).
+Define primitives used above:
+  sat_Δ(x) ≡ sign(x)·min(|x|,Δ),   clip(x,a,b) ≡ min(max(x,a),b).
+Bounds: enforce 1 ≤ W_min ≤ W(v) ≤ W_max.
 
 5.2 Thresholds & timers (nondimensional & hysteresis)
 
-Define nondimensional load \lambda_v\triangleq \Lambda_v/W(v)\in[0,1] and choose 0<b<a<1:
+Define nondimensional load \hat\lambda_v\triangleq \min\{1,\Lambda_v/W(v)\} and choose 0<b<a<1:
 N_\text{decoh}(v)= a\,W(v),\qquad
 N_\text{recoh}(v)= b\,W(v).
 •Q→Θ (“decoh_threshold”): when \Lambda_v \ge aW(v) within the current window. \psi_v becomes frozen (read-only); p_v activates.
-•Θ→Q (“recoh_threshold”): when \Lambda_v \le bW(v) for T_\text{hold} consecutive windows and E_Q(v)\ge C_\text{min}.
-•Θ→C (“classical_dominance”): when H(p_v)\le H_\text{max} and \text{bit\frac}\ge f\text{min} and \text{conf}v\ge \text{conf}\text{min} for T_\text{class} windows.
+•Θ→Q (“recoh_threshold”): when \Lambda_v \le bW(v) for T_\text{hold} consecutive windows and E_Q(v)\ge E_{Q,\min}.
+•Θ→C (“classical_dominance”): when H(p_v)\le H_\text{max}, bitfrac ≥ f_min, and conf_v ≥ conf_min for T_\text{class} windows.
+Define bitfrac precisely as the fraction of ones in a fixed‑length majority buffer of length L_C (default L_C=16).
 •(Optional C→Θ can be added; not required for v1.3.)
 
 Hysteresis rationale. A simple 2-state Markov approximation under noise \epsilon shows mean dwell time increases with the band \Delta\lambda=a-b and with the hold timers. Recommended: a\approx 0.8, b\approx 0.5, T_{\mathrm{hold}}\in[2,4].
@@ -251,12 +288,12 @@ Hysteresis rationale. A simple 2-state Markov approximation under noise \epsilon
 On Q-delivery at v, emit seeds along outgoing edges.
 
 Default: one seed per window. Enabling emit_per_delivery switches to a per-arrival emission mode.
-•Ancestry prefix: match key from h_v (first L bits).
+•Ancestry prefix: match key from h_v (first L_bits bits).
 •Angle tag: local phase proxy \theta_v (e.g., \operatorname{atan2}(m_{v,y},m_{v,x})).
-•Expiry by depth: d_\text{exp} = d_\text{emit} + \Delta.
+•Expiry by depth: d_\text{exp} = d_\text{emit} + T_\text{TTL}.
 •A forwarded seed uses the current edge delay: d_\text{next}=d_\text{curr}+d_\text{eff}; continue only if d_\text{next}\le d_\text{exp}.
 
-Implementations may cap the seed pool per vertex at N_\text{seed} (e.g., 64) to avoid unbounded growth.
+Capacity & eviction. Cap the per‑vertex seed pool at N_\text{seed} (default 64) to avoid unbounded growth; on overflow, evict FIFO by depth or by smallest σ.
 
 6.2 Binding & bridges
 
@@ -274,17 +311,15 @@ Bridges are scheduled exactly like edges.
 •Each window (idle): \sigma\leftarrow (1-\lambda_\text{decay})\sigma.
 •Remove bridge when \sigma<\sigma_\text{min}.
 
-Accidental bind probability (per encounter).
-\boxed{
-\Pr\big(|\Delta\theta|\le \theta_{\max}\big)=\frac{\theta_{\max}}{\pi}
-}
-If seeds arrive at rate \lambda per window and TTL spans L windows, expected false-binds per window at a vertex:
+Accidental bind probability (per encounter). For uniformly random relative angles,
+\Pr\big(|\Delta\theta|\le \theta_{\max}\big)=\theta_{\max}/\pi.
+If seeds arrive at rate \lambda per window and TTL spans T_TTL windows, and a match also requires L_bits ancestry prefix equality, then the expected false‑binds per window at a vertex are
 \[
 \boxed{
-\mathbb{E}[\mathrm{false\binds}] \;\approx\; \lambda L\,\frac{\theta{\max}}{\pi}.
+\mathbb{E}[\mathrm{false\binds}] \;\approx\; \lambda^2\,T_\mathrm{TTL}\,2^{-L_\mathrm{bits}}\,\frac{\theta_{\max}}{\pi}.
 }
 \]
-Choose \theta_{\max} to meet a false-positive target p_{\mathrm{fp}}.
+If you intend the rate conditional on a prefix match, state that explicitly and omit the 2^{-L_bits} factor. Choose \theta_{\max} to meet a false-positive target p_{\mathrm{fp}}.
 
 Bridge lifetime (mean). With Poisson traversal rate r:
 \[
@@ -310,7 +345,7 @@ making residual unitless and balanced.
 Leak. At steady state with homogeneous input, expected leak per window is approximately
 \mathrm{leak} \;\approx\; \alpha_{\text{leak}} \sum_{e\in E}\rho_e.
 
-Residual (per window; region/global). For any finite processed region \mathcal R,
+Residual (per window; region/global). Positive residual indicates net creation after accounting for leak and boundary ρ‑flux; negative indicates net loss. For any finite processed region \mathcal R,
 \boxed{
 \mathrm{Res} \;\equiv\;
 \sum_{v\in\mathcal R}\big(\Delta E_Q+\Delta E_\Theta+\Delta E_C\big)
@@ -318,6 +353,7 @@ Residual (per window; region/global). For any finite processed region \mathcal R
 \;+\;\mathrm{leak}.
 }
 We report an EWMA of \mathrm{Res} over windows.
+Vertex‑star option (debug). For per‑vertex diagnostics, approximate ∂\mathcal R by the incident edges ("star") of v and sum κ_ρ·Δρ_e over the star.
 
 ⸻
 
@@ -356,14 +392,15 @@ b=\operatorname{sgn}\!\big(\langle a_D,\ R(h_D,\zeta)\,u\rangle + \xi\big),
 with local noise \xi\sim\mathcal N(0,\sigma(\kappa_\xi)). R is a deterministic local rotation about a hash-derived axis with angle 2\pi\zeta\,\alpha_R.
 
 Predictions & tests.
-•MI_\text{strict} \Rightarrow CHSH S\le 2 by construction.
-•MI_\text{conditioned} (\kappa_a>0) \Rightarrow S(\kappa_a) increases monotonically in simulation while no-signaling holds (marginals flat vs. remote setting). See Validation Appendix.
+•RNG lanes: use disjoint RNG lanes for (i) detector setting, (ii) readout noise, (iii) seed emission (see §0).
+•MI_\text{strict}: CHSH S\le 2 by construction.
+•MI_\text{conditioned} (\kappa_a>0): S(\kappa_a) increases monotonically in simulation while **no‑signaling holds per remote setting**; operational test is max_{a'_D}\!|P(b=+1|a_D,a'_D)−0.5|≤0.01. A Tsirelson guard flags any S>2.86 as inadmissible. See Validation Appendix.
 
 ⸻
 
 9. Adaptive parameters & dimensionless groups
 •Windows: W_0,\zeta_1,\zeta_2 (local topology & \bar\rho).
-•Decoherence: a,b,T_\text{hold},C_\text{min}.
+•Decoherence: a,b,T_\text{hold},E_{Q,\min}.
 •rho/delay: \alpha_d,\alpha_{\text{leak}},\eta,\gamma,\rho_0.
 •epsilon-pairs: \Delta, L, \theta_\text{max}, \sigma_0,\lambda_\text{decay},\sigma_\text{reinforce},\sigma_\text{min}.
 •Bell: \beta_m,\beta_h,\kappa_a,\kappa_\xi.
@@ -376,6 +413,12 @@ Useful dimensionless ratios for DOE:
 \frac{a}{b},\
 \frac{\sigma_\text{reinforce}}{\lambda_\text{decay}},\
 \kappa_a,\ \kappa_\xi.
+
+Notes on renames & clamps (v1.3.1).
+• C_min → E_{Q,\min} (Θ→Q gate key is the Q‑meter).
+• λ_v used in thresholds replaced by \hat{λ}_v=\min\{1,Λ_v/W(v)\}.
+• L→L_bits and TTL→T_TTL in ε‑pairs.
+• Default inject_mode set to “incident”.
 
 ⸻
 
@@ -403,15 +446,19 @@ Useful dimensionless ratios for DOE:
 Visibility depends on relative phases; intra-window arrival order does not affect E_Q at close.
 2.ρ→delay saturation (Gate 2):
 Under sustained traffic, d_\text{eff} rises smoothly (log-like), then relaxes when traffic stops.
+Acceptance: after a step in load, d_eff(t) follows d_0+⌊γ ln(1+ρ(t)/ρ_0)⌋ with median absolute error ≤ 1 tick; relaxation time within ±10% of 1/α_ℓ.
 3.LCCM hysteresis (Gate 3):
 Q→Θ at \Lambda_v \ge aW; Θ→Q below bW sustained for T_\text{hold}; Θ→C under dominance criteria.
+Acceptance: transitions occur within ±5% of aW and bW; holds respected for T_hold windows.
 4.ε-pairs locality (Gate 4):
 Bridges form only within \Delta (depth-TTL), and decay when unused (\sigma<\sigma_\text{min}).
 5.Conservation (Gate 5):
 E_Q+E_\Theta+E_C+\kappa_\rho\sum\rho remains within leak-tolerance; residual tracks \alpha_{\text{leak}}.
+Acceptance: EWMA(Residual) within ±0.1 unitless after calibration.
 6.Bell toggles (Gate 6):
 MI\text{strict} \Rightarrow CHSH \le 2.
-MI\text{conditioned} \Rightarrow CHSH increases with \kappa_a; no signaling (marginals flat vs remote setting).
+MI\text{conditioned} \Rightarrow CHSH increases with \kappa_a; **no signaling per remote setting** and **Tsirelson guard**.
+Acceptance: MI_strict S ≤ 2.00±0.03; MI_conditioned max S ≤ 2.86; max_{a'_D}|P(b=+1|a_D,a'_D)−0.5| ≤ 0.01.
 7.Ancestry determinism (Gate 7):
 Identical local Q-delivery sequences at v produce identical (h_v,m_v). Shuffling remote events leaves (h_v,m_v) unchanged.
 
@@ -419,11 +466,13 @@ Identical local Q-delivery sequences at v produce identical (h_v,m_v). Shuffling
 
 13. Defaults (illustrative, tune per graph)
 •W_0=4,\ \zeta_1=\zeta_2=0.3.
-•a=0.7,\ b=0.4,\ T_\text{hold}=2,\ C_\text{min}=0.1.
+•W_min=2,\ W_max=64.
+•a=0.7,\ b=0.4,\ T_\text{hold}=2,\ E_{Q,\min}=0.1.
 •\alpha_d=0.1,\ \alpha_{\text{leak}}=0.01,\ \eta=0.2,\ \gamma=0.8,\ \rho_0=1.0.
-•\Delta\approx 2W_0,\ L=16,\ \theta_\text{max}\approx \pi/12,\ \sigma_0=0.3,\ \lambda_\text{decay}=0.05,\ \sigma_\text{reinforce}=0.1,\ \sigma_\text{min}=10^{-3}.
-•\t\kappa_a\in\{0,2,5,10\},\ \kappa_\xi=0.5.
-•H_\text{max}=0.2,\ f_\text{min}=0.6,\ \text{conf}\text{min}=0.7,\ T\text{class}=2.
+•\Delta\approx 2W_0,\ T_\text{TTL}=\Delta,\ L_\text{bits}=16,\ \theta_\text{max}\approx \pi/12,\ \sigma_0=0.3,\ \lambda_\text{decay}=0.05,\ \sigma_\text{reinforce}=0.1,\ \sigma_\text{min}=10^{-3},\ N_\text{seed}=64.
+•\kappa_a\in\{0,2,5,10\},\ \kappa_\xi=0.5.
+•H_\text{max}=0.2,\ f_\text{min}=0.6,\ \text{conf}_\text{min}=0.7,\ T_\text{class}=2.
+•inject_mode = incident.
 •Ancestry: \beta_m=0.1,\ \beta_h=0.3,\ \delta_m=0.02.
 
 ⸻
