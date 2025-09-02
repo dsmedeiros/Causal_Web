@@ -1,28 +1,16 @@
 Causal Web Theory & Layered Causal Coherence Model (CWT/LCCM)
 
-Version 1.3.1 — Strict-Local
-Status: Research draft (2025-08-26).
+Version 1.5 — Testable Program (Strict-Local, Sub-Quantum)
+Status: Research draft (2025-08-26)
 Principle: Every rule reads/writes only local state and messages on finite causal paths. No global tick; no nonlocal action.
 
-What’s new since 1.3
-• Assumptions & Invariants preface (stability α_d+α_ℓ≤1; determinism/RNG contract; no‑signaling & Tsirelson acceptance; window bounds).
-• ρ‑update vector form sign fix (“+ ηI”) and explicit contraction condition; steady‑state clarified.
-• Q/Θ intensity contract: Q packets are unit‑norm; Θ default inject_mode=incident to avoid ρ saturation on hubs.
-• LCCM: clamp \hat{λ}=min(1,Λ/W); rename C_min→E_{Q,min}; define bitfrac and majority buffer length L_C.
-• ε‑pairs: L→L_bits, TTL→T_TTL; false‑binds include 2^{-L_bits}; per‑vertex seed cap N_seed with eviction.
-• Conservation: sign convention and optional vertex‑star flux residual.
-• SAS/Bell: per‑remote‑setting marginal no‑signaling diagnostic; RNG lane separation; Tsirelson guard S≤2.86.
-• Defaults updated (W_min/W_max, L_C, N_seed; inject_mode default).
-
-What’s new since 1.2
-•Causal order lemma clarifying determinism and partial-order preservation under arrival-depth scheduling.
-•ρ-dynamics derivation: linear system form with diffusion/leak, stability and steady-state; clarified the saturating delay law.
-•Window controller: explicit clipped-EWMA update toward a log-based target; stability and settling-time guidance.
-•LCCM thresholds: nondimensionalized load \lambda=\Lambda/W and hysteresis/hold rationale (recommended bands).
-•ε-pairs math: binding probability vs. \theta_{\max}; bridge lifetime vs. traversal/decay.
-•Meters & residual: calibration (nondimensionalization) and leak interpretation; explicit residual form.
-•SAS/Bell notes: MI\text{strict} vs MI\text{conditioned} clarified; guidance for CHSH/no-signaling validation.
-•Added an event-lifecycle flowchart and a Validation Appendix scaffold (reproducible figures).
+What’s new in 1.5 (testable program)
+• Two-Track program: Correlation Core (CC) and Transport Core (TC) graduate independently; joint synthesis attempted later.
+• Robust pass: non-zero-volume requirement (no razor-thin needle solutions).
+• Promotion via Bayesian sequential design (directional hypotheses; Bayes factors; optional stopping).
+• Overlap instrumentation via block-randomized A/B (difference-in-differences); continuous overlap only secondary.
+• Evidence grades (A/B/C) and adaptive binning with monotonicity guard.
+• Assistant-friendly escalation protocols and decision rules.
 
 ⸻
 
@@ -43,7 +31,14 @@ Tsirelson guard (MDL mode). In MI_conditioned runs, require CHSH S ≤ 2.86 (buf
 
 Window bounds. 1 ≤ W_min ≤ W(v) ≤ W_max < ∞.
 
-Notes. These invariants are reported in logs and figure captions (see Validation Appendix).
+0C. External Bounds & Null-Compatibility (MDL)
+We treat high-quality Bell tests as external benchmarks that define prior tiers for MD parameters (ν_χ, T_χ, κ_a). A Null-MD profile (ν_χ→0 or T_χ below relevant separations) reproduces flat S vs overlap at those layouts. Discovery is pursued in new layouts under broader priors; any positive signal must also be consistent with at least one benchmark layout within reported error bands (Null-compatibility check).
+
+0D. Research Tracks & Core-Claim Graduation
+We separate claims to avoid all-or-nothing bottlenecks.
+ • Correlation Core (CC) minimal set: Gate-6 (CHSH) + no-signaling + Gate-χ (genericity) + Null-compatibility (≥1 published layout). 
+ • Transport Core (TC) minimal set: Gate-U (unitarity proxy), Gate-B/B′ (Born + micro), Gate-L1 (basic isotropy), Gate-G (gauge).
+A track “graduates” when its minimal set passes with non-zero-volume in the active-knob subspace (see §12). Enhanced gates (e.g., TC L2/L3; CC Tsirelson bands) do not invalidate a track already graduated. Only after both tracks graduate do we attempt a CC+TC synthesis; if the joint pass region collapses to measure-zero, we conclude CWT cannot realize both cores simultaneously under current ontology.
 
 ⸻
 
@@ -243,6 +238,12 @@ inject_mode="incoming" applies this intensity per delivered edge.
 Non-incoming modes (incident,outgoing) inject using the mean per-edge \|p\|_1 over the window/batch to avoid saturation under high fan-in.
 •C: I = \text{bit}\in\{0,1\}.
 
+4.7 Causal DAG & Microcausality (Bell context)
+Let the micro-beables B = {ψ, p, bit, ρ, χ, σ,…} evolve only along graph adjacency with depth-bounded rules. Denote Past(A) as all beables in A’s past lightcone under the discrete causal graph.
+Microcausality assertions:
+ A_out ⟂ B_set | Past(A) and B_out ⟂ A_set | Past(B).
+Thus the model forbids signaling even with MDL; any observed signaling is a model or implementation error.
+
 ⸻
 
 5. LCCM (Layered Causal Coherence Model)
@@ -278,6 +279,12 @@ Define bitfrac precisely as the fraction of ones in a fixed‑length majority bu
 •(Optional C→Θ can be added; not required for v1.3.)
 
 Hysteresis rationale. A simple 2-state Markov approximation under noise \epsilon shows mean dwell time increases with the band \Delta\lambda=a-b and with the hold timers. Recommended: a\approx 0.8, b\approx 0.5, T_{\mathrm{hold}}\in[2,4].
+
+5.6 Instruments for MDL/Bell (operational overlap)
+Primary instrumentation uses binary conditions that modulate causal connectivity without changing hardware:
+ • Geometry instrument: same detectors/RNG; place the setting generator to realize High-overlap vs Low-overlap by design (block-randomized ABBA).
+ • Switch-rate instrument: alternate fast vs slow setting blocks at spacelike separation.
+Primary estimator: difference in block means of S with block fixed effects (ABBA), or a difference-in-differences layout to remove slow drift. Secondary analysis may use a conservative lower bound for continuous overlap (interval arithmetic with redundant timing), but promotion decisions rely on the binary instrument.
 
 ⸻
 
@@ -396,6 +403,17 @@ Predictions & tests.
 •MI_\text{strict}: CHSH S\le 2 by construction.
 •MI_\text{conditioned} (\kappa_a>0): S(\kappa_a) increases monotonically in simulation while **no‑signaling holds per remote setting**; operational test is max_{a'_D}\!|P(b=+1|a_D,a'_D)−0.5|≤0.01. A Tsirelson guard flags any S>2.86 as inadmissible. See Validation Appendix.
 
+8.8 Bayesian Sequential Design (CC promotion)
+Directional hypothesis: “S is larger in High-overlap than Low-overlap condition” (or slope β_S>0). Use a heavy-tailed prior for β_S (e.g., Cauchy), pre-registered scales. After each AB block, compute Bayes factor BF_10.
+Decision thresholds:
+ • Promote Tier-3→Tier-2 if BF_10≥10 and no-signaling holds;
+ • Abandon if BF_01≥10;
+ • Otherwise continue with more blocks until N_max or a futility bound is met (posterior P(|β_S|>β_min)<0.1).
+Tier-2 “Grade-A” requires BF_10≥10 in a fresh run or BF_10≥3 in two independent runs; always check no-signaling.
+
+8.9 Adaptive Binning (guarded)
+If BF is inconclusive (1/3<BF_10<3), split each instrument bin once by a pre-specified rule (distance threshold or rate quantiles), impose a monotonicity constraint (“bin means non-decreasing”), and test with isotonic regression or ordered-means ANOVA. At most one refinement per side. Promotion only if the monotonic trend has strong evidence and no-signaling holds.
+
 ⸻
 
 9. Adaptive parameters & dimensionless groups
@@ -441,30 +459,27 @@ Notes on renames & clamps (v1.3.1).
 
 ⸻
 
-12. Validation suite (expected outcomes)
-1.Two-path interference (Gate 1):
-Visibility depends on relative phases; intra-window arrival order does not affect E_Q at close.
-2.ρ→delay saturation (Gate 2):
-Under sustained traffic, d_\text{eff} rises smoothly (log-like), then relaxes when traffic stops.
-Acceptance: after a step in load, d_eff(t) follows d_0+⌊γ ln(1+ρ(t)/ρ_0)⌋ with median absolute error ≤ 1 tick; relaxation time within ±10% of 1/α_ℓ.
-3.LCCM hysteresis (Gate 3):
-Q→Θ at \Lambda_v \ge aW; Θ→Q below bW sustained for T_\text{hold}; Θ→C under dominance criteria.
-Acceptance: transitions occur within ±5% of aW and bW; holds respected for T_hold windows.
-4.ε-pairs locality (Gate 4):
-Bridges form only within \Delta (depth-TTL), and decay when unused (\sigma<\sigma_\text{min}).
-5.Conservation (Gate 5):
-E_Q+E_\Theta+E_C+\kappa_\rho\sum\rho remains within leak-tolerance; residual tracks \alpha_{\text{leak}}.
-Acceptance: EWMA(Residual) within ±0.1 unitless after calibration.
-6.Bell toggles (Gate 6):
-MI\text{strict} \Rightarrow CHSH \le 2.
-MI\text{conditioned} \Rightarrow CHSH increases with \kappa_a; **no signaling per remote setting** and **Tsirelson guard**.
-Acceptance: MI_strict S ≤ 2.00±0.03; MI_conditioned max S ≤ 2.86; max_{a'_D}|P(b=+1|a_D,a'_D)−0.5| ≤ 0.01.
-7.Ancestry determinism (Gate 7):
-Identical local Q-delivery sequences at v produce identical (h_v,m_v). Shuffling remote events leaves (h_v,m_v) unchanged.
+## 12. Validation Suite (Gates & Decisions)
+**Gate-0 (Sloppiness & Identifiability).** Around the chosen baseline, compute a finite-difference Jacobian for key metrics vs the **≤4** active dimensionless knobs; form Fisher information, keep stiff directions that explain ≥80% of variance. Sloppy directions are frozen in this profile.
+
+**Non-Zero-Volume pass (robustness).** A configuration passes only if the set of parameters that satisfy the minimal gate set has **non-zero hypervolume** in the active-knob subspace (≥ V_min). Razor-edge solutions do not count.
+
+**Track minima (graduation).**
+ • **CC minimum:** Gate-6 (S with CIs), no-signaling (Δ≤0.01), Gate-χ (genericity ensemble: majority of seeds produce S>2 within bands), Null-compatibility for ≥1 benchmark layout.
+ • **TC minimum:** Gate-U (global Q-norm drift ≤1%/1e4 windows; interference ≤2% L1), Gate-B (Born L1/L∞), Gate-B′ (weak-coupling invariance), Gate-L1 (isotropy), Gate-G (gauge).
+Enhanced gates (L2/L3; QC Tsirelson bands) are tracked but do not invalidate graduation.
+
+**Promotion decisions (Bayesian sequential).** For CC directional claims under instrumentation (High vs Low):
+ • After each AB block, compute BF_10 for β_S>0; if BF_10≥10 → Promote; if BF_01≥10 → Abandon; else Continue (or stop for futility).
+Tier-2 Grade-A requires a fresh run BF_10≥10 (or two runs BF_10≥3) with no-signaling; report C_MI and sensitivity to prior scale.
+
+**Adaptive binning (one-time).** If BF inconclusive, perform one pre-registered split per bin and test monotonicity; promotion requires strong evidence and Δ≤0.01.
+
+**Pareto & Reporting.** For each track, plot the Pareto front across core metrics (CC: S, Δ, Gate-χ pass fraction; TC: U-drift, Born L1, anisotropy). Publish evidence grade (A/B/C), V_min check, priors tier, and whether graduation achieved.
 
 ⸻
 
-13. Defaults (illustrative, tune per graph)
+13. Defaults (illustrative; tune per graph)
 •W_0=4,\ \zeta_1=\zeta_2=0.3.
 •W_min=2,\ W_max=64.
 •a=0.7,\ b=0.4,\ T_\text{hold}=2,\ E_{Q,\min}=0.1.
@@ -498,3 +513,11 @@ A.5LCCM stabilityLayer occupancy vs load; hysteresis with holds
 A.6ConservationResidual EWMA over a long run
 
 Reproduction note. Each figure caption should include {git_sha, theory_version, graph_hash, optimizer, cfg_hash} and a pointer to the log directory.
+
+Appendix B — Instrument Designs (CC)
+B.1 Geometry instrument (ABBA): same hardware; two placements engineered to minimize vs maximize causal connectivity by design. Randomize block order; equal block lengths; document distances/timing.
+B.2 Switch-rate instrument: slow vs fast setting blocks with spacelike separation; randomize order and durations; confirm detector independence.
+B.3 Overlap bounds (secondary): derive conservative lower bounds via interval arithmetic with redundant clocks; consistency check only—primary decisions rely on AB differences.
+
+Appendix C — Power & Sensitivity
+Provide variance estimates for S per setting, sample-size calculators for a minimal relevant effect, and futility bounds used in Bayesian sequential design.
