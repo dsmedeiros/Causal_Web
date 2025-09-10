@@ -9,6 +9,5 @@ msgpack
 networkx
 matplotlib
 pytest
-pytest-qt
 ruff
 mypy
